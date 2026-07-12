@@ -22,7 +22,8 @@ namespace SparseFreeLineEvenExtraCreatedWindowAudit
 
 open RedCycles RedShadeGraph RedShadeGraphRefinement RedShadeGraphSearch
   RedShadeGraphWeightedSearch RedShadeGraphTranslation
-  BorderCoverageLocalAudit ShadedFreeLineRecurrence Signals.FreeCellLocal
+  ShadedFreeLineProjectionSourceLists ShadedFreeLineRecurrence
+  Signals.FreeCellLocal
   SparseFreeLineLocalStates SparseFreeLineEvenExtraCreatedPositions
 
 abbrev Window := List Index
@@ -35,18 +36,13 @@ def windowAt (parent : Index) (blockX blockY : Nat) : Window :=
   (List.range 3).flatMap fun y =>
     (List.range 3).map fun x => grid (blockX - 1 + x) (blockY - 1 + y)
 
-def translateStart (start : WeightedStart) (dx dy : Nat) : WeightedStart :=
-  ⟨translatePort start.port dx dy, start.parity⟩
+def cellCycleStarts (x y : Nat) : List WeightedStart :=
+  (cyclePorts (4 * x + 1) (4 * x + 3)
+    (4 * y + 1) (4 * y + 3)).map fun port => ⟨port, false⟩
 
-def cellCycleStarts (window : Window) (x y : Nat) : List WeightedStart :=
-  let p := windowGrid window x y
-  let starts := rowStarts p .cycle 0 ++ rowStarts p .cycle 1 ++
-    columnStarts p .cycle 0 ++ columnStarts p .cycle 1
-  starts.map fun start => translateStart start (8 * x) (8 * y)
-
-def windowStarts (window : Window) : List WeightedStart :=
+def windowStarts (_window : Window) : List WeightedStart :=
   (List.range 3).flatMap fun y =>
-    (List.range 3).flatMap fun x => cellCycleStarts window x y
+    (List.range 3).flatMap fun x => cellCycleStarts x y
 
 def windowNodes (window : Window) : List ReachNode :=
   exploreFastWeightedReach (iterateRefine 2 (windowGrid window)) 24 24 20000

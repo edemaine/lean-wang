@@ -13,7 +13,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineEvenExtraCreatedWindowAudit
 
-open RedCycles RedShadeGraph RedShadeGraphRefinement RedShadeGraphWeightedSearch
+open RedCycles RedShadeGraph RedShadeGraphBoards RedShadeGraphRefinement
+  RedShadeGraphWeightedSearch ShadedFreeLineProjectionSourceLists
   ShadedFreeLineRecurrence Signals.FreeCellLocal SparseFreeLineLocalStates
 
 set_option maxRecDepth 20000
@@ -28,6 +29,23 @@ structure RouteWitness (window : Window) (target : Port) where
 
 def Route (window : Window) (target : Port) : Prop :=
   Nonempty (RouteWitness window target)
+
+/-- Every enumerated source lies on one of the nine explicit cell cycles. -/
+theorem start_on_cell_cycle {window : Window} {start : WeightedStart}
+    (hstart : start ∈ windowStarts window) :
+    ∃ x < 3, ∃ y < 3,
+      start.parity = false ∧
+      OnCycle (4 * x + 1) (4 * x + 3)
+        (4 * y + 1) (4 * y + 3) start.port := by
+  rw [windowStarts, List.mem_flatMap] at hstart
+  rcases hstart with ⟨y, hy, hstart⟩
+  rw [List.mem_flatMap] at hstart
+  rcases hstart with ⟨x, hx, hstart⟩
+  rcases List.mem_map.1 hstart with ⟨port, hport, hstart⟩
+  subst start
+  simp only [List.mem_range] at hx hy
+  refine ⟨x, hx, y, hy, rfl, ?_⟩
+  exact onCycle_of_mem_cyclePorts (by omega) (by omega) hport
 
 theorem reached_sound {window : Window}
     {nodes : List RedShadeGraphSearch.ReachNode} {target : Port}
