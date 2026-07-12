@@ -21,7 +21,7 @@ namespace Closed104
 namespace ShadedObstructionGeometryCover
 
 open RedShadeCycles ShadedObstructionGeometry ShadedPayloadCorridors
-  ShadedPlaneSignalGrid
+  ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -55,6 +55,104 @@ structure LocalCover
         Geometry indexGrid shadeGrid
           localWest localEast localSouth localNorth
 
+/-- A hierarchy can localize a crossing together with any selected witness. -/
+structure PairCover
+    (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (west east south north : Nat) : Prop where
+  vertical : ∀ {column row boundary : Nat},
+    quarterWest west < column → column < quarterEast east →
+    quarterSouth south < row → row < quarterNorth north →
+    quarterSouth south < boundary → boundary < quarterNorth north →
+    ShadedSignals.selectedHorizontalFor
+      (componentAt indexGrid column boundary) (quadrantAt column boundary)
+      (shadeGrid column boundary) ≠ none →
+      ∃ localWest localEast localSouth localNorth,
+        quarterWest west ≤ quarterWest localWest ∧
+        quarterEast localEast ≤ quarterEast east ∧
+        quarterWest localWest < column ∧ column < quarterEast localEast ∧
+        quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+        quarterSouth localSouth < boundary ∧
+        boundary < quarterNorth localNorth ∧
+        Geometry indexGrid shadeGrid
+          localWest localEast localSouth localNorth
+  horizontal : ∀ {column row boundary : Nat},
+    quarterWest west < column → column < quarterEast east →
+    quarterSouth south < row → row < quarterNorth north →
+    quarterWest west < boundary → boundary < quarterEast east →
+    ShadedSignals.selectedVerticalFor
+      (componentAt indexGrid boundary row) (quadrantAt boundary row)
+      (shadeGrid boundary row) ≠ none →
+      ∃ localWest localEast localSouth localNorth,
+        quarterSouth south ≤ quarterSouth localSouth ∧
+        quarterNorth localNorth ≤ quarterNorth north ∧
+        quarterWest localWest < column ∧ column < quarterEast localEast ∧
+        quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+        quarterWest localWest < boundary ∧
+        boundary < quarterEast localEast ∧
+        Geometry indexGrid shadeGrid
+          localWest localEast localSouth localNorth
+
+set_option maxHeartbeats 1000000 in
+-- Extracting finite selected-boundary witnesses unfolds both free predicates.
+theorem PairCover.localCover
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat}
+    (cover : PairCover indexGrid shadeGrid west east south north) :
+    LocalCover indexGrid shadeGrid west east south north := by
+  classical
+  constructor
+  · intro column row hwest heast hsouth hnorth hnotFree
+    have witness : ∃ boundary,
+        quarterSouth south < boundary ∧ boundary < quarterNorth north ∧
+        ShadedSignals.selectedHorizontalFor
+          (componentAt indexGrid column boundary) (quadrantAt column boundary)
+          (shadeGrid column boundary) ≠ none := by
+      by_contra hnone
+      apply hnotFree
+      intro boundary hboundarySouth hboundaryNorth
+      by_contra hselected
+      exact hnone ⟨boundary, hboundarySouth, hboundaryNorth, hselected⟩
+    rcases witness with
+      ⟨boundary, hboundarySouth, hboundaryNorth, hselected⟩
+    rcases cover.vertical hwest heast hsouth hnorth hboundarySouth
+      hboundaryNorth hselected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        houterWest, houterEast, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hboundaryLocalSouth,
+        hboundaryLocalNorth, geometry⟩
+    refine ⟨localWest, localEast, localSouth, localNorth,
+      houterWest, houterEast, hlocalWest, hlocalEast,
+      hlocalSouth, hlocalNorth, ?_, geometry⟩
+    intro free
+    exact hselected
+      (free boundary hboundaryLocalSouth hboundaryLocalNorth)
+  · intro column row hwest heast hsouth hnorth hnotFree
+    have witness : ∃ boundary,
+        quarterWest west < boundary ∧ boundary < quarterEast east ∧
+        ShadedSignals.selectedVerticalFor
+          (componentAt indexGrid boundary row) (quadrantAt boundary row)
+          (shadeGrid boundary row) ≠ none := by
+      by_contra hnone
+      apply hnotFree
+      intro boundary hboundaryWest hboundaryEast
+      by_contra hselected
+      exact hnone ⟨boundary, hboundaryWest, hboundaryEast, hselected⟩
+    rcases witness with
+      ⟨boundary, hboundaryWest, hboundaryEast, hselected⟩
+    rcases cover.horizontal hwest heast hsouth hnorth hboundaryWest
+      hboundaryEast hselected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        houterSouth, houterNorth, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hboundaryLocalWest,
+        hboundaryLocalEast, geometry⟩
+    refine ⟨localWest, localEast, localSouth, localNorth,
+      houterSouth, houterNorth, hlocalWest, hlocalEast,
+      hlocalSouth, hlocalNorth, ?_, geometry⟩
+    intro free
+    exact hselected
+      (free boundary hboundaryLocalWest hboundaryLocalEast)
 theorem LocalCover.crossingObstruction
     {indexGrid : Nat → Nat → Index}
     {shadeGrid : Nat → Nat → RedShades.State}
