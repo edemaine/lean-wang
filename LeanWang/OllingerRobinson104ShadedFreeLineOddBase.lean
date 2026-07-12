@@ -16,7 +16,8 @@ namespace ShadedFreeLineOddBase
 
 open RedCycles OrientedRedCycles RedShadeCycles RedShadeGraph RedShadeGraphSearch
   RedShadeGraphSearchSoundness RedShadeGraphBoards RedShadeCrossingBoards
-  RedShadePaths ShadedFreeLineGraph ShadedFreeLinePatternRefinement
+  RedShadePaths RedShadeGraphRefinement RedShadeGraphTranslation
+  RefinementTranslation ShadedFreeLineGraph ShadedFreeLinePatternRefinement
   ShadedFreeLineOffsets
   ShadedFreeLineRecurrence ShadedPlaneSignalGrid Signals.FreeCellLocal
 
@@ -181,6 +182,140 @@ theorem columnCertificate (parent : Index) {offset : Nat}
   · right
     rw [← heast]
     exact hreached.1.1 ▸ sound.2
+
+theorem boardPorts_inBounds {port : Port} (hport : port ∈ boardPorts) :
+    PortInBounds port 16 16 := by
+  rw [boardPorts, List.mem_flatMap] at hport
+  rcases hport with ⟨offset, hoffset, hport⟩
+  simp only [List.mem_range] at hoffset
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hport
+  rcases hport with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp [PortInBounds] <;> omega
+
+theorem componentAt_localGrid_eq_shift
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {parent : Index} (hparent : grid blockX blockY = parent)
+    {quarterX quarterY : Nat} (hx : quarterX < 16) (hy : quarterY < 16) :
+    componentAt (localGrid parent) quarterX quarterY =
+      componentAt (iterateRefine 3 (shiftGrid grid blockX blockY))
+        quarterX quarterY := by
+  have hlocal := componentAt_shift_eq_constant 3 grid blockX blockY
+    quarterX quarterY (by norm_num; exact hx) (by norm_num; exact hy)
+  rw [hparent] at hlocal
+  exact hlocal.symm
+
+theorem portPresent_localGrid_eq_shift
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {parent : Index} (hparent : grid blockX blockY = parent)
+    (port : Port) (hport : PortInBounds port 16 16) :
+    portPresent (localGrid parent) port =
+      portPresent (iterateRefine 3 (shiftGrid grid blockX blockY)) port := by
+  rcases port with ⟨x, y, side⟩
+  cases side <;> simp only [portPresent] <;>
+    rw [componentAt_localGrid_eq_shift grid blockX blockY hparent
+      hport.1 hport.2]
+
+/-- The checked odd live row certificate in an arbitrary refined coarse block. -/
+theorem liveRowCertificate_shift (grid : Nat → Nat → Index)
+    (blockX blockY : Nat) {parent : Index}
+    (hparent : grid blockX blockY = parent) {offset : Nat}
+    (hoffset : offset ∈ freeOffsets 0) :
+    LiveRowCertificate (iterateRefine 3 (shiftGrid grid blockX blockY))
+      2 6 2 6 (5 + 2 * offset) := by
+  intro quarterX hwest heast hinterior
+  have hwest' : 5 < quarterX := by simpa [quarterWest] using hwest
+  have heast' : quarterX < 12 := by simpa [quarterEast] using heast
+  have hoffsetBounds : offset < 3 := by
+    norm_num [freeOffsets, extendedOffsets] at hoffset
+    omega
+  have hcomponent : componentAt (localGrid parent) quarterX (5 + 2 * offset) =
+      componentAt (iterateRefine 3 (shiftGrid grid blockX blockY))
+        quarterX (5 + 2 * offset) :=
+    componentAt_localGrid_eq_shift grid blockX blockY hparent
+      (by omega) (by omega)
+  have hinteriorLocal : Signals.verticalInterior?
+      (componentAt (localGrid parent) quarterX (5 + 2 * offset))
+      (quadrantAt quarterX (5 + 2 * offset)) ≠ none := by
+    rwa [hcomponent]
+  rcases vertical_node_exists parent hoffset hwest' heast' hinteriorLocal with
+    ⟨node, hnode, hreached⟩
+  have sound := exploreFast_bounded_sound
+    (fun port hport => boardPorts_inBounds hport) hnode
+  have componentsEq : ∀ x y, x < 16 → y < 16 →
+      componentAt (localGrid parent) x y =
+        componentAt (iterateRefine 3 (shiftGrid grid blockX blockY)) x y := by
+    intro x y hx hy
+    exact componentAt_localGrid_eq_shift grid blockX blockY hparent hx hy
+  have path := BoundedPath.congr_of_component_eq componentsEq sound.2
+  have honCycle := onCycle_of_mem_boardPorts sound.1
+  have cycle : CycleOn
+      (iterateRefine 3 (shiftGrid grid blockX blockY)) 2 6 2 6 := by
+    simpa using largeCycle (shiftGrid grid blockX blockY) 1
+  simp only [verticalReached, Bool.and_eq_true, Bool.or_eq_true,
+    decide_eq_true_eq] at hreached
+  refine ⟨{
+    port := node.current
+    parity := node.parity
+    start := node.origin
+    onCycle := honCycle
+    path := path.path
+    startLive := portPresent_of_onCycle cycle honCycle
+    portLive := ?_
+  }, hreached.1.1, hreached.2⟩
+  rw [← portPresent_localGrid_eq_shift grid blockX blockY hparent
+    node.current path.second_inBounds]
+  exact hreached.1.2
+
+/-- The checked odd live column certificate in an arbitrary refined coarse block. -/
+theorem liveColumnCertificate_shift (grid : Nat → Nat → Index)
+    (blockX blockY : Nat) {parent : Index}
+    (hparent : grid blockX blockY = parent) {offset : Nat}
+    (hoffset : offset ∈ freeOffsets 0) :
+    LiveColumnCertificate (iterateRefine 3 (shiftGrid grid blockX blockY))
+      2 6 2 6 (5 + 2 * offset) := by
+  intro quarterY hsouth hnorth hinterior
+  have hsouth' : 5 < quarterY := by simpa [quarterSouth] using hsouth
+  have hnorth' : quarterY < 12 := by simpa [quarterNorth] using hnorth
+  have hoffsetBounds : offset < 3 := by
+    norm_num [freeOffsets, extendedOffsets] at hoffset
+    omega
+  have hcomponent : componentAt (localGrid parent) (5 + 2 * offset) quarterY =
+      componentAt (iterateRefine 3 (shiftGrid grid blockX blockY))
+        (5 + 2 * offset) quarterY :=
+    componentAt_localGrid_eq_shift grid blockX blockY hparent
+      (by omega) (by omega)
+  have hinteriorLocal : Signals.horizontalInterior?
+      (componentAt (localGrid parent) (5 + 2 * offset) quarterY)
+      (quadrantAt (5 + 2 * offset) quarterY) ≠ none := by
+    rwa [hcomponent]
+  rcases horizontal_node_exists parent hoffset hsouth' hnorth' hinteriorLocal with
+    ⟨node, hnode, hreached⟩
+  have sound := exploreFast_bounded_sound
+    (fun port hport => boardPorts_inBounds hport) hnode
+  have componentsEq : ∀ x y, x < 16 → y < 16 →
+      componentAt (localGrid parent) x y =
+        componentAt (iterateRefine 3 (shiftGrid grid blockX blockY)) x y := by
+    intro x y hx hy
+    exact componentAt_localGrid_eq_shift grid blockX blockY hparent hx hy
+  have path := BoundedPath.congr_of_component_eq componentsEq sound.2
+  have honCycle := onCycle_of_mem_boardPorts sound.1
+  have cycle : CycleOn
+      (iterateRefine 3 (shiftGrid grid blockX blockY)) 2 6 2 6 := by
+    simpa using largeCycle (shiftGrid grid blockX blockY) 1
+  simp only [horizontalReached, Bool.and_eq_true, Bool.or_eq_true,
+    decide_eq_true_eq] at hreached
+  refine ⟨{
+    port := node.current
+    parity := node.parity
+    start := node.origin
+    onCycle := honCycle
+    path := path.path
+    startLive := portPresent_of_onCycle cycle honCycle
+    portLive := ?_
+  }, hreached.1.1, hreached.2⟩
+  rw [← portPresent_localGrid_eq_shift grid blockX blockY hparent
+    node.current path.second_inBounds]
+  exact hreached.1.2
 
 /-- The odd base also retains its graph paths for recursive refinement. -/
 theorem graphHolds_odd_zero : GraphHolds .odd 0 := by
