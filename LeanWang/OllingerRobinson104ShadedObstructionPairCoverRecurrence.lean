@@ -5,7 +5,6 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedRoutedScaffoldForward
 import LeanWang.OllingerRobinson104ShadedObstructionGeometryOddBaseBoundedSoundness
-import LeanWang.OllingerRobinson104RedShadeGraphProjection
 
 /-!
 # Pair-cover recurrence for canonical Robinson boards
@@ -26,7 +25,7 @@ namespace ShadedObstructionPairCoverRecurrence
 
 open RedCycles RedShadeCycles RedShadePaths ShadedFreeLineRecurrence
   ShadedObstructionGeometryCover ShadedRoutedScaffoldForward
-  SparseFreeLinePlaneBase RedShadeGraphProjection
+  SparseFreeLinePlaneBase
 
 set_option maxRecDepth 20000
 
@@ -112,33 +111,67 @@ theorem refinedGrid_succ (phase : Phase) (depth : Nat)
   exact (PlaneRedBoards.iterateRefine_add 2
     (refinementDepth phase depth) grid).symm
 
-/-- The remaining combinatorial content of one recurrence step, after a fine
-shade grid has been projected and the induction hypothesis has supplied its
-coarse pair cover. -/
-def Lift : Prop :=
+/-- Refining the ambient grid commutes with the fixed hierarchy refinement. -/
+theorem refinedGrid_iterateRefine_two (phase : Phase) (depth : Nat)
+    (grid : Nat → Nat → Index) :
+    refinedGrid phase depth (iterateRefine 2 grid) =
+      iterateRefine 2 (refinedGrid phase depth grid) := by
+  unfold refinedGrid
+  rw [PlaneRedBoards.iterateRefine_add, PlaneRedBoards.iterateRefine_add]
+  congr 1
+  omega
+
+/-- All aligned copies of the current hierarchy cover inside its two-level
+refinement.  These are already covers of the fine shade grid; no geometry has
+to be transported back from a projected coarse shade grid. -/
+def ChildCovers (phase : Phase) (depth : Nat)
+    (grid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State) : Prop :=
+  ∀ blockX blockY,
+    PairCover (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (2 ^ refinementDepth phase depth * blockX + west phase depth)
+      (2 ^ refinementDepth phase depth * blockX + east phase depth)
+      (2 ^ refinementDepth phase depth * blockY + west phase depth)
+      (2 ^ refinementDepth phase depth * blockY + east phase depth)
+
+/-- An induction hypothesis supplies every aligned child cover needed by the
+successor board. -/
+theorem Holds.childCovers
+    {phase : Phase} {depth : Nat} (holds : Holds phase depth)
+    {grid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid) :
+    ChildCovers phase depth grid shadeGrid := by
+  intro blockX blockY
+  have valid' : ValidShadeGrid
+      (refinedGrid phase depth (iterateRefine 2 grid)) shadeGrid := by
+    rw [refinedGrid_iterateRefine_two]
+    exact valid
+  have cover := holds.at_block valid' blockX blockY
+  simpa only [refinedGrid_iterateRefine_two] using cover
+
+/-- The remaining bounded combinatorial content of one recurrence step:
+aligned child covers handle inherited regions, and a finite local audit only
+has to cover the seams between them. -/
+def ChildLift : Prop :=
   ∀ (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
       (shadeGrid : Nat → Nat → RedShades.State),
     ValidShadeGrid
         (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid →
-    PairCover (refinedGrid phase depth grid) (projectStateGrid shadeGrid)
-        (west phase depth) (east phase depth)
-        (west phase depth) (east phase depth) →
+    ChildCovers phase depth grid shadeGrid →
     PairCover (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
         (4 * west phase depth) (4 * east phase depth)
         (4 * west phase depth) (4 * east phase depth)
 
-/-- Projection discharges all semantic and inductive obligations; a `Lift`
-proof therefore establishes the common recurrence step. -/
-theorem step_of_lift (lift : Lift) : Step := by
+/-- A bounded child-cover lift establishes the common recurrence step. -/
+theorem step_of_childLift (lift : ChildLift) : Step := by
   intro phase depth holds grid shadeGrid valid
   have fineValid : ValidShadeGrid
       (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid := by
     simpa only [refinedGrid_succ] using valid
-  have coarseValid : ValidShadeGrid (refinedGrid phase depth grid)
-      (projectStateGrid shadeGrid) :=
-    projectStateGrid_valid fineValid
-  have coarseCover := holds grid (projectStateGrid shadeGrid) coarseValid
-  have fineCover := lift phase depth grid shadeGrid fineValid coarseCover
+  have children := holds.childCovers fineValid
+  have fineCover := lift phase depth grid shadeGrid fineValid children
   simpa only [refinedGrid_succ, west_succ, east_succ] using fineCover
 
 /-- Both phase families at every depth used by the unbounded-board theorem. -/
