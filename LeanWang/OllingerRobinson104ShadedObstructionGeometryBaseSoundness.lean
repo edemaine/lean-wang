@@ -165,7 +165,7 @@ theorem value_eq_dark_of_reached
       subst shade
       simpa [RedShades.Shade.opposite] using hfinish
 
-private theorem horizontalShade_eq_light_of_selected
+theorem horizontalShade_eq_light_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State}
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state ≠ none) :
@@ -174,7 +174,7 @@ private theorem horizontalShade_eq_light_of_selected
   by_contra hshade
   simp [hshade] at hselected
 
-private theorem verticalShade_eq_light_of_selected
+theorem verticalShade_eq_light_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State}
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state ≠ none) :
@@ -183,7 +183,7 @@ private theorem verticalShade_eq_light_of_selected
   by_contra hshade
   simp [hshade] at hselected
 
-private theorem hasWest_of_allowedFor_present
+theorem hasWest_of_allowedFor_present
     {component : Figure16.Thick} {quadrant : Quadrant} {state : RedShades.State}
     (hallowed : RedShades.allowedFor component quadrant state = true)
     (hpresent : state.west.isSome = true) :
@@ -193,7 +193,7 @@ private theorem hasWest_of_allowedFor_present
       at hallowed
   · rfl
 
-private theorem hasSouth_of_allowedFor_present
+theorem hasSouth_of_allowedFor_present
     {component : Figure16.Thick} {quadrant : Quadrant} {state : RedShades.State}
     (hallowed : RedShades.allowedFor component quadrant state = true)
     (hpresent : state.south.isSome = true) :
@@ -203,7 +203,7 @@ private theorem hasSouth_of_allowedFor_present
       at hallowed
   · rfl
 
-private theorem north_present_of_allowedFor
+theorem north_present_of_allowedFor
     {component : Figure16.Thick} {quadrant : Quadrant} {state : RedShades.State}
     (hallowed : RedShades.allowedFor component quadrant state = true)
     (hnorth : RedShades.hasNorth component quadrant = true) :
@@ -213,7 +213,7 @@ private theorem north_present_of_allowedFor
       at hallowed
   · simp
 
-private theorem hasHorizontal_of_hasWest_hasEast
+theorem hasHorizontal_of_hasWest_hasEast
     {component : Figure16.Thick} {quadrant : Quadrant}
     (hwest : RedShades.hasWest component quadrant = true)
     (heast : RedShades.hasEast component quadrant = true) :
@@ -224,7 +224,7 @@ private theorem hasHorizontal_of_hasWest_hasEast
       QuarterGeometry.redHorizontalAt, QuarterGeometry.containsLine,
       Figure16.Thick.lineSum?, Figure16.ThickLineSum.mkDistinct, Quadrant.yBit]
 
-private theorem hasVertical_of_hasSouth_hasNorth
+theorem hasVertical_of_hasSouth_hasNorth
     {component : Figure16.Thick} {quadrant : Quadrant}
     (hsouth : RedShades.hasSouth component quadrant = true)
     (hnorth : RedShades.hasNorth component quadrant = true) :
@@ -235,7 +235,7 @@ private theorem hasVertical_of_hasSouth_hasNorth
       QuarterGeometry.redVerticalAt, QuarterGeometry.containsLine,
       Figure16.Thick.lineSum?, Figure16.ThickLineSum.mkDistinct, Quadrant.xBit]
 
-private theorem horizontal_west_light_of_selected
+theorem horizontal_west_light_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant} {state : RedShades.State}
     (hallowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state ≠ none)
@@ -246,7 +246,7 @@ private theorem horizontal_west_light_of_selected
   cases hvalue : state.west <;>
     simp_all [ShadedSignals.horizontalShade?]
 
-private theorem horizontal_east_light_of_selected
+theorem horizontal_east_light_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant} {state : RedShades.State}
     (hallowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state ≠ none)
@@ -265,7 +265,7 @@ private theorem horizontal_east_light_of_selected
         simpa [ShadedSignals.horizontalShade?, hwest] using hshade
       exact heq.symm.trans hwestLight
 
-private theorem vertical_south_light_of_selected
+theorem vertical_south_light_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant} {state : RedShades.State}
     (hallowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state ≠ none)
@@ -276,7 +276,7 @@ private theorem vertical_south_light_of_selected
   cases hvalue : state.south <;>
     simp_all [ShadedSignals.verticalShade?]
 
-private theorem vertical_north_light_of_selected
+theorem vertical_north_light_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant} {state : RedShades.State}
     (hallowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state ≠ none)
@@ -295,7 +295,7 @@ private theorem vertical_north_light_of_selected
         simpa [ShadedSignals.verticalShade?, hsouth] using hshade
       exact heq.symm.trans hsouthLight
 
-private theorem horizontalInterior_isSome_of_selected
+theorem horizontalInterior_isSome_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State}
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state ≠ none) :
@@ -306,7 +306,7 @@ private theorem horizontalInterior_isSome_of_selected
       simp_all
   · contradiction
 
-private theorem verticalInterior_isSome_of_selected
+theorem verticalInterior_isSome_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State}
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state ≠ none) :

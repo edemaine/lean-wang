@@ -23,8 +23,9 @@ namespace ShadedObstructionGeometryBoundedSoundness
 
 open OrientedRedCycles RedShadeGraph RedShadeGraphSearch
   RedShadeGraphSearchSoundness RedShadeGraphTranslation RedShadeCycles
-  RedShadePaths ShadedFreeLineGraphBase ShadedObstructionGeometryBaseAudit
-  Signals.FreeCellLocal
+  RedShadeGraphRefinement RedShadePaths ShadedFreeLineGraphBase
+  ShadedObstructionGeometryBaseAudit
+  ShadedObstructionGeometryBaseSoundness Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -260,6 +261,298 @@ theorem selectedVertical_semantic
           dsimp only at hallowed
           exact verticalShade_eq_light_of_north hallowed hinteriorTarget hnorthLight
       simp [ShadedSignals.selectedVerticalFor, hshade, hinteriorTarget]
+
+private theorem horizontal_not_reached_same
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    {column row : Nat} (hcolumnBound : column < 32)
+    (hrowBound : row < 32) {side : Side}
+    (hside : side = .west ∨ side = .east)
+    (hselected : ShadedSignals.selectedHorizontalFor
+      (componentAt targetGrid column row) (quadrantAt column row)
+      (stateGrid column row) ≠ none)
+    (hreached : reachedWithParity parent (reachedBitmap (nodes parent))
+      ⟨column, row, side⟩ parentLight = true) : False := by
+  have hdark := value_eq_dark_of_reached parent componentsEq valid parentLight
+    cycle shaded hcolumnBound hreached
+  have hallowed := valid.allowed column row
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  rcases hside with rfl | rfl
+  · have hparts :
+        (reachedBitmap (nodes parent))[stateCode 32
+          (⟨column, row, .west⟩, parentLight)]?.getD false = true ∧
+        portPresent (localGrid parent) ⟨column, row, .west⟩ = true := by
+      simpa only [reachedWithParity, Bool.and_eq_true] using hreached
+    have hwestLocal : RedShades.hasWest
+        (componentAt (localGrid parent) column row) (quadrantAt column row) = true := by
+      simpa only [portPresent] using hparts.2
+    have hwest : RedShades.hasWest
+        (componentAt targetGrid column row) (quadrantAt column row) = true := by
+      rw [← componentsEq column row hcolumnBound hrowBound]
+      exact hwestLocal
+    have hlight := horizontal_west_light_of_selected hallowed hselected hwest
+    simp only [value] at hdark
+    simp_all
+  · have hparts :
+        (reachedBitmap (nodes parent))[stateCode 32
+          (⟨column, row, .east⟩, parentLight)]?.getD false = true ∧
+        portPresent (localGrid parent) ⟨column, row, .east⟩ = true := by
+      simpa only [reachedWithParity, Bool.and_eq_true] using hreached
+    have heastLocal : RedShades.hasEast
+        (componentAt (localGrid parent) column row) (quadrantAt column row) = true := by
+      simpa only [portPresent] using hparts.2
+    have heast : RedShades.hasEast
+        (componentAt targetGrid column row) (quadrantAt column row) = true := by
+      rw [← componentsEq column row hcolumnBound hrowBound]
+      exact heastLocal
+    have hlight := horizontal_east_light_of_selected hallowed hselected heast
+    simp only [value] at hdark
+    simp_all
+
+private theorem vertical_not_reached_same
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    {column row : Nat} (hcolumnBound : column < 32)
+    (hrowBound : row < 32) {side : Side}
+    (hside : side = .south ∨ side = .north)
+    (hselected : ShadedSignals.selectedVerticalFor
+      (componentAt targetGrid column row) (quadrantAt column row)
+      (stateGrid column row) ≠ none)
+    (hreached : reachedWithParity parent (reachedBitmap (nodes parent))
+      ⟨column, row, side⟩ parentLight = true) : False := by
+  have hdark := value_eq_dark_of_reached parent componentsEq valid parentLight
+    cycle shaded hcolumnBound hreached
+  have hallowed := valid.allowed column row
+  unfold RedShades.locallyAllowed at hallowed
+  dsimp only at hallowed
+  rcases hside with rfl | rfl
+  · have hparts :
+        (reachedBitmap (nodes parent))[stateCode 32
+          (⟨column, row, .south⟩, parentLight)]?.getD false = true ∧
+        portPresent (localGrid parent) ⟨column, row, .south⟩ = true := by
+      simpa only [reachedWithParity, Bool.and_eq_true] using hreached
+    have hsouthLocal : RedShades.hasSouth
+        (componentAt (localGrid parent) column row) (quadrantAt column row) = true := by
+      simpa only [portPresent] using hparts.2
+    have hsouth : RedShades.hasSouth
+        (componentAt targetGrid column row) (quadrantAt column row) = true := by
+      rw [← componentsEq column row hcolumnBound hrowBound]
+      exact hsouthLocal
+    have hlight := vertical_south_light_of_selected hallowed hselected hsouth
+    simp only [value] at hdark
+    simp_all
+  · have hparts :
+        (reachedBitmap (nodes parent))[stateCode 32
+          (⟨column, row, .north⟩, parentLight)]?.getD false = true ∧
+        portPresent (localGrid parent) ⟨column, row, .north⟩ = true := by
+      simpa only [reachedWithParity, Bool.and_eq_true] using hreached
+    have hnorthLocal : RedShades.hasNorth
+        (componentAt (localGrid parent) column row) (quadrantAt column row) = true := by
+      simpa only [portPresent] using hparts.2
+    have hnorth : RedShades.hasNorth
+        (componentAt targetGrid column row) (quadrantAt column row) = true := by
+      rw [← componentsEq column row hcolumnBound hrowBound]
+      exact hnorthLocal
+    have hlight := vertical_north_light_of_selected hallowed hselected hnorth
+    simp only [value] at hdark
+    simp_all
+
+set_option maxRecDepth 100000 in
+set_option maxHeartbeats 1000000 in
+-- Coverage elimination expands four parity alternatives and endpoint contradictions.
+theorem selectedHorizontal_of_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates)
+    (hselected : ShadedSignals.selectedHorizontalFor
+      (componentAt targetGrid column row) (quadrantAt column row)
+      (stateGrid column row) ≠ none) :
+    selectedHorizontal parent (reachedBitmap (nodes parent))
+      parentLight column row = true := by
+  have hcolumnBound := (mem_coordinates_iff.1 hcolumn).2.trans
+    (by decide : 24 < 32)
+  have hrowBound := (mem_coordinates_iff.1 hrow).2.trans
+    (by decide : 24 < 32)
+  have hinteriorTarget := horizontalInterior_isSome_of_selected hselected
+  have hinteriorLocal :
+      (Signals.horizontalInterior? (componentAt (localGrid parent) column row)
+        (quadrantAt column row)).isSome = true := by
+    rw [componentsEq column row hcolumnBound hrowBound]
+    exact hinteriorTarget
+  have hcovered := coverage.horizontal hcolumn hrow hinteriorLocal
+  by_cases hwest : reachedWithParity parent (reachedBitmap (nodes parent))
+      ⟨column, row, .west⟩ (!parentLight) = true
+  · simp [selectedHorizontal, hinteriorLocal, hwest]
+  by_cases heast : reachedWithParity parent (reachedBitmap (nodes parent))
+      ⟨column, row, .east⟩ (!parentLight) = true
+  · simp [selectedHorizontal, hinteriorLocal, heast]
+  have hsame :
+      reachedWithParity parent (reachedBitmap (nodes parent))
+          ⟨column, row, .west⟩ parentLight = true ∨
+        reachedWithParity parent (reachedBitmap (nodes parent))
+          ⟨column, row, .east⟩ parentLight = true := by
+    cases parentLight
+    · simp only [Bool.not_false] at hwest heast
+      rcases hcovered with ((hwestSame | hwestOpposite) | heastSame) |
+        heastOpposite
+      · exact Or.inl hwestSame
+      · exact (hwest hwestOpposite).elim
+      · exact Or.inr heastSame
+      · exact (heast heastOpposite).elim
+    · simp only [Bool.not_true] at hwest heast
+      rcases hcovered with ((hwestOpposite | hwestSame) | heastOpposite) |
+        heastSame
+      · exact (hwest hwestOpposite).elim
+      · exact Or.inl hwestSame
+      · exact (heast heastOpposite).elim
+      · exact Or.inr heastSame
+  rcases hsame with hsame | hsame
+  · exact False.elim (horizontal_not_reached_same parent componentsEq valid
+      parentLight cycle shaded hcolumnBound hrowBound (Or.inl rfl) hselected hsame)
+  · exact False.elim (horizontal_not_reached_same parent componentsEq valid
+      parentLight cycle shaded hcolumnBound hrowBound (Or.inr rfl) hselected hsame)
+
+set_option maxRecDepth 100000 in
+set_option maxHeartbeats 1000000 in
+-- Coverage elimination expands four parity alternatives and endpoint contradictions.
+theorem selectedVertical_of_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates)
+    (hselected : ShadedSignals.selectedVerticalFor
+      (componentAt targetGrid column row) (quadrantAt column row)
+      (stateGrid column row) ≠ none) :
+    selectedVertical parent (reachedBitmap (nodes parent))
+      parentLight column row = true := by
+  have hcolumnBound := (mem_coordinates_iff.1 hcolumn).2.trans
+    (by decide : 24 < 32)
+  have hrowBound := (mem_coordinates_iff.1 hrow).2.trans
+    (by decide : 24 < 32)
+  have hinteriorTarget := verticalInterior_isSome_of_selected hselected
+  have hinteriorLocal :
+      (Signals.verticalInterior? (componentAt (localGrid parent) column row)
+        (quadrantAt column row)).isSome = true := by
+    rw [componentsEq column row hcolumnBound hrowBound]
+    exact hinteriorTarget
+  have hcovered := coverage.vertical hcolumn hrow hinteriorLocal
+  by_cases hsouth : reachedWithParity parent (reachedBitmap (nodes parent))
+      ⟨column, row, .south⟩ (!parentLight) = true
+  · simp [selectedVertical, hinteriorLocal, hsouth]
+  by_cases hnorth : reachedWithParity parent (reachedBitmap (nodes parent))
+      ⟨column, row, .north⟩ (!parentLight) = true
+  · simp [selectedVertical, hinteriorLocal, hnorth]
+  have hsame :
+      reachedWithParity parent (reachedBitmap (nodes parent))
+          ⟨column, row, .south⟩ parentLight = true ∨
+        reachedWithParity parent (reachedBitmap (nodes parent))
+          ⟨column, row, .north⟩ parentLight = true := by
+    cases parentLight
+    · simp only [Bool.not_false] at hsouth hnorth
+      rcases hcovered with ((hsouthSame | hsouthOpposite) | hnorthSame) |
+        hnorthOpposite
+      · exact Or.inl hsouthSame
+      · exact (hsouth hsouthOpposite).elim
+      · exact Or.inr hnorthSame
+      · exact (hnorth hnorthOpposite).elim
+    · simp only [Bool.not_true] at hsouth hnorth
+      rcases hcovered with ((hsouthOpposite | hsouthSame) | hnorthOpposite) |
+        hnorthSame
+      · exact (hsouth hsouthOpposite).elim
+      · exact Or.inl hsouthSame
+      · exact (hnorth hnorthOpposite).elim
+      · exact Or.inr hnorthSame
+  rcases hsame with hsame | hsame
+  · exact False.elim (vertical_not_reached_same parent componentsEq valid
+      parentLight cycle shaded hcolumnBound hrowBound (Or.inl rfl) hselected hsame)
+  · exact False.elim (vertical_not_reached_same parent componentsEq valid
+      parentLight cycle shaded hcolumnBound hrowBound (Or.inr rfl) hselected hsame)
+
+theorem selectedHorizontal_iff_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates) :
+    selectedHorizontal parent (reachedBitmap (nodes parent))
+        parentLight column row = true ↔
+      ShadedSignals.selectedHorizontalFor
+        (componentAt targetGrid column row) (quadrantAt column row)
+        (stateGrid column row) ≠ none := by
+  constructor
+  · exact selectedHorizontal_semantic parent componentsEq valid parentLight
+      cycle shaded hcolumn hrow
+  · exact selectedHorizontal_of_semantic parent componentsEq valid parentLight
+      cycle shaded coverage hcolumn hrow
+
+theorem selectedVertical_iff_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates) :
+    selectedVertical parent (reachedBitmap (nodes parent))
+        parentLight column row = true ↔
+      ShadedSignals.selectedVerticalFor
+        (componentAt targetGrid column row) (quadrantAt column row)
+        (stateGrid column row) ≠ none := by
+  constructor
+  · exact selectedVertical_semantic parent componentsEq valid parentLight
+      cycle shaded hcolumn hrow
+  · exact selectedVertical_of_semantic parent componentsEq valid parentLight
+      cycle shaded coverage hcolumn hrow
 
 end ShadedObstructionGeometryBoundedSoundness
 end Closed104
