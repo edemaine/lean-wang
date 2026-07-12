@@ -391,6 +391,18 @@ theorem seamCover_of_regionSeamCover (regions : RegionSeamCover) :
     · exact regions.horizontalOutside phase depth grid shadeGrid valid children
         hwest heast hsouth hnorth hboundaryWest hboundaryEast hselected houtside
 
+/-- The four normalized seam families are the sole remaining recurrence
+obligation. -/
+theorem step_of_regionSeamCover (regions : RegionSeamCover) : Step :=
+  step_of_childLift
+    (childLift_of_seamCover (seamCover_of_regionSeamCover regions))
+
+theorem forcesRoutedFixedCornerSquares_of_regionSeamCover
+    (regions : RegionSeamCover) :
+    ShadedRoutedScaffoldForward.ForcesRoutedFixedCornerSquares
+      ShadedSignals.routedScaffold :=
+  forcesRoutedFixedCornerSquares_of_step (step_of_regionSeamCover regions)
+
 end PairCoverSeamArithmetic
 end Closed104
 end Figure13Layers
