@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import LeanWang.OllingerRobinson104RedShadeGraphWeightedReachBounded
 import LeanWang.OllingerRobinson104SparseFreeLineEvenExtraCreatedWindowAuditCheck
 
 /-! Proposition-level soundness for neighboring-window created-segment routes. -/
@@ -13,8 +14,10 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineEvenExtraCreatedWindowAudit
 
-open RedCycles RedShadeGraph RedShadeGraphBoards RedShadeGraphRefinement
-  RedShadeGraphWeightedSearch ShadedFreeLineProjectionSourceLists
+open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards RedShadeGraphRefinement
+  RedShadeGraphSearchSoundness RedShadeGraphWeightedSearch
+  ShadedFreeLineProjectionSourceLists
+  RedShadeGraphWeightedReachBounded
   ShadedFreeLineRecurrence Signals.FreeCellLocal SparseFreeLineLocalStates
 
 set_option maxRecDepth 20000
@@ -22,8 +25,8 @@ set_option maxRecDepth 20000
 structure RouteWitness (window : Window) (target : Port) where
   start : WeightedStart
   start_mem : start ∈ windowStarts window
-  path : Path (RedCycles.iterateRefine 2 (windowGrid window)) start.port target
-    (Bool.xor start.parity true)
+  path : BoundedPath (RedCycles.iterateRefine 2 (windowGrid window)) 24 24
+    start.port target (Bool.xor start.parity true)
   targetLive :
     portPresent (RedCycles.iterateRefine 2 (windowGrid window)) target = true
 
@@ -47,6 +50,22 @@ theorem start_on_cell_cycle {window : Window} {start : WeightedStart}
   refine ⟨x, hx, y, hy, rfl, ?_⟩
   exact onCycle_of_mem_cyclePorts (by omega) (by omega) hport
 
+theorem onCellCycle_inBounds {x y : Nat} (hx : x < 3) (hy : y < 3)
+    {port : Port}
+    (onCycle : OnCycle (4 * x + 1) (4 * x + 3)
+      (4 * y + 1) (4 * y + 3) port) :
+    PortInBounds port 24 24 := by
+  cases onCycle <;>
+    simp_all [PortInBounds, quarterWest, quarterEast,
+      quarterSouth, quarterNorth] <;>
+    omega
+
+theorem windowStarts_inBounds (window : Window) :
+    ∀ start ∈ windowStarts window, PortInBounds start.port 24 24 := by
+  intro start hstart
+  rcases start_on_cell_cycle hstart with ⟨x, hx, y, hy, _, onCycle⟩
+  exact onCellCycle_inBounds hx hy onCycle
+
 theorem reached_sound {window : Window}
     {nodes : List RedShadeGraphSearch.ReachNode} {target : Port}
     (checked : reached window nodes target = true)
@@ -55,7 +74,8 @@ theorem reached_sound {window : Window}
     decide_eq_true_eq] at checked
   rcases checked.2 with ⟨node, hnode, hparity, hcurrent⟩
   rw [hnodes] at hnode
-  rcases exploreFastWeightedReach_sound hnode with ⟨start, hstart, path⟩
+  rcases exploreFastWeightedReach_bounded_sound
+      (windowStarts_inBounds window) hnode with ⟨start, hstart, path⟩
   refine ⟨⟨start, hstart, ?_, checked.1⟩⟩
   rw [hcurrent] at path
   simpa [hparity] using path
