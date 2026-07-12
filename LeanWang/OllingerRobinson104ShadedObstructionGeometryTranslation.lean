@@ -19,7 +19,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedObstructionGeometryTranslation
 
-open RedCycles RedShadeCycles RefinementTranslation ShadedFreeLineTranslation
+open RedCycles RedShadeCycles RedShadePaths RefinementTranslation
+  ShadedFreeLineTranslation
   ShadedObstructionGeometry ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
@@ -253,6 +254,22 @@ theorem Geometry.translate
           selectedVertical_shift depth grid shadeGrid blockX blockY
             localCoordinate localY]
           using hnone
+
+/-- Every coarse coordinate contributes an absolute audited depth-four board. -/
+theorem geometry_at_block
+    (grid : Nat → Nat → Index)
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (iterateRefine 4 grid) shadeGrid)
+    (blockX blockY : Nat) :
+    Geometry (iterateRefine 4 grid) shadeGrid
+      (16 * blockX + 4) (16 * blockX + 12)
+      (16 * blockY + 4) (16 * blockY + 12) := by
+  have localGeometry :=
+    ShadedObstructionGeometryBoundedSoundness.geometry_shift
+      grid valid blockX blockY
+  have translated := Geometry.translate localGeometry
+  norm_num at translated
+  exact translated
 
 end ShadedObstructionGeometryTranslation
 end Closed104
