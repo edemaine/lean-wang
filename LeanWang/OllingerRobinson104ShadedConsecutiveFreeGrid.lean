@@ -20,8 +20,9 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedConsecutiveFreeGrid
 
-open RedCycles RedShadePaths ShadedPlaneSignalGrid ShadedFreeGrid
-  ShadedFreeLineEnumeration SparseFreeLinePlaneMarkedGrid
+open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths
+  ShadedPlaneSignalGrid ShadedFreeGrid ShadedFreeLineEnumeration
+  SparseFreeLinePlaneMarkedGrid
   SparseFreeLineDecodedMarkedGrid Signals.FreeCellLocal
 
 structure OrderedPrefix (s : Finset Nat) (size : Nat) where
@@ -252,6 +253,40 @@ variable {T : TileSet} {seed : WangTile}
   {x : Int × Int -> TileIn
     (combineWithRoutedScaffold ShadedSignals.routedScaffold T seed)}
 
+/-- Arbitrarily large complete consecutive free grids, retaining their light board. -/
+theorem unboundedConsecutiveMarkedFreeGrid_with_light
+    (decoded : ShadedRoutedPlaneDecode.Decoded x)
+    (size : Nat) (coarseOrigin : Int × Int) :
+    let level := 2 * (1 + size)
+    let coarse := ShadedPlaneShadeGrid.coarseGrid decoded (level + 2) coarseOrigin
+    let state := ShadedPlaneShadeGrid.stateGrid decoded
+      (ShadedPlaneShadeGrid.fineParentOrigin decoded (level + 2) coarseOrigin)
+    (CycleOn (iterateRefine (level + 2) coarse)
+        (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level) ∧
+      CycleShade state
+        (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level) .light ∧
+      Nonempty (ConsecutiveMarkedFreeGrid
+        (iterateRefine (level + 2) coarse) state
+        (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level)
+        (size + 3))) ∨
+      (CycleOn (iterateRefine (level + 2) coarse)
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) ∧
+        CycleShade state
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) .light ∧
+        Nonempty (ConsecutiveMarkedFreeGrid
+          (iterateRefine (level + 2) coarse) state
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 2))) := by
+  rcases SparseFreeLineDecodedMarkedGrid.unboundedMarkedFreeGrid_with_light
+      decoded size coarseOrigin with
+    ⟨cycle, shaded, marked⟩ | ⟨cycle, shaded, marked⟩
+  · rcases marked with ⟨marked⟩
+    exact Or.inl ⟨cycle, shaded, ⟨ConsecutiveMarkedFreeGrid.ofMarked marked⟩⟩
+  · rcases marked with ⟨marked⟩
+    exact Or.inr ⟨cycle, shaded, ⟨ConsecutiveMarkedFreeGrid.ofMarked marked⟩⟩
+
 /-- Arbitrarily large complete consecutive free grids in a decoded plane. -/
 theorem unboundedConsecutiveMarkedFreeGrid
     (decoded : ShadedRoutedPlaneDecode.Decoded x)
@@ -266,11 +301,11 @@ theorem unboundedConsecutiveMarkedFreeGrid
       Nonempty (ConsecutiveMarkedFreeGrid (iterateRefine (level + 2) coarse) state
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 2)) := by
-  rcases unboundedMarkedFreeGrid decoded size coarseOrigin with hmarked | hmarked
-  · rcases hmarked with ⟨marked⟩
-    exact Or.inl ⟨ConsecutiveMarkedFreeGrid.ofMarked marked⟩
-  · rcases hmarked with ⟨marked⟩
-    exact Or.inr ⟨ConsecutiveMarkedFreeGrid.ofMarked marked⟩
+  rcases unboundedConsecutiveMarkedFreeGrid_with_light
+      decoded size coarseOrigin with
+    ⟨_, _, grid⟩ | ⟨_, _, grid⟩
+  · exact Or.inl grid
+  · exact Or.inr grid
 
 end ShadedConsecutiveFreeGrid
 end Closed104

@@ -234,6 +234,26 @@ def IsRoutedScaffold (S : RoutedScaffold) : Prop :=
     TilesPlane (combineWithRoutedScaffold S T seed) ↔
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
 
+/-- Backward half of the routed scaffold equivalence. -/
+def RealizesRoutedFixedCornerSquares (S : RoutedScaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      TilesPlane (combineWithRoutedScaffold S T seed)
+
+/-- Forward half of the routed scaffold equivalence. -/
+def ForcesRoutedFixedCornerSquares (S : RoutedScaffold) : Prop :=
+  ∀ {T : TileSet} {seed : WangTile},
+    TilesPlane (combineWithRoutedScaffold S T seed) →
+      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
+
+theorem isRoutedScaffold_of_realizes_of_forces
+    {S : RoutedScaffold}
+    (realizes : RealizesRoutedFixedCornerSquares S)
+    (forces : ForcesRoutedFixedCornerSquares S) :
+    IsRoutedScaffold S := by
+  intro T seed
+  exact ⟨forces, realizes T seed⟩
+
 /-- Correctness theorem exposed by any certified routed scaffold. -/
 theorem routedScaffold_reduction_correct {S : RoutedScaffold}
     (hS : IsRoutedScaffold S) (T : TileSet) (seed : WangTile) :
