@@ -231,6 +231,28 @@ theorem even_offset_eq_pivot (depth : Nat) {offset : Nat}
         subst offset
         simp [Nat.add_mod, Nat.mul_mod] at heven
 
+/--
+Every odd retained offset at positive depth is either the ordinary `3 mod 4`
+main child or the unique extra child of the preceding pivot.
+-/
+theorem odd_mem_offsets_succ_cases (depth : Nat) {offset : Nat}
+    (hoffset : offset ∈ offsets (depth + 1)) (hodd : offset % 2 = 1) :
+    offset % 4 = 3 ∨ offset = extraChild (pivot depth) := by
+  rcases mem_offsets_succ_cases depth hoffset with
+    ⟨oldOffset, hold, hchild⟩
+  by_cases heven : oldOffset % 2 = 0
+  · have hpivot := even_offset_eq_pivot depth hold heven
+    subst oldOffset
+    simp only [children, pivot_even, if_true, List.mem_cons,
+      List.not_mem_nil, or_false] at hchild
+    rcases hchild with rfl | rfl
+    · simp [Nat.mul_mod] at hodd
+    · exact Or.inr rfl
+  · simp only [children, heven, if_false, List.mem_singleton] at hchild
+    subst offset
+    left
+    simp [Nat.add_mod]
+
 theorem even_pivot_coordinate (depth : Nat) :
     lineCoordinate .even depth (pivot depth) = 4 * 4 ^ depth + 1 := by
   simp [pivot, lineCoordinate_even]
