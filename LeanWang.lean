@@ -19,6 +19,7 @@ import LeanWang.UniversalTM0TableauLocalCorrect
 import LeanWang.UniversalTM0TableauTiles
 import LeanWang.UniversalTM0TableauHistory
 import LeanWang.UniversalTM0TableauInitial
+import LeanWang.UniversalTM0TableauDecode
 import LeanWang.UniversalTM0Folded
 import LeanWang.UniversalMachineCertificate
 import LeanWang.UniversalFoldedReduction
