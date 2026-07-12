@@ -3,7 +3,6 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.NatPartrecToToPartrec
 import LeanWang.PartrecToTM2Support
 import LeanWang.UniversalCode
 
@@ -73,9 +72,24 @@ theorem relabelCfg_stepAux {K : Type u} {Γ : K → Type v} {Λ : Type w}
   | goto _ => rfl
   | halt => rfl
 
-/-- The fixed list-language universal evaluator. -/
+/--
+The fixed list-language universal evaluator.  Mathlib's completeness theorem
+for `Turing.ToPartrec.Code` lets us choose this code directly; no translation
+of source-code syntax is needed.
+-/
 def code : Turing.ToPartrec.Code :=
-  NatPartrecToToPartrec.translate UniversalCode.universalCode
+  Classical.choose (Turing.ToPartrec.Code.exists_code
+    (Nat.Partrec'.part_iff₁.2
+      (Partrec.nat_iff.2 UniversalCode.universalEval_partrec)))
+
+theorem code_eval (n : Nat) :
+    code.eval [n] = pure <$> UniversalCode.universalEval n := by
+  have h := Classical.choose_spec (Turing.ToPartrec.Code.exists_code
+    (Nat.Partrec'.part_iff₁.2
+      (Partrec.nat_iff.2 UniversalCode.universalEval_partrec)))
+    (List.Vector.cons n List.Vector.nil)
+  change code.eval [n] = pure <$> UniversalCode.universalEval n at h
+  exact h
 
 /-- A wrapper whose default value is the fixed evaluator's start label. -/
 structure Label where
@@ -368,11 +382,10 @@ theorem tm2_eval_dom_iff (c : Nat.Partrec.Code) :
       (StateTransition.eval (Turing.TM2.step Turing.PartrecToTM2.tr) originalInit).Dom from
     StateTransition.tr_eval_dom hstep rfl]
   change (StateTransition.eval (Turing.TM2.step Turing.PartrecToTM2.tr)
-      (Turing.PartrecToTM2.init
-        (NatPartrecToToPartrec.translate UniversalCode.universalCode)
-        [sourceInput c])).Dom ↔ _
-  rw [NatPartrecToToPartrec.translate_tm2_dom_at]
-  rw [sourceInput, UniversalCode.universalCode_eval]
+      (Turing.PartrecToTM2.init code [sourceInput c])).Dom ↔ _
+  rw [Turing.PartrecToTM2.tr_eval]
+  rw [code_eval]
+  simp [sourceInput, UniversalCode.universalEval]
 
 theorem tm0_eval_dom_iff (c : Nat.Partrec.Code) :
     (Turing.TM0.eval tm0 (input c)).Dom ↔

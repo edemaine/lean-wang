@@ -10,8 +10,6 @@ import LeanWang.MachineTiles
 import LeanWang.PostMachine
 import LeanWang.PostMachineInput
 import LeanWang.PartrecToTM2Support
-import LeanWang.ToPartrecHelpers
-import LeanWang.NatPartrecToToPartrec
 import LeanWang.UniversalCode
 import LeanWang.UniversalTM0Semantic
 import LeanWang.UniversalTM0Folded

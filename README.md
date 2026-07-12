@@ -45,9 +45,10 @@ proof task.
   seeded quarter-plane tilings.
 - `LeanWang.MachineInputTiles` and `LeanWang.MachineInputTilesData` prove the
   finite-input machine-to-Wang correspondence and compute its tile lists.
-- `LeanWang.UniversalCode` and `LeanWang.UniversalTM0Semantic` construct one
-  fixed universal evaluator, carry Mathlib's native finite supports through
-  TM2, TM1, and TM0, and place the source code on its initial tape.
+- `LeanWang.UniversalCode` defines the universal partial function, and
+  `LeanWang.UniversalTM0Semantic` uses Mathlib's completeness theorem to choose
+  one evaluator code directly, carries its finite supports through TM2, TM1,
+  and TM0, and places the source code on its initial tape.
 - `LeanWang.UniversalTM0Folded` constructs the constant one-sided Post table
   directly from that fixed TM0 machine and proves its folded-tape simulation.
 - `LeanWang.UniversalDirectReduction` computes the resulting fixed-corner Wang

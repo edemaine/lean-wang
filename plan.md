@@ -39,17 +39,19 @@ constant finite table program, a computable source-dependent input word, a
 support proof, and the halting equivalence. All machine-to-Wang and scaffold
 reasoning depends only on this certificate.
 
-`UniversalTM0Semantic` relabels the one fixed evaluator, carries Mathlib's
-native finite supports through TM2, TM1, and TM0, and proves the varying binary
-input primitive recursive. `UniversalTM0Folded` enumerates the fixed support
-once, emits the semantic folded rows directly, proves exact transition lookup,
-and proves the two-sided-TM0 to one-sided-Post simulation in both directions.
-No translated statement syntax is encoded or decoded.
+`UniversalTM0Semantic` applies Mathlib's `ToPartrec.Code.exists_code` directly
+to the universal partial function, relabels that one fixed evaluator, carries
+Mathlib's native finite supports through TM2, TM1, and TM0, and proves the
+varying binary input primitive recursive. `UniversalTM0Folded` enumerates the
+fixed support once, emits the semantic folded rows directly, proves exact
+transition lookup, and proves the two-sided-TM0 to one-sided-Post simulation in
+both directions. No source syntax is translated, encoded, or decoded.
 
-1. `UniversalCode.universalCode` evaluates a supplied encoded
+1. `UniversalCode.universalEval` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
-2. `UniversalTM0Semantic.code` translates this evaluator once and uses
-   Mathlib's finite-support TM2-to-TM1-to-TM0 transformations.
+2. `UniversalTM0Semantic.code` chooses one `Turing.ToPartrec.Code` for this
+   function using Mathlib's completeness theorem, then uses Mathlib's
+   finite-support TM2-to-TM1-to-TM0 transformations.
 3. `UniversalTM0Semantic.input c` writes `Nat.pair (encode c) 0` as the varying
    initial tape. Its construction is computable.
 4. `UniversalTM0Folded.inputWord` folds that finite word and starts the constant
