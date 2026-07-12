@@ -40,6 +40,34 @@ def Holds (phase : Phase) (depth : Nat) : Prop :=
         (west phase depth) (east phase depth)
         (west phase depth) (east phase depth)
 
+/-- A hierarchy hypothesis supplies the same canonical cover in every aligned
+refinement block of an arbitrary ambient grid. -/
+theorem Holds.at_block
+    {phase : Phase} {depth : Nat} (holds : Holds phase depth)
+    {grid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (refinedGrid phase depth grid) shadeGrid)
+    (blockX blockY : Nat) :
+    PairCover (refinedGrid phase depth grid) shadeGrid
+      (2 ^ refinementDepth phase depth * blockX + west phase depth)
+      (2 ^ refinementDepth phase depth * blockX + east phase depth)
+      (2 ^ refinementDepth phase depth * blockY + west phase depth)
+      (2 ^ refinementDepth phase depth * blockY + east phase depth) := by
+  let quarterOffsetX :=
+    2 ^ (refinementDepth phase depth + 1) * blockX
+  let quarterOffsetY :=
+    2 ^ (refinementDepth phase depth + 1) * blockY
+  have localValid := ShadedFreeLineTranslation.validShadeGrid_shift
+    (refinementDepth phase depth) grid (by
+      simpa only [refinedGrid] using valid) blockX blockY
+  have localCover := holds
+    (RefinementTranslation.shiftGrid grid blockX blockY)
+    (ShadedFreeLineTranslation.shiftQuarterGrid shadeGrid
+      quarterOffsetX quarterOffsetY) (by
+        simpa only [refinedGrid, quarterOffsetX, quarterOffsetY] using localValid)
+  have translated := ShadedObstructionGeometryCover.PairCover.translate localCover
+  simpa only [refinedGrid] using translated
+
 /-- The existing translated depth-four audit is exactly the even base. -/
 theorem even_one : Holds .even 1 := by
   intro grid shadeGrid valid
