@@ -97,6 +97,31 @@ theorem twoCornerBridge
   simpa [middleX, middleY, Nat.sub_sub] using
     odd_trans_odd middle first second
 
+/-- An even bridge transports an odd route out of its descendant cycle. -/
+theorem even_trans_odd
+    {grid : Nat → Nat → Index}
+    {firstWest firstEast firstSouth firstNorth : Nat}
+    {secondWest secondEast secondSouth secondNorth : Nat}
+    (secondCycle : CycleOn grid
+      secondWest secondEast secondSouth secondNorth)
+    (bridge : EvenCycleBridge grid
+      firstWest firstEast firstSouth firstNorth
+      secondWest secondEast secondSouth secondNorth)
+    {secondStart target : Port}
+    (secondStartOnCycle : OnCycle
+      secondWest secondEast secondSouth secondNorth secondStart)
+    (tail : Path grid secondStart target true) :
+    ∃ firstStart,
+      OnCycle firstWest firstEast firstSouth firstNorth firstStart ∧
+        Path grid firstStart target true := by
+  rcases bridge with ⟨firstStart, secondEntry, firstStartOnCycle,
+    secondEntryOnCycle, bridgePath⟩
+  have alongSecond := onCycle_connected secondCycle
+    secondEntryOnCycle secondStartOnCycle
+  refine ⟨firstStart, firstStartOnCycle, ?_⟩
+  simpa [Bool.xor_assoc] using
+    Path.trans bridgePath (Path.trans alongSecond tail)
+
 end RedShadeCycleBridgeComposition
 end Closed104
 end Figure13Layers
