@@ -33,6 +33,9 @@ theorem two_pow_refinementDepth_eq_four_mul_west
 /-- The southwest/northeast child selector as an ordinary block index. -/
 def childBlock (side : Fin 2) : Nat := side.val + 1
 
+def absoluteChildBlock (parent : Nat) (side : Fin 2) : Nat :=
+  4 * parent + childBlock side
+
 /-- Strict membership in one recursive child's quarter-coordinate interval. -/
 def InChildInterval (phase : Phase) (depth : Nat)
     (side : Fin 2) (coordinate : Nat) : Prop :=
@@ -42,6 +45,15 @@ def InChildInterval (phase : Phase) (depth : Nat)
     coordinate < quarterEast
       (2 ^ refinementDepth phase depth * childBlock side + east phase depth)
 
+def InAbsoluteChildInterval (phase : Phase) (depth parent : Nat)
+    (side : Fin 2) (coordinate : Nat) : Prop :=
+  quarterWest
+      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
+        west phase depth) < coordinate ∧
+    coordinate < quarterEast
+      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
+        east phase depth)
+
 def InSomeChild (phase : Phase) (depth coordinate : Nat) : Prop :=
   ∃ side : Fin 2, InChildInterval phase depth side coordinate
 
@@ -50,8 +62,203 @@ def InSameChild (phase : Phase) (depth first second : Nat) : Prop :=
     InChildInterval phase depth side first ∧
       InChildInterval phase depth side second
 
+def InSomeAbsoluteChild (phase : Phase) (depth parent coordinate : Nat) : Prop :=
+  ∃ side : Fin 2, InAbsoluteChildInterval phase depth parent side coordinate
+
+def InSameAbsoluteChild (phase : Phase) (depth parent first second : Nat) : Prop :=
+  ∃ side : Fin 2,
+    InAbsoluteChildInterval phase depth parent side first ∧
+      InAbsoluteChildInterval phase depth parent side second
+
 theorem west_pos (phase : Phase) (depth : Nat) : 0 < west phase depth := by
   cases phase <;> simp [west, scale, Phase.factor]
+
+theorem two_pow_refinementDepth_succ (phase : Phase) (depth : Nat) :
+    2 ^ refinementDepth phase (depth + 1) =
+      4 * 2 ^ refinementDepth phase depth := by
+  rw [two_pow_refinementDepth_eq_four_mul_west,
+    two_pow_refinementDepth_eq_four_mul_west, west_succ]
+  ring
+
+theorem absolute_child_block_eq
+    {phase : Phase} {depth parent child : Nat}
+    (outerLower : quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parent + west phase (depth + 1)) ≤
+        quarterWest
+          (2 ^ refinementDepth phase depth * child + west phase depth))
+    (outerUpper : quarterEast
+        (2 ^ refinementDepth phase depth * child + east phase depth) ≤
+      quarterEast
+        (2 ^ refinementDepth phase (depth + 1) * parent + east phase (depth + 1))) :
+    child = 4 * parent + 1 ∨ child = 4 * parent + 2 := by
+  have hpow := two_pow_refinementDepth_eq_four_mul_west phase depth
+  have hpowSucc := two_pow_refinementDepth_succ phase depth
+  have hwestSucc := west_succ phase depth
+  have heast : east phase depth = 3 * west phase depth := rfl
+  have heastSucc : east phase (depth + 1) = 4 * east phase depth :=
+    east_succ phase depth
+  have hwest := west_pos phase depth
+  simp only [quarterWest, quarterEast, hpow, hpowSucc,
+    hwestSucc, heast, heastSucc] at outerLower outerUpper
+  have hlower : 4 * parent + 1 ≤ child := by
+    by_contra h
+    have : child ≤ 4 * parent := by omega
+    nlinarith
+  have hupper : child ≤ 4 * parent + 2 := by
+    by_contra h
+    have : 4 * parent + 3 ≤ child := by omega
+    nlinarith
+  omega
+
+theorem absolute_child_contained
+    (phase : Phase) (depth parent : Nat) (side : Fin 2) :
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parent + west phase (depth + 1)) ≤
+        quarterWest
+          (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
+            west phase depth) ∧
+      quarterEast
+          (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
+            east phase depth) ≤
+        quarterEast
+          (2 ^ refinementDepth phase (depth + 1) * parent +
+            east phase (depth + 1)) := by
+  have hpow := two_pow_refinementDepth_eq_four_mul_west phase depth
+  have hpowSucc := two_pow_refinementDepth_succ phase depth
+  have hwestSucc := west_succ phase depth
+  have heast : east phase depth = 3 * west phase depth := rfl
+  have heastSucc : east phase (depth + 1) = 4 * east phase depth :=
+    east_succ phase depth
+  have hwest := west_pos phase depth
+  fin_cases side <;>
+    simp [absoluteChildBlock, childBlock, quarterWest, quarterEast,
+      hpow, hpowSucc, hwestSucc, heast, heastSucc] <;> nlinarith
+
+theorem exists_side_of_absolute_child_block_eq
+    {parent child : Nat}
+    (hchild : child = 4 * parent + 1 ∨ child = 4 * parent + 2) :
+    ∃ side : Fin 2, child = absoluteChildBlock parent side := by
+  rcases hchild with hchild | hchild
+  · exact ⟨⟨0, by decide⟩, by simpa [absoluteChildBlock, childBlock] using hchild⟩
+  · exact ⟨⟨1, by decide⟩, by simpa [absoluteChildBlock, childBlock] using hchild⟩
+
+theorem fitsContainedVerticalChild_iff
+    (phase : Phase) (depth parentX parentY column row boundary : Nat) :
+    FitsContainedVerticalChild phase depth parentX parentY
+      column row boundary ↔
+      ∃ childX childY : Fin 2,
+        InAbsoluteChildInterval phase depth parentX childX column ∧
+        InAbsoluteChildInterval phase depth parentY childY row ∧
+        InAbsoluteChildInterval phase depth parentY childY boundary := by
+  constructor
+  · rintro ⟨childX, childY, houterWest, houterEast,
+      houterSouth, houterNorth, hcolumnWest, hcolumnEast,
+      hrowSouth, hrowNorth, hboundarySouth, hboundaryNorth⟩
+    rcases exists_side_of_absolute_child_block_eq
+        (absolute_child_block_eq houterWest houterEast) with
+      ⟨sideX, rfl⟩
+    rcases exists_side_of_absolute_child_block_eq
+        (absolute_child_block_eq houterSouth houterNorth) with
+      ⟨sideY, rfl⟩
+    exact ⟨sideX, sideY, ⟨hcolumnWest, hcolumnEast⟩,
+      ⟨hrowSouth, hrowNorth⟩,
+      ⟨hboundarySouth, hboundaryNorth⟩⟩
+  · rintro ⟨childX, childY, hcolumn, hrow, hboundary⟩
+    exact ⟨absoluteChildBlock parentX childX,
+      absoluteChildBlock parentY childY,
+      (absolute_child_contained phase depth parentX childX).1,
+      (absolute_child_contained phase depth parentX childX).2,
+      (absolute_child_contained phase depth parentY childY).1,
+      (absolute_child_contained phase depth parentY childY).2,
+      hcolumn.1, hcolumn.2, hrow.1, hrow.2,
+      hboundary.1, hboundary.2⟩
+
+theorem fitsContainedHorizontalChild_iff
+    (phase : Phase) (depth parentX parentY column row boundary : Nat) :
+    FitsContainedHorizontalChild phase depth parentX parentY
+      column row boundary ↔
+      ∃ childX childY : Fin 2,
+        InAbsoluteChildInterval phase depth parentX childX column ∧
+        InAbsoluteChildInterval phase depth parentY childY row ∧
+        InAbsoluteChildInterval phase depth parentX childX boundary := by
+  constructor
+  · rintro ⟨childX, childY, houterWest, houterEast,
+      houterSouth, houterNorth, hcolumnWest, hcolumnEast,
+      hrowSouth, hrowNorth, hboundaryWest, hboundaryEast⟩
+    rcases exists_side_of_absolute_child_block_eq
+        (absolute_child_block_eq houterWest houterEast) with
+      ⟨sideX, rfl⟩
+    rcases exists_side_of_absolute_child_block_eq
+        (absolute_child_block_eq houterSouth houterNorth) with
+      ⟨sideY, rfl⟩
+    exact ⟨sideX, sideY, ⟨hcolumnWest, hcolumnEast⟩,
+      ⟨hrowSouth, hrowNorth⟩,
+      ⟨hboundaryWest, hboundaryEast⟩⟩
+  · rintro ⟨childX, childY, hcolumn, hrow, hboundary⟩
+    exact ⟨absoluteChildBlock parentX childX,
+      absoluteChildBlock parentY childY,
+      (absolute_child_contained phase depth parentX childX).1,
+      (absolute_child_contained phase depth parentX childX).2,
+      (absolute_child_contained phase depth parentY childY).1,
+      (absolute_child_contained phase depth parentY childY).2,
+      hcolumn.1, hcolumn.2, hrow.1, hrow.2,
+      hboundary.1, hboundary.2⟩
+
+theorem fitsContainedVerticalChild_iff_regions
+    (phase : Phase) (depth parentX parentY column row boundary : Nat) :
+    FitsContainedVerticalChild phase depth parentX parentY
+      column row boundary ↔
+      InSomeAbsoluteChild phase depth parentX column ∧
+        InSameAbsoluteChild phase depth parentY row boundary := by
+  rw [fitsContainedVerticalChild_iff]
+  constructor
+  · rintro ⟨childX, childY, hcolumn, hrow, hboundary⟩
+    exact ⟨⟨childX, hcolumn⟩, ⟨childY, hrow, hboundary⟩⟩
+  · rintro ⟨⟨childX, hcolumn⟩, ⟨childY, hrow, hboundary⟩⟩
+    exact ⟨childX, childY, hcolumn, hrow, hboundary⟩
+
+theorem fitsContainedHorizontalChild_iff_regions
+    (phase : Phase) (depth parentX parentY column row boundary : Nat) :
+    FitsContainedHorizontalChild phase depth parentX parentY
+      column row boundary ↔
+      InSameAbsoluteChild phase depth parentX column boundary ∧
+        InSomeAbsoluteChild phase depth parentY row := by
+  rw [fitsContainedHorizontalChild_iff]
+  constructor
+  · rintro ⟨childX, childY, hcolumn, hrow, hboundary⟩
+    exact ⟨⟨childX, hcolumn, hboundary⟩, ⟨childY, hrow⟩⟩
+  · rintro ⟨⟨childX, hcolumn, hboundary⟩, ⟨childY, hrow⟩⟩
+    exact ⟨childX, childY, hcolumn, hrow, hboundary⟩
+
+def containedVerticalSeamCheck (phase : Phase)
+    (depth parentX parentY column row boundary : Nat) : Bool :=
+  decide (¬InSomeAbsoluteChild phase depth parentX column ∨
+    ¬InSameAbsoluteChild phase depth parentY row boundary)
+
+def containedHorizontalSeamCheck (phase : Phase)
+    (depth parentX parentY column row boundary : Nat) : Bool :=
+  decide (¬InSameAbsoluteChild phase depth parentX column boundary ∨
+    ¬InSomeAbsoluteChild phase depth parentY row)
+
+theorem containedVerticalSeamCheck_eq_true_iff
+    (phase : Phase) (depth parentX parentY column row boundary : Nat) :
+    containedVerticalSeamCheck phase depth parentX parentY
+      column row boundary = true ↔
+      ¬FitsContainedVerticalChild phase depth parentX parentY
+        column row boundary := by
+  rw [containedVerticalSeamCheck, decide_eq_true_eq,
+    fitsContainedVerticalChild_iff_regions]
+  tauto
+
+theorem containedHorizontalSeamCheck_eq_true_iff
+    (phase : Phase) (depth parentX parentY column row boundary : Nat) :
+    containedHorizontalSeamCheck phase depth parentX parentY
+      column row boundary = true ↔
+      ¬FitsContainedHorizontalChild phase depth parentX parentY
+        column row boundary := by
+  rw [containedHorizontalSeamCheck, decide_eq_true_eq,
+    fitsContainedHorizontalChild_iff_regions]
+  tauto
 
 theorem fitting_block_eq_child
     {phase : Phase} {depth block coordinate : Nat}
