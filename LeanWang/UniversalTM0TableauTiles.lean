@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.UniversalTM0TableauLocalCorrect
+import LeanWang.MachineInputTiles
 
 /-!
 # Finite Wang history tiles for the direct TM0 tableau
@@ -128,10 +129,13 @@ theorem mem_historyTiles_iff (tile : HistoryTile) :
         hvalid.2.2.2.2.1, hvalid.2.2.2.2.2.1⟩, hvalid⟩
 
 def normalTiles : TileSet :=
-  historyTiles.map fun tile => tile.toWangTile normalRowTag normalRowTag
+  historyTiles.map fun tile =>
+    MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+      tile.toMachineHistoryTile
 
 theorem historyTile_mem_normalTiles {tile : HistoryTile} (hvalid : tile.Valid) :
-    tile.toWangTile normalRowTag normalRowTag ∈ normalTiles := by
+    MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+        tile.toMachineHistoryTile ∈ normalTiles := by
   exact List.mem_map.2 ⟨tile, (mem_historyTiles_iff tile).2 hvalid, rfl⟩
 
 end UniversalTM0Tableau

@@ -182,6 +182,17 @@ theorem runHistoryTile_hOverlap (input : List Symbol) (time position : Nat) :
       (runHistoryTile_hMatches input time position)
   exact ⟨h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2⟩
 
+theorem runHistoryTile_positioned_hMatches
+    (input : List Symbol) (time position : Nat) :
+    WangTile.HMatches
+      (MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+        (runHistoryTile input time position).toMachineHistoryTile)
+      (MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+        (runHistoryTile input time (position + 1)).toMachineHistoryTile) := by
+  rw [MachineInputTiles.hMatches_toWangTile_iff]
+  have h := runHistoryTile_hOverlap input time position
+  exact ⟨rfl, rfl, h.1, h.2.1, h.2.2.1, h.2.2.2⟩
+
 theorem runHistoryTile_vMatches (input : List Symbol) (time position : Nat) :
     WangTile.VMatches
       ((runHistoryTile input time position).toWangTile normalRowTag normalRowTag)

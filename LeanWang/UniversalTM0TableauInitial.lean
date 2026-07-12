@@ -258,19 +258,20 @@ theorem initialWangTile_hMatches (input : List Symbol) (position : Nat) :
         (tailPosition input) (tailPosition input)
         (tailPosition input) (tailPosition input) rfl hoverlap
 
-def runWangTile (input : List Symbol) (time position : Nat) : WangTile :=
-  if time = 0 then initialWangTile input position
-  else (runHistoryTile input time position).toWangTile normalRowTag normalRowTag
+def runWangTile (input : List Symbol) : Nat → Nat → WangTile
+  | 0, position => initialWangTile input position
+  | time + 1, position => MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+      (runHistoryTile input (time + 1) position).toMachineHistoryTile
 
 theorem runWangTile_mem {input : List Symbol}
     (hdom : ¬ (Turing.TM0.eval tm0 input).Dom) (time position : Nat) :
     runWangTile input time position ∈ tiles input := by
   cases time with
   | zero =>
-      rw [runWangTile, if_pos rfl, tiles]
+      rw [runWangTile, tiles]
       exact List.mem_append_left _ (initialWangTile_mem input position)
   | succ time =>
-      rw [runWangTile, if_neg (by omega)]
+      rw [runWangTile]
       apply List.mem_append_right
       exact historyTile_mem_normalTiles
         (runHistoryTile_valid hdom (time + 1) position)
@@ -279,10 +280,9 @@ theorem runWangTile_hMatches (input : List Symbol) (time position : Nat) :
     WangTile.HMatches (runWangTile input time position)
       (runWangTile input time (position + 1)) := by
   cases time with
-  | zero => simpa [runWangTile] using initialWangTile_hMatches input position
+  | zero => exact initialWangTile_hMatches input position
   | succ time =>
-      simp only [runWangTile, if_neg (Nat.succ_ne_zero time)]
-      exact runHistoryTile_hMatches input (time + 1) position
+      exact runHistoryTile_positioned_hMatches input (time + 1) position
 
 theorem positioned_vMatches_of_overlap
     (lower upper : HistoryTile) (west east : Nat)
@@ -294,12 +294,25 @@ theorem positioned_vMatches_of_overlap
     WangTile.VMatches
       (MachineInputTiles.toWangTile west east initialRowTag normalRowTag
         lower.toMachineHistoryTile)
-      (upper.toWangTile normalRowTag normalRowTag) := by
-  unfold WangTile.VMatches MachineInputTiles.toWangTile HistoryTile.toWangTile
-    HistoryTile.toMachineHistoryTile
-  rcases hoverlap with ⟨hleft, hcenter, hright⟩
-  rw [hleft, hcenter, hright]
-  rfl
+      (MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+        upper.toMachineHistoryTile) := by
+  rw [MachineInputTiles.vMatches_toWangTile_iff]
+  exact ⟨rfl, hoverlap.1, hoverlap.2.1, hoverlap.2.2⟩
+
+theorem normal_vMatches_of_overlap
+    (lower upper : HistoryTile)
+    (hoverlap :
+      HistoryTile.leftMachineCell lower.atOrigin lower.nextLeft =
+          HistoryTile.leftMachineCell upper.atOrigin upper.prevLeft ∧
+        lower.nextCenter.toMachineCell = upper.prevCenter.toMachineCell ∧
+        lower.nextRight.toMachineCell = upper.prevRight.toMachineCell) :
+    WangTile.VMatches
+      (MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+        lower.toMachineHistoryTile)
+      (MachineInputTiles.toWangTile 0 0 normalRowTag normalRowTag
+        upper.toMachineHistoryTile) := by
+  rw [MachineInputTiles.vMatches_toWangTile_iff]
+  exact ⟨rfl, hoverlap.1, hoverlap.2.1, hoverlap.2.2⟩
 
 theorem runWangTile_vMatches (input : List Symbol) (time position : Nat) :
     WangTile.VMatches (runWangTile input time position)
@@ -307,7 +320,7 @@ theorem runWangTile_vMatches (input : List Symbol) (time position : Nat) :
   cases time with
   | zero =>
       have hoverlap := runHistoryTile_vOverlap input 0 position
-      rw [runWangTile, if_pos rfl, runWangTile, if_neg (by omega)]
+      rw [runWangTile, runWangTile]
       rw [initialWangTile_history]
       split
       · exact positioned_vMatches_of_overlap
@@ -317,9 +330,10 @@ theorem runWangTile_vMatches (input : List Symbol) (time position : Nat) :
           (runHistoryTile input 0 position) (runHistoryTile input 1 position)
           (tailPosition input) (tailPosition input) hoverlap
   | succ time =>
-      simp only [runWangTile, if_neg (Nat.succ_ne_zero time),
-        if_neg (Nat.succ_ne_zero (time + 1))]
-      exact runHistoryTile_vMatches input (time + 1) position
+      exact normal_vMatches_of_overlap
+        (runHistoryTile input (time + 1) position)
+        (runHistoryTile input (time + 2) position)
+        (runHistoryTile_vOverlap input (time + 1) position)
 
 theorem tilesQuarterWithSeed_of_not_dom {input : List Symbol}
     (hdom : ¬ (Turing.TM0.eval tm0 input).Dom) :
