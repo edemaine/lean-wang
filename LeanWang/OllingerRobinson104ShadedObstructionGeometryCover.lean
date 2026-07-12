@@ -22,7 +22,8 @@ namespace ShadedObstructionGeometryCover
 
 open RedCycles RedShadeCycles RedShadePaths ShadedObstructionGeometry
   ShadedPayloadCorridors
-  ShadedPlaneSignalGrid Signals.FreeCellLocal
+  ShadedPlaneSignalGrid RefinementTranslation ShadedFreeLineTranslation
+  Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -123,6 +124,219 @@ theorem pairCover_at_block
   pairCover_of_geometry
     (ShadedObstructionGeometryTranslation.geometry_at_block
       grid valid blockX blockY)
+
+set_option maxHeartbeats 1000000 in
+-- Translating both quantified coordinates and returned geometry witnesses.
+/-- Pair covers are equivariant under a refined-grid block translation. -/
+theorem PairCover.translate
+    {depth : Nat} {grid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {blockX blockY west east south north : Nat}
+    (cover : PairCover
+      (iterateRefine depth (shiftGrid grid blockX blockY))
+      (shiftQuarterGrid shadeGrid
+        (2 ^ (depth + 1) * blockX) (2 ^ (depth + 1) * blockY))
+      west east south north) :
+    PairCover (iterateRefine depth grid) shadeGrid
+      (2 ^ depth * blockX + west) (2 ^ depth * blockX + east)
+      (2 ^ depth * blockY + south) (2 ^ depth * blockY + north) := by
+  let quarterOffsetX := 2 ^ (depth + 1) * blockX
+  let quarterOffsetY := 2 ^ (depth + 1) * blockY
+  let indexOffsetX := 2 ^ depth * blockX
+  let indexOffsetY := 2 ^ depth * blockY
+  have hquarterX : quarterOffsetX = 2 * indexOffsetX := by
+    dsimp [quarterOffsetX, indexOffsetX]
+    rw [pow_succ]
+    ac_rfl
+  have hquarterY : quarterOffsetY = 2 * indexOffsetY := by
+    dsimp [quarterOffsetY, indexOffsetY]
+    rw [pow_succ]
+    ac_rfl
+  have quarterWest_add (value : Nat) :
+      quarterWest (indexOffsetX + value) =
+        quarterOffsetX + quarterWest value := by
+    simp [quarterWest, hquarterX]
+    omega
+  have quarterEast_add (value : Nat) :
+      quarterEast (indexOffsetX + value) =
+        quarterOffsetX + quarterEast value := by
+    simp [quarterEast, hquarterX]
+    omega
+  have quarterSouth_add (value : Nat) :
+      quarterSouth (indexOffsetY + value) =
+        quarterOffsetY + quarterSouth value := by
+    simp [quarterSouth, hquarterY]
+    omega
+  have quarterNorth_add (value : Nat) :
+      quarterNorth (indexOffsetY + value) =
+        quarterOffsetY + quarterNorth value := by
+    simp [quarterNorth, hquarterY]
+    omega
+  have hwest : quarterWest (indexOffsetX + west) =
+      quarterOffsetX + quarterWest west := quarterWest_add west
+  have heast : quarterEast (indexOffsetX + east) =
+      quarterOffsetX + quarterEast east := quarterEast_add east
+  have hsouth : quarterSouth (indexOffsetY + south) =
+      quarterOffsetY + quarterSouth south := quarterSouth_add south
+  have hnorth : quarterNorth (indexOffsetY + north) =
+      quarterOffsetY + quarterNorth north := quarterNorth_add north
+  constructor
+  · intro column row boundary hcolumnWest hcolumnEast hrowSouth hrowNorth
+      hboundarySouth hboundaryNorth hselected
+    have hcolumnWest' : quarterOffsetX + quarterWest west < column := by
+      rw [← hwest]
+      simpa [indexOffsetX] using hcolumnWest
+    have hcolumnEast' : column < quarterOffsetX + quarterEast east := by
+      rw [← heast]
+      simpa [indexOffsetX] using hcolumnEast
+    have hrowSouth' : quarterOffsetY + quarterSouth south < row := by
+      rw [← hsouth]
+      simpa [indexOffsetY] using hrowSouth
+    have hrowNorth' : row < quarterOffsetY + quarterNorth north := by
+      rw [← hnorth]
+      simpa [indexOffsetY] using hrowNorth
+    have hboundarySouth' : quarterOffsetY + quarterSouth south < boundary := by
+      rw [← hsouth]
+      simpa [indexOffsetY] using hboundarySouth
+    have hboundaryNorth' : boundary < quarterOffsetY + quarterNorth north := by
+      rw [← hnorth]
+      simpa [indexOffsetY] using hboundaryNorth
+    let localX := column - quarterOffsetX
+    let localY := row - quarterOffsetY
+    let localBoundary := boundary - quarterOffsetY
+    have hx : quarterOffsetX + localX = column := by
+      dsimp [localX]
+      omega
+    have hy : quarterOffsetY + localY = row := by
+      dsimp [localY]
+      omega
+    have hb : quarterOffsetY + localBoundary = boundary := by
+      dsimp [localBoundary]
+      omega
+    have localSelected : ShadedSignals.selectedHorizontalFor
+        (componentAt (iterateRefine depth (shiftGrid grid blockX blockY))
+          localX localBoundary)
+        (quadrantAt localX localBoundary)
+        (shiftQuarterGrid shadeGrid quarterOffsetX quarterOffsetY
+          localX localBoundary) ≠ none := by
+      simpa only [quarterOffsetX, quarterOffsetY, hx, hb,
+        ShadedObstructionGeometryTranslation.selectedHorizontal_shift
+          depth grid shadeGrid blockX blockY localX localBoundary] using hselected
+    rcases cover.vertical (column := localX) (row := localY)
+        (boundary := localBoundary)
+        (by omega)
+        (by omega)
+        (by omega)
+        (by omega)
+        (by omega)
+        (by omega)
+        localSelected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        houterWest, houterEast, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hlocalBoundarySouth,
+        hlocalBoundaryNorth, geometry⟩
+    refine ⟨indexOffsetX + localWest, indexOffsetX + localEast,
+      indexOffsetY + localSouth, indexOffsetY + localNorth,
+      ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · change quarterWest (indexOffsetX + west) ≤
+        quarterWest (indexOffsetX + localWest)
+      rw [quarterWest_add, quarterWest_add]
+      omega
+    · change quarterEast (indexOffsetX + localEast) ≤
+        quarterEast (indexOffsetX + east)
+      rw [quarterEast_add, quarterEast_add]
+      omega
+    · rw [quarterWest_add, ← hx]
+      omega
+    · rw [quarterEast_add, ← hx]
+      omega
+    · rw [quarterSouth_add, ← hy]
+      omega
+    · rw [quarterNorth_add, ← hy]
+      omega
+    · rw [quarterSouth_add, ← hb]
+      omega
+    · rw [quarterNorth_add, ← hb]
+      omega
+    · exact ShadedObstructionGeometryTranslation.Geometry.translate geometry
+  · intro column row boundary hcolumnWest hcolumnEast hrowSouth hrowNorth
+      hboundaryWest hboundaryEast hselected
+    have hcolumnWest' : quarterOffsetX + quarterWest west < column := by
+      rw [← hwest]
+      simpa [indexOffsetX] using hcolumnWest
+    have hcolumnEast' : column < quarterOffsetX + quarterEast east := by
+      rw [← heast]
+      simpa [indexOffsetX] using hcolumnEast
+    have hrowSouth' : quarterOffsetY + quarterSouth south < row := by
+      rw [← hsouth]
+      simpa [indexOffsetY] using hrowSouth
+    have hrowNorth' : row < quarterOffsetY + quarterNorth north := by
+      rw [← hnorth]
+      simpa [indexOffsetY] using hrowNorth
+    have hboundaryWest' : quarterOffsetX + quarterWest west < boundary := by
+      rw [← hwest]
+      simpa [indexOffsetX] using hboundaryWest
+    have hboundaryEast' : boundary < quarterOffsetX + quarterEast east := by
+      rw [← heast]
+      simpa [indexOffsetX] using hboundaryEast
+    let localX := column - quarterOffsetX
+    let localY := row - quarterOffsetY
+    let localBoundary := boundary - quarterOffsetX
+    have hx : quarterOffsetX + localX = column := by
+      dsimp [localX]
+      omega
+    have hy : quarterOffsetY + localY = row := by
+      dsimp [localY]
+      omega
+    have hb : quarterOffsetX + localBoundary = boundary := by
+      dsimp [localBoundary]
+      omega
+    have localSelected : ShadedSignals.selectedVerticalFor
+        (componentAt (iterateRefine depth (shiftGrid grid blockX blockY))
+          localBoundary localY)
+        (quadrantAt localBoundary localY)
+        (shiftQuarterGrid shadeGrid quarterOffsetX quarterOffsetY
+          localBoundary localY) ≠ none := by
+      simpa only [quarterOffsetX, quarterOffsetY, hb, hy,
+        ShadedObstructionGeometryTranslation.selectedVertical_shift
+          depth grid shadeGrid blockX blockY localBoundary localY] using hselected
+    rcases cover.horizontal (column := localX) (row := localY)
+        (boundary := localBoundary)
+        (by omega)
+        (by omega)
+        (by omega)
+        (by omega)
+        (by omega)
+        (by omega)
+        localSelected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        houterSouth, houterNorth, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hlocalBoundaryWest,
+        hlocalBoundaryEast, geometry⟩
+    refine ⟨indexOffsetX + localWest, indexOffsetX + localEast,
+      indexOffsetY + localSouth, indexOffsetY + localNorth,
+      ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · change quarterSouth (indexOffsetY + south) ≤
+        quarterSouth (indexOffsetY + localSouth)
+      rw [quarterSouth_add, quarterSouth_add]
+      omega
+    · change quarterNorth (indexOffsetY + localNorth) ≤
+        quarterNorth (indexOffsetY + north)
+      rw [quarterNorth_add, quarterNorth_add]
+      omega
+    · rw [quarterWest_add, ← hx]
+      omega
+    · rw [quarterEast_add, ← hx]
+      omega
+    · rw [quarterSouth_add, ← hy]
+      omega
+    · rw [quarterNorth_add, ← hy]
+      omega
+    · rw [quarterWest_add, ← hb]
+      omega
+    · rw [quarterEast_add, ← hb]
+      omega
+    · exact ShadedObstructionGeometryTranslation.Geometry.translate geometry
 
 set_option maxHeartbeats 1000000 in
 -- Extracting finite selected-boundary witnesses unfolds both free predicates.
