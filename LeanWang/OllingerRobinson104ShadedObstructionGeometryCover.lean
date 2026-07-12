@@ -112,6 +112,88 @@ theorem pairCover_of_geometry
     exact ⟨west, east, south, north, le_rfl, le_rfl,
       hwest, heast, hsouth, hnorth, hboundaryWest, hboundaryEast, geometry⟩
 
+/-- A family of smaller pair covers assembles into a larger pair cover when
+each queried coordinate pair lies in one member of the family.  Vertical
+queries only require horizontal containment in the large board, and
+horizontal queries only require vertical containment, exactly matching the
+asymmetric localization conditions in `PairCover`. -/
+theorem PairCover.of_subcovers
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat}
+    (verticalSubcover : ∀ {column row boundary : Nat},
+      quarterWest west < column → column < quarterEast east →
+      quarterSouth south < row → row < quarterNorth north →
+      quarterSouth south < boundary → boundary < quarterNorth north →
+      ShadedSignals.selectedHorizontalFor
+        (componentAt indexGrid column boundary) (quadrantAt column boundary)
+        (shadeGrid column boundary) ≠ none →
+      ∃ localWest localEast localSouth localNorth,
+        quarterWest west ≤ quarterWest localWest ∧
+        quarterEast localEast ≤ quarterEast east ∧
+        quarterWest localWest < column ∧ column < quarterEast localEast ∧
+        quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+        quarterSouth localSouth < boundary ∧
+        boundary < quarterNorth localNorth ∧
+        PairCover indexGrid shadeGrid
+          localWest localEast localSouth localNorth)
+    (horizontalSubcover : ∀ {column row boundary : Nat},
+      quarterWest west < column → column < quarterEast east →
+      quarterSouth south < row → row < quarterNorth north →
+      quarterWest west < boundary → boundary < quarterEast east →
+      ShadedSignals.selectedVerticalFor
+        (componentAt indexGrid boundary row) (quadrantAt boundary row)
+        (shadeGrid boundary row) ≠ none →
+      ∃ localWest localEast localSouth localNorth,
+        quarterSouth south ≤ quarterSouth localSouth ∧
+        quarterNorth localNorth ≤ quarterNorth north ∧
+        quarterWest localWest < column ∧ column < quarterEast localEast ∧
+        quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+        quarterWest localWest < boundary ∧
+        boundary < quarterEast localEast ∧
+        PairCover indexGrid shadeGrid
+          localWest localEast localSouth localNorth) :
+    PairCover indexGrid shadeGrid west east south north := by
+  constructor
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundarySouth hboundaryNorth hselected
+    rcases verticalSubcover hwest heast hsouth hnorth hboundarySouth
+      hboundaryNorth hselected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        houterWest, houterEast, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hboundaryLocalSouth,
+        hboundaryLocalNorth, cover⟩
+    rcases cover.vertical hlocalWest hlocalEast hlocalSouth hlocalNorth
+      hboundaryLocalSouth hboundaryLocalNorth hselected with
+      ⟨geometryWest, geometryEast, geometrySouth, geometryNorth,
+        hgeometryWest, hgeometryEast, hgeometryColumnWest,
+        hgeometryColumnEast, hgeometryRowSouth, hgeometryRowNorth,
+        hgeometryBoundarySouth, hgeometryBoundaryNorth, geometry⟩
+    exact ⟨geometryWest, geometryEast, geometrySouth, geometryNorth,
+      houterWest.trans hgeometryWest, hgeometryEast.trans houterEast,
+      hgeometryColumnWest, hgeometryColumnEast,
+      hgeometryRowSouth, hgeometryRowNorth,
+      hgeometryBoundarySouth, hgeometryBoundaryNorth, geometry⟩
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundaryWest hboundaryEast hselected
+    rcases horizontalSubcover hwest heast hsouth hnorth hboundaryWest
+      hboundaryEast hselected with
+      ⟨localWest, localEast, localSouth, localNorth,
+        houterSouth, houterNorth, hlocalWest, hlocalEast,
+        hlocalSouth, hlocalNorth, hboundaryLocalWest,
+        hboundaryLocalEast, cover⟩
+    rcases cover.horizontal hlocalWest hlocalEast hlocalSouth hlocalNorth
+      hboundaryLocalWest hboundaryLocalEast hselected with
+      ⟨geometryWest, geometryEast, geometrySouth, geometryNorth,
+        hgeometrySouth, hgeometryNorth, hgeometryColumnWest,
+        hgeometryColumnEast, hgeometryRowSouth, hgeometryRowNorth,
+        hgeometryBoundaryWest, hgeometryBoundaryEast, geometry⟩
+    exact ⟨geometryWest, geometryEast, geometrySouth, geometryNorth,
+      houterSouth.trans hgeometrySouth, hgeometryNorth.trans houterNorth,
+      hgeometryColumnWest, hgeometryColumnEast,
+      hgeometryRowSouth, hgeometryRowNorth,
+      hgeometryBoundaryWest, hgeometryBoundaryEast, geometry⟩
+
 /-- Every translated depth-four audit block supplies a local pair cover. -/
 theorem pairCover_at_block
     (grid : Nat → Nat → Index)
