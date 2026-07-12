@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedRoutedScaffoldForward
 import LeanWang.OllingerRobinson104ShadedObstructionGeometryOddBaseBoundedSoundness
+import LeanWang.OllingerRobinson104RedShadeGraphProjection
 
 /-!
 # Pair-cover recurrence for canonical Robinson boards
@@ -25,7 +26,7 @@ namespace ShadedObstructionPairCoverRecurrence
 
 open RedCycles RedShadeCycles RedShadePaths ShadedFreeLineRecurrence
   ShadedObstructionGeometryCover ShadedRoutedScaffoldForward
-  SparseFreeLinePlaneBase
+  SparseFreeLinePlaneBase RedShadeGraphProjection
 
 set_option maxRecDepth 20000
 
@@ -70,6 +71,47 @@ theorem odd_zero : Holds .odd 0 := by
 /-- One common two-substitution recurrence advances either shade phase. -/
 def Step : Prop :=
   ∀ (phase : Phase) (depth : Nat), Holds phase depth → Holds phase (depth + 1)
+
+theorem refinedGrid_succ (phase : Phase) (depth : Nat)
+    (grid : Nat → Nat → Index) :
+    refinedGrid phase (depth + 1) grid =
+      iterateRefine 2 (refinedGrid phase depth grid) := by
+  unfold refinedGrid
+  rw [show refinementDepth phase (depth + 1) =
+      2 + refinementDepth phase depth by
+    simp [refinementDepth]
+    omega]
+  exact (PlaneRedBoards.iterateRefine_add 2
+    (refinementDepth phase depth) grid).symm
+
+/-- The remaining combinatorial content of one recurrence step, after a fine
+shade grid has been projected and the induction hypothesis has supplied its
+coarse pair cover. -/
+def Lift : Prop :=
+  ∀ (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+      (shadeGrid : Nat → Nat → RedShades.State),
+    ValidShadeGrid
+        (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid →
+    PairCover (refinedGrid phase depth grid) (projectStateGrid shadeGrid)
+        (west phase depth) (east phase depth)
+        (west phase depth) (east phase depth) →
+    PairCover (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+        (4 * west phase depth) (4 * east phase depth)
+        (4 * west phase depth) (4 * east phase depth)
+
+/-- Projection discharges all semantic and inductive obligations; a `Lift`
+proof therefore establishes the common recurrence step. -/
+theorem step_of_lift (lift : Lift) : Step := by
+  intro phase depth holds grid shadeGrid valid
+  have fineValid : ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid := by
+    simpa only [refinedGrid_succ] using valid
+  have coarseValid : ValidShadeGrid (refinedGrid phase depth grid)
+      (projectStateGrid shadeGrid) :=
+    projectStateGrid_valid fineValid
+  have coarseCover := holds grid (projectStateGrid shadeGrid) coarseValid
+  have fineCover := lift phase depth grid shadeGrid fineValid coarseCover
+  simpa only [refinedGrid_succ, west_succ, east_succ] using fineCover
 
 /-- Both phase families at every depth used by the unbounded-board theorem. -/
 def AllHolds : Prop :=
