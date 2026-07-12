@@ -13,8 +13,10 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineEvenExtraCreatedWindowClosure
 
-open RedCycles RedShadeGraphRefinement RefinementTranslation
-  ShadedFreeLineRecurrence SparseFreeLineEvenExtraCreatedWindowAudit
+open RedCycles RedShadeGraph RedShadeGraphRefinement
+  RedShadeGraphSearchSoundness RedShadeGraphTranslation RefinementTranslation
+  BorderGeometry ShadedFreeLineRecurrence Signals.FreeCellLocal
+  SparseFreeLineEvenExtraCreatedWindowAudit
 
 set_option maxRecDepth 20000
 
@@ -351,6 +353,138 @@ theorem canonical_horizontalWindowAt_mem
       rw [horizontalWindowAt_succ, hblock, canonicalWindow_refineWindow]
       apply horizontalRefine_mem_closed (ih oldDelta holdDelta)
       exact Nat.mod_lt _ (by decide)
+
+set_option linter.style.nativeDecide false in
+theorem verticalLocal_canonical (parent : Index) {x : Nat}
+    (hx : x = 4 ∨ x = 5) :
+    (Signals.verticalInterior?
+      (componentAt (fineGrid (BorderSubstitution.canonicalIndex parent)) x 0)
+      (quadrantAt x 0)).isSome =
+      (Signals.verticalInterior?
+        (componentAt (fineGrid parent) x 0) (quadrantAt x 0)).isSome ∧
+    SparseFreeLineLocalStates.verticalAncestorAt 0 0
+      (BorderSubstitution.canonicalIndex parent) x =
+      SparseFreeLineLocalStates.verticalAncestorAt 0 0 parent x := by
+  rcases hx with rfl | rfl <;> revert parent <;> native_decide
+
+set_option linter.style.nativeDecide false in
+theorem horizontalLocal_canonical (parent : Index) {y : Nat}
+    (hy : y = 4 ∨ y = 5) :
+    (Signals.horizontalInterior?
+      (componentAt (fineGrid (BorderSubstitution.canonicalIndex parent)) 0 y)
+      (quadrantAt 0 y)).isSome =
+      (Signals.horizontalInterior?
+        (componentAt (fineGrid parent) 0 y) (quadrantAt 0 y)).isSome ∧
+    SparseFreeLineLocalStates.horizontalAncestorAt 0 0
+      (BorderSubstitution.canonicalIndex parent) y =
+      SparseFreeLineLocalStates.horizontalAncestorAt 0 0 parent y := by
+  rcases hy with rfl | rfl <;> revert parent <;> native_decide
+
+theorem vertical_case_mem {window : Window} (hwindow :
+    canonicalWindow window ∈ verticalClosed) {x : Nat}
+    (hx : x = 4 ∨ x = 5)
+    (required : (Signals.verticalInterior?
+      (componentAt (fineGrid (windowGrid window 1 1)) x 0)
+      (quadrantAt x 0)).isSome = true)
+    (created : SparseFreeLineLocalStates.verticalAncestorAt 0 0
+      (windowGrid window 1 1) x = false) :
+    (canonicalWindow window, x) ∈ verticalCases := by
+  rw [verticalCases, List.mem_eraseDups, List.mem_flatMap]
+  refine ⟨canonicalWindow window, hwindow, ?_⟩
+  rw [List.mem_filterMap]
+  refine ⟨x, by simp [hx], ?_⟩
+  have hcenter := windowGrid_canonicalWindow window 1 1
+  have hlocal := verticalLocal_canonical (windowGrid window 1 1) hx
+  rw [hcenter, hlocal.1, hlocal.2]
+  simp [required, created]
+
+theorem horizontal_case_mem {window : Window} (hwindow :
+    canonicalWindow window ∈ horizontalClosed) {y : Nat}
+    (hy : y = 4 ∨ y = 5)
+    (required : (Signals.horizontalInterior?
+      (componentAt (fineGrid (windowGrid window 1 1)) 0 y)
+      (quadrantAt 0 y)).isSome = true)
+    (created : SparseFreeLineLocalStates.horizontalAncestorAt 0 0
+      (windowGrid window 1 1) y = false) :
+    (canonicalWindow window, y) ∈ horizontalCases := by
+  rw [horizontalCases, List.mem_eraseDups, List.mem_flatMap]
+  refine ⟨canonicalWindow window, hwindow, ?_⟩
+  rw [List.mem_filterMap]
+  refine ⟨y, by simp [hy], ?_⟩
+  have hcenter := windowGrid_canonicalWindow window 1 1
+  have hlocal := horizontalLocal_canonical (windowGrid window 1 1) hy
+  rw [hcenter, hlocal.1, hlocal.2]
+  simp [required, created]
+
+theorem vertical_route_of_mem {entry : Window × Nat}
+    (hentry : entry ∈ verticalCases) :
+    Route entry.1 ⟨8 + entry.2, 8, .south⟩ ∨
+      Route entry.1 ⟨8 + entry.2, 8, .north⟩ := by
+  have checked := vertical_routes_complete
+  simp only [List.all_eq_true] at checked
+  exact verticalCaseCheck_sound (checked entry hentry)
+
+theorem horizontal_route_of_mem {entry : Window × Nat}
+    (hentry : entry ∈ horizontalCases) :
+    Route entry.1 ⟨8, 8 + entry.2, .west⟩ ∨
+      Route entry.1 ⟨8, 8 + entry.2, .east⟩ := by
+  have checked := horizontal_routes_complete
+  simp only [List.all_eq_true] at checked
+  exact horizontalCaseCheck_sound (checked entry hentry)
+
+/-- A canonical quotient route is a route in the original 104-symbol window. -/
+theorem route_of_canonicalWindow {window : Window} {target : Port}
+    (route : Route (canonicalWindow window) target) : Route window target := by
+  have hgrid : windowGrid (canonicalWindow window) =
+      BorderSubstitution.canonicalizeGrid (windowGrid window) := by
+    funext x y
+    exact windowGrid_canonicalWindow window x y
+  have same : SameComponents
+      (iterateRefine 2 (windowGrid (canonicalWindow window)))
+      (iterateRefine 2 (windowGrid window)) := by
+    rw [hgrid]
+    exact BorderGeometry.sameComponents_iterateRefine_canonicalizeGrid
+      2 (windowGrid window)
+  rcases route with ⟨witness⟩
+  refine ⟨{
+    start := witness.start
+    start_mem := witness.start_mem
+    path := BoundedPath.congr_of_component_eq
+      (fun x y _ _ => same x y) witness.path
+    targetLive := ?_
+  }⟩
+  have targetLive := witness.targetLive
+  rwa [portPresent_congr same target] at targetLive
+
+/-- Every created segment in an actual recursive row window has an odd route. -/
+theorem vertical_actual_route {window : Window}
+    (hwindow : canonicalWindow window ∈ verticalClosed) {x : Nat}
+    (hx : x = 4 ∨ x = 5)
+    (required : (Signals.verticalInterior?
+      (componentAt (fineGrid (windowGrid window 1 1)) x 0)
+      (quadrantAt x 0)).isSome = true)
+    (created : SparseFreeLineLocalStates.verticalAncestorAt 0 0
+      (windowGrid window 1 1) x = false) :
+    Route window ⟨8 + x, 8, .south⟩ ∨ Route window ⟨8 + x, 8, .north⟩ := by
+  have hentry := vertical_case_mem hwindow hx required created
+  rcases vertical_route_of_mem hentry with route | route
+  · exact Or.inl (route_of_canonicalWindow route)
+  · exact Or.inr (route_of_canonicalWindow route)
+
+/-- Every created segment in an actual recursive column window has an odd route. -/
+theorem horizontal_actual_route {window : Window}
+    (hwindow : canonicalWindow window ∈ horizontalClosed) {y : Nat}
+    (hy : y = 4 ∨ y = 5)
+    (required : (Signals.horizontalInterior?
+      (componentAt (fineGrid (windowGrid window 1 1)) 0 y)
+      (quadrantAt 0 y)).isSome = true)
+    (created : SparseFreeLineLocalStates.horizontalAncestorAt 0 0
+      (windowGrid window 1 1) y = false) :
+    Route window ⟨8, 8 + y, .west⟩ ∨ Route window ⟨8, 8 + y, .east⟩ := by
+  have hentry := horizontal_case_mem hwindow hy required created
+  rcases horizontal_route_of_mem hentry with route | route
+  · exact Or.inl (route_of_canonicalWindow route)
+  · exact Or.inr (route_of_canonicalWindow route)
 
 end SparseFreeLineEvenExtraCreatedWindowClosure
 end Closed104
