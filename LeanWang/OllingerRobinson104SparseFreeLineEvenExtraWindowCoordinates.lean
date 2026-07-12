@@ -20,7 +20,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineEvenExtraWindowCoordinates
 
-open BorderCoverageOffsets ShadedFreeLineRecurrence SparseFreeLineOffsets
+open BorderCoverageOffsets RedShadeGraph RedShadeGraphRefinement
+  ShadedFreeLineRecurrence SparseFreeLineOffsets
 
 set_option maxRecDepth 20000
 
@@ -75,6 +76,24 @@ theorem target_local (depth : Nat) :
     exceptionalCoordinate (depth + 1) = 8 * anchor depth + 8 := by
   rw [exceptionalCoordinate_eq, anchor_eq, pow_succ]
   omega
+
+/-- Literal sparse refinement overshoots the next exceptional line by `24`. -/
+theorem sparseCoordinate_exceptionalCoordinate (depth : Nat) :
+    sparseCoordinate (exceptionalCoordinate depth) =
+      exceptionalCoordinate (depth + 1) + 24 := by
+  rw [exceptionalCoordinate_eq, exceptionalCoordinate_eq, pow_succ]
+  simp [sparseCoordinate, macroOrigin, localCoordinate]
+  omega
+
+theorem sparsePort_exceptionalRow (depth x : Nat) (side : Side) :
+    sparsePort ⟨x, exceptionalCoordinate depth, side⟩ =
+      ⟨sparseCoordinate x, exceptionalCoordinate (depth + 1) + 24, side⟩ := by
+  simp [sparsePort, sparseCoordinate_exceptionalCoordinate]
+
+theorem sparsePort_exceptionalColumn (depth y : Nat) (side : Side) :
+    sparsePort ⟨exceptionalCoordinate depth, y, side⟩ =
+      ⟨exceptionalCoordinate (depth + 1) + 24, sparseCoordinate y, side⟩ := by
+  simp [sparsePort, sparseCoordinate_exceptionalCoordinate]
 
 end SparseFreeLineEvenExtraWindowCoordinates
 end Closed104
