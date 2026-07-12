@@ -151,6 +151,95 @@ theorem Holds.childCovers
   have cover := holds.at_block valid' blockX blockY
   simpa only [refinedGrid_iterateRefine_two] using cover
 
+/-- A vertical query fits one aligned child board, including the horizontal
+containment needed when that child's geometry is returned to the parent. -/
+def FitsVerticalChild (phase : Phase) (depth column row boundary : Nat) : Prop :=
+  ∃ blockX blockY,
+    quarterWest (4 * west phase depth) ≤ quarterWest
+      (2 ^ refinementDepth phase depth * blockX + west phase depth) ∧
+    quarterEast
+      (2 ^ refinementDepth phase depth * blockX + east phase depth) ≤
+        quarterEast (4 * east phase depth) ∧
+    quarterWest
+      (2 ^ refinementDepth phase depth * blockX + west phase depth) < column ∧
+    column < quarterEast
+      (2 ^ refinementDepth phase depth * blockX + east phase depth) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase depth * blockY + west phase depth) < row ∧
+    row < quarterNorth
+      (2 ^ refinementDepth phase depth * blockY + east phase depth) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase depth * blockY + west phase depth) < boundary ∧
+    boundary < quarterNorth
+      (2 ^ refinementDepth phase depth * blockY + east phase depth)
+
+/-- A horizontal query fits one aligned child board, including the vertical
+containment needed when that child's geometry is returned to the parent. -/
+def FitsHorizontalChild (phase : Phase) (depth column row boundary : Nat) : Prop :=
+  ∃ blockX blockY,
+    quarterSouth (4 * west phase depth) ≤ quarterSouth
+      (2 ^ refinementDepth phase depth * blockY + west phase depth) ∧
+    quarterNorth
+      (2 ^ refinementDepth phase depth * blockY + east phase depth) ≤
+        quarterNorth (4 * east phase depth) ∧
+    quarterWest
+      (2 ^ refinementDepth phase depth * blockX + west phase depth) < column ∧
+    column < quarterEast
+      (2 ^ refinementDepth phase depth * blockX + east phase depth) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase depth * blockY + west phase depth) < row ∧
+    row < quarterNorth
+      (2 ^ refinementDepth phase depth * blockY + east phase depth) ∧
+    quarterWest
+      (2 ^ refinementDepth phase depth * blockX + west phase depth) < boundary ∧
+    boundary < quarterEast
+      (2 ^ refinementDepth phase depth * blockX + east phase depth)
+
+/-- The genuinely new local content at a successor level.  If a queried pair
+does not fit one recursive child, the current parent board itself carries the
+obstruction geometry. -/
+structure SeamGeometry : Prop where
+  vertical : ∀ (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+      (shadeGrid : Nat → Nat → RedShades.State)
+      {column row boundary : Nat},
+    ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid →
+    quarterWest (4 * west phase depth) < column →
+    column < quarterEast (4 * east phase depth) →
+    quarterSouth (4 * west phase depth) < row →
+    row < quarterNorth (4 * east phase depth) →
+    quarterSouth (4 * west phase depth) < boundary →
+    boundary < quarterNorth (4 * east phase depth) →
+    ShadedSignals.selectedHorizontalFor
+      (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
+        column boundary)
+      (quadrantAt column boundary) (shadeGrid column boundary) ≠ none →
+    ¬FitsVerticalChild phase depth column row boundary →
+    ShadedObstructionGeometry.Geometry
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (4 * west phase depth) (4 * east phase depth)
+      (4 * west phase depth) (4 * east phase depth)
+  horizontal : ∀ (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+      (shadeGrid : Nat → Nat → RedShades.State)
+      {column row boundary : Nat},
+    ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid →
+    quarterWest (4 * west phase depth) < column →
+    column < quarterEast (4 * east phase depth) →
+    quarterSouth (4 * west phase depth) < row →
+    row < quarterNorth (4 * east phase depth) →
+    quarterWest (4 * west phase depth) < boundary →
+    boundary < quarterEast (4 * east phase depth) →
+    ShadedSignals.selectedVerticalFor
+      (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
+        boundary row)
+      (quadrantAt boundary row) (shadeGrid boundary row) ≠ none →
+    ¬FitsHorizontalChild phase depth column row boundary →
+    ShadedObstructionGeometry.Geometry
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (4 * west phase depth) (4 * east phase depth)
+      (4 * west phase depth) (4 * east phase depth)
+
 /-- The remaining bounded combinatorial content of one recurrence step:
 aligned child covers handle inherited regions, and a finite local audit only
 has to cover the seams between them. -/
@@ -163,6 +252,37 @@ def ChildLift : Prop :=
     PairCover (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
         (4 * west phase depth) (4 * east phase depth)
         (4 * west phase depth) (4 * east phase depth)
+
+/-- Child covers discharge the recursive cases, leaving only seam geometry. -/
+theorem childLift_of_seamGeometry (seams : SeamGeometry) : ChildLift := by
+  intro phase depth grid shadeGrid valid children
+  apply PairCover.of_subcovers
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundarySouth hboundaryNorth hselected
+    by_cases fits : FitsVerticalChild phase depth column row boundary
+    · rcases fits with ⟨blockX, blockY, houterWest, houterEast,
+        hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+        hboundaryLocalSouth, hboundaryLocalNorth⟩
+      exact ⟨_, _, _, _, houterWest, houterEast,
+        hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+        hboundaryLocalSouth, hboundaryLocalNorth, children blockX blockY⟩
+    · have geometry := seams.vertical phase depth grid shadeGrid valid
+        hwest heast hsouth hnorth hboundarySouth hboundaryNorth hselected fits
+      exact ⟨_, _, _, _, le_rfl, le_rfl, hwest, heast, hsouth, hnorth,
+        hboundarySouth, hboundaryNorth, pairCover_of_geometry geometry⟩
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundaryWest hboundaryEast hselected
+    by_cases fits : FitsHorizontalChild phase depth column row boundary
+    · rcases fits with ⟨blockX, blockY, houterSouth, houterNorth,
+        hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+        hboundaryLocalWest, hboundaryLocalEast⟩
+      exact ⟨_, _, _, _, houterSouth, houterNorth,
+        hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+        hboundaryLocalWest, hboundaryLocalEast, children blockX blockY⟩
+    · have geometry := seams.horizontal phase depth grid shadeGrid valid
+        hwest heast hsouth hnorth hboundaryWest hboundaryEast hselected fits
+      exact ⟨_, _, _, _, le_rfl, le_rfl, hwest, heast, hsouth, hnorth,
+        hboundaryWest, hboundaryEast, pairCover_of_geometry geometry⟩
 
 /-- A bounded child-cover lift establishes the common recurrence step. -/
 theorem step_of_childLift (lift : ChildLift) : Step := by
