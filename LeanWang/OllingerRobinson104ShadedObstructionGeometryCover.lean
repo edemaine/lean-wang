@@ -20,7 +20,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedObstructionGeometryCover
 
-open RedShadeCycles ShadedObstructionGeometry ShadedPayloadCorridors
+open RedCycles RedShadeCycles RedShadePaths ShadedObstructionGeometry
+  ShadedPayloadCorridors
   ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
@@ -92,6 +93,36 @@ structure PairCover
         boundary < quarterEast localEast ∧
         Geometry indexGrid shadeGrid
           localWest localEast localSouth localNorth
+
+/-- One geometry board covers every coordinate pair in its own interior. -/
+theorem pairCover_of_geometry
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {west east south north : Nat}
+    (geometry : Geometry indexGrid shadeGrid west east south north) :
+    PairCover indexGrid shadeGrid west east south north := by
+  constructor
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundarySouth hboundaryNorth _
+    exact ⟨west, east, south, north, le_rfl, le_rfl,
+      hwest, heast, hsouth, hnorth, hboundarySouth, hboundaryNorth, geometry⟩
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundaryWest hboundaryEast _
+    exact ⟨west, east, south, north, le_rfl, le_rfl,
+      hwest, heast, hsouth, hnorth, hboundaryWest, hboundaryEast, geometry⟩
+
+/-- Every translated depth-four audit block supplies a local pair cover. -/
+theorem pairCover_at_block
+    (grid : Nat → Nat → Index)
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (iterateRefine 4 grid) shadeGrid)
+    (blockX blockY : Nat) :
+    PairCover (iterateRefine 4 grid) shadeGrid
+      (16 * blockX + 4) (16 * blockX + 12)
+      (16 * blockY + 4) (16 * blockY + 12) :=
+  pairCover_of_geometry
+    (ShadedObstructionGeometryTranslation.geometry_at_block
+      grid valid blockX blockY)
 
 set_option maxHeartbeats 1000000 in
 -- Extracting finite selected-boundary witnesses unfolds both free predicates.

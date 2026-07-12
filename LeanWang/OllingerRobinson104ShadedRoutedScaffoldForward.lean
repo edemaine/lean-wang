@@ -28,21 +28,30 @@ open HierarchyEmbedding OrientedRedCycles RedCycles RedShadeCycles
 
 set_option maxRecDepth 20000
 
-/-- Every selected boundary in every decoded light board is localized by an
-audited obstruction-geometry board. -/
+/-- Every selected boundary in either canonical light board used at a requested
+size is localized by an audited obstruction-geometry board. -/
 def LightBoardPairCovers : Prop :=
   forall {T : TileSet} {seed : WangTile}
       {x : Int × Int -> TileIn
         (combineWithRoutedScaffold ShadedSignals.routedScaffold T seed)},
     forall (decoded : ShadedRoutedPlaneDecode.Decoded x)
-      (parentOrigin : Int × Int) (west east south north : Nat),
-      CycleOn (natGridAt decoded.parent parentOrigin)
-          west east south north ->
-        CycleShade (ShadedPlaneShadeGrid.stateGrid decoded parentOrigin)
-          west east south north .light ->
-        PairCover (natGridAt decoded.parent parentOrigin)
-          (ShadedPlaneShadeGrid.stateGrid decoded parentOrigin)
-          west east south north
+      (size : Nat) (coarseOrigin : Int × Int),
+      let level := 2 * (1 + size)
+      let coarse := ShadedPlaneShadeGrid.coarseGrid decoded
+        (level + 2) coarseOrigin
+      let state := ShadedPlaneShadeGrid.stateGrid decoded
+        (ShadedPlaneShadeGrid.fineParentOrigin decoded
+          (level + 2) coarseOrigin)
+      (CycleShade state
+          (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level) .light ->
+        PairCover (iterateRefine (level + 2) coarse) state
+          (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level)) ∧
+      (CycleShade state
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) .light ->
+        PairCover (iterateRefine (level + 2) coarse) state
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)))
 
 set_option maxHeartbeats 1000000 in
 -- The two dependent grid branches repeatedly unfold the routed payload proof.
@@ -65,17 +74,20 @@ theorem forcesRoutedFixedCornerSquares
         iterateRefine (level + 2) coarse := by
     exact ShadedPlaneShadeGrid.parentGrid_eq_iterateRefine
       decoded (level + 2) coarseOrigin
+  have pairCovers := covers decoded size coarseOrigin
   rcases unboundedConsecutiveMarkedFreeGrid_with_light
       decoded size coarseOrigin with
     ⟨cycle, shaded, ⟨grid⟩⟩ | ⟨cycle, shaded, ⟨grid⟩⟩
-  · rw [← parentGrid] at cycle grid
-    have crossing := (covers decoded parentOrigin _ _ _ _ cycle shaded).localCover
+  · have pairCover := pairCovers.1 shaded
+    rw [← parentGrid] at cycle grid pairCover
+    have crossing := pairCover.localCover
       |>.crossingObstruction (ShadedPlaneSignalGrid.valid decoded parentOrigin)
     exact tileableFixedCornerSquare_crop hsize (by omega)
       (ShadedPayloadCorridors.tileableFixedCornerSquare_of_consecutive
         decoded parentOrigin grid cycle shaded crossing)
-  · rw [← parentGrid] at cycle grid
-    have crossing := (covers decoded parentOrigin _ _ _ _ cycle shaded).localCover
+  · have pairCover := pairCovers.2 shaded
+    rw [← parentGrid] at cycle grid pairCover
+    have crossing := pairCover.localCover
       |>.crossingObstruction (ShadedPlaneSignalGrid.valid decoded parentOrigin)
     exact tileableFixedCornerSquare_crop hsize (by omega)
       (ShadedPayloadCorridors.tileableFixedCornerSquare_of_consecutive
