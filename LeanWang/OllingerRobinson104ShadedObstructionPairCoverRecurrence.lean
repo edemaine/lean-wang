@@ -39,6 +39,39 @@ def Holds (phase : Phase) (depth : Nat) : Prop :=
         (west phase depth) (east phase depth)
         (west phase depth) (east phase depth)
 
+/-- Strong recurrence invariant: every aligned board has a geometry witness
+contained in that board in both axes. -/
+def ContainedHolds (phase : Phase) (depth : Nat) : Prop :=
+  ∀ (grid : Nat → Nat → Index)
+      (shadeGrid : Nat → Nat → RedShades.State),
+    ValidShadeGrid (refinedGrid phase depth grid) shadeGrid →
+    ∀ blockX blockY,
+      ContainedPairCover (refinedGrid phase depth grid) shadeGrid
+        (2 ^ refinementDepth phase depth * blockX + west phase depth)
+        (2 ^ refinementDepth phase depth * blockX + east phase depth)
+        (2 ^ refinementDepth phase depth * blockY + west phase depth)
+        (2 ^ refinementDepth phase depth * blockY + east phase depth)
+
+theorem ContainedHolds.holds
+    {phase : Phase} {depth : Nat} (holds : ContainedHolds phase depth) :
+    Holds phase depth := by
+  intro grid shadeGrid valid
+  have cover := (holds grid shadeGrid valid 0 0).toPairCover
+  simpa using cover
+
+/-- Fully contained covers of every current-depth block in the two-level
+refinement used by a successor step. -/
+def ContainedChildCovers (phase : Phase) (depth : Nat)
+    (grid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State) : Prop :=
+  ∀ blockX blockY,
+    ContainedPairCover
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (2 ^ refinementDepth phase depth * blockX + west phase depth)
+      (2 ^ refinementDepth phase depth * blockX + east phase depth)
+      (2 ^ refinementDepth phase depth * blockY + west phase depth)
+      (2 ^ refinementDepth phase depth * blockY + east phase depth)
+
 /-- A hierarchy hypothesis supplies the same canonical cover in every aligned
 refinement block of an arbitrary ambient grid. -/
 theorem Holds.at_block
@@ -95,6 +128,42 @@ theorem odd_zero : Holds .odd 0 := by
   simpa only [refinedGrid, refinementDepth, Phase.extra,
     west, east, scale, Phase.factor, pow_zero, mul_one] using cover
 
+/-- The translated depth-four audit supplies every aligned even base board. -/
+theorem contained_even_one : ContainedHolds .even 1 := by
+  intro grid shadeGrid valid blockX blockY
+  have valid' : ValidShadeGrid (iterateRefine 4 grid) shadeGrid := by
+    simpa [refinedGrid, refinementDepth, Phase.extra] using valid
+  have cover := containedPairCover_at_block grid valid' blockX blockY
+  simpa [refinedGrid, refinementDepth, Phase.extra, west, east, scale,
+    Phase.factor] using cover
+
+/-- Absolute odd-base geometry at an arbitrary aligned parent block. -/
+theorem oddGeometry_at_block
+    (grid : Nat → Nat → Index)
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (iterateRefine 3 grid) shadeGrid)
+    (blockX blockY : Nat) :
+    ShadedObstructionGeometry.Geometry (iterateRefine 3 grid) shadeGrid
+      (8 * blockX + 2) (8 * blockX + 6)
+      (8 * blockY + 2) (8 * blockY + 6) := by
+  have localGeometry :=
+    ShadedObstructionGeometryOddBaseBoundedSoundness.geometry_shift
+      grid valid blockX blockY
+  have translated :=
+    ShadedObstructionGeometryTranslation.Geometry.translate localGeometry
+  norm_num at translated
+  exact translated
+
+/-- The odd-base audit likewise supplies every aligned odd base board. -/
+theorem contained_odd_zero : ContainedHolds .odd 0 := by
+  intro grid shadeGrid valid blockX blockY
+  have valid' : ValidShadeGrid (iterateRefine 3 grid) shadeGrid := by
+    simpa [refinedGrid, refinementDepth, Phase.extra] using valid
+  have geometry := oddGeometry_at_block grid valid' blockX blockY
+  have cover := containedPairCover_of_geometry geometry
+  simpa [refinedGrid, refinementDepth, Phase.extra, west, east, scale,
+    Phase.factor] using cover
+
 /-- One common two-substitution recurrence advances either shade phase. -/
 def Step : Prop :=
   ∀ (phase : Phase) (depth : Nat), Holds phase depth → Holds phase (depth + 1)
@@ -149,6 +218,23 @@ theorem Holds.childCovers
     rw [refinedGrid_iterateRefine_two]
     exact valid
   have cover := holds.at_block valid' blockX blockY
+  simpa only [refinedGrid_iterateRefine_two] using cover
+
+/-- The all-block invariant specializes directly to the fine grid's child
+covers; no translated cover theorem is needed. -/
+theorem ContainedHolds.childCovers
+    {phase : Phase} {depth : Nat} (holds : ContainedHolds phase depth)
+    {grid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid) :
+    ContainedChildCovers phase depth grid shadeGrid := by
+  intro blockX blockY
+  have valid' : ValidShadeGrid
+      (refinedGrid phase depth (iterateRefine 2 grid)) shadeGrid := by
+    rw [refinedGrid_iterateRefine_two]
+    exact valid
+  have cover := holds (iterateRefine 2 grid) shadeGrid valid' blockX blockY
   simpa only [refinedGrid_iterateRefine_two] using cover
 
 /-- A vertical query fits one aligned child board, including the horizontal
@@ -324,6 +410,38 @@ theorem childLift_of_seamCover (seams : SeamCover) : ChildLift := by
         hlocalSouth, hlocalNorth, hboundaryLocalWest,
         hboundaryLocalEast, pairCover_of_geometry geometry⟩
 
+/-- Successor construction for the fully contained all-block invariant. -/
+def ContainedLift : Prop :=
+  ∀ (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+      (shadeGrid : Nat → Nat → RedShades.State),
+    ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid →
+    ContainedChildCovers phase depth grid shadeGrid →
+    ∀ blockX blockY,
+      ContainedPairCover
+        (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+        (2 ^ refinementDepth phase (depth + 1) * blockX +
+          west phase (depth + 1))
+        (2 ^ refinementDepth phase (depth + 1) * blockX +
+          east phase (depth + 1))
+        (2 ^ refinementDepth phase (depth + 1) * blockY +
+          west phase (depth + 1))
+        (2 ^ refinementDepth phase (depth + 1) * blockY +
+          east phase (depth + 1))
+
+def ContainedStep : Prop :=
+  ∀ (phase : Phase) (depth : Nat),
+    ContainedHolds phase depth → ContainedHolds phase (depth + 1)
+
+theorem containedStep_of_lift (lift : ContainedLift) : ContainedStep := by
+  intro phase depth holds grid shadeGrid valid blockX blockY
+  have fineValid : ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid := by
+    simpa only [refinedGrid_succ] using valid
+  have children := holds.childCovers fineValid
+  have cover := lift phase depth grid shadeGrid fineValid children blockX blockY
+  simpa only [refinedGrid_succ] using cover
+
 /-- A bounded child-cover lift establishes the common recurrence step. -/
 theorem step_of_childLift (lift : ChildLift) : Step := by
   intro phase depth holds grid shadeGrid valid
@@ -337,6 +455,27 @@ theorem step_of_childLift (lift : ChildLift) : Step := by
 /-- Both phase families at every depth used by the unbounded-board theorem. -/
 def AllHolds : Prop :=
   ∀ size : Nat, Holds .even (1 + size) ∧ Holds .odd size
+
+def AllContainedHolds : Prop :=
+  ∀ size : Nat,
+    ContainedHolds .even (1 + size) ∧ ContainedHolds .odd size
+
+theorem allContainedHolds_of_step (step : ContainedStep) :
+    AllContainedHolds := by
+  intro size
+  constructor
+  · induction size with
+    | zero => simpa using contained_even_one
+    | succ size ih =>
+        simpa [Nat.add_assoc] using step .even (1 + size) ih
+  · induction size with
+    | zero => exact contained_odd_zero
+    | succ size ih => simpa using step .odd size ih
+
+theorem AllContainedHolds.allHolds
+    (holds : AllContainedHolds) : AllHolds := by
+  intro size
+  exact ⟨(holds size).1.holds, (holds size).2.holds⟩
 
 theorem allHolds_of_bases_of_step
     (odd_zero : Holds .odd 0) (step : Step) : AllHolds := by
@@ -352,6 +491,9 @@ theorem allHolds_of_bases_of_step
 
 theorem allHolds_of_step (step : Step) : AllHolds :=
   allHolds_of_bases_of_step odd_zero step
+
+theorem allHolds_of_containedStep (step : ContainedStep) : AllHolds :=
+  (allContainedHolds_of_step step).allHolds
 
 set_option maxHeartbeats 1000000 in
 -- Normalizing the even and odd recurrence grids against the common tower grid.
@@ -416,6 +558,19 @@ theorem forcesRoutedFixedCornerSquares_of_step (step : Step) :
   forcesRoutedFixedCornerSquares
     (lightBoardPairCovers_of_allHolds
       (allHolds_of_step step))
+
+theorem forcesRoutedFixedCornerSquares_of_containedStep
+    (step : ContainedStep) :
+    ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
+  forcesRoutedFixedCornerSquares
+    (lightBoardPairCovers_of_allHolds
+      (allHolds_of_containedStep step))
+
+theorem forcesRoutedFixedCornerSquares_of_containedLift
+    (lift : ContainedLift) :
+    ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
+  forcesRoutedFixedCornerSquares_of_containedStep
+    (containedStep_of_lift lift)
 
 end ShadedObstructionPairCoverRecurrence
 end Closed104
