@@ -25,7 +25,8 @@ open OrientedRedCycles RedShadeGraph RedShadeGraphSearch
   RedShadeGraphSearchSoundness RedShadeGraphTranslation RedShadeCycles
   RedShadeGraphRefinement RedShadePaths ShadedFreeLineGraphBase
   ShadedObstructionGeometryBaseAudit
-  ShadedObstructionGeometryBaseSoundness Signals.FreeCellLocal
+  ShadedObstructionGeometryBaseSoundness ShadedObstructionGeometry
+  ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -553,6 +554,434 @@ theorem selectedVertical_iff_semantic
       cycle shaded hcolumn hrow
   · exact selectedVertical_of_semantic parent componentsEq valid parentLight
       cycle shaded coverage hcolumn hrow
+
+set_option maxHeartbeats 1000000 in
+-- Relating the boolean audit to the quantified target-grid predicate.
+theorem freeRow_eq_true_iff
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {row : Nat} (hrow : row ∈ coordinates) :
+    freeRow parent (reachedBitmap (nodes parent)) parentLight row = true ↔
+      IsFreeRow targetGrid stateGrid 4 12 row := by
+  constructor
+  · intro hfree quarterX hwest heast
+    have hquarterX : quarterX ∈ coordinates := mem_coordinates_iff.2 (by
+      simp [quarterWest] at hwest
+      simp [quarterEast] at heast
+      omega)
+    simp only [freeRow, List.all_eq_true] at hfree
+    have hnotSelected := hfree quarterX hquarterX
+    by_contra hselected
+    have haudit := (selectedVertical_iff_semantic parent componentsEq valid
+      parentLight cycle shaded coverage hquarterX hrow).2 hselected
+    simp [haudit] at hnotSelected
+  · intro hfree
+    simp only [freeRow, List.all_eq_true]
+    intro quarterX hquarterX
+    cases haudit : selectedVertical parent (reachedBitmap (nodes parent))
+        parentLight quarterX row
+    · simp
+    · have hsemantic := (selectedVertical_iff_semantic parent componentsEq valid
+        parentLight cycle shaded coverage hquarterX hrow).1 haudit
+      have hnone := hfree quarterX (by
+        have := mem_coordinates_iff.1 hquarterX
+        simp [quarterWest]
+        omega) (by
+        have := mem_coordinates_iff.1 hquarterX
+        simp [quarterEast]
+        omega)
+      contradiction
+
+set_option maxHeartbeats 1000000 in
+-- Relating the boolean audit to the quantified target-grid predicate.
+theorem freeColumn_eq_true_iff
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column : Nat} (hcolumn : column ∈ coordinates) :
+    freeColumn parent (reachedBitmap (nodes parent)) parentLight column = true ↔
+      IsFreeColumn targetGrid stateGrid 4 12 column := by
+  constructor
+  · intro hfree quarterY hsouth hnorth
+    have hquarterY : quarterY ∈ coordinates := mem_coordinates_iff.2 (by
+      simp [quarterSouth] at hsouth
+      simp [quarterNorth] at hnorth
+      omega)
+    simp only [freeColumn, List.all_eq_true] at hfree
+    have hnotSelected := hfree quarterY hquarterY
+    by_contra hselected
+    have haudit := (selectedHorizontal_iff_semantic parent componentsEq valid
+      parentLight cycle shaded coverage hcolumn hquarterY).2 hselected
+    simp [haudit] at hnotSelected
+  · intro hfree
+    simp only [freeColumn, List.all_eq_true]
+    intro quarterY hquarterY
+    cases haudit : selectedHorizontal parent (reachedBitmap (nodes parent))
+        parentLight column quarterY
+    · simp
+    · have hsemantic := (selectedHorizontal_iff_semantic parent componentsEq valid
+        parentLight cycle shaded coverage hcolumn hquarterY).1 haudit
+      have hnone := hfree quarterY (by
+        have := mem_coordinates_iff.1 hquarterY
+        simp [quarterSouth]
+        omega) (by
+        have := mem_coordinates_iff.1 hquarterY
+        simp [quarterNorth]
+        omega)
+      contradiction
+
+set_option maxHeartbeats 1000000 in
+-- Decode the bounded existential witness and its intervening target-grid cells.
+theorem upperWitness_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates)
+    (hwitness : upperWitness parent (reachedBitmap (nodes parent))
+      parentLight column row = true) :
+    ∃ boundary, row < boundary ∧ boundary < 24 ∧
+      ShadedSignals.selectedHorizontalFor
+        (componentAt targetGrid column boundary) (quadrantAt column boundary)
+        (stateGrid column boundary) = some .north ∧
+      ∀ y, row < y → y < boundary →
+        ShadedSignals.selectedHorizontalFor
+          (componentAt targetGrid column y) (quadrantAt column y)
+          (stateGrid column y) = none := by
+  simp only [upperWitness, List.any_eq_true] at hwitness
+  rcases hwitness with ⟨boundary, hboundary, hparts⟩
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hparts
+  simp only [List.all_eq_true] at hparts
+  refine ⟨boundary, hparts.1.1.1, (mem_coordinates_iff.1 hboundary).2, ?_, ?_⟩
+  · exact selectedHorizontal_eq_of_interior
+      ((selectedHorizontal_iff_semantic parent componentsEq valid parentLight
+        cycle shaded coverage hcolumn hboundary).1 hparts.1.2)
+      (by
+        rw [← componentsEq column boundary
+          ((mem_coordinates_iff.1 hcolumn).2.trans (by decide : 24 < 32))
+          ((mem_coordinates_iff.1 hboundary).2.trans (by decide : 24 < 32))]
+        exact hparts.1.1.2)
+  · intro y hry hyb
+    have hy : y ∈ coordinates := mem_coordinates_iff.2 (by
+      have hrowBounds := mem_coordinates_iff.1 hrow
+      have hboundaryBounds := mem_coordinates_iff.1 hboundary
+      omega)
+    have hnotAudit := hparts.2 y hy
+    simp only [hry, hyb] at hnotAudit
+    cases hsemantic : ShadedSignals.selectedHorizontalFor
+        (componentAt targetGrid column y) (quadrantAt column y)
+        (stateGrid column y) with
+    | none => rfl
+    | some interior =>
+        have haudit := (selectedHorizontal_iff_semantic parent componentsEq valid
+          parentLight cycle shaded coverage hcolumn hy).2 (by simp [hsemantic])
+        simp [haudit] at hnotAudit
+
+set_option maxHeartbeats 1000000 in
+-- Decode the bounded existential witness and its intervening target-grid cells.
+theorem lowerWitness_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates)
+    (hwitness : lowerWitness parent (reachedBitmap (nodes parent))
+      parentLight column row = true) :
+    ∃ boundary, 9 < boundary ∧ boundary < row ∧
+      ShadedSignals.selectedHorizontalFor
+        (componentAt targetGrid column boundary) (quadrantAt column boundary)
+        (stateGrid column boundary) = some .south ∧
+      ∀ y, boundary < y → y < row →
+        ShadedSignals.selectedHorizontalFor
+          (componentAt targetGrid column y) (quadrantAt column y)
+          (stateGrid column y) = none := by
+  simp only [lowerWitness, List.any_eq_true] at hwitness
+  rcases hwitness with ⟨boundary, hboundary, hparts⟩
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hparts
+  simp only [List.all_eq_true] at hparts
+  refine ⟨boundary, (mem_coordinates_iff.1 hboundary).1, hparts.1.1.1, ?_, ?_⟩
+  · exact selectedHorizontal_eq_of_interior
+      ((selectedHorizontal_iff_semantic parent componentsEq valid parentLight
+        cycle shaded coverage hcolumn hboundary).1 hparts.1.2)
+      (by
+        rw [← componentsEq column boundary
+          ((mem_coordinates_iff.1 hcolumn).2.trans (by decide : 24 < 32))
+          ((mem_coordinates_iff.1 hboundary).2.trans (by decide : 24 < 32))]
+        exact hparts.1.1.2)
+  · intro y hby hyr
+    have hy : y ∈ coordinates := mem_coordinates_iff.2 (by
+      have hrowBounds := mem_coordinates_iff.1 hrow
+      have hboundaryBounds := mem_coordinates_iff.1 hboundary
+      omega)
+    have hnotAudit := hparts.2 y hy
+    simp only [hby, hyr] at hnotAudit
+    cases hsemantic : ShadedSignals.selectedHorizontalFor
+        (componentAt targetGrid column y) (quadrantAt column y)
+        (stateGrid column y) with
+    | none => rfl
+    | some interior =>
+        have haudit := (selectedHorizontal_iff_semantic parent componentsEq valid
+          parentLight cycle shaded coverage hcolumn hy).2 (by simp [hsemantic])
+        simp [haudit] at hnotAudit
+
+set_option maxHeartbeats 1000000 in
+-- Decode the bounded existential witness and its intervening target-grid cells.
+theorem rightWitness_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates)
+    (hwitness : rightWitness parent (reachedBitmap (nodes parent))
+      parentLight column row = true) :
+    ∃ boundary, column < boundary ∧ boundary < 24 ∧
+      ShadedSignals.selectedVerticalFor
+        (componentAt targetGrid boundary row) (quadrantAt boundary row)
+        (stateGrid boundary row) = some .east ∧
+      ∀ x, column < x → x < boundary →
+        ShadedSignals.selectedVerticalFor
+          (componentAt targetGrid x row) (quadrantAt x row)
+          (stateGrid x row) = none := by
+  simp only [rightWitness, List.any_eq_true] at hwitness
+  rcases hwitness with ⟨boundary, hboundary, hparts⟩
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hparts
+  simp only [List.all_eq_true] at hparts
+  refine ⟨boundary, hparts.1.1.1, (mem_coordinates_iff.1 hboundary).2, ?_, ?_⟩
+  · exact selectedVertical_eq_of_interior
+      ((selectedVertical_iff_semantic parent componentsEq valid parentLight
+        cycle shaded coverage hboundary hrow).1 hparts.1.2)
+      (by
+        rw [← componentsEq boundary row
+          ((mem_coordinates_iff.1 hboundary).2.trans (by decide : 24 < 32))
+          ((mem_coordinates_iff.1 hrow).2.trans (by decide : 24 < 32))]
+        exact hparts.1.1.2)
+  · intro x hcx hxb
+    have hx : x ∈ coordinates := mem_coordinates_iff.2 (by
+      have hcolumnBounds := mem_coordinates_iff.1 hcolumn
+      have hboundaryBounds := mem_coordinates_iff.1 hboundary
+      omega)
+    have hnotAudit := hparts.2 x hx
+    simp only [hcx, hxb] at hnotAudit
+    cases hsemantic : ShadedSignals.selectedVerticalFor
+        (componentAt targetGrid x row) (quadrantAt x row)
+        (stateGrid x row) with
+    | none => rfl
+    | some interior =>
+        have haudit := (selectedVertical_iff_semantic parent componentsEq valid
+          parentLight cycle shaded coverage hx hrow).2 (by simp [hsemantic])
+        simp [haudit] at hnotAudit
+
+set_option maxHeartbeats 1000000 in
+-- Decode the bounded existential witness and its intervening target-grid cells.
+theorem leftWitness_semantic
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    {column row : Nat} (hcolumn : column ∈ coordinates)
+    (hrow : row ∈ coordinates)
+    (hwitness : leftWitness parent (reachedBitmap (nodes parent))
+      parentLight column row = true) :
+    ∃ boundary, 9 < boundary ∧ boundary < column ∧
+      ShadedSignals.selectedVerticalFor
+        (componentAt targetGrid boundary row) (quadrantAt boundary row)
+        (stateGrid boundary row) = some .west ∧
+      ∀ x, boundary < x → x < column →
+        ShadedSignals.selectedVerticalFor
+          (componentAt targetGrid x row) (quadrantAt x row)
+          (stateGrid x row) = none := by
+  simp only [leftWitness, List.any_eq_true] at hwitness
+  rcases hwitness with ⟨boundary, hboundary, hparts⟩
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hparts
+  simp only [List.all_eq_true] at hparts
+  refine ⟨boundary, (mem_coordinates_iff.1 hboundary).1, hparts.1.1.1, ?_, ?_⟩
+  · exact selectedVertical_eq_of_interior
+      ((selectedVertical_iff_semantic parent componentsEq valid parentLight
+        cycle shaded coverage hboundary hrow).1 hparts.1.2)
+      (by
+        rw [← componentsEq boundary row
+          ((mem_coordinates_iff.1 hboundary).2.trans (by decide : 24 < 32))
+          ((mem_coordinates_iff.1 hrow).2.trans (by decide : 24 < 32))]
+        exact hparts.1.1.2)
+  · intro x hbx hxc
+    have hx : x ∈ coordinates := mem_coordinates_iff.2 (by
+      have hcolumnBounds := mem_coordinates_iff.1 hcolumn
+      have hboundaryBounds := mem_coordinates_iff.1 hboundary
+      omega)
+    have hnotAudit := hparts.2 x hx
+    simp only [hbx, hxc] at hnotAudit
+    cases hsemantic : ShadedSignals.selectedVerticalFor
+        (componentAt targetGrid x row) (quadrantAt x row)
+        (stateGrid x row) with
+    | none => rfl
+    | some interior =>
+        have haudit := (selectedVertical_iff_semantic parent componentsEq valid
+          parentLight cycle shaded coverage hx hrow).2 (by simp [hsemantic])
+        simp [haudit] at hnotAudit
+
+set_option maxHeartbeats 1000000 in
+-- Combining four audited witness forms elaborates a large dependent structure.
+theorem geometry_of_audit
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid parent) x y = componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark))
+    (coverage : CoveragePaths parent)
+    (complete : completeFor parent (reachedBitmap (nodes parent))
+      parentLight = true) :
+    ShadedObstructionGeometry.Geometry targetGrid stateGrid 4 12 4 12 := by
+  constructor
+  · intro column row hwest heast hsouth hnorth hfreeRow hnotFreeColumn
+    have hcolumn : column ∈ coordinates := mem_coordinates_iff.2 (by
+      simp [quarterWest, quarterEast] at hwest heast
+      omega)
+    have hrow : row ∈ coordinates := mem_coordinates_iff.2 (by
+      simp [quarterSouth, quarterNorth] at hsouth hnorth
+      omega)
+    have hfreeRowAudit := (freeRow_eq_true_iff parent componentsEq valid
+      parentLight cycle shaded coverage hrow).2 hfreeRow
+    have hfreeColumnAudit : freeColumn parent (reachedBitmap (nodes parent))
+        parentLight column = false := by
+      cases hvalue : freeColumn parent (reachedBitmap (nodes parent))
+          parentLight column
+      · rfl
+      · have hsemantic := (freeColumn_eq_true_iff parent componentsEq valid
+            parentLight cycle shaded coverage hcolumn).1 hvalue
+        contradiction
+    simp only [ShadedObstructionGeometryBaseAudit.completeFor,
+      List.all_eq_true] at complete
+    have crossing := complete column hcolumn row hrow
+    rw [Bool.and_eq_true] at crossing
+    have vertical := crossing.1
+    simp only [hfreeRowAudit, hfreeColumnAudit, Bool.not_true,
+      Bool.false_or, Bool.or_eq_true] at vertical
+    rcases vertical with (hselected | hupper) | hlower
+    · exact Or.inl ((selectedHorizontal_iff_semantic parent componentsEq valid
+        parentLight cycle shaded coverage hcolumn hrow).1 hselected)
+    · exact Or.inr (Or.inl (by
+        rcases upperWitness_semantic parent componentsEq valid parentLight cycle
+          shaded coverage hcolumn hrow hupper with
+          ⟨boundary, hrb, hbn, hselected, hbetween⟩
+        exact ⟨boundary, hrb, by simpa [quarterNorth] using hbn,
+          hselected, hbetween⟩))
+    · exact Or.inr (Or.inr (by
+        rcases lowerWitness_semantic parent componentsEq valid parentLight cycle
+          shaded coverage hcolumn hrow hlower with
+          ⟨boundary, hsb, hbr, hselected, hbetween⟩
+        exact ⟨boundary, by simpa [quarterSouth] using hsb, hbr,
+          hselected, hbetween⟩))
+  · intro column row hwest heast hsouth hnorth hfreeColumn hnotFreeRow
+    have hcolumn : column ∈ coordinates := mem_coordinates_iff.2 (by
+      simp [quarterWest, quarterEast] at hwest heast
+      omega)
+    have hrow : row ∈ coordinates := mem_coordinates_iff.2 (by
+      simp [quarterSouth, quarterNorth] at hsouth hnorth
+      omega)
+    have hfreeColumnAudit := (freeColumn_eq_true_iff parent componentsEq valid
+      parentLight cycle shaded coverage hcolumn).2 hfreeColumn
+    have hfreeRowAudit : freeRow parent (reachedBitmap (nodes parent))
+        parentLight row = false := by
+      cases hvalue : freeRow parent (reachedBitmap (nodes parent)) parentLight row
+      · rfl
+      · have hsemantic := (freeRow_eq_true_iff parent componentsEq valid
+            parentLight cycle shaded coverage hrow).1 hvalue
+        contradiction
+    simp only [ShadedObstructionGeometryBaseAudit.completeFor,
+      List.all_eq_true] at complete
+    have crossing := complete column hcolumn row hrow
+    rw [Bool.and_eq_true] at crossing
+    have horizontal := crossing.2
+    simp only [hfreeColumnAudit, hfreeRowAudit, Bool.not_true,
+      Bool.false_or, Bool.or_eq_true] at horizontal
+    rcases horizontal with (hselected | hright) | hleft
+    · exact Or.inl ((selectedVertical_iff_semantic parent componentsEq valid
+        parentLight cycle shaded coverage hcolumn hrow).1 hselected)
+    · exact Or.inr (Or.inl (by
+        rcases rightWitness_semantic parent componentsEq valid parentLight cycle
+          shaded coverage hcolumn hrow hright with
+          ⟨boundary, hcb, hbe, hselected, hbetween⟩
+        exact ⟨boundary, hcb, by simpa [quarterEast] using hbe,
+          hselected, hbetween⟩))
+    · exact Or.inr (Or.inr (by
+        rcases leftWitness_semantic parent componentsEq valid parentLight cycle
+          shaded coverage hcolumn hrow hleft with
+          ⟨boundary, hwb, hbc, hselected, hbetween⟩
+        exact ⟨boundary, by simpa [quarterWest] using hwb, hbc,
+          hselected, hbetween⟩))
+
+theorem geometry
+    (parent : Index)
+    {targetGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    (componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid (BorderSubstitution.canonicalIndex parent)) x y =
+        componentAt targetGrid x y)
+    (valid : ValidShadeGrid targetGrid stateGrid)
+    (parentLight : Bool)
+    (cycle : CycleOn targetGrid 4 12 4 12)
+    (shaded : CycleShade stateGrid 4 12 4 12
+      (if parentLight then .light else .dark)) :
+    ShadedObstructionGeometry.Geometry targetGrid stateGrid 4 12 4 12 :=
+  geometry_of_audit (BorderSubstitution.canonicalIndex parent) componentsEq valid
+    parentLight cycle shaded
+    (coveragePaths_of_eq_true _
+      (ShadedObstructionGeometryBaseComplete.coverageFor_canonical_eq_true parent))
+    (ShadedObstructionGeometryBaseComplete.completeFor_canonical_eq_true
+      parent parentLight)
 
 end ShadedObstructionGeometryBoundedSoundness
 end Closed104

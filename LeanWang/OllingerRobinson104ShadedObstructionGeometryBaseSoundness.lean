@@ -788,7 +788,7 @@ theorem freeColumn_eq_true_iff
         omega)
       contradiction
 
-private theorem selectedHorizontal_eq_of_interior
+theorem selectedHorizontal_eq_of_interior
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State} {interior : Signals.VerticalInterior}
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state ≠ none)
@@ -799,7 +799,7 @@ private theorem selectedHorizontal_eq_of_interior
   · simp [hshade, hinterior]
   · simp [hshade] at hselected
 
-private theorem selectedVertical_eq_of_interior
+theorem selectedVertical_eq_of_interior
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State} {interior : Signals.HorizontalInterior}
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state ≠ none)
