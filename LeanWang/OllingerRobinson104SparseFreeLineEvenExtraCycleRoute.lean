@@ -23,7 +23,7 @@ namespace SparseFreeLineEvenExtraCycleRoute
 
 open OrientedRedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
   RedShadeGraphRefinement RedShadeCycleConnectivity
-  ShadedFreeLinePatternRefinement
+  RedShadeCycleBridgeComposition ShadedFreeLinePatternRefinement
 
 /-- Package an odd refined-cycle route as a projection from the old cycle. -/
 def projectsTo_of_refinedCyclePath
@@ -46,6 +46,32 @@ def projectsTo_of_refinedCyclePath
     sparseSourceOnCycle fineStartOnCycle
   exact ProjectsTo.ofCyclePath oldCycle sourceOnCycle
     (by simpa [Bool.xor_assoc] using Path.trans connector tail) targetLive
+
+/-- A descendant-cycle tail reached by an even bridge is an old-cycle projection. -/
+theorem projectsTo_of_evenBridgeTail
+    {grid : Nat → Nat → Index} {west east south north : Nat}
+    (oldCycle : CycleOn grid west east south north)
+    (fineCycle : CycleOn (RedCycles.iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north))
+    {descendantWest descendantEast descendantSouth descendantNorth : Nat}
+    (descendantCycle : CycleOn (RedCycles.iterateRefine 2 grid)
+      descendantWest descendantEast descendantSouth descendantNorth)
+    (bridge : EvenCycleBridge (RedCycles.iterateRefine 2 grid)
+      (4 * west) (4 * east) (4 * south) (4 * north)
+      descendantWest descendantEast descendantSouth descendantNorth)
+    {source descendantStart target : Port}
+    (sourceOnCycle : OnCycle west east south north source)
+    (descendantStartOnCycle : OnCycle descendantWest descendantEast
+      descendantSouth descendantNorth descendantStart)
+    (tail : Path (RedCycles.iterateRefine 2 grid)
+      descendantStart target true)
+    (targetLive : portPresent (RedCycles.iterateRefine 2 grid) target = true) :
+    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+      (south := south) (north := north) target) := by
+  rcases even_trans_odd descendantCycle bridge descendantStartOnCycle tail with
+    ⟨fineStart, fineStartOnCycle, path⟩
+  exact ⟨projectsTo_of_refinedCyclePath oldCycle fineCycle sourceOnCycle
+    fineStartOnCycle path targetLive⟩
 
 end SparseFreeLineEvenExtraCycleRoute
 end Closed104
