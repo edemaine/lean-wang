@@ -20,8 +20,9 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeCycleBridgeComposition
 
-open OrientedRedCycles RedShadeGraph RedShadeGraphBoards
+open OrientedRedCycles RedCycles RedShadeGraph RedShadeGraphBoards
   RedShadeCycleConnectivity RedShadeCycleCrossingPaths
+  TranslatedRedShadeCrossings TranslatedRedShadeCrossingPaths
 
 /-- An explicit even path from one oriented cycle to another. -/
 def EvenCycleBridge
@@ -57,6 +58,44 @@ theorem odd_trans_odd
   refine ⟨firstPort, lastPort, firstOnCycle, lastOnCycle, ?_⟩
   simpa [Bool.xor_assoc] using
     Path.trans firstPath (Path.trans middlePath secondPath)
+
+/-- Two successive corner descendants are evenly bridged to their ancestor. -/
+theorem twoCornerBridge
+    (grid : Nat → Nat → Index) {level : Nat} (hlevel : 2 ≤ level)
+    (blockX blockY : Nat)
+    (firstCornerX firstCornerY secondCornerX secondCornerY : Fin 2) :
+    EvenCycleBridge (iterateRefine (level + 2) grid)
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3))
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockX + firstCornerX.val) + secondCornerX.val) + 1))
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockX + firstCornerX.val) + secondCornerX.val) + 3))
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockY + firstCornerY.val) + secondCornerY.val) + 1))
+      (2 ^ (level - 2) *
+        (4 * (2 * (2 * blockY + firstCornerY.val) + secondCornerY.val) + 3)) := by
+  have hlevelOne : 1 ≤ level := by omega
+  have hchildLevel : 1 ≤ level - 1 := by omega
+  let middleX := 2 * blockX + firstCornerX.val
+  let middleY := 2 * blockY + firstCornerY.val
+  have first := cornerBridge grid hlevelOne blockX blockY
+    firstCornerX firstCornerY
+  have middle := cornerSmallCycle grid hlevelOne blockX blockY
+    firstCornerX firstCornerY
+  have second := cornerBridge (iterateRefine 1 grid) hchildLevel
+    middleX middleY secondCornerX secondCornerY
+  have hgrid :
+      iterateRefine (level - 1 + 2) (iterateRefine 1 grid) =
+        iterateRefine (level + 2) grid := by
+    rw [PlaneRedBoards.iterateRefine_add]
+    congr 1
+    omega
+  rw [hgrid] at second
+  simpa [middleX, middleY, Nat.sub_sub] using
+    odd_trans_odd middle first second
 
 end RedShadeCycleBridgeComposition
 end Closed104
