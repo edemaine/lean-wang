@@ -281,6 +281,70 @@ def FitsHorizontalChild (phase : Phase) (depth column row boundary : Nat) : Prop
     boundary < quarterEast
       (2 ^ refinementDepth phase depth * blockX + east phase depth)
 
+def FitsContainedVerticalChild (phase : Phase) (depth parentX parentY
+    column row boundary : Nat) : Prop :=
+  ∃ childX childY,
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parentX + west phase (depth + 1)) ≤
+        quarterWest
+          (2 ^ refinementDepth phase depth * childX + west phase depth) ∧
+    quarterEast
+        (2 ^ refinementDepth phase depth * childX + east phase depth) ≤
+      quarterEast
+        (2 ^ refinementDepth phase (depth + 1) * parentX + east phase (depth + 1)) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + west phase (depth + 1)) ≤
+        quarterSouth
+          (2 ^ refinementDepth phase depth * childY + west phase depth) ∧
+    quarterNorth
+        (2 ^ refinementDepth phase depth * childY + east phase depth) ≤
+      quarterNorth
+        (2 ^ refinementDepth phase (depth + 1) * parentY + east phase (depth + 1)) ∧
+    quarterWest
+      (2 ^ refinementDepth phase depth * childX + west phase depth) < column ∧
+    column < quarterEast
+      (2 ^ refinementDepth phase depth * childX + east phase depth) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase depth * childY + west phase depth) < row ∧
+    row < quarterNorth
+      (2 ^ refinementDepth phase depth * childY + east phase depth) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase depth * childY + west phase depth) < boundary ∧
+    boundary < quarterNorth
+      (2 ^ refinementDepth phase depth * childY + east phase depth)
+
+def FitsContainedHorizontalChild (phase : Phase) (depth parentX parentY
+    column row boundary : Nat) : Prop :=
+  ∃ childX childY,
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parentX + west phase (depth + 1)) ≤
+        quarterWest
+          (2 ^ refinementDepth phase depth * childX + west phase depth) ∧
+    quarterEast
+        (2 ^ refinementDepth phase depth * childX + east phase depth) ≤
+      quarterEast
+        (2 ^ refinementDepth phase (depth + 1) * parentX + east phase (depth + 1)) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + west phase (depth + 1)) ≤
+        quarterSouth
+          (2 ^ refinementDepth phase depth * childY + west phase depth) ∧
+    quarterNorth
+        (2 ^ refinementDepth phase depth * childY + east phase depth) ≤
+      quarterNorth
+        (2 ^ refinementDepth phase (depth + 1) * parentY + east phase (depth + 1)) ∧
+    quarterWest
+      (2 ^ refinementDepth phase depth * childX + west phase depth) < column ∧
+    column < quarterEast
+      (2 ^ refinementDepth phase depth * childX + east phase depth) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase depth * childY + west phase depth) < row ∧
+    row < quarterNorth
+      (2 ^ refinementDepth phase depth * childY + east phase depth) ∧
+    quarterWest
+      (2 ^ refinementDepth phase depth * childX + west phase depth) < boundary ∧
+    boundary < quarterEast
+      (2 ^ refinementDepth phase depth * childX + east phase depth)
+
 def VerticalGeometryWitness (phase : Phase) (depth : Nat)
     (indexGrid : Nat → Nat → Index)
     (shadeGrid : Nat → Nat → RedShades.State)
@@ -302,6 +366,50 @@ def HorizontalGeometryWitness (phase : Phase) (depth : Nat)
   ∃ localWest localEast localSouth localNorth,
     quarterSouth (4 * west phase depth) ≤ quarterSouth localSouth ∧
     quarterNorth localNorth ≤ quarterNorth (4 * east phase depth) ∧
+    quarterWest localWest < column ∧ column < quarterEast localEast ∧
+    quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+    quarterWest localWest < boundary ∧
+    boundary < quarterEast localEast ∧
+    ShadedObstructionGeometry.Geometry indexGrid shadeGrid
+      localWest localEast localSouth localNorth
+
+def ContainedVerticalGeometryWitness (phase : Phase) (depth parentX parentY : Nat)
+    (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (column row boundary : Nat) : Prop :=
+  ∃ localWest localEast localSouth localNorth,
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parentX + west phase (depth + 1)) ≤
+        quarterWest localWest ∧
+    quarterEast localEast ≤ quarterEast
+      (2 ^ refinementDepth phase (depth + 1) * parentX + east phase (depth + 1)) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + west phase (depth + 1)) ≤
+        quarterSouth localSouth ∧
+    quarterNorth localNorth ≤ quarterNorth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + east phase (depth + 1)) ∧
+    quarterWest localWest < column ∧ column < quarterEast localEast ∧
+    quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
+    quarterSouth localSouth < boundary ∧
+    boundary < quarterNorth localNorth ∧
+    ShadedObstructionGeometry.Geometry indexGrid shadeGrid
+      localWest localEast localSouth localNorth
+
+def ContainedHorizontalGeometryWitness (phase : Phase) (depth parentX parentY : Nat)
+    (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (column row boundary : Nat) : Prop :=
+  ∃ localWest localEast localSouth localNorth,
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parentX + west phase (depth + 1)) ≤
+        quarterWest localWest ∧
+    quarterEast localEast ≤ quarterEast
+      (2 ^ refinementDepth phase (depth + 1) * parentX + east phase (depth + 1)) ∧
+    quarterSouth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + west phase (depth + 1)) ≤
+        quarterSouth localSouth ∧
+    quarterNorth localNorth ≤ quarterNorth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + east phase (depth + 1)) ∧
     quarterWest localWest < column ∧ column < quarterEast localEast ∧
     quarterSouth localSouth < row ∧ row < quarterNorth localNorth ∧
     quarterWest localWest < boundary ∧
@@ -351,6 +459,70 @@ structure SeamCover : Prop where
       (quadrantAt boundary row) (shadeGrid boundary row) ≠ none →
     ¬FitsHorizontalChild phase depth column row boundary →
     HorizontalGeometryWitness phase depth
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      column row boundary
+
+/-- Seam witnesses for every absolute successor board, retaining containment
+in both axes. -/
+structure ContainedSeamCover : Prop where
+  vertical : ∀ (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+      (shadeGrid : Nat → Nat → RedShades.State)
+      (parentX parentY : Nat) {column row boundary : Nat},
+    ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid →
+    ContainedChildCovers phase depth grid shadeGrid →
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parentX + west phase (depth + 1)) <
+        column →
+    column < quarterEast
+      (2 ^ refinementDepth phase (depth + 1) * parentX + east phase (depth + 1)) →
+    quarterSouth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + west phase (depth + 1)) <
+        row →
+    row < quarterNorth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + east phase (depth + 1)) →
+    quarterSouth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + west phase (depth + 1)) <
+        boundary →
+    boundary < quarterNorth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + east phase (depth + 1)) →
+    ShadedSignals.selectedHorizontalFor
+      (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
+        column boundary)
+      (quadrantAt column boundary) (shadeGrid column boundary) ≠ none →
+    ¬FitsContainedVerticalChild phase depth parentX parentY
+      column row boundary →
+    ContainedVerticalGeometryWitness phase depth parentX parentY
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      column row boundary
+  horizontal : ∀ (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+      (shadeGrid : Nat → Nat → RedShades.State)
+      (parentX parentY : Nat) {column row boundary : Nat},
+    ValidShadeGrid
+      (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid →
+    ContainedChildCovers phase depth grid shadeGrid →
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parentX + west phase (depth + 1)) <
+        column →
+    column < quarterEast
+      (2 ^ refinementDepth phase (depth + 1) * parentX + east phase (depth + 1)) →
+    quarterSouth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + west phase (depth + 1)) <
+        row →
+    row < quarterNorth
+      (2 ^ refinementDepth phase (depth + 1) * parentY + east phase (depth + 1)) →
+    quarterWest
+      (2 ^ refinementDepth phase (depth + 1) * parentX + west phase (depth + 1)) <
+        boundary →
+    boundary < quarterEast
+      (2 ^ refinementDepth phase (depth + 1) * parentX + east phase (depth + 1)) →
+    ShadedSignals.selectedVerticalFor
+      (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
+        boundary row)
+      (quadrantAt boundary row) (shadeGrid boundary row) ≠ none →
+    ¬FitsContainedHorizontalChild phase depth parentX parentY
+      column row boundary →
+    ContainedHorizontalGeometryWitness phase depth parentX parentY
       (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
       column row boundary
 
@@ -428,6 +600,57 @@ def ContainedLift : Prop :=
           west phase (depth + 1))
         (2 ^ refinementDepth phase (depth + 1) * blockY +
           east phase (depth + 1))
+
+theorem containedLift_of_seamCover
+    (seams : ContainedSeamCover) : ContainedLift := by
+  intro phase depth grid shadeGrid valid children parentX parentY
+  constructor
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundarySouth hboundaryNorth hselected
+    by_cases fits : FitsContainedVerticalChild phase depth parentX parentY
+      column row boundary
+    · rcases fits with ⟨childX, childY,
+        hparentWest, hparentEast, hparentSouth, hparentNorth,
+        hchildWest, hchildEast, hchildSouth, hchildNorth,
+        hboundaryChildSouth, hboundaryChildNorth⟩
+      rcases (children childX childY).vertical
+        hchildWest hchildEast hchildSouth hchildNorth
+        hboundaryChildSouth hboundaryChildNorth hselected with
+        ⟨localWest, localEast, localSouth, localNorth,
+          houterWest, houterEast, houterSouth, houterNorth,
+          hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+          hboundaryLocalSouth, hboundaryLocalNorth, geometry⟩
+      exact ⟨localWest, localEast, localSouth, localNorth,
+        hparentWest.trans houterWest, houterEast.trans hparentEast,
+        hparentSouth.trans houterSouth, houterNorth.trans hparentNorth,
+        hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+        hboundaryLocalSouth, hboundaryLocalNorth, geometry⟩
+    · exact seams.vertical phase depth grid shadeGrid parentX parentY
+        valid children hwest heast hsouth hnorth hboundarySouth
+        hboundaryNorth hselected fits
+  · intro column row boundary hwest heast hsouth hnorth
+      hboundaryWest hboundaryEast hselected
+    by_cases fits : FitsContainedHorizontalChild phase depth parentX parentY
+      column row boundary
+    · rcases fits with ⟨childX, childY,
+        hparentWest, hparentEast, hparentSouth, hparentNorth,
+        hchildWest, hchildEast, hchildSouth, hchildNorth,
+        hboundaryChildWest, hboundaryChildEast⟩
+      rcases (children childX childY).horizontal
+        hchildWest hchildEast hchildSouth hchildNorth
+        hboundaryChildWest hboundaryChildEast hselected with
+        ⟨localWest, localEast, localSouth, localNorth,
+          houterWest, houterEast, houterSouth, houterNorth,
+          hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+          hboundaryLocalWest, hboundaryLocalEast, geometry⟩
+      exact ⟨localWest, localEast, localSouth, localNorth,
+        hparentWest.trans houterWest, houterEast.trans hparentEast,
+        hparentSouth.trans houterSouth, houterNorth.trans hparentNorth,
+        hlocalWest, hlocalEast, hlocalSouth, hlocalNorth,
+        hboundaryLocalWest, hboundaryLocalEast, geometry⟩
+    · exact seams.horizontal phase depth grid shadeGrid parentX parentY
+        valid children hwest heast hsouth hnorth hboundaryWest
+        hboundaryEast hselected fits
 
 def ContainedStep : Prop :=
   ∀ (phase : Phase) (depth : Nat),
@@ -571,6 +794,12 @@ theorem forcesRoutedFixedCornerSquares_of_containedLift
     ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
   forcesRoutedFixedCornerSquares_of_containedStep
     (containedStep_of_lift lift)
+
+theorem forcesRoutedFixedCornerSquares_of_containedSeamCover
+    (seams : ContainedSeamCover) :
+    ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
+  forcesRoutedFixedCornerSquares_of_containedLift
+    (containedLift_of_seamCover seams)
 
 end ShadedObstructionPairCoverRecurrence
 end Closed104
