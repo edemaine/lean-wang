@@ -39,13 +39,15 @@ def selectedVertical (parent : Index) (visited : Array Bool)
     (parentLight : Bool) (x y : Nat) : Bool :=
   (verticalInterior? (componentAt (localGrid parent) x y)
       (quadrantAt x y)).isSome &&
-    reachedWithParity parent visited ⟨x, y, .south⟩ (!parentLight)
+    (reachedWithParity parent visited ⟨x, y, .south⟩ (!parentLight) ||
+      reachedWithParity parent visited ⟨x, y, .north⟩ (!parentLight))
 
 def selectedHorizontal (parent : Index) (visited : Array Bool)
     (parentLight : Bool) (x y : Nat) : Bool :=
   (horizontalInterior? (componentAt (localGrid parent) x y)
       (quadrantAt x y)).isSome &&
-    reachedWithParity parent visited ⟨x, y, .west⟩ (!parentLight)
+    (reachedWithParity parent visited ⟨x, y, .west⟩ (!parentLight) ||
+      reachedWithParity parent visited ⟨x, y, .east⟩ (!parentLight))
 
 def coordinates : List Nat := (List.range 14).map (10 + ·)
 
@@ -123,10 +125,26 @@ def completeFor (parent : Index) (visited : Array Bool)
       rightWitness parent visited parentLight column row ||
       leftWitness parent visited parentLight column row)
 
+def coverageFor (parent : Index) (visited : Array Bool) : Bool :=
+  coordinates.all fun x => coordinates.all fun y =>
+    (!(verticalInterior? (componentAt (localGrid parent) x y)
+        (quadrantAt x y)).isSome ||
+      reachedWithParity parent visited ⟨x, y, .south⟩ false ||
+      reachedWithParity parent visited ⟨x, y, .south⟩ true ||
+      reachedWithParity parent visited ⟨x, y, .north⟩ false ||
+      reachedWithParity parent visited ⟨x, y, .north⟩ true) &&
+    (!(horizontalInterior? (componentAt (localGrid parent) x y)
+        (quadrantAt x y)).isSome ||
+      reachedWithParity parent visited ⟨x, y, .west⟩ false ||
+      reachedWithParity parent visited ⟨x, y, .west⟩ true ||
+      reachedWithParity parent visited ⟨x, y, .east⟩ false ||
+      reachedWithParity parent visited ⟨x, y, .east⟩ true)
+
 def complete : Bool :=
   (states.map representative).all fun parent =>
     let visited := reachedBitmap (nodes parent)
-    completeFor parent visited false && completeFor parent visited true
+    coverageFor parent visited &&
+      completeFor parent visited false && completeFor parent visited true
 
 set_option linter.style.nativeDecide false in
 theorem complete_eq_true : complete = true := by
