@@ -12,6 +12,7 @@ import LeanWang.PostMachineInput
 import LeanWang.PartrecToTM2Support
 import LeanWang.UniversalCode
 import LeanWang.UniversalTM0Semantic
+import LeanWang.UniversalTM0TableauCells
 import LeanWang.UniversalTM0Folded
 import LeanWang.UniversalMachineCertificate
 import LeanWang.UniversalFoldedReduction
