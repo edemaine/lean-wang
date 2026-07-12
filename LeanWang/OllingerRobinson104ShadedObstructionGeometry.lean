@@ -34,6 +34,9 @@ structure Geometry
     quarterSouth south < row -> row < quarterNorth north ->
     IsFreeRow indexGrid shadeGrid west east row ->
     ¬IsFreeColumn indexGrid shadeGrid south north column ->
+      ShadedSignals.selectedHorizontalFor
+          (componentAt indexGrid column row) (quadrantAt column row)
+          (shadeGrid column row) ≠ none ∨
       (∃ boundary, row < boundary ∧ boundary < quarterNorth north ∧
         ShadedSignals.selectedHorizontalFor
           (componentAt indexGrid column boundary) (quadrantAt column boundary)
@@ -55,6 +58,9 @@ structure Geometry
     quarterSouth south < row -> row < quarterNorth north ->
     IsFreeColumn indexGrid shadeGrid south north column ->
     ¬IsFreeRow indexGrid shadeGrid west east row ->
+      ShadedSignals.selectedVerticalFor
+          (componentAt indexGrid column row) (quadrantAt column row)
+          (shadeGrid column row) ≠ none ∨
       (∃ boundary, column < boundary ∧ boundary < quarterEast east ∧
         ShadedSignals.selectedVerticalFor
           (componentAt indexGrid boundary row) (quadrantAt boundary row)
@@ -71,6 +77,54 @@ structure Geometry
           ShadedSignals.selectedVerticalFor
             (componentAt indexGrid x row) (quadrantAt x row)
             (shadeGrid x row) = none)
+
+theorem vertical_blocked_at_boundary
+    {indexGrid : Nat -> Nat -> Index}
+    {shadeGrid : Nat -> Nat -> RedShades.State}
+    {signalGrid : Nat -> Nat -> Signals.State}
+    (valid : ValidGrid indexGrid shadeGrid signalGrid)
+    {column row : Nat}
+    (hselected : ShadedSignals.selectedHorizontalFor
+      (componentAt indexGrid column row) (quadrantAt column row)
+      (shadeGrid column row) ≠ none) :
+    (signalGrid column row).south ≠ .none ∨
+      (signalGrid column row).north ≠ .none := by
+  cases hvalue : ShadedSignals.selectedHorizontalFor
+      (componentAt indexGrid column row) (quadrantAt column row)
+      (shadeGrid column row) with
+  | none => contradiction
+  | some interior =>
+      cases interior with
+      | north =>
+          exact Or.inl (Signals.vertical_interiorNorth_rules (by
+            simpa only [hvalue] using valid.verticalAllowed column row)).1
+      | south =>
+          exact Or.inr (Signals.vertical_interiorSouth_rules (by
+            simpa only [hvalue] using valid.verticalAllowed column row)).1
+
+theorem horizontal_blocked_at_boundary
+    {indexGrid : Nat -> Nat -> Index}
+    {shadeGrid : Nat -> Nat -> RedShades.State}
+    {signalGrid : Nat -> Nat -> Signals.State}
+    (valid : ValidGrid indexGrid shadeGrid signalGrid)
+    {column row : Nat}
+    (hselected : ShadedSignals.selectedVerticalFor
+      (componentAt indexGrid column row) (quadrantAt column row)
+      (shadeGrid column row) ≠ none) :
+    (signalGrid column row).west ≠ .none ∨
+      (signalGrid column row).east ≠ .none := by
+  cases hvalue : ShadedSignals.selectedVerticalFor
+      (componentAt indexGrid column row) (quadrantAt column row)
+      (shadeGrid column row) with
+  | none => contradiction
+  | some interior =>
+      cases interior with
+      | west =>
+          exact Or.inr (Signals.horizontal_interiorWest_rules (by
+            simpa only [hvalue] using valid.horizontalAllowed column row)).1
+      | east =>
+          exact Or.inl (Signals.horizontal_interiorEast_rules (by
+            simpa only [hvalue] using valid.horizontalAllowed column row)).1
 
 theorem vertical_blocked_of_upper
     {indexGrid : Nat -> Nat -> Index}
@@ -195,14 +249,16 @@ theorem Geometry.crossingObstruction
   constructor
   · intro column row hwest heast hsouth hnorth hfreeRow hnotFreeColumn
     rcases geometry.verticalBoundary hwest heast hsouth hnorth
-      hfreeRow hnotFreeColumn with hupper | hlower
+      hfreeRow hnotFreeColumn with hat | hupper | hlower
+    · exact vertical_blocked_at_boundary valid hat
     · rcases hupper with ⟨boundary, hrb, _, hselected, hbetween⟩
       exact Or.inr (vertical_blocked_of_upper valid hrb hselected hbetween)
     · rcases hlower with ⟨boundary, _, hbr, hselected, hbetween⟩
       exact Or.inl (vertical_blocked_of_lower valid hbr hselected hbetween)
   · intro column row hwest heast hsouth hnorth hfreeColumn hnotFreeRow
     rcases geometry.horizontalBoundary hwest heast hsouth hnorth
-      hfreeColumn hnotFreeRow with hright | hleft
+      hfreeColumn hnotFreeRow with hat | hright | hleft
+    · exact horizontal_blocked_at_boundary valid hat
     · rcases hright with ⟨boundary, hcb, _, hselected, hbetween⟩
       exact Or.inr (horizontal_blocked_of_right valid hcb hselected hbetween)
     · rcases hleft with ⟨boundary, _, hbc, hselected, hbetween⟩
