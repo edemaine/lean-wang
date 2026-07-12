@@ -95,6 +95,19 @@ theorem sparsePort_exceptionalColumn (depth y : Nat) (side : Side) :
       ⟨exceptionalCoordinate (depth + 1) + 24, sparseCoordinate y, side⟩ := by
   simp [sparsePort, sparseCoordinate_exceptionalCoordinate]
 
+/-- The exceptional target is the sparse copy of the retained extra-pivot line. -/
+theorem exceptionalCoordinate_as_sparseSource (depth : Nat) :
+    exceptionalCoordinate depth = sparseCoordinate
+      (lineCoordinate .even (depth + 1) (extraChild (pivot depth))) := by
+  have hsource : lineCoordinate .even (depth + 1)
+      (extraChild (pivot depth)) = 16 * 4 ^ depth + 2 := by
+    rw [lineCoordinate_even]
+    simp [extraChild, pivot, pow_succ]
+    omega
+  rw [exceptionalCoordinate_eq, hsource]
+  simp [sparseCoordinate, macroOrigin, localCoordinate]
+  omega
+
 end SparseFreeLineEvenExtraWindowCoordinates
 end Closed104
 end Figure13Layers

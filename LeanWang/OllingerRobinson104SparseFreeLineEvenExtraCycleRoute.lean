@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104RedShadeCycleBridgeComposition
+import LeanWang.OllingerRobinson104SparseFreeLineLocalProjection
 import LeanWang.OllingerRobinson104ShadedFreeLinePatternRefinement
 
 /-!
@@ -24,6 +25,7 @@ namespace SparseFreeLineEvenExtraCycleRoute
 open OrientedRedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
   RedShadeGraphRefinement RedShadeCycleConnectivity
   RedShadeCycleBridgeComposition ShadedFreeLinePatternRefinement
+  SparseFreeLineLocalProjection
 
 /-- Package an odd refined-cycle route as a projection from the old cycle. -/
 def projectsTo_of_refinedCyclePath
@@ -105,6 +107,99 @@ theorem weightedSource_of_evenBridge
   }, rfl, rfl⟩
   simpa [Bool.xor_assoc] using
     Path.trans bridgePath (Path.trans alongDescendant source.path)
+
+/-- Inherited sparse segments and separately routed created segments assemble a row. -/
+theorem verticalProjectionAt_of_sparse_or_created
+    {grid : Nat → Nat → Index} {west east south north oldRow fineRow : Nat}
+    (previous : LiveRowCertificate grid west east south north oldRow)
+    (coordinate : fineRow = sparseCoordinate oldRow)
+    (classify : ∀ x,
+      Signals.verticalInterior?
+        (Signals.FreeCellLocal.componentAt (RedCycles.iterateRefine 2 grid)
+          x fineRow)
+        (Signals.FreeCellLocal.quadrantAt x fineRow) ≠ none →
+      (∃ oldX, sparseCoordinate oldX = x ∧
+        Signals.verticalInterior?
+          (Signals.FreeCellLocal.componentAt grid oldX oldRow)
+          (Signals.FreeCellLocal.quadrantAt oldX oldRow) ≠ none) ∨
+      (Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, fineRow, .south⟩) ∨
+       Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨x, fineRow, .north⟩))) :
+    VerticalProjectionAt grid west east south north fineRow := by
+  intro x hwest heast interior
+  rcases classify x interior with inherited | created
+  · rcases inherited with ⟨oldX, oldCoordinate, oldInterior⟩
+    have oldWest : quarterWest west < oldX := by
+      rw [← sparseCoordinate_lt_iff]
+      simpa [oldCoordinate] using hwest
+    have oldEast : oldX < quarterEast east := by
+      rw [← sparseCoordinate_lt_iff]
+      simpa [oldCoordinate] using heast
+    rcases previous oldX oldWest oldEast oldInterior with
+      ⟨source, sourceOdd, endpoint | endpoint⟩
+    · left
+      refine ⟨ProjectsTo.ofOddSourcePath sourceOdd ?_ ?_⟩
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate] using
+          (Path.refl (indexGrid := RedCycles.iterateRefine 2 grid)
+            (sparsePort source.port))
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate,
+          WeightedSource.refine] using source.refine.portLive
+    · right
+      refine ⟨ProjectsTo.ofOddSourcePath sourceOdd ?_ ?_⟩
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate] using
+          (Path.refl (indexGrid := RedCycles.iterateRefine 2 grid)
+            (sparsePort source.port))
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate,
+          WeightedSource.refine] using source.refine.portLive
+  · exact created
+
+/-- Inherited sparse segments and separately routed created segments assemble a column. -/
+theorem horizontalProjectionAt_of_sparse_or_created
+    {grid : Nat → Nat → Index}
+    {west east south north oldColumn fineColumn : Nat}
+    (previous : LiveColumnCertificate grid west east south north oldColumn)
+    (coordinate : fineColumn = sparseCoordinate oldColumn)
+    (classify : ∀ y,
+      Signals.horizontalInterior?
+        (Signals.FreeCellLocal.componentAt (RedCycles.iterateRefine 2 grid)
+          fineColumn y)
+        (Signals.FreeCellLocal.quadrantAt fineColumn y) ≠ none →
+      (∃ oldY, sparseCoordinate oldY = y ∧
+        Signals.horizontalInterior?
+          (Signals.FreeCellLocal.componentAt grid oldColumn oldY)
+          (Signals.FreeCellLocal.quadrantAt oldColumn oldY) ≠ none) ∨
+      (Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨fineColumn, y, .west⟩) ∨
+       Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
+        (south := south) (north := north) ⟨fineColumn, y, .east⟩))) :
+    HorizontalProjectionAt grid west east south north fineColumn := by
+  intro y hsouth hnorth interior
+  rcases classify y interior with inherited | created
+  · rcases inherited with ⟨oldY, oldCoordinate, oldInterior⟩
+    have oldSouth : quarterSouth south < oldY := by
+      rw [← sparseCoordinate_lt_iff]
+      simpa [oldCoordinate] using hsouth
+    have oldNorth : oldY < quarterNorth north := by
+      rw [← sparseCoordinate_lt_iff]
+      simpa [oldCoordinate] using hnorth
+    rcases previous oldY oldSouth oldNorth oldInterior with
+      ⟨source, sourceOdd, endpoint | endpoint⟩
+    · left
+      refine ⟨ProjectsTo.ofOddSourcePath sourceOdd ?_ ?_⟩
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate] using
+          (Path.refl (indexGrid := RedCycles.iterateRefine 2 grid)
+            (sparsePort source.port))
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate,
+          WeightedSource.refine] using source.refine.portLive
+    · right
+      refine ⟨ProjectsTo.ofOddSourcePath sourceOdd ?_ ?_⟩
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate] using
+          (Path.refl (indexGrid := RedCycles.iterateRefine 2 grid)
+            (sparsePort source.port))
+      · simpa [endpoint, sparsePort, oldCoordinate, coordinate,
+          WeightedSource.refine] using source.refine.portLive
+  · exact created
 
 end SparseFreeLineEvenExtraCycleRoute
 end Closed104
