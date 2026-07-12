@@ -52,7 +52,7 @@ proof task.
 - `LeanWang.UniversalTM0Tableau*` folds the two-sided TM0 tape into paired
   cells, proves the radius-one Wang history construction in both directions,
   and computes the finite bottom-row tile list and seed.
-- `LeanWang.UniversalFoldedReduction` proves the fixed-corner and plane-tiling
+- `LeanWang.UniversalTM0Reduction` proves the fixed-corner and plane-tiling
   reductions and derives undecidability from Mathlib's halting problem.
 - `LeanWang.OllingerRobinsonScaffold` defines the abstract scaffold certificate.
 - `LeanWang.OllingerRobinson104*` contains the corrected 104-component

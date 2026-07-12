@@ -21,7 +21,7 @@ import LeanWang.UniversalTM0TableauHistory
 import LeanWang.UniversalTM0TableauInitial
 import LeanWang.UniversalTM0TableauDecode
 import LeanWang.UniversalTM0TableauData
-import LeanWang.UniversalFoldedReduction
+import LeanWang.UniversalTM0Reduction
 import LeanWang.Theorems
 import LeanWang.RoutedScaffold
 import LeanWang.RoutedPlaneDecode

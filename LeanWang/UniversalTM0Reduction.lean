@@ -26,7 +26,7 @@ noncomputable section
 
 namespace LeanWang
 
-namespace UniversalFoldedReduction
+namespace UniversalTM0Reduction
 
 open Nat.Partrec (Code)
 
@@ -180,6 +180,6 @@ theorem domino_problem_undecidable_of_routed
   exact ComputablePred.halting_problem 0
     ((hnonhalting.not).of_eq fun _ => not_not)
 
-end UniversalFoldedReduction
+end UniversalTM0Reduction
 
 end LeanWang

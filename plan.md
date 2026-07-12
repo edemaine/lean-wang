@@ -59,7 +59,7 @@ or descriptor decoder occurs in the retained reduction.
 7. `UniversalTM0TableauData` computes the finite tile list and seed, so the
    resulting Wang instance tiles exactly when
    `Nat.Partrec.Code.eval c 0` is undefined.
-8. `UniversalFoldedReduction` exposes that construction to the existing
+8. `UniversalTM0Reduction` exposes that construction to the existing
    scaffold reductions.
 9. The direct `IsRoutedScaffold` reduction preserves the horizontal and
    vertical channel constraints used by the Robinson board construction.

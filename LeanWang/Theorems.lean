@@ -13,7 +13,7 @@ Main theorem surface for the Wang-tile undecidability proof.
 This file collects the generic tiling theorems used by the reduction:
 machine-tile correctness, fixed-corner-square compactness, and the abstract
 scaffold construction. The fixed universal-machine specialization is kept in
-`UniversalFoldedReduction`.
+`UniversalTM0Reduction`.
 -/
 
 noncomputable section

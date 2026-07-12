@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.UniversalFoldedReduction
+import LeanWang.UniversalTM0Reduction
 
 /-!
 # Final Wang-tile undecidability theorem
@@ -22,25 +22,25 @@ namespace LeanWang
 theorem encoded_domino_problem_undecidable
     (S : Scaffold) (hS : IsScaffold S) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  UniversalFoldedReduction.encoded_domino_problem_undecidable S hS
+  UniversalTM0Reduction.encoded_domino_problem_undecidable S hS
 
 /-- Wang domino undecidability from any certified scaffold. -/
 theorem domino_problem_undecidable
     (S : Scaffold) (hS : IsScaffold S) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  UniversalFoldedReduction.domino_problem_undecidable S hS
+  UniversalTM0Reduction.domino_problem_undecidable S hS
 
 /-- Encoded Wang domino undecidability from a channel-aware routed scaffold. -/
 theorem encoded_domino_problem_undecidable_of_routed
     (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  UniversalFoldedReduction.encoded_domino_problem_undecidable_of_routed S hS
+  UniversalTM0Reduction.encoded_domino_problem_undecidable_of_routed S hS
 
 /-- Wang domino undecidability from a channel-aware routed scaffold. -/
 theorem domino_problem_undecidable_of_routed
     (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  UniversalFoldedReduction.domino_problem_undecidable_of_routed S hS
+  UniversalTM0Reduction.domino_problem_undecidable_of_routed S hS
 
 end LeanWang
 
