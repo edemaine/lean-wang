@@ -21,7 +21,7 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedObstructionGeometryBoundedSoundness
 
-open OrientedRedCycles RedShadeGraph RedShadeGraphSearch
+open OrientedRedCycles RedCycles RedShadeGraph RedShadeGraphSearch
   RedShadeGraphSearchSoundness RedShadeGraphTranslation RedShadeCycles
   RedShadeGraphRefinement RedShadePaths ShadedFreeLineGraphBase
   ShadedObstructionGeometryBaseAudit
@@ -982,6 +982,51 @@ theorem geometry
       (ShadedObstructionGeometryBaseComplete.coverageFor_canonical_eq_true parent))
     (ShadedObstructionGeometryBaseComplete.completeFor_canonical_eq_true
       parent parentLight)
+
+theorem geometry_shift
+    (grid : Nat → Nat → Index)
+    {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid (iterateRefine 4 grid) stateGrid)
+    (blockX blockY : Nat) :
+    Geometry
+      (iterateRefine 4 (RefinementTranslation.shiftGrid grid blockX blockY))
+      (ShadedFreeLineTranslation.shiftQuarterGrid stateGrid
+        (32 * blockX) (32 * blockY)) 4 12 4 12 := by
+  let parent := grid blockX blockY
+  let targetGrid :=
+    iterateRefine 4 (RefinementTranslation.shiftGrid grid blockX blockY)
+  let targetState := ShadedFreeLineTranslation.shiftQuarterGrid stateGrid
+    (32 * blockX) (32 * blockY)
+  have localValid : ValidShadeGrid targetGrid targetState := by
+    simpa only [targetGrid, targetState, show 2 ^ (4 + 1) = 32 by norm_num] using
+      ShadedFreeLineTranslation.validShadeGrid_shift 4 grid valid blockX blockY
+  have localCycle : CycleOn targetGrid 4 12 4 12 := by
+    have cycle := OrientedRedBoardTranslations.at_scale
+      (RefinementTranslation.shiftGrid grid blockX blockY) 2 0 0
+    norm_num at cycle
+    simpa only [targetGrid] using cycle
+  have same : BorderGeometry.SameComponents
+      (localGrid (BorderSubstitution.canonicalIndex parent))
+      (localGrid parent) := by
+    simpa [ShadedFreeLineRecurrence.localGrid,
+      ShadedFreeLineRecurrence.refinementDepth,
+      ShadedFreeLineRecurrence.Phase.extra,
+      ShadedFreeLineGraphBase.localGrid] using
+      BorderCoverage.sameComponents_localGrid_canonicalIndex
+        ShadedFreeLineRecurrence.Phase.even 1 parent
+  have componentsEq : ∀ x y, x < 32 → y < 32 →
+      componentAt (localGrid (BorderSubstitution.canonicalIndex parent)) x y =
+        componentAt targetGrid x y := by
+    intro x y hx hy
+    exact (same x y).trans
+      (componentAt_localGrid_eq_shift grid blockX blockY rfl hx hy)
+  rcases RedShadeCycles.CycleOn.exists_cycleShade localCycle localValid with
+    ⟨shade, shaded⟩
+  cases shade with
+  | light =>
+      exact geometry parent componentsEq localValid true localCycle (by simpa)
+  | dark =>
+      exact geometry parent componentsEq localValid false localCycle (by simpa)
 
 end ShadedObstructionGeometryBoundedSoundness
 end Closed104
