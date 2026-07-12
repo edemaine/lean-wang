@@ -376,12 +376,10 @@ end TableTransition
 /--
 A finite transition-table presentation of the concrete machine model.
 
-This is the current backend consumed by the Wang-tile construction: it contains
-only finite data plus support proofs, and converts to the semantic `Machine`
-used by the tile simulation. The source-level reduction no longer targets this
-model directly; it reaches finite one-sided TM0 data first, then uses
-`PostProgram.toTableProgram` as a compatibility adapter for the existing tile
-layer.
+This finite transition-table presentation is retained as generic infrastructure
+for the Wang history-tile construction. The final undecidability reduction does
+not compile into this model: it gives one fixed Mathlib TM0 machine directly to
+the folded tableau in `UniversalTM0Tableau`.
 -/
 structure TableMachine where
   symbols : List Nat
