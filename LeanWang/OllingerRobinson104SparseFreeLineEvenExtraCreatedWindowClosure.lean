@@ -196,6 +196,162 @@ theorem horizontalWindowAt_succ
   · omega
   · omega
 
+set_option linter.style.nativeDecide false in
+theorem canonicalIndex_zero : BorderSubstitution.canonicalIndex 0 = 0 := by
+  native_decide
+
+theorem windowGrid_canonicalWindow (window : Window) (x y : Nat) :
+    windowGrid (canonicalWindow window) x y =
+      BorderSubstitution.canonicalIndex (windowGrid window x y) := by
+  simp only [windowGrid, canonicalWindow, List.getElem?_map]
+  cases hentry : window[y * 3 + x]? <;> simp [canonicalIndex_zero]
+
+theorem canonicalWindow_refineWindow
+    (window : Window) (residueX residueY : Nat) :
+    canonicalWindow (refineWindow window residueX residueY) =
+      canonicalWindow
+        (refineWindow (canonicalWindow window) residueX residueY) := by
+  have hgrid : windowGrid (canonicalWindow window) =
+      BorderSubstitution.canonicalizeGrid (windowGrid window) := by
+    funext gridX gridY
+    exact windowGrid_canonicalWindow window gridX gridY
+  simp only [canonicalWindow, refineWindow, List.map_flatMap, List.map_map]
+  apply List.flatMap_congr
+  intro y _
+  apply List.map_congr_left
+  intro x _
+  simp only [Function.comp_apply]
+  change BorderSubstitution.canonicalIndex
+      (iterateRefine 2 (windowGrid window) (residueX + x) (residueY + y)) =
+    BorderSubstitution.canonicalIndex
+      (iterateRefine 2 (windowGrid (canonicalWindow window))
+        (residueX + x) (residueY + y))
+  rw [hgrid]
+  have hstate := BorderGeometry.indexState_iterateRefine_canonicalizeGrid
+    2 (windowGrid window) (residueX + x) (residueY + y)
+  simpa [Function.comp_def, BorderSubstitution.canonicalIndex] using
+    congrArg BorderSubstitution.representative hstate.symm
+
+theorem verticalBase_mem (parent : Index) (delta : Nat) (hdelta : delta < 9) :
+    canonicalWindow (verticalWindowAt 0 parent (4 + delta)) ∈
+      verticalBaseWindows := by
+  rw [verticalWindowAt_zero, verticalBaseWindows, List.mem_eraseDups,
+    List.mem_flatMap]
+  refine ⟨parent, by simp, ?_⟩
+  rw [List.mem_map]
+  exact ⟨delta, by simpa using hdelta, rfl⟩
+
+theorem horizontalBase_mem (parent : Index) (delta : Nat) (hdelta : delta < 9) :
+    canonicalWindow (horizontalWindowAt 0 parent (4 + delta)) ∈
+      horizontalBaseWindows := by
+  rw [horizontalWindowAt_zero, horizontalBaseWindows, List.mem_eraseDups,
+    List.mem_flatMap]
+  refine ⟨parent, by simp, ?_⟩
+  rw [List.mem_map]
+  exact ⟨delta, by simpa using hdelta, rfl⟩
+
+theorem verticalBase_mem_closed {window : Window}
+    (hwindow : window ∈ verticalBaseWindows) : window ∈ verticalClosed := by
+  rw [verticalClosed, closeVertical, List.mem_eraseDups, List.mem_append]
+  exact Or.inl hwindow
+
+theorem horizontalBase_mem_closed {window : Window}
+    (hwindow : window ∈ horizontalBaseWindows) : window ∈ horizontalClosed := by
+  rw [horizontalClosed, closeHorizontal, List.mem_eraseDups, List.mem_append]
+  exact Or.inl hwindow
+
+theorem verticalRefine_mem_closed {window : Window}
+    (hwindow : window ∈ verticalClosed) {residueX : Nat}
+    (hresidue : residueX < 4) :
+    canonicalWindow (refineWindow window residueX 0) ∈ verticalClosed := by
+  have hmem : canonicalWindow (refineWindow window residueX 0) ∈
+      closeVertical verticalClosed := by
+    rw [closeVertical, List.mem_eraseDups, List.mem_append]
+    right
+    rw [List.mem_flatMap]
+    refine ⟨window, hwindow, ?_⟩
+    rw [List.mem_map]
+    exact ⟨residueX, by simpa using hresidue, rfl⟩
+  rwa [vertical_closed] at hmem
+
+theorem horizontalRefine_mem_closed {window : Window}
+    (hwindow : window ∈ horizontalClosed) {residueY : Nat}
+    (hresidue : residueY < 4) :
+    canonicalWindow (refineWindow window 0 residueY) ∈ horizontalClosed := by
+  have hmem : canonicalWindow (refineWindow window 0 residueY) ∈
+      closeHorizontal horizontalClosed := by
+    rw [closeHorizontal, List.mem_eraseDups, List.mem_append]
+    right
+    rw [List.mem_flatMap]
+    refine ⟨window, hwindow, ?_⟩
+    rw [List.mem_map]
+    exact ⟨residueY, by simpa using hresidue, rfl⟩
+  rwa [horizontal_closed] at hmem
+
+/-- Every actual recursive row window belongs to the vertical finite quotient. -/
+theorem canonical_verticalWindowAt_mem
+    (depth : Nat) (parent : Index) (delta : Nat)
+    (hdelta : delta ≤ blockCount depth) :
+    canonicalWindow
+      (verticalWindowAt depth parent (firstBlock depth + delta)) ∈
+      verticalClosed := by
+  induction depth generalizing delta with
+  | zero =>
+      rw [firstBlock_zero]
+      apply verticalBase_mem_closed
+      exact verticalBase_mem parent delta
+        (by simp [blockCount, firstBlock] at hdelta ⊢; omega)
+  | succ depth ih =>
+      let oldDelta := (delta + 3) / 4
+      have holdDelta : oldDelta ≤ blockCount depth := by
+        simp only [blockCount, firstBlock_succ] at hdelta ⊢
+        dsimp [oldDelta]
+        have hpositive : 0 < firstBlock depth := pow_pos (by decide) _
+        omega
+      have hblock :
+          (firstBlock (depth + 1) + delta - 1) / 4 + 1 =
+            firstBlock depth + oldDelta := by
+        rw [firstBlock_succ]
+        dsimp [oldDelta]
+        have hpositive : 0 < firstBlock depth := by
+          exact pow_pos (by decide) _
+        omega
+      rw [verticalWindowAt_succ, hblock, canonicalWindow_refineWindow]
+      apply verticalRefine_mem_closed (ih oldDelta holdDelta)
+      exact Nat.mod_lt _ (by decide)
+
+/-- Every actual recursive column window belongs to the horizontal quotient. -/
+theorem canonical_horizontalWindowAt_mem
+    (depth : Nat) (parent : Index) (delta : Nat)
+    (hdelta : delta ≤ blockCount depth) :
+    canonicalWindow
+      (horizontalWindowAt depth parent (firstBlock depth + delta)) ∈
+      horizontalClosed := by
+  induction depth generalizing delta with
+  | zero =>
+      rw [firstBlock_zero]
+      apply horizontalBase_mem_closed
+      exact horizontalBase_mem parent delta
+        (by simp [blockCount, firstBlock] at hdelta ⊢; omega)
+  | succ depth ih =>
+      let oldDelta := (delta + 3) / 4
+      have holdDelta : oldDelta ≤ blockCount depth := by
+        simp only [blockCount, firstBlock_succ] at hdelta ⊢
+        dsimp [oldDelta]
+        have hpositive : 0 < firstBlock depth := pow_pos (by decide) _
+        omega
+      have hblock :
+          (firstBlock (depth + 1) + delta - 1) / 4 + 1 =
+            firstBlock depth + oldDelta := by
+        rw [firstBlock_succ]
+        dsimp [oldDelta]
+        have hpositive : 0 < firstBlock depth := by
+          exact pow_pos (by decide) _
+        omega
+      rw [horizontalWindowAt_succ, hblock, canonicalWindow_refineWindow]
+      apply horizontalRefine_mem_closed (ih oldDelta holdDelta)
+      exact Nat.mod_lt _ (by decide)
+
 end SparseFreeLineEvenExtraCreatedWindowClosure
 end Closed104
 end Figure13Layers

@@ -32,12 +32,12 @@ def refineWindow (window : Window) (residueX residueY : Nat) : Window :=
 
 def verticalBaseWindows : List Window :=
   ((List.finRange 104).flatMap fun parent =>
-    (List.range 8).map fun delta =>
+    (List.range 9).map fun delta =>
       canonicalWindow (windowAt parent (4 + delta) 9)).eraseDups
 
 def horizontalBaseWindows : List Window :=
   ((List.finRange 104).flatMap fun parent =>
-    (List.range 8).map fun delta =>
+    (List.range 9).map fun delta =>
       canonicalWindow (windowAt parent 9 (4 + delta))).eraseDups
 
 def closeVertical (windows : List Window) : List Window :=
@@ -96,9 +96,9 @@ theorem horizontal_routes_complete :
 
 set_option linter.style.nativeDecide false in
 theorem quotient_lengths :
-    verticalBaseWindows.length = 32 ∧ verticalClosed.length = 92 ∧
-      verticalCases.length = 92 ∧ horizontalBaseWindows.length = 32 ∧
-      horizontalClosed.length = 92 ∧ horizontalCases.length = 92 := by
+    verticalBaseWindows.length = 36 ∧ verticalClosed.length = 104 ∧
+      verticalCases.length = 104 ∧ horizontalBaseWindows.length = 36 ∧
+      horizontalClosed.length = 104 ∧ horizontalCases.length = 104 := by
   native_decide
 
 end SparseFreeLineEvenExtraCreatedWindowClosure
