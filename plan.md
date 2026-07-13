@@ -660,6 +660,10 @@ The exhaustive vertical and horizontal checks leave one dual pair of local
 families: a sparse selected boundary with a created free-row/free-column
 coordinate.  Those cases occur at recursive-child edges and need the enclosing
 hierarchy context rather than an arbitrary constant-parent macrocell.
+`OllingerRobinson104PairCoverSeamCreatedLocalAudit` proves soundness of this
+check as bounded red-graph paths.  Every intermediate port remains in the
+audited 8-by-8 macrocell, providing exactly the hypothesis needed by the
+existing component-congruence and block-translation lemmas.
 
 ### 1. Obtain arbitrarily large free squares
 
