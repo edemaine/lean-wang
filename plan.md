@@ -840,13 +840,13 @@ selected boundary uses the parity-normalized local-cycle theorem.  The
 remaining source-ancestry work is the finite even/odd base certificate and its
 iteration to the recurrence depths used by `ResidualSourceAncestorsAt`.
 
-The base certificate is now factored into a reusable soundness module and
-small native-decision cache modules.  A single weighted flood starts from the
-two consecutive canonical cycles and simultaneously checks every live source
-in the stable collar.  The first cache module certifies both the depth-four
-even base and depth-five odd base for parent tiles `0` through `3`; the
-remaining parent ranges use the same four-parent module shape so that changing
-later hierarchy code does not rerun the whole finite audit.
+The base certificate is now complete and factored into a reusable soundness
+module plus 26 four-parent native-decision cache modules.  A single weighted
+flood starts from the two consecutive canonical cycles and simultaneously
+checks every live source in the stable collar.  Both the depth-four even base
+and depth-five odd base are certified for all 104 parent tiles.  The public
+`sourceAncestorsIn` theorem hides the finite partition, while the small cache
+modules ensure that changing later hierarchy code does not rerun the audit.
 
 ### 1. Obtain arbitrarily large free squares
 
