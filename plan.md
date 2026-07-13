@@ -945,6 +945,16 @@ remaining invariant is only target recognizability: for the source's actual
 family, find a live target on the query line or strictly between it and the
 source.  All graph connectivity is supplied generically.
 
+`OllingerRobinson104PairCoverSeamResidualDirectPathTargets` now states that
+recognizability invariant as `FamilyTargetsAt`.  `RowFamilyTarget` and
+`ColumnFamilyTarget` allow exactly the crossing and between-line alternatives
+from the seam definitions, with a target ancestor in the source's actual
+family.  `FamilyTargetsAt.toDirectPaths` combines this finite endpoint choice
+with the proved all-depth source ancestry and the same-family bridge, yielding
+`DirectResidualPathsAt` with no remaining graph search.  The next finite work
+can therefore focus solely on recognizing a suitable target family from local
+two-substitution data and transporting that recognition through recurrence.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

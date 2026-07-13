@@ -44,7 +44,7 @@ structure DirectResidualPathsAt (phase : Phase) (depth : Nat) : Prop where
     Signals.horizontalInterior?
       (componentAt (iterateRefine 2
         (refinedGrid phase (depth + 1) grid)) column boundary)
-      (quadrantAt column boundary) != none ->
+      (quadrantAt column boundary) ≠ none ->
     VerticalSeamPath
       (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
       (successorWest phase (depth + 1) parentX)
@@ -64,7 +64,7 @@ structure DirectResidualPathsAt (phase : Phase) (depth : Nat) : Prop where
     Signals.verticalInterior?
       (componentAt (iterateRefine 2
         (refinedGrid phase (depth + 1) grid)) boundary row)
-      (quadrantAt boundary row) != none ->
+      (quadrantAt boundary row) ≠ none ->
     HorizontalSeamPath
       (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
       (successorWest phase (depth + 1) parentY)
@@ -75,7 +75,7 @@ private theorem horizontalInterior_ne_none_of_selected
     {state : RedShades.State} {interior : Signals.VerticalInterior}
     (selected : ShadedSignals.selectedHorizontalFor component quadrant state =
       some interior) :
-    Signals.horizontalInterior? component quadrant != none := by
+    Signals.horizontalInterior? component quadrant ≠ none := by
   unfold ShadedSignals.selectedHorizontalFor at selected
   split at selected
   · simp [selected]
@@ -86,7 +86,7 @@ private theorem verticalInterior_ne_none_of_selected
     {state : RedShades.State} {interior : Signals.HorizontalInterior}
     (selected : ShadedSignals.selectedVerticalFor component quadrant state =
       some interior) :
-    Signals.verticalInterior? component quadrant != none := by
+    Signals.verticalInterior? component quadrant ≠ none := by
   unfold ShadedSignals.selectedVerticalFor at selected
   split at selected
   · simp [selected]
