@@ -740,6 +740,15 @@ inside that cycle.  The four face orientations can then be discharged by the
 cycle contradiction, after which the all-depth pair-cover recurrence can be
 assembled.
 
+`OllingerRobinson104PairCoverSeamResidualCycles` makes that remaining boundary
+precise.  `ResidualCycleWitnessesAt` asks each wrong-facing case for an
+existential `RowCrossingCycle` or `ColumnCrossingCycle`; validity and freeness
+are intentionally not part of these geometric obligations.  The module proves
+that the four witnesses imply both residual face structures.  It remains to
+construct the witnesses from aligned canonical cycles, the sparse-boundary
+classification, the nearest-boundary hypothesis, and the failed contained-child
+test.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
