@@ -521,6 +521,16 @@ way at a nonrecursive seam. The remaining seam lemma must therefore use the
 actual valid shade grid and the fact that no *selected* boundary lies between
 the query and the chosen nearest boundary, exactly as in Robinson's argument.
 
+The seam-path checker now searches for the exact Robinson disjunction: an
+even path either reaches a perpendicular interior on the queried free line or
+reaches a parallel interior strictly between the query and the selected
+boundary. Its breadth-first reachability and adaptive multi-query coverage
+algorithms have proved sound path semantics. `PairCoverSeamPathBaseAudit`
+packages successful finite checks as `ParentPaths` and `Paths`. An external
+eight-process diagnostic verified all 104 odd-base parents; even parent zero
+also passed, but the even certificates still need to be split into cached
+Lake modules instead of one monolithic native check.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

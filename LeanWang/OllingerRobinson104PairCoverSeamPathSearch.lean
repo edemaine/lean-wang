@@ -721,6 +721,98 @@ theorem horizontalReachPathCheck_sound
         simpa [nodeParity] using path
       exact horizontalSeamPath_of_target pathFalse checked.2
 
+theorem verticalReachSeamCheck_sound_of_paths
+    {grid : Nat → Nat → Index} {west east column row boundary : Nat}
+    {found : List ReachNode}
+    (paths : ∀ node ∈ found,
+      Path grid (horizontalPort grid column boundary)
+        node.current node.parity)
+    (checked : verticalReachSeamCheck grid west east
+      column row boundary found = true) :
+    VerticalSeamPath grid west east column row boundary := by
+  simp only [verticalReachSeamCheck, List.any_eq_true,
+    Bool.and_eq_true] at checked
+  rcases checked with ⟨node, hnode, hparity, htarget⟩
+  have nodeParity : node.parity = false :=
+    Bool.eq_false_of_not_eq_true' hparity
+  have pathFalse : Path grid (horizontalPort grid column boundary)
+      node.current false := by
+    simpa [nodeParity] using paths node hnode
+  exact verticalSeamPath_of_target pathFalse htarget
+
+theorem horizontalReachSeamCheck_sound_of_paths
+    {grid : Nat → Nat → Index} {south north row column boundary : Nat}
+    {found : List ReachNode}
+    (paths : ∀ node ∈ found,
+      Path grid (verticalPort grid boundary row) node.current node.parity)
+    (checked : horizontalReachSeamCheck grid south north
+      row column boundary found = true) :
+    HorizontalSeamPath grid south north row column boundary := by
+  simp only [horizontalReachSeamCheck, List.any_eq_true,
+    Bool.and_eq_true] at checked
+  rcases checked with ⟨node, hnode, hparity, htarget⟩
+  have nodeParity : node.parity = false :=
+    Bool.eq_false_of_not_eq_true' hparity
+  have pathFalse : Path grid (verticalPort grid boundary row)
+      node.current false := by
+    simpa [nodeParity] using paths node hnode
+  exact horizontalSeamPath_of_target pathFalse htarget
+
+theorem verticalReachCover_node_sound
+    {grid : Nat → Nat → Index} {width height fuel : Nat}
+    {west east column boundary : Nat} {rows : List Nat} {node : ReachNode}
+    (hnode : node ∈ verticalReachCover grid width height fuel
+      west east column boundary rows) :
+    Path grid (horizontalPort grid column boundary)
+      node.current node.parity := by
+  have sound := exploreFastWeightedReachCover_sound (show node ∈
+      exploreFastWeightedReachCover grid width height fuel
+        [⟨horizontalPort grid column boundary, false⟩] rows
+        (fun candidate row => !candidate.parity &&
+          verticalSeamTarget grid west east column row boundary
+            candidate.current) from hnode)
+  rcases sound with ⟨start, hstart, path⟩
+  simp only [List.mem_singleton] at hstart
+  subst start
+  simpa using path
+
+theorem horizontalReachCover_node_sound
+    {grid : Nat → Nat → Index} {width height fuel : Nat}
+    {south north row boundary : Nat} {columns : List Nat} {node : ReachNode}
+    (hnode : node ∈ horizontalReachCover grid width height fuel
+      south north row boundary columns) :
+    Path grid (verticalPort grid boundary row) node.current node.parity := by
+  have sound := exploreFastWeightedReachCover_sound (show node ∈
+      exploreFastWeightedReachCover grid width height fuel
+        [⟨verticalPort grid boundary row, false⟩] columns
+        (fun candidate column => !candidate.parity &&
+          horizontalSeamTarget grid south north row column boundary
+            candidate.current) from hnode)
+  rcases sound with ⟨start, hstart, path⟩
+  simp only [List.mem_singleton] at hstart
+  subst start
+  simpa using path
+
+theorem verticalReachCover_check_sound
+    {grid : Nat → Nat → Index} {width height fuel : Nat}
+    {west east column row boundary : Nat} {rows : List Nat}
+    (checked : verticalReachSeamCheck grid west east column row boundary
+      (verticalReachCover grid width height fuel
+        west east column boundary rows) = true) :
+    VerticalSeamPath grid west east column row boundary :=
+  verticalReachSeamCheck_sound_of_paths
+    (fun _ hnode => verticalReachCover_node_sound hnode) checked
+
+theorem horizontalReachCover_check_sound
+    {grid : Nat → Nat → Index} {width height fuel : Nat}
+    {south north row column boundary : Nat} {columns : List Nat}
+    (checked : horizontalReachSeamCheck grid south north row column boundary
+      (horizontalReachCover grid width height fuel
+        south north row boundary columns) = true) :
+    HorizontalSeamPath grid south north row column boundary :=
+  horizontalReachSeamCheck_sound_of_paths
+    (fun _ hnode => horizontalReachCover_node_sound hnode) checked
+
 theorem verticalReachSeamCheck_sound
     {grid : Nat → Nat → Index} {width height fuel : Nat}
     {west east column row boundary : Nat} {found : List ReachNode}
