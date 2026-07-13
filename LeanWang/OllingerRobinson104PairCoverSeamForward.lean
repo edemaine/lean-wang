@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamComposition
+import LeanWang.OllingerRobinson104PairCoverSeamPathFaces
 import LeanWang.OllingerRobinson104ShadedObstructionPairCoverForward
 
 /-!
@@ -19,7 +20,9 @@ namespace Figure13Layers
 namespace Closed104
 namespace PairCoverSeamForward
 
-open PairCoverSeamComposition ShadedObstructionPairCoverRecurrence
+open ShadedFreeLineRecurrence PairCoverSeamComposition
+  PairCoverSeamPathBoundedBase PairCoverSeamPathFaces
+  ShadedObstructionPairCoverRecurrence
 
 theorem forcesRoutedFixedCornerSquares_of_boundarySeams
     (seams : BoundarySeams) :
@@ -33,6 +36,15 @@ theorem forcesRoutedFixedCornerSquares_of_boundaryFaces
     ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
   forcesRoutedFixedCornerSquares_of_boundarySeams
     (boundarySeams_of_faces verticalFaces horizontalFaces)
+
+/-- Proof-producing bounded seam certificates at every hierarchy scale imply
+the routed scaffold's forward square-forcing property. -/
+theorem forcesRoutedFixedCornerSquares_of_boundedPaths
+    (paths : ∀ (phase : Phase) (depth : Nat), BoundedPaths phase depth) :
+    ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
+  forcesRoutedFixedCornerSquares_of_boundaryFaces
+    (BoundedPaths.verticalBoundaryFaces paths)
+    (BoundedPaths.horizontalBoundaryFaces paths)
 
 end PairCoverSeamForward
 end Closed104
