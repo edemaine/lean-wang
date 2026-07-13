@@ -9,9 +9,8 @@ import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetTr
 # Finite family-target bases
 
 This module isolates the finite constant-parent checks needed to construct the
-global family targets.  The local certificate is deliberately stronger than
-the residual goal: it covers every wrong-facing query not contained in one
-child, without first filtering for sparse and created coordinates.
+global family targets.  The local certificate covers exactly the residual
+queries: the selected boundary is sparse and the queried free line is created.
 -/
 
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
@@ -26,14 +25,15 @@ open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
   PairCoverSeamResidualDirectPathFamilyTargetSearch
   PairCoverSeamResidualDirectPathFamilyTargetTransport
   PairCoverSeamResidualDirectPathTargets
+  RefinedCoordinateProjection
   ShadedFreeLineRecurrence SparseFreeLinePlaneBase Signals.FreeCellLocal
   ShadedObstructionPairCoverRecurrence
 
 set_option maxRecDepth 20000
 
-/-- Executable family-target certificates for every local query at one depth.
-The parent tile remains a parameter, so the eventual finite audit has 104
-constant-parent instances. -/
+/-- Executable family-target certificates for every local residual query at
+one depth.  The parent tile remains a parameter, so a direct finite audit has
+104 constant-parent instances. -/
 structure BoundedFamilyTargetsAt
     (phase : Phase) (depth fuel : Nat) : Prop where
   row : ∀ (parent : Index) {column row boundary : Nat},
@@ -42,6 +42,8 @@ structure BoundedFamilyTargetsAt
     row ∈ verticalQueries phase depth
       (fineGrid phase depth (fun _ _ => parent))
       (coordinates phase depth) column boundary →
+    IsSparseCoordinate boundary →
+    ¬IsSparseCoordinate row →
     rowJointCheckFound (fun _ _ => parent) (outerLevel phase depth)
       (familyWidth (outerLevel phase depth))
       (nodes (fun _ _ => parent) (outerLevel phase depth)
@@ -56,6 +58,8 @@ structure BoundedFamilyTargetsAt
     column ∈ horizontalQueries phase depth
       (fineGrid phase depth (fun _ _ => parent))
       (coordinates phase depth) row boundary →
+    IsSparseCoordinate boundary →
+    ¬IsSparseCoordinate column →
     columnJointCheckFound (fun _ _ => parent) (outerLevel phase depth)
       (familyWidth (outerLevel phase depth))
       (nodes (fun _ _ => parent) (outerLevel phase depth)
@@ -95,6 +99,50 @@ private theorem familyQuarterOffset_eq
       searchSize phase depth * parent := by
   simp [familyQuarterOffset, familyWidth_eq_searchSize]
 
+theorem isSparseCoordinate_iff_mod (coordinate : Nat) :
+    IsSparseCoordinate coordinate ↔
+      coordinate % 8 = 0 ∨ coordinate % 8 = 1 := by
+  constructor
+  · rintro ⟨coarse, rfl⟩
+    have hmod := Nat.mod_lt coarse (by decide : 0 < 2)
+    have hdecompose := Nat.mod_add_div coarse 2
+    rcases (show coarse % 2 = 0 ∨ coarse % 2 = 1 by omega) with h | h
+    · have hcoarse : coarse = 2 * (coarse / 2) := by omega
+      rw [hcoarse, sparseCoordinate_two_mul]
+      simp
+    · have hcoarse : coarse = 2 * (coarse / 2) + 1 := by omega
+      rw [hcoarse, sparseCoordinate_two_mul_add_one]
+      simp
+  · intro residue
+    have hmod := Nat.mod_lt coordinate (by decide : 0 < 8)
+    have hdecompose := Nat.mod_add_div coordinate 8
+    rcases residue with h | h
+    · refine ⟨2 * (coordinate / 8), ?_⟩
+      rw [sparseCoordinate_two_mul]
+      omega
+    · refine ⟨2 * (coordinate / 8) + 1, ?_⟩
+      rw [sparseCoordinate_two_mul_add_one]
+      omega
+
+theorem isSparseCoordinate_add_of_mod_eq_zero
+    {offset coordinate : Nat} (offsetMod : offset % 8 = 0) :
+    IsSparseCoordinate (offset + coordinate) ↔
+      IsSparseCoordinate coordinate := by
+  rw [isSparseCoordinate_iff_mod, isSparseCoordinate_iff_mod]
+  simp only [Nat.add_mod, offsetMod, Nat.zero_add, Nat.mod_mod]
+
+theorem searchSize_mod_eight (phase : Phase) (depth : Nat) :
+    searchSize phase depth % 8 = 0 := by
+  simp [searchSize, pow_add]
+
+theorem isSparseCoordinate_add_searchOffset_iff
+    (phase : Phase) (depth parent coordinate : Nat) :
+    IsSparseCoordinate
+        (searchSize phase depth * parent + coordinate) ↔
+      IsSparseCoordinate coordinate := by
+  apply isSparseCoordinate_add_of_mod_eq_zero
+  simp [Nat.mul_mod, searchSize_mod_eight]
+
 set_option maxHeartbeats 1000000 in
 -- The dependent local-coordinate normalization is expensive to elaborate.
 /-- Constant-parent finite certificates supply the global endpoint-selection
@@ -106,7 +154,7 @@ theorem BoundedFamilyTargetsAt.toFamilyTargetsAt
   constructor
   · intro grid parentX parentY column row boundary
       columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
-      notFits _sparseBoundary _createdRow wrongFacing
+      notFits sparseBoundary createdRow wrongFacing
     let localColumn := localCoordinate phase (depth + 1) parentX column
     let localRow := localCoordinate phase (depth + 1) parentY row
     let localBoundary := localCoordinate phase (depth + 1) parentY boundary
@@ -178,8 +226,19 @@ theorem BoundedFamilyTargetsAt.toFamilyTargetsAt
       simp only [verticalQueries, List.mem_filter, Bool.and_eq_true,
         Bool.or_eq_true, decide_eq_true_eq]
       exact ⟨hlocalRow, hlocalWrongFacing, hlocalCheck⟩
+    have hlocalSparseBoundary : IsSparseCoordinate localBoundary := by
+      apply (isSparseCoordinate_add_searchOffset_iff phase (depth + 1)
+        parentY localBoundary).1
+      rwa [hboundaryEq]
+    have hlocalCreatedRow : ¬IsSparseCoordinate localRow := by
+      intro sparse
+      apply createdRow
+      rw [← hrowEq]
+      exact (isSparseCoordinate_add_searchOffset_iff phase (depth + 1)
+        parentY localRow).2 sparse
     have checked := targets.row (grid parentX parentY)
       hlocalColumn hlocalBoundary hquery
+      hlocalSparseBoundary hlocalCreatedRow
     have translated := rowJointCheckFound_familyWidth_translate checked
     dsimp only [localColumn, localRow, localBoundary] at translated
     dsimp only [localColumn] at hcolumnEq
@@ -191,7 +250,7 @@ theorem BoundedFamilyTargetsAt.toFamilyTargetsAt
       hcolumnEq, hrowEq, hboundaryEq] using translated
   · intro grid parentX parentY column row boundary
       columnWest columnEast boundaryWest boundaryEast rowSouth rowNorth
-      notFits _sparseBoundary _createdColumn wrongFacing
+      notFits sparseBoundary createdColumn wrongFacing
     let localColumn := localCoordinate phase (depth + 1) parentX column
     let localRow := localCoordinate phase (depth + 1) parentY row
     let localBoundary := localCoordinate phase (depth + 1) parentX boundary
@@ -263,8 +322,19 @@ theorem BoundedFamilyTargetsAt.toFamilyTargetsAt
       simp only [horizontalQueries, List.mem_filter, Bool.and_eq_true,
         Bool.or_eq_true, decide_eq_true_eq]
       exact ⟨hlocalColumn, hlocalWrongFacing, hlocalCheck⟩
+    have hlocalSparseBoundary : IsSparseCoordinate localBoundary := by
+      apply (isSparseCoordinate_add_searchOffset_iff phase (depth + 1)
+        parentX localBoundary).1
+      rwa [hboundaryEq]
+    have hlocalCreatedColumn : ¬IsSparseCoordinate localColumn := by
+      intro sparse
+      apply createdColumn
+      rw [← hcolumnEq]
+      exact (isSparseCoordinate_add_searchOffset_iff phase (depth + 1)
+        parentX localColumn).2 sparse
     have checked := targets.column (grid parentX parentY)
       hlocalBoundary hlocalRow hquery
+      hlocalSparseBoundary hlocalCreatedColumn
     have translated := columnJointCheckFound_familyWidth_translate checked
     dsimp only [localColumn, localRow, localBoundary] at translated
     dsimp only [localColumn] at hcolumnEq

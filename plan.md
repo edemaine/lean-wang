@@ -1019,13 +1019,27 @@ local coordinates.
 That arithmetic normalization is now complete in
 `OllingerRobinson104PairCoverSeamResidualDirectPathFamilyBase`.
 `BoundedFamilyTargetsAt` is the exact finite certificate boundary: for each of
-the 104 constant parent tiles it checks every wrong-facing, non-contained row
-and column query.  This intentionally strengthens the residual obligation by
-omitting the sparse/created-coordinate filters.  Its `toFamilyTargetsAt`
-theorem translates local coordinates, interiors, child-containment tests,
-source routes, and target routes into an arbitrary parent block.  Thus the
-remaining base work no longer contains global hierarchy geometry; it only has
-to implement and certify the finite `BoundedFamilyTargetsAt` checks.
+the 104 constant parent tiles it checks every wrong-facing, non-contained
+residual row and column query, retaining the sparse-boundary and created-line
+filters from the semantic goal.  Its `toFamilyTargetsAt` theorem translates
+local coordinates, interiors, child-containment tests, source routes, and
+target routes into an arbitrary parent block.
+
+The executable base layer now has a proof-sound dense reachability index.
+Every indexed hit is checked again against the retained path node before its
+soundness theorem recovers the original family-reach predicate, so the mutable
+array is only an accelerator and carries no trusted invariant.  Indexed row,
+column, and joint-family checks feed a single `check_sound` theorem for the
+exact `BoundedFamilyTargetsAt` interface.
+
+A first odd-depth diagnostic with a deliberately small flood budget found
+that both family floods hit the budget before reaching the first residual
+source.  Increasing this whole-board search is not the intended inductive
+proof: the existing `horizontalPredecessor` and `verticalPredecessor` theorems
+already give every sparse-boundary fine port an even local connector to a live
+coarse predecessor.  The next step is to transport the predecessor's family
+through that connector and reduce target recognition to the fixed `8 x 8`
+local refinement cases, reserving the whole-board checker for base validation.
 
 ### 1. Obtain arbitrarily large free squares
 
