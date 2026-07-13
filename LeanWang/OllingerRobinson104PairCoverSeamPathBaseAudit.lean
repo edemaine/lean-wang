@@ -3,8 +3,10 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104PairCoverSeamComposition
+import LeanWang.OllingerRobinson104PairCoverSeamChecks
 import LeanWang.OllingerRobinson104PairCoverSeamPathSearch
+import LeanWang.OllingerRobinson104BorderGeometry
+import LeanWang.OllingerRobinson104ShadedFreeLineCoordinates
 
 /-!
 # Finite base audit for wrong-facing seam paths
@@ -21,17 +23,17 @@ namespace Figure13Layers
 namespace Closed104
 namespace PairCoverSeamPathBaseAudit
 
-open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
-  ShadedFreeLineRecurrence SparseFreeLinePlaneBase
-  ShadedPlaneSignalGrid ShadedObstructionPairCoverRecurrence
-  PairCoverSeamArithmetic PairCoverSeamComposition
-  PairCoverSeamPathSearch Signals.FreeCellLocal
+open RedCycles RedShadeCycles RedShadeGraph
+  ShadedFreeLineRecurrence
+  PairCoverSeamArithmetic
+  PairCoverSeamPathSearch PairCoverSeamShadePaths
+  Signals.FreeCellLocal BorderGeometry
 
 set_option maxRecDepth 20000
 
 def fineGrid (phase : Phase) (depth : Nat)
     (grid : Nat → Nat → Index) : Nat → Nat → Index :=
-  iterateRefine 2 (refinedGrid phase depth grid)
+  iterateRefine 2 (iterateRefine (refinementDepth phase depth) grid)
 
 def coordinates (phase : Phase) (depth : Nat) : List Nat :=
   (List.range (quarterNorth (successorEast phase depth 0))).filter fun value =>
@@ -202,6 +204,126 @@ structure ParentPaths (phase : Phase) (depth : Nat) (parent : Index) : Prop wher
 def Paths (phase : Phase) (depth : Nat) : Prop :=
   ∀ parent : Index, ParentPaths phase depth parent
 
+theorem horizontalPort_congr_of_sameComponents
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    (x y : Nat) :
+    horizontalPort first x y = horizontalPort second x y := by
+  simp only [horizontalPort, same x y]
+
+theorem verticalPort_congr_of_sameComponents
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    (x y : Nat) :
+    verticalPort first x y = verticalPort second x y := by
+  simp only [verticalPort, same x y]
+
+theorem verticalSeamPath_congr_of_sameComponents
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    {west east column row boundary : Nat}
+    (path : VerticalSeamPath first west east column row boundary) :
+    VerticalSeamPath second west east column row boundary := by
+  rcases path with path | path
+  · left
+    rcases path with ⟨targetX, hwest, heast, hinterior, path⟩
+    refine ⟨targetX, hwest, heast, ?_, ?_⟩
+    · simpa [same targetX row] using hinterior
+    · have transported := path_congr_of_sameComponents same path
+      simpa only [horizontalPort_congr_of_sameComponents same,
+        verticalPort_congr_of_sameComponents same] using transported
+  · right
+    rcases path with ⟨targetY, hbetween, hinterior, path⟩
+    refine ⟨targetY, hbetween, ?_, ?_⟩
+    · simpa [same column targetY] using hinterior
+    · have transported := path_congr_of_sameComponents same path
+      simpa only [horizontalPort_congr_of_sameComponents same] using transported
+
+theorem horizontalSeamPath_congr_of_sameComponents
+    {first second : Nat → Nat → Index} (same : SameComponents first second)
+    {south north row column boundary : Nat}
+    (path : HorizontalSeamPath first south north row column boundary) :
+    HorizontalSeamPath second south north row column boundary := by
+  rcases path with path | path
+  · left
+    rcases path with ⟨targetY, hsouth, hnorth, hinterior, path⟩
+    refine ⟨targetY, hsouth, hnorth, ?_, ?_⟩
+    · simpa [same column targetY] using hinterior
+    · have transported := path_congr_of_sameComponents same path
+      simpa only [verticalPort_congr_of_sameComponents same,
+        horizontalPort_congr_of_sameComponents same] using transported
+  · right
+    rcases path with ⟨targetX, hbetween, hinterior, path⟩
+    refine ⟨targetX, hbetween, ?_, ?_⟩
+    · simpa [same targetX row] using hinterior
+    · have transported := path_congr_of_sameComponents same path
+      simpa only [verticalPort_congr_of_sameComponents same] using transported
+
+theorem sameComponents_fineGrid_canonicalIndex
+    (phase : Phase) (depth : Nat) (parent : Index) :
+    SameComponents
+      (fineGrid phase depth
+        (fun _ _ => BorderSubstitution.canonicalIndex parent))
+      (fineGrid phase depth (fun _ _ => parent)) := by
+  change SameComponents
+    (iterateRefine 2 (iterateRefine (refinementDepth phase depth)
+      (fun _ _ => BorderSubstitution.canonicalIndex parent)))
+    (iterateRefine 2 (iterateRefine (refinementDepth phase depth)
+      (fun _ _ => parent)))
+  rw [PlaneRedBoards.iterateRefine_add,
+    PlaneRedBoards.iterateRefine_add]
+  have same := sameComponents_iterateRefine_canonicalizeGrid
+    (2 + refinementDepth phase depth) (fun _ _ => parent)
+  have gridEquality : (fun _ _ => BorderSubstitution.canonicalIndex parent) =
+      BorderSubstitution.canonicalizeGrid (fun _ _ => parent) := by
+    funext x y
+    rfl
+  rw [gridEquality]
+  exact same
+
+theorem ParentPaths.of_canonicalIndex
+    {phase : Phase} {depth : Nat} {parent : Index}
+    (canonical : ParentPaths phase depth
+      (BorderSubstitution.canonicalIndex parent)) :
+    ParentPaths phase depth parent := by
+  let canonicalGrid := fineGrid phase depth
+    (fun _ _ => BorderSubstitution.canonicalIndex parent)
+  let grid := fineGrid phase depth (fun _ _ => parent)
+  have same : SameComponents canonicalGrid grid := by
+    simpa [canonicalGrid, grid] using
+      (sameComponents_fineGrid_canonicalIndex phase depth parent)
+  constructor
+  · dsimp only
+    intro column boundary row hcolumn hboundary hrow
+    have canonicalRow : row ∈ verticalQueries phase depth canonicalGrid
+        (coordinates phase depth) column boundary := by
+      simp only [verticalQueries, List.mem_filter] at hrow ⊢
+      refine ⟨hrow.1, ?_⟩
+      simpa [same column boundary] using hrow.2
+    have path := canonical.vertical hcolumn hboundary canonicalRow
+    exact verticalSeamPath_congr_of_sameComponents same path
+  · dsimp only
+    intro boundary row column hboundary hrow hcolumn
+    have canonicalColumn : column ∈ horizontalQueries phase depth canonicalGrid
+        (coordinates phase depth) row boundary := by
+      simp only [horizontalQueries, List.mem_filter] at hcolumn ⊢
+      refine ⟨hcolumn.1, ?_⟩
+      simpa [same boundary row] using hcolumn.2
+    have path := canonical.horizontal hboundary hrow canonicalColumn
+    exact horizontalSeamPath_congr_of_sameComponents same path
+
+def canonicalParents : List Index :=
+  BorderSubstitution.states.map BorderSubstitution.representative
+
+def CanonicalPaths (phase : Phase) (depth : Nat) : Prop :=
+  ∀ parent ∈ canonicalParents, ParentPaths phase depth parent
+
+theorem CanonicalPaths.paths {phase : Phase} {depth : Nat}
+    (canonical : CanonicalPaths phase depth) : Paths phase depth := by
+  intro parent
+  apply ParentPaths.of_canonicalIndex
+  apply canonical
+  exact List.mem_map.2
+    ⟨BorderSubstitution.indexState parent,
+      BorderSubstitution.indexState_mem_states parent, rfl⟩
+
 theorem checkParent_sound {phase : Phase} {depth : Nat} {parent : Index}
     (checked : checkParent phase depth parent = true) :
     ParentPaths phase depth parent := by
@@ -218,6 +340,17 @@ theorem checkParent_sound {phase : Phase} {depth : Nat} {parent : Index}
 
 def check (phase : Phase) (depth : Nat) : Bool :=
   (List.finRange 104).all fun parent => checkParent phase depth parent
+
+def checkCanonical (phase : Phase) (depth : Nat) : Bool :=
+  canonicalParents.all fun parent => checkParent phase depth parent
+
+theorem checkCanonical_sound {phase : Phase} {depth : Nat}
+    (checked : checkCanonical phase depth = true) : Paths phase depth := by
+  apply CanonicalPaths.paths
+  intro parent hparent
+  apply checkParent_sound
+  simp only [checkCanonical, List.all_eq_true] at checked
+  exact checked parent hparent
 
 theorem check_sound {phase : Phase} {depth : Nat}
     (checked : check phase depth = true) : Paths phase depth := by

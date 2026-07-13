@@ -24,7 +24,7 @@ open RedCycles RedShadeCycles RedShadePaths RedShadeGraphRefinement
   ShadedFreeLineRecurrence ShadedPlaneSignalGrid
   ShadedObstructionGeometry ShadedObstructionGeometryCover
   ShadedObstructionPairCoverRecurrence SparseFreeLinePlaneBase
-  Signals.FreeCellLocal
+  Signals.FreeCellLocal PairCoverSeamArithmetic
 
 set_option maxRecDepth 20000
 set_option maxHeartbeats 1000000
@@ -86,12 +86,6 @@ theorem exists_last_before
     exact Nat.find_min' existsQ candidate
   dsimp [distance] at hlastValue
   omega
-
-def successorWest (phase : Phase) (depth block : Nat) : Nat :=
-  2 ^ refinementDepth phase (depth + 1) * block + west phase (depth + 1)
-
-def successorEast (phase : Phase) (depth block : Nat) : Nat :=
-  2 ^ refinementDepth phase (depth + 1) * block + east phase (depth + 1)
 
 def VerticalBoundaryConclusion
     (indexGrid : Nat → Nat → Index)

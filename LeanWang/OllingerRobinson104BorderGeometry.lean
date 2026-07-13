@@ -83,6 +83,52 @@ theorem componentAt_iterateRefine_canonicalizeGrid
 def SameComponents (first second : Nat → Nat → Index) : Prop :=
   ∀ x y, componentAt first x y = componentAt second x y
 
+theorem link_congr_of_sameComponents
+    {firstGrid secondGrid : Nat → Nat → Index}
+    (same : SameComponents firstGrid secondGrid)
+    {first second : Port} {parity : Bool}
+    (link : Link firstGrid first second parity) :
+    Link secondGrid first second parity := by
+  induction link with
+  | horizontalMatch x y => exact Link.horizontalMatch x y
+  | verticalMatch x y => exact Link.verticalMatch x y
+  | horizontal x y hpath =>
+      exact Link.horizontal x y (by simpa [same x y] using hpath)
+  | vertical x y hpath =>
+      exact Link.vertical x y (by simpa [same x y] using hpath)
+  | westNorth x y hwest hnorth =>
+      exact Link.westNorth x y
+        (by simpa [same x y] using hwest)
+        (by simpa [same x y] using hnorth)
+  | westSouth x y hwest hsouth =>
+      exact Link.westSouth x y
+        (by simpa [same x y] using hwest)
+        (by simpa [same x y] using hsouth)
+  | eastNorth x y heast hnorth =>
+      exact Link.eastNorth x y
+        (by simpa [same x y] using heast)
+        (by simpa [same x y] using hnorth)
+  | eastSouth x y heast hsouth =>
+      exact Link.eastSouth x y
+        (by simpa [same x y] using heast)
+        (by simpa [same x y] using hsouth)
+  | crossing x y hhorizontal hvertical =>
+      exact Link.crossing x y
+        (by simpa [same x y] using hhorizontal)
+        (by simpa [same x y] using hvertical)
+  | symm link ih => exact Link.symm ih
+
+theorem path_congr_of_sameComponents
+    {firstGrid secondGrid : Nat → Nat → Index}
+    (same : SameComponents firstGrid secondGrid)
+    {first second : Port} {parity : Bool}
+    (path : Path firstGrid first second parity) :
+    Path secondGrid first second parity := by
+  induction path with
+  | refl port => exact Path.refl port
+  | ofLink link => exact Path.ofLink (link_congr_of_sameComponents same link)
+  | trans _ _ firstIH secondIH => exact Path.trans firstIH secondIH
+
 theorem sameComponents_canonicalizeGrid (grid : Nat → Nat → Index) :
     SameComponents (BorderSubstitution.canonicalizeGrid grid) grid :=
   componentAt_canonicalizeGrid grid

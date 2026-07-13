@@ -531,6 +531,16 @@ eight-process diagnostic verified all 104 odd-base parents; even parent zero
 also passed, but the even certificates still need to be split into cached
 Lake modules instead of one monolithic native check.
 
+The seam certificate cone is now separated from the older semantic audits.
+Phase coordinates, executable child-containment checks, and red-port selectors
+live in lightweight modules; graph search and its path soundness no longer
+import shade contradictions. As a result, the complete proof-producing seam
+base audit builds in seconds without rerunning unrelated native certificates.
+The parent obligation is invariant under the border-state quotient, so checking
+the 56 canonical `(thin, thick)` representatives proves `Paths` for all 104
+tile indices. The next finite certificates should therefore be split over
+those 56 representatives for each of the odd and even parity bases.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

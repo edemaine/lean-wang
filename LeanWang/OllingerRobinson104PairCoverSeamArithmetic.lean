@@ -7,6 +7,7 @@ import Mathlib.Tactic.FinCases
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Tauto
+import LeanWang.OllingerRobinson104PairCoverSeamChecks
 import LeanWang.OllingerRobinson104ShadedObstructionPairCoverRecurrence
 
 /-!
@@ -34,46 +35,6 @@ theorem two_pow_refinementDepth_eq_four_mul_west
   cases phase <;>
     simp [refinementDepth, Phase.extra, west, scale, Phase.factor,
       pow_add, pow_mul] <;> ring
-
-/-- The southwest/northeast child selector as an ordinary block index. -/
-def childBlock (side : Fin 2) : Nat := side.val + 1
-
-def absoluteChildBlock (parent : Nat) (side : Fin 2) : Nat :=
-  4 * parent + childBlock side
-
-/-- Strict membership in one recursive child's quarter-coordinate interval. -/
-def InChildInterval (phase : Phase) (depth : Nat)
-    (side : Fin 2) (coordinate : Nat) : Prop :=
-  quarterWest
-      (2 ^ refinementDepth phase depth * childBlock side + west phase depth) <
-      coordinate ∧
-    coordinate < quarterEast
-      (2 ^ refinementDepth phase depth * childBlock side + east phase depth)
-
-def InAbsoluteChildInterval (phase : Phase) (depth parent : Nat)
-    (side : Fin 2) (coordinate : Nat) : Prop :=
-  quarterWest
-      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
-        west phase depth) < coordinate ∧
-    coordinate < quarterEast
-      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
-        east phase depth)
-
-def InSomeChild (phase : Phase) (depth coordinate : Nat) : Prop :=
-  ∃ side : Fin 2, InChildInterval phase depth side coordinate
-
-def InSameChild (phase : Phase) (depth first second : Nat) : Prop :=
-  ∃ side : Fin 2,
-    InChildInterval phase depth side first ∧
-      InChildInterval phase depth side second
-
-def InSomeAbsoluteChild (phase : Phase) (depth parent coordinate : Nat) : Prop :=
-  ∃ side : Fin 2, InAbsoluteChildInterval phase depth parent side coordinate
-
-def InSameAbsoluteChild (phase : Phase) (depth parent first second : Nat) : Prop :=
-  ∃ side : Fin 2,
-    InAbsoluteChildInterval phase depth parent side first ∧
-      InAbsoluteChildInterval phase depth parent side second
 
 theorem west_pos (phase : Phase) (depth : Nat) : 0 < west phase depth := by
   cases phase <;> simp [west, scale, Phase.factor]
@@ -236,27 +197,6 @@ theorem fitsContainedHorizontalChild_iff_regions
   · rintro ⟨⟨childX, hcolumn, hboundary⟩, ⟨childY, hrow⟩⟩
     exact ⟨childX, childY, hcolumn, hrow, hboundary⟩
 
-def inAbsoluteChildIntervalCheck (phase : Phase) (depth parent : Nat)
-    (side : Fin 2) (coordinate : Nat) : Bool :=
-  decide (quarterWest
-      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
-        west phase depth) < coordinate) &&
-    decide (coordinate < quarterEast
-      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
-        east phase depth))
-
-def inSomeAbsoluteChildCheck (phase : Phase)
-    (depth parent coordinate : Nat) : Bool :=
-  inAbsoluteChildIntervalCheck phase depth parent ⟨0, by decide⟩ coordinate ||
-    inAbsoluteChildIntervalCheck phase depth parent ⟨1, by decide⟩ coordinate
-
-def inSameAbsoluteChildCheck (phase : Phase)
-    (depth parent first second : Nat) : Bool :=
-  (inAbsoluteChildIntervalCheck phase depth parent ⟨0, by decide⟩ first &&
-      inAbsoluteChildIntervalCheck phase depth parent ⟨0, by decide⟩ second) ||
-    (inAbsoluteChildIntervalCheck phase depth parent ⟨1, by decide⟩ first &&
-      inAbsoluteChildIntervalCheck phase depth parent ⟨1, by decide⟩ second)
-
 theorem inAbsoluteChildIntervalCheck_eq_true_iff
     (phase : Phase) (depth parent : Nat) (side : Fin 2) (coordinate : Nat) :
     inAbsoluteChildIntervalCheck phase depth parent side coordinate = true ↔
@@ -276,16 +216,6 @@ theorem inSameAbsoluteChildCheck_eq_true_iff
       InSameAbsoluteChild phase depth parent first second := by
   simp [inSameAbsoluteChildCheck, InSameAbsoluteChild,
     Fin.exists_fin_two, inAbsoluteChildIntervalCheck_eq_true_iff]
-
-def containedVerticalSeamCheck (phase : Phase)
-    (depth parentX parentY column row boundary : Nat) : Bool :=
-  !inSomeAbsoluteChildCheck phase depth parentX column ||
-    !inSameAbsoluteChildCheck phase depth parentY row boundary
-
-def containedHorizontalSeamCheck (phase : Phase)
-    (depth parentX parentY column row boundary : Nat) : Bool :=
-  !inSameAbsoluteChildCheck phase depth parentX column boundary ||
-    !inSomeAbsoluteChildCheck phase depth parentY row
 
 theorem containedVerticalSeamCheck_eq_true_iff
     (phase : Phase) (depth parentX parentY column row boundary : Nat) :

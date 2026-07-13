@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinson104RedShadeGraphProjection
 import LeanWang.OllingerRobinson104ShadedObstructionGeometryBaseSoundness
 import LeanWang.OllingerRobinson104ShadedLightBoardFreeLines
+import LeanWang.OllingerRobinson104PairCoverSeamPorts
 
 /-!
 # Shade contradictions for seam paths
@@ -28,16 +29,6 @@ open RedShadeCycles RedShadeGraph RedShadeGraphProjection
   Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
-
-def horizontalPort (grid : Nat → Nat → Index) (x y : Nat) : Port :=
-  if RedShades.hasWest (componentAt grid x y) (quadrantAt x y) then
-    ⟨x, y, .west⟩
-  else ⟨x, y, .east⟩
-
-def verticalPort (grid : Nat → Nat → Index) (x y : Nat) : Port :=
-  if RedShades.hasSouth (componentAt grid x y) (quadrantAt x y) then
-    ⟨x, y, .south⟩
-  else ⟨x, y, .north⟩
 
 theorem horizontalPort_value_eq_light
     {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}

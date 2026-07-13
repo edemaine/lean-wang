@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinson104ShadedFreeLineGraphBase
 import LeanWang.OllingerRobinson104ShadedFreeLinePatternRefinement
 import LeanWang.OllingerRobinson104ShadedFreeLineProjectionSourceLists
+import LeanWang.OllingerRobinson104ShadedFreeLineCoordinates
 
 /-!
 The semantic Figure 18 free-line recurrence.
@@ -27,35 +28,6 @@ open RedCycles RedShadeCycles RedShadePaths ShadedFreeGrid ShadedFreeLineGraphBa
   ShadedFreeLineOffsets ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 100000
-
-inductive Phase where
-  | even
-  | odd
-deriving DecidableEq, Repr
-
-def Phase.factor : Phase → Nat
-  | .even => 1
-  | .odd => 2
-
-def Phase.extra : Phase → Nat
-  | .even => 0
-  | .odd => 1
-
-def scale (phase : Phase) (depth : Nat) : Nat :=
-  phase.factor * 4 ^ depth
-
-def refinementDepth (phase : Phase) (depth : Nat) : Nat :=
-  2 * depth + phase.extra + 2
-
-def localGrid (phase : Phase) (depth : Nat) (parent : Index) : Nat → Nat → Index :=
-  iterateRefine (refinementDepth phase depth) (fun _ _ => parent)
-
-def west (phase : Phase) (depth : Nat) : Nat := scale phase depth
-
-def east (phase : Phase) (depth : Nat) : Nat := 3 * scale phase depth
-
-def quarterStart (phase : Phase) (depth : Nat) : Nat :=
-  quarterWest (west phase depth)
 
 def offsetAt (phase : Phase) (depth : Nat)
     (index : Fin (freeOffsets depth).length) : Nat :=
