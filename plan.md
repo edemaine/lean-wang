@@ -556,6 +556,11 @@ separate from the executable checker and its cached Boolean certificates. It
 allows each constant-parent certificate to be transported into the matching
 block of an arbitrary coarse grid without assuming component equality outside
 the searched parent block.
+The cached chunk equalities now lift through a second, proof-only soundness
+layer to `BoundedPaths phase depth` for all 104 parent indices. Canonical
+border-state quotient transport preserves both path endpoints and every
+intermediate search-box bound, so this strengthening does not require any new
+native certificate.
 
 ### 1. Obtain arbitrarily large free squares
 
