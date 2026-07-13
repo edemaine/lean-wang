@@ -64,8 +64,41 @@ private theorem horizontalPort_on_south
   · exact OnCycle.southWest column columnWest columnEast
   · exact OnCycle.southEast column columnWest columnEast
 
-/-- A selected horizontal cycle side cannot enclose a row that is free across
-the cycle's west side. -/
+/-- A selected horizontal boundary cannot route evenly into a cycle enclosing
+a row that is free across the cycle's west side. -/
+theorem freeRow_forbids_selected_cycle_route
+    {grid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    {outerWest outerEast west east south north column boundary row : Nat}
+    {entry : Port}
+    (valid : ValidShadeGrid grid stateGrid)
+    (freeRow : IsFreeRow grid stateGrid outerWest outerEast row)
+    (cycle : CycleOn grid west east south north)
+    (rowSouth : quarterSouth south < row)
+    (rowNorth : row < quarterNorth north)
+    (cycleWestInside : quarterWest outerWest < quarterWest west)
+    (cycleWestInside' : quarterWest west < quarterEast outerEast)
+    (selected : ShadedSignals.selectedHorizontalFor
+      (componentAt grid column boundary) (quadrantAt column boundary)
+      (stateGrid column boundary) ≠ none)
+    (entryOnCycle : OnCycle west east south north entry)
+    (sourceToCycle : Path grid (horizontalPort grid column boundary)
+      entry false) : False := by
+  have targetPresent := RedShadeCycles.CycleOn.west_path
+    cycle rowSouth rowNorth
+  have targetInterior : Signals.verticalInterior?
+      (componentAt grid (quarterWest west) row)
+      (quadrantAt (quarterWest west) row) ≠ none :=
+    verticalInterior_ne_none_of_hasVertical _ _ targetPresent
+  have targetOnCycle : OnCycle west east south north
+      (verticalPort grid (quarterWest west) row) :=
+    verticalPort_on_west rowSouth rowNorth
+  have cyclePath := onCycle_connected cycle entryOnCycle targetOnCycle
+  have path := Path.trans sourceToCycle cyclePath
+  exact freeRow_forbids_even_path valid freeRow cycleWestInside
+    cycleWestInside' selected targetInterior path
+
+/-- Special case where the selected source is already a cycle port. -/
 theorem freeRow_forbids_selected_cycle_crossing
     {grid : Nat → Nat → Index}
     {stateGrid : Nat → Nat → RedShades.State}
@@ -82,20 +115,44 @@ theorem freeRow_forbids_selected_cycle_crossing
       (stateGrid column boundary) ≠ none)
     (sourceOnCycle : OnCycle west east south north
       (horizontalPort grid column boundary)) : False := by
-  have targetPresent := RedShadeCycles.CycleOn.west_path
-    cycle rowSouth rowNorth
-  have targetInterior : Signals.verticalInterior?
-      (componentAt grid (quarterWest west) row)
-      (quadrantAt (quarterWest west) row) ≠ none :=
-    verticalInterior_ne_none_of_hasVertical _ _ targetPresent
-  have targetOnCycle : OnCycle west east south north
-      (verticalPort grid (quarterWest west) row) :=
-    verticalPort_on_west rowSouth rowNorth
-  have path := onCycle_connected cycle sourceOnCycle targetOnCycle
-  exact freeRow_forbids_even_path valid freeRow cycleWestInside
-    cycleWestInside' selected targetInterior path
+  exact freeRow_forbids_selected_cycle_route valid freeRow cycle rowSouth
+    rowNorth cycleWestInside cycleWestInside' selected sourceOnCycle
+    (Path.refl _)
 
-/-- Horizontal dual of `freeRow_forbids_selected_cycle_crossing`. -/
+/-- Horizontal dual of `freeRow_forbids_selected_cycle_route`. -/
+theorem freeColumn_forbids_selected_cycle_route
+    {grid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State}
+    {outerSouth outerNorth west east south north column boundary row : Nat}
+    {entry : Port}
+    (valid : ValidShadeGrid grid stateGrid)
+    (freeColumn : IsFreeColumn grid stateGrid outerSouth outerNorth column)
+    (cycle : CycleOn grid west east south north)
+    (columnWest : quarterWest west < column)
+    (columnEast : column < quarterEast east)
+    (cycleSouthInside : quarterSouth outerSouth < quarterSouth south)
+    (cycleSouthInside' : quarterSouth south < quarterNorth outerNorth)
+    (selected : ShadedSignals.selectedVerticalFor
+      (componentAt grid boundary row) (quadrantAt boundary row)
+      (stateGrid boundary row) ≠ none)
+    (entryOnCycle : OnCycle west east south north entry)
+    (sourceToCycle : Path grid (verticalPort grid boundary row)
+      entry false) : False := by
+  have targetPresent := RedShadeCycles.CycleOn.south_path
+    cycle columnWest columnEast
+  have targetInterior : Signals.horizontalInterior?
+      (componentAt grid column (quarterSouth south))
+      (quadrantAt column (quarterSouth south)) ≠ none :=
+    horizontalInterior_ne_none_of_hasHorizontal _ _ targetPresent
+  have targetOnCycle : OnCycle west east south north
+      (horizontalPort grid column (quarterSouth south)) :=
+    horizontalPort_on_south columnWest columnEast
+  have cyclePath := onCycle_connected cycle entryOnCycle targetOnCycle
+  have path := Path.trans sourceToCycle cyclePath
+  exact freeColumn_forbids_even_path valid freeColumn cycleSouthInside
+    cycleSouthInside' selected targetInterior path
+
+/-- Special case where the selected source is already a cycle port. -/
 theorem freeColumn_forbids_selected_cycle_crossing
     {grid : Nat → Nat → Index}
     {stateGrid : Nat → Nat → RedShades.State}
@@ -112,18 +169,9 @@ theorem freeColumn_forbids_selected_cycle_crossing
       (stateGrid boundary row) ≠ none)
     (sourceOnCycle : OnCycle west east south north
       (verticalPort grid boundary row)) : False := by
-  have targetPresent := RedShadeCycles.CycleOn.south_path
-    cycle columnWest columnEast
-  have targetInterior : Signals.horizontalInterior?
-      (componentAt grid column (quarterSouth south))
-      (quadrantAt column (quarterSouth south)) ≠ none :=
-    horizontalInterior_ne_none_of_hasHorizontal _ _ targetPresent
-  have targetOnCycle : OnCycle west east south north
-      (horizontalPort grid column (quarterSouth south)) :=
-    horizontalPort_on_south columnWest columnEast
-  have path := onCycle_connected cycle sourceOnCycle targetOnCycle
-  exact freeColumn_forbids_even_path valid freeColumn cycleSouthInside
-    cycleSouthInside' selected targetInterior path
+  exact freeColumn_forbids_selected_cycle_route valid freeColumn cycle
+    columnWest columnEast cycleSouthInside cycleSouthInside' selected
+    sourceOnCycle (Path.refl _)
 
 end PairCoverSeamCycleContradictions
 end Closed104

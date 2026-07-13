@@ -729,33 +729,28 @@ can close outside any such local window.  Enlarging that audit is therefore
 not the right proof boundary.
 
 `OllingerRobinson104PairCoverSeamCycleContradictions` instead formalizes the
-global step used in Robinson Section 7.  If a selected boundary port lies on a
-red cycle and a free row or column crosses the cycle interior, even
-connectivity around the cycle reaches a perpendicular red interior on the free
-line and contradicts freeness.  The remaining residual task is geometric:
-classify the sparse selected boundary as a port of the appropriate enclosing
-hierarchy cycle, then use the absence of an intervening selected boundary and
-the failed child-containment test to place the created free line strictly
-inside that cycle.  The four face orientations can then be discharged by the
-cycle contradiction, after which the all-depth pair-cover recurrence can be
-assembled.
+global step used in Robinson Section 7.  If a selected boundary port has an
+even red-graph route into a cycle and a free row or column crosses the cycle
+interior, even connectivity around the cycle reaches a perpendicular red
+interior on the free line and contradicts freeness.  Requiring the selected
+port itself to be a literal cycle side is too strong: newly created red
+segments can route to a canonical cycle without lying on it.  The remaining
+residual task is geometric: use the existing sparse-boundary ancestry
+classifiers to construct that even route and enclosing cycle, then use the
+absence of an intervening selected boundary and the failed child-containment
+test to place the created free line strictly inside the cycle.  The four face
+orientations can then be discharged by the cycle contradiction, after which
+the all-depth pair-cover recurrence can be assembled.
 
 `OllingerRobinson104PairCoverSeamResidualCycles` makes that remaining boundary
 precise.  `ResidualCycleWitnessesAt` asks each wrong-facing case for an
-existential side-specific crossing cycle; validity and freeness are
+existential `RowCrossingCycle` or `ColumnCrossingCycle`, including an even path
+from the selected source into the cycle; validity and freeness are
 intentionally not part of these geometric obligations.  The module proves that
 the four witnesses imply both residual face structures.  It remains to
 construct the witnesses from aligned canonical cycles, the sparse-boundary
-classification, the nearest-boundary hypothesis, and the failed contained-child
-test.
-
-The cycle-witness interface is now side-specific: the four cases ask for a
-north, south, east, or west cycle side exactly matching the inherited boundary.
-Constructors turn those data into graph `OnCycle` witnesses even when the
-transverse query coordinate is newly created, and refinement lemmas preserve
-each retained side through two substitutions.  Thus the next classifier only
-has to find the first ancestor cycle side containing the sparse boundary and
-prove the free line lies strictly within that cycle's orthogonal span.
+ancestry classification, the nearest-boundary hypothesis, and the failed
+contained-child test.
 
 ### 1. Obtain arbitrarily large free squares
 
