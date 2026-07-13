@@ -885,9 +885,12 @@ arbitrary bottom level, and `oddDescendantBridge` prefixes one certified corner
 crossing before the even descent.  Thus an ancestor reaches every contained
 canonical descendant with path parity equal to the level difference.  These
 theorems live downstream of the native source certificates, so later
-connectivity work does not invalidate their caches.  Next combine two
-same-parity hierarchy addresses through their common outer canonical cycle,
-then choose row- and column-separating descendants geometrically.
+connectivity work does not invalidate their caches.  Hierarchy-address
+quotients are now converted to the exact descendant interval bounds, and the
+even-family and odd-family common-outer lemmas connect any two canonical
+cycles of the same parity through their enclosing outer cycle.  The remaining
+step is geometric: choose row- and column-separating descendants in the
+appropriate parity family and package their bridges as residual selections.
 
 ### 1. Obtain arbitrarily large free squares
 

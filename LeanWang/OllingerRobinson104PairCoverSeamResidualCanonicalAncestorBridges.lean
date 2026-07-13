@@ -338,5 +338,154 @@ theorem oddDescendantBridge
     exact first
   exact odd_trans_even middleCycle first' second
 
+private theorem bounds_of_div_eq
+    {scale block outerBlock : Nat} (scalePos : 0 < scale)
+    (quotient : block / scale = outerBlock) :
+    scale * outerBlock ≤ block ∧ block < scale * (outerBlock + 1) := by
+  constructor
+  · rw [← quotient]
+    simpa [Nat.mul_comm] using Nat.div_mul_le_self block scale
+  · rw [← quotient]
+    simpa [Nat.mul_comm] using Nat.lt_mul_div_succ block scalePos
+
+/-- A hierarchy address with an even level difference supplies exactly the
+base-four bounds needed by `evenDescendantBridge`. -/
+theorem evenBridgeWithin
+    {outerLevel outerBlockX outerBlockY level blockX blockY depth : Nat}
+    {grid : Nat → Nat → Index}
+    (levelEq : outerLevel = level + 2 * depth)
+    (xWithin : HierarchyAddressWithin
+      outerLevel outerBlockX level blockX)
+    (yWithin : HierarchyAddressWithin
+      outerLevel outerBlockY level blockY) :
+    EvenCycleBridge (iterateRefine (outerLevel + 2) grid)
+      (2 ^ outerLevel * (4 * outerBlockX + 1))
+      (2 ^ outerLevel * (4 * outerBlockX + 3))
+      (2 ^ outerLevel * (4 * outerBlockY + 1))
+      (2 ^ outerLevel * (4 * outerBlockY + 3))
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) := by
+  have differenceEq : outerLevel - level = 2 * depth := by omega
+  have scaleEq : 2 ^ (outerLevel - level) = 4 ^ depth := by
+    rw [differenceEq, pow_mul]
+    norm_num
+  have xQuotient : blockX / 4 ^ depth = outerBlockX := by
+    rw [← scaleEq]
+    exact xWithin.2
+  have yQuotient : blockY / 4 ^ depth = outerBlockY := by
+    rw [← scaleEq]
+    exact yWithin.2
+  have scalePos : 0 < 4 ^ depth := pow_pos (by decide) _
+  obtain ⟨xLower, xUpper⟩ := bounds_of_div_eq scalePos xQuotient
+  obtain ⟨yLower, yUpper⟩ := bounds_of_div_eq scalePos yQuotient
+  simpa only [levelEq] using evenDescendantBridge depth level grid
+    outerBlockX outerBlockY blockX blockY
+    xLower xUpper yLower yUpper
+
+/-- A hierarchy address with an odd level difference supplies exactly the
+twice-base-four bounds needed by `oddDescendantBridge`. -/
+theorem oddBridgeWithin
+    {outerLevel outerBlockX outerBlockY level blockX blockY depth : Nat}
+    {grid : Nat → Nat → Index}
+    (levelEq : outerLevel = level + 2 * depth + 1)
+    (xWithin : HierarchyAddressWithin
+      outerLevel outerBlockX level blockX)
+    (yWithin : HierarchyAddressWithin
+      outerLevel outerBlockY level blockY) :
+    OddCycleBridge (iterateRefine (outerLevel + 2) grid)
+      (2 ^ outerLevel * (4 * outerBlockX + 1))
+      (2 ^ outerLevel * (4 * outerBlockX + 3))
+      (2 ^ outerLevel * (4 * outerBlockY + 1))
+      (2 ^ outerLevel * (4 * outerBlockY + 3))
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) := by
+  have differenceEq : outerLevel - level = 2 * depth + 1 := by omega
+  have scaleEq : 2 ^ (outerLevel - level) = 2 * 4 ^ depth := by
+    rw [differenceEq, pow_add, pow_mul]
+    norm_num
+    ring
+  have xQuotient : blockX / (2 * 4 ^ depth) = outerBlockX := by
+    rw [← scaleEq]
+    exact xWithin.2
+  have yQuotient : blockY / (2 * 4 ^ depth) = outerBlockY := by
+    rw [← scaleEq]
+    exact yWithin.2
+  have scalePos : 0 < 2 * 4 ^ depth := by positivity
+  obtain ⟨xLower, xUpper⟩ := bounds_of_div_eq scalePos xQuotient
+  obtain ⟨yLower, yUpper⟩ := bounds_of_div_eq scalePos yQuotient
+  simpa only [levelEq] using oddDescendantBridge depth level grid
+    outerBlockX outerBlockY blockX blockY
+    xLower xUpper yLower yUpper
+
+/-- Two even-depth descendants of one outer canonical cycle are evenly
+connected through that outer cycle. -/
+theorem evenFamilyBridgeWithin
+    {outerLevel outerBlockX outerBlockY : Nat}
+    {firstLevel firstBlockX firstBlockY firstDepth : Nat}
+    {secondLevel secondBlockX secondBlockY secondDepth : Nat}
+    {grid : Nat → Nat → Index}
+    (firstLevelEq : outerLevel = firstLevel + 2 * firstDepth)
+    (secondLevelEq : outerLevel = secondLevel + 2 * secondDepth)
+    (firstXWithin : HierarchyAddressWithin
+      outerLevel outerBlockX firstLevel firstBlockX)
+    (firstYWithin : HierarchyAddressWithin
+      outerLevel outerBlockY firstLevel firstBlockY)
+    (secondXWithin : HierarchyAddressWithin
+      outerLevel outerBlockX secondLevel secondBlockX)
+    (secondYWithin : HierarchyAddressWithin
+      outerLevel outerBlockY secondLevel secondBlockY) :
+    EvenCycleBridge (iterateRefine (outerLevel + 2) grid)
+      (2 ^ firstLevel * (4 * firstBlockX + 1))
+      (2 ^ firstLevel * (4 * firstBlockX + 3))
+      (2 ^ firstLevel * (4 * firstBlockY + 1))
+      (2 ^ firstLevel * (4 * firstBlockY + 3))
+      (2 ^ secondLevel * (4 * secondBlockX + 1))
+      (2 ^ secondLevel * (4 * secondBlockX + 3))
+      (2 ^ secondLevel * (4 * secondBlockY + 1))
+      (2 ^ secondLevel * (4 * secondBlockY + 3)) := by
+  have first := evenBridgeWithin (grid := grid) firstLevelEq
+    firstXWithin firstYWithin
+  have second := evenBridgeWithin (grid := grid) secondLevelEq
+    secondXWithin secondYWithin
+  have outerCycle := at_scale grid outerLevel outerBlockX outerBlockY
+  exact even_trans_even outerCycle (EvenCycleBridge.symm first) second
+
+/-- Two odd-depth descendants of one outer canonical cycle are evenly
+connected through that outer cycle. -/
+theorem oddFamilyBridgeWithin
+    {outerLevel outerBlockX outerBlockY : Nat}
+    {firstLevel firstBlockX firstBlockY firstDepth : Nat}
+    {secondLevel secondBlockX secondBlockY secondDepth : Nat}
+    {grid : Nat → Nat → Index}
+    (firstLevelEq : outerLevel = firstLevel + 2 * firstDepth + 1)
+    (secondLevelEq : outerLevel = secondLevel + 2 * secondDepth + 1)
+    (firstXWithin : HierarchyAddressWithin
+      outerLevel outerBlockX firstLevel firstBlockX)
+    (firstYWithin : HierarchyAddressWithin
+      outerLevel outerBlockY firstLevel firstBlockY)
+    (secondXWithin : HierarchyAddressWithin
+      outerLevel outerBlockX secondLevel secondBlockX)
+    (secondYWithin : HierarchyAddressWithin
+      outerLevel outerBlockY secondLevel secondBlockY) :
+    EvenCycleBridge (iterateRefine (outerLevel + 2) grid)
+      (2 ^ firstLevel * (4 * firstBlockX + 1))
+      (2 ^ firstLevel * (4 * firstBlockX + 3))
+      (2 ^ firstLevel * (4 * firstBlockY + 1))
+      (2 ^ firstLevel * (4 * firstBlockY + 3))
+      (2 ^ secondLevel * (4 * secondBlockX + 1))
+      (2 ^ secondLevel * (4 * secondBlockX + 3))
+      (2 ^ secondLevel * (4 * secondBlockY + 1))
+      (2 ^ secondLevel * (4 * secondBlockY + 3)) := by
+  have first := oddBridgeWithin (grid := grid) firstLevelEq
+    firstXWithin firstYWithin
+  have second := oddBridgeWithin (grid := grid) secondLevelEq
+    secondXWithin secondYWithin
+  have outerCycle := at_scale grid outerLevel outerBlockX outerBlockY
+  exact odd_trans_odd outerCycle (OddCycleBridge.symm first) second
+
 end PairCoverSeamResidualCanonicalAncestorBridges
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
