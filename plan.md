@@ -757,6 +757,14 @@ witnesses from aligned canonical cycles, the sparse-boundary ancestry
 classification, the nearest-boundary hypothesis, and the failed
 contained-child test.
 
+The hierarchy composition part is now isolated in
+`OllingerRobinson104PairCoverSeamResidualCycleBridges`.  An even route from the
+selected source to an enclosing cycle composes with any `EvenCycleBridge` to a
+descendant cycle, and branch-specific row and column constructors package that
+descendant directly as a separation witness.  Thus the residual proof no
+longer needs to build a graph path for each query: it needs one source-ancestry
+route and an arithmetic choice of a bridged descendant cycle.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
