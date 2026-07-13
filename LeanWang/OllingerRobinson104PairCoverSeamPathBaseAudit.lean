@@ -312,8 +312,24 @@ theorem ParentPaths.of_canonicalIndex
 def canonicalParents : List Index :=
   BorderSubstitution.states.map BorderSubstitution.representative
 
+abbrev Chunk := Fin 14
+
+def parentChunk (chunk : Chunk) : List Index :=
+  (canonicalParents.drop (4 * chunk.val)).take 4
+
+def checkChunk (phase : Phase) (depth : Nat) (chunk : Chunk) : Bool :=
+  (parentChunk chunk).all fun parent => checkParent phase depth parent
+
+set_option linter.style.nativeDecide false in
+theorem canonicalParents_eq_chunks :
+    canonicalParents = (List.finRange 14).flatMap parentChunk := by
+  native_decide
+
 def CanonicalPaths (phase : Phase) (depth : Nat) : Prop :=
   ∀ parent ∈ canonicalParents, ParentPaths phase depth parent
+
+def ChunkChecks (phase : Phase) (depth : Nat) : Prop :=
+  ∀ chunk : Chunk, checkChunk phase depth chunk = true
 
 theorem CanonicalPaths.paths {phase : Phase} {depth : Nat}
     (canonical : CanonicalPaths phase depth) : Paths phase depth := by
@@ -337,6 +353,18 @@ theorem checkParent_sound {phase : Phase} {depth : Nat} {parent : Index}
     intro boundary row column hboundary hrow hcolumn
     exact horizontalQueriesCheck_sound hcolumn
       (checked.2 boundary hboundary row hrow)
+
+theorem ChunkChecks.paths {phase : Phase} {depth : Nat}
+    (checked : ChunkChecks phase depth) : Paths phase depth := by
+  apply CanonicalPaths.paths
+  intro parent hparent
+  rw [canonicalParents_eq_chunks] at hparent
+  simp only [List.mem_flatMap] at hparent
+  rcases hparent with ⟨chunk, _, hparent⟩
+  apply checkParent_sound
+  have chunkChecked := checked chunk
+  simp only [checkChunk, List.all_eq_true] at chunkChecked
+  exact chunkChecked parent hparent
 
 def check (phase : Phase) (depth : Nat) : Bool :=
   (List.finRange 104).all fun parent => checkParent phase depth parent

@@ -540,6 +540,11 @@ The parent obligation is invariant under the border-state quotient, so checking
 the 56 canonical `(thin, thick)` representatives proves `Paths` for all 104
 tile indices. The next finite certificates should therefore be split over
 those 56 representatives for each of the odd and even parity bases.
+The canonical list is now partitioned into 14 checked chunks of four states,
+and `ChunkChecks.paths` assembles their Boolean results into the semantic
+all-parent theorem. The first isolated odd chunk passes `native_decide` and
+builds in 949 seconds; the remaining chunks can therefore be generated and
+built independently or in bounded parallel batches.
 
 ### 1. Obtain arbitrarily large free squares
 
