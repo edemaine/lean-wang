@@ -21,9 +21,10 @@ namespace Figure13Layers
 namespace Closed104
 namespace PairCoverSeamPathTranslation
 
-open RedCycles RedShadeGraph RedShadeGraphSearchSoundness
+open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphSearchSoundness
   RedShadeGraphTranslation RefinementTranslation
-  PairCoverSeamPathBaseAudit PairCoverSeamPathBoundedBase
+  PairCoverSeamArithmetic
+  PairCoverSeamPathSearch PairCoverSeamPathBaseAudit PairCoverSeamPathBoundedBase
   PairCoverSeamShadePaths ShadedFreeLineRecurrence Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
@@ -46,6 +47,65 @@ theorem searchSize_eq_totalQuarterWidth (phase : Phase) (depth : Nat) :
     searchSize phase depth =
       2 ^ ((refinementDepth phase depth + 2) + 1) := by
   simp [searchSize]
+
+theorem searchSize_mul_eq_parentQuarterOffset
+    (phase : Phase) (depth block : Nat) :
+    searchSize phase depth * block =
+      2 * (2 ^ refinementDepth phase (depth + 1) * block) := by
+  have hpow := PairCoverSeamArithmetic.two_pow_refinementDepth_succ phase depth
+  simp only [searchSize, pow_add, hpow]
+  ring
+
+theorem quarterOffset_add_west (phase : Phase) (depth block : Nat) :
+    searchSize phase depth * block +
+        quarterWest (successorWest phase depth 0) =
+      quarterWest (successorWest phase depth block) := by
+  rw [searchSize_mul_eq_parentQuarterOffset]
+  simp [successorWest, quarterWest]
+  ring
+
+theorem quarterOffset_add_east (phase : Phase) (depth block : Nat) :
+    searchSize phase depth * block +
+        quarterEast (successorEast phase depth 0) =
+      quarterEast (successorEast phase depth block) := by
+  rw [searchSize_mul_eq_parentQuarterOffset]
+  simp [successorEast, quarterEast]
+  ring
+
+theorem quarterOffset_add_south (phase : Phase) (depth block : Nat) :
+    searchSize phase depth * block +
+        quarterSouth (successorWest phase depth 0) =
+      quarterSouth (successorWest phase depth block) := by
+  simpa [quarterSouth, quarterWest] using quarterOffset_add_west phase depth block
+
+theorem quarterOffset_add_north (phase : Phase) (depth block : Nat) :
+    searchSize phase depth * block +
+        quarterNorth (successorEast phase depth 0) =
+      quarterNorth (successorEast phase depth block) := by
+  simpa [quarterNorth, quarterEast] using quarterOffset_add_east phase depth block
+
+def localCoordinate (phase : Phase) (depth block coordinate : Nat) : Nat :=
+  coordinate - searchSize phase depth * block
+
+theorem offset_add_localCoordinate
+    {phase : Phase} {depth block coordinate : Nat}
+    (hlower : quarterSouth (successorWest phase depth block) < coordinate) :
+    searchSize phase depth * block +
+        localCoordinate phase depth block coordinate = coordinate := by
+  have hboundary := quarterOffset_add_south phase depth block
+  unfold localCoordinate
+  omega
+
+theorem localCoordinate_mem_coordinates
+    {phase : Phase} {depth block coordinate : Nat}
+    (hlower : quarterSouth (successorWest phase depth block) < coordinate)
+    (hupper : coordinate < quarterNorth (successorEast phase depth block)) :
+    localCoordinate phase depth block coordinate ∈ coordinates phase depth := by
+  have hlowerEq := quarterOffset_add_south phase depth block
+  have hupperEq := quarterOffset_add_north phase depth block
+  have hcoordinate := offset_add_localCoordinate hlower
+  simp only [coordinates, List.mem_filter, List.mem_range, decide_eq_true_eq]
+  constructor <;> omega
 
 theorem horizontalPort_translate (depth : Nat) (grid : Nat → Nat → Index)
     (blockX blockY x y : Nat) :
@@ -252,6 +312,128 @@ theorem boundedPath_parentBlock
     (blockX := blockX) (blockY := blockY) shifted
   rw [globalGrid_eq_total phase depth grid]
   simpa [totalDepth, searchSize_eq_totalQuarterWidth] using translated
+
+/-- A bounded vertical seam certificate becomes a global seam path in the
+corresponding successor parent. -/
+theorem boundedVerticalSeamPath_parentBlock
+    (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+    (blockX blockY : Nat) {column row boundary : Nat}
+    (hcolumn : column < searchSize phase depth)
+    (hrow : row < searchSize phase depth)
+    (hboundary : boundary < searchSize phase depth)
+    (path : BoundedVerticalSeamPath
+      (fineGrid phase depth (fun _ _ => grid blockX blockY))
+      (searchSize phase depth)
+      (successorWest phase depth 0) (successorEast phase depth 0)
+      column row boundary) :
+    VerticalSeamPath
+      (iterateRefine 2 (SparseFreeLinePlaneBase.refinedGrid phase depth grid))
+      (successorWest phase depth blockX) (successorEast phase depth blockX)
+      (searchSize phase depth * blockX + column)
+      (searchSize phase depth * blockY + row)
+      (searchSize phase depth * blockY + boundary) := by
+  rcases path with path | path
+  · rcases path with ⟨targetX, hwest, heast, hinterior, path⟩
+    have htargetX : targetX < searchSize phase depth := by
+      have hbounds := path.second_inBounds
+      unfold verticalPort at hbounds
+      split at hbounds <;> exact hbounds.1
+    left
+    refine ⟨searchSize phase depth * blockX + targetX, ?_, ?_, ?_, ?_⟩
+    · rw [← quarterOffset_add_west]
+      omega
+    · rw [← quarterOffset_add_east]
+      omega
+    · rw [← verticalInterior_parentBlock phase depth grid blockX blockY
+        targetX row htargetX hrow]
+      exact hinterior
+    · have translated := boundedPath_parentBlock
+        phase depth grid blockX blockY path
+      rw [horizontalPort_parentBlock phase depth grid blockX blockY
+        column boundary hcolumn hboundary] at translated
+      rw [verticalPort_parentBlock phase depth grid blockX blockY
+        targetX row htargetX hrow] at translated
+      exact translated
+  · rcases path with ⟨targetY, hbetween, hinterior, path⟩
+    have htargetY : targetY < searchSize phase depth := by
+      have hbounds := path.second_inBounds
+      unfold horizontalPort at hbounds
+      split at hbounds <;> exact hbounds.2
+    right
+    refine ⟨searchSize phase depth * blockY + targetY, ?_, ?_, ?_⟩
+    · unfold StrictBetween at hbetween ⊢
+      omega
+    · rw [← horizontalInterior_parentBlock phase depth grid blockX blockY
+        column targetY hcolumn htargetY]
+      exact hinterior
+    · have translated := boundedPath_parentBlock
+        phase depth grid blockX blockY path
+      rw [horizontalPort_parentBlock phase depth grid blockX blockY
+        column boundary hcolumn hboundary] at translated
+      rw [horizontalPort_parentBlock phase depth grid blockX blockY
+        column targetY hcolumn htargetY] at translated
+      exact translated
+
+/-- A bounded horizontal seam certificate becomes a global seam path in the
+corresponding successor parent. -/
+theorem boundedHorizontalSeamPath_parentBlock
+    (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+    (blockX blockY : Nat) {row column boundary : Nat}
+    (hrow : row < searchSize phase depth)
+    (hcolumn : column < searchSize phase depth)
+    (hboundary : boundary < searchSize phase depth)
+    (path : BoundedHorizontalSeamPath
+      (fineGrid phase depth (fun _ _ => grid blockX blockY))
+      (searchSize phase depth)
+      (successorWest phase depth 0) (successorEast phase depth 0)
+      row column boundary) :
+    HorizontalSeamPath
+      (iterateRefine 2 (SparseFreeLinePlaneBase.refinedGrid phase depth grid))
+      (successorWest phase depth blockY) (successorEast phase depth blockY)
+      (searchSize phase depth * blockY + row)
+      (searchSize phase depth * blockX + column)
+      (searchSize phase depth * blockX + boundary) := by
+  rcases path with path | path
+  · rcases path with ⟨targetY, hsouth, hnorth, hinterior, path⟩
+    have htargetY : targetY < searchSize phase depth := by
+      have hbounds := path.second_inBounds
+      unfold horizontalPort at hbounds
+      split at hbounds <;> exact hbounds.2
+    left
+    refine ⟨searchSize phase depth * blockY + targetY, ?_, ?_, ?_, ?_⟩
+    · rw [← quarterOffset_add_south]
+      omega
+    · rw [← quarterOffset_add_north]
+      omega
+    · rw [← horizontalInterior_parentBlock phase depth grid blockX blockY
+        column targetY hcolumn htargetY]
+      exact hinterior
+    · have translated := boundedPath_parentBlock
+        phase depth grid blockX blockY path
+      rw [verticalPort_parentBlock phase depth grid blockX blockY
+        boundary row hboundary hrow] at translated
+      rw [horizontalPort_parentBlock phase depth grid blockX blockY
+        column targetY hcolumn htargetY] at translated
+      exact translated
+  · rcases path with ⟨targetX, hbetween, hinterior, path⟩
+    have htargetX : targetX < searchSize phase depth := by
+      have hbounds := path.second_inBounds
+      unfold verticalPort at hbounds
+      split at hbounds <;> exact hbounds.1
+    right
+    refine ⟨searchSize phase depth * blockX + targetX, ?_, ?_, ?_⟩
+    · unfold StrictBetween at hbetween ⊢
+      omega
+    · rw [← verticalInterior_parentBlock phase depth grid blockX blockY
+        targetX row htargetX hrow]
+      exact hinterior
+    · have translated := boundedPath_parentBlock
+        phase depth grid blockX blockY path
+      rw [verticalPort_parentBlock phase depth grid blockX blockY
+        boundary row hboundary hrow] at translated
+      rw [verticalPort_parentBlock phase depth grid blockX blockY
+        targetX row htargetX hrow] at translated
+      exact translated
 
 end PairCoverSeamPathTranslation
 end Closed104
