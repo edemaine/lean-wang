@@ -723,10 +723,22 @@ signed shade constraints, with parity zero denoting light and parity one dark.
 It proves that a weighted graph flood reaching any constrained port with the
 opposite parity contradicts every valid shade assignment.  The accompanying
 port lemmas prove that a present unselected vertical or horizontal interior is
-dark.  The next finite audit can therefore seed the selected boundary as light,
-the free-line and intervening unselected interiors as dark, and certify each
-residual case by a signed parity conflict rather than requiring one particular
-even path shape.
+dark.  Direct one-cell and two-cell audits nevertheless have genuine
+counterexamples in every residual orientation: the relevant light red cycle
+can close outside any such local window.  Enlarging that audit is therefore
+not the right proof boundary.
+
+`OllingerRobinson104PairCoverSeamCycleContradictions` instead formalizes the
+global step used in Robinson Section 7.  If a selected boundary port lies on a
+red cycle and a free row or column crosses the cycle interior, even
+connectivity around the cycle reaches a perpendicular red interior on the free
+line and contradicts freeness.  The remaining residual task is geometric:
+classify the sparse selected boundary as a port of the appropriate enclosing
+hierarchy cycle, then use the absence of an intervening selected boundary and
+the failed child-containment test to place the created free line strictly
+inside that cycle.  The four face orientations can then be discharged by the
+cycle contradiction, after which the all-depth pair-cover recurrence can be
+assembled.
 
 ### 1. Obtain arbitrarily large free squares
 
