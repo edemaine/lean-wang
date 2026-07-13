@@ -643,13 +643,10 @@ the complete one-depth recurrence without any additional global arithmetic or
 lower-edge exception.
 
 `OllingerRobinson104PairCoverSeamCreatedPaths` removes shade semantics from
-that final local obligation.  It is enough to provide an ordinary red-graph
-seam path for every wrong-facing query having at least one created coordinate.
-The existing path/shade contradiction proves both created boundary-face
-structures, and the face-step theorem then lifts the previous depth's vertical
-and horizontal certificates together.  The remaining recurrence is therefore
-a finite geometric path-certificate problem; it no longer mentions a shade
-grid, free-line shades, or nearest selected-boundary semantics.
+the cases actually covered by ordinary red-graph seam paths.  Those paths
+discharge most of the remaining recurrence, but not the
+sparse-boundary/created-free-line family described below; that family genuinely
+retains the shade grid and nearest-selected-boundary semantics.
 
 A first finite split of that geometric problem is now certified by
 `OllingerRobinson104PairCoverSeamCreatedLocalAuditCheck`.  In every one of the
@@ -658,8 +655,11 @@ boundary coordinate is created.  It also exists when the boundary and queried
 free-line coordinate are sparse but the transverse coordinate is created.
 The exhaustive vertical and horizontal checks leave one dual pair of local
 families: a sparse selected boundary with a created free-row/free-column
-coordinate.  Those cases occur at recursive-child edges and need the enclosing
-hierarchy context rather than an arbitrary constant-parent macrocell.
+coordinate.  An exact substitution-language diagnostic showed that this is
+not merely a missing neighboring-cell template: the language stabilizes at
+204 adjacent pairs and 400 triples by depth three, and the path property still
+fails on exact depth-four triples.  This family therefore needs Robinson's
+semantic free-line/obstruction argument rather than another even-path audit.
 `OllingerRobinson104PairCoverSeamCreatedLocalAudit` proves soundness of this
 check as bounded red-graph paths.  Every intermediate port remains in the
 audited 8-by-8 macrocell, providing exactly the hypothesis needed by the
@@ -706,8 +706,16 @@ thin/thick quotient state rather than evaluating canonical representatives.
 paths, ports, and interior predicates into global quarter coordinates.  Its
 `verticalLower`, `verticalUpper`, `horizontalLeft`, and `horizontalRight`
 theorems expose all four boundary-created paths crossing one neighboring
-macrocell edge.  The next step is the board-scale coordinate decomposition
-that combines these with the same-block transport.
+macrocell edge.  `OllingerRobinson104PairCoverSeamCreatedPaths` now records the
+correct logical split: `CoveredCreatedPathsAt` asks only for a created boundary,
+or a sparse free line with a created transverse coordinate;
+`ResidualVerticalBoundaryFacesAt` and
+`ResidualHorizontalBoundaryFacesAt` state exactly the remaining sparse-boundary
+and created-free-line semantic cases.  The next proof step is to derive those
+residual face orientations from validity, freeness, and the absence of an
+intervening selected boundary, following Robinson Section 7.  After that, the
+same-cell and adjacent certificates can be assembled with the residual theorem
+into the all-depth face recurrence.
 
 ### 1. Obtain arbitrarily large free squares
 
