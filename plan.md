@@ -677,6 +677,15 @@ now consume the actual wrong-facing interior orientation and the audited
 created-coordinate disjunction directly, so later recurrence code does not
 need to reconstruct Boolean query-list membership.
 
+The first cross-macrocell family is also finitely certified.  The final
+substitution address bit reduces adjacent cells to 72 canonical sibling pairs
+plus 720 canonical cross-parent pairs, for 792 states in each orientation.
+`OllingerRobinson104PairCoverSeamCreatedAdjacentAuditDefs` checks the two-cell
+8-by-16 and 16-by-8 windows for a created boundary facing across their common
+edge.  Twenty-five independent cached modules cover 32 pair states each, and
+`OllingerRobinson104PairCoverSeamCreatedAdjacentAuditChunks` assembles all
+vertical and horizontal results without rerunning graph search.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
