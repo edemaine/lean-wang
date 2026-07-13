@@ -31,6 +31,7 @@ set_option maxRecDepth 20000
 def HorizontalPredecessor (grid : Nat → Nat → Index)
     (column boundary : Nat) : Prop :=
   ∃ oldColumn oldBoundary,
+    oldColumn / 2 = column / 8 ∧
     sparseCoordinate oldBoundary = boundary ∧
     Signals.horizontalInterior?
       (componentAt grid oldColumn oldBoundary)
@@ -42,6 +43,7 @@ def HorizontalPredecessor (grid : Nat → Nat → Index)
 def VerticalPredecessor (grid : Nat → Nat → Index)
     (boundary row : Nat) : Prop :=
   ∃ oldBoundary oldRow,
+    oldRow / 2 = row / 8 ∧
     sparseCoordinate oldBoundary = boundary ∧
     Signals.verticalInterior?
       (componentAt grid oldBoundary oldRow)
@@ -49,6 +51,44 @@ def VerticalPredecessor (grid : Nat → Nat → Index)
     Path (iterateRefine 2 grid)
       (verticalPort (iterateRefine 2 grid) boundary row)
       (sparsePort (verticalPort grid oldBoundary oldRow)) false
+
+/-- Strict membership in a four-times larger board projects every predecessor
+from the same macro-block into the stable one-quarter collar. -/
+theorem predecessor_in_collar
+    {west east fine coarse : Nat}
+    (sameBlock : coarse / 2 = fine / 8)
+    (lower : RedShadeCycles.quarterWest (4 * west) < fine)
+    (upper : fine < RedShadeCycles.quarterEast (4 * east)) :
+    RedShadeCycles.quarterWest west - 1 ≤ coarse ∧
+      coarse < RedShadeCycles.quarterEast east := by
+  unfold RedShadeCycles.quarterWest RedShadeCycles.quarterEast at *
+  omega
+
+/-- The weak lower edge of the stable collar is also preserved. -/
+theorem predecessor_in_collar_of_collar
+    {west east fine coarse : Nat}
+    (sameBlock : coarse / 2 = fine / 8)
+    (lower : RedShadeCycles.quarterWest (4 * west) - 1 ≤ fine)
+    (upper : fine < RedShadeCycles.quarterEast (4 * east)) :
+    RedShadeCycles.quarterWest west - 1 ≤ coarse ∧
+      coarse < RedShadeCycles.quarterEast east := by
+  unfold RedShadeCycles.quarterWest RedShadeCycles.quarterEast at *
+  omega
+
+/-- A literal sparse coordinate in the fine collar comes from the coarse
+collar. -/
+theorem sparse_preimage_in_collar
+    {west east fine coarse : Nat}
+    (sparse : sparseCoordinate coarse = fine)
+    (lower : RedShadeCycles.quarterWest (4 * west) - 1 ≤ fine)
+    (upper : fine < RedShadeCycles.quarterEast (4 * east)) :
+    RedShadeCycles.quarterWest west - 1 ≤ coarse ∧
+      coarse < RedShadeCycles.quarterEast east := by
+  have hmod := Nat.mod_lt coarse (by decide : 0 < 2)
+  have hdecompose := Nat.mod_add_div coarse 2
+  unfold RedShadeCycles.quarterWest RedShadeCycles.quarterEast at *
+  unfold sparseCoordinate macroOrigin localCoordinate at sparse
+  omega
 
 private theorem horizontalSparsePort_oldBlock
     (grid : Nat → Nat → Index) (blockX blockY sourceX sourceY : Nat)
@@ -135,6 +175,9 @@ theorem horizontalPredecessor
   rcases horizontalAt_sound hsourceY checked localInterior with
     ⟨sourceX, hsourceX, sourceInterior, localPath⟩
   let oldColumn := 2 * blockX + sourceX
+  have holdColumnBlock : oldColumn / 2 = column / 8 := by
+    dsimp only [oldColumn, blockX]
+    omega
   have globalSourceInterior : Signals.horizontalInterior?
       (componentAt grid oldColumn oldBoundary)
       (quadrantAt oldColumn oldBoundary) ≠ none := by
@@ -159,7 +202,7 @@ theorem horizontalPredecessor
       (horizontalPort (iterateRefine 2 grid) column boundary) false := by
     rw [sourcePort, targetPort, hcolumn, hboundaryLocal] at translated
     simpa only [oldColumn, holdBoundary] using translated
-  exact ⟨oldColumn, oldBoundary, hboundary, globalSourceInterior,
+  exact ⟨oldColumn, oldBoundary, holdColumnBlock, hboundary, globalSourceInterior,
     path_symm globalPath⟩
 
 set_option maxHeartbeats 2000000 in
@@ -205,6 +248,9 @@ theorem verticalPredecessor
   rcases verticalAt_sound hsourceX checked localInterior with
     ⟨sourceY, hsourceY, sourceInterior, localPath⟩
   let oldRow := 2 * blockY + sourceY
+  have holdRowBlock : oldRow / 2 = row / 8 := by
+    dsimp only [oldRow, blockY]
+    omega
   have globalSourceInterior : Signals.verticalInterior?
       (componentAt grid oldBoundary oldRow)
       (quadrantAt oldBoundary oldRow) ≠ none := by
@@ -229,7 +275,7 @@ theorem verticalPredecessor
       (verticalPort (iterateRefine 2 grid) boundary row) false := by
     rw [sourcePort, targetPort, hboundaryLocal, hrow] at translated
     simpa only [oldRow, holdBoundary] using translated
-  exact ⟨oldBoundary, oldRow, hboundary, globalSourceInterior,
+  exact ⟨oldBoundary, oldRow, holdRowBlock, hboundary, globalSourceInterior,
     path_symm globalPath⟩
 
 end PairCoverSeamResidualCyclePredecessorTransport

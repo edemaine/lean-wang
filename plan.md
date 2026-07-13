@@ -829,6 +829,17 @@ parent.  The named witness converts to the older unlabelled interface and is
 preserved by a two-substitution sparse lift, so it is ready for the exhaustive
 sparse/created hierarchy induction.
 
+That induction step is now proved in
+`OllingerRobinson104PairCoverSeamResidualCanonicalAncestorRecurrence`.
+The predecessor witness records that its transverse coordinate stays in the
+same two-cell macro-block, which proves that the collar
+`[quarterWest west - 1, quarterEast east)` projects into itself.  Every live
+fine selector then splits exhaustively: a sparse selected boundary uses the
+certified predecessor, canonical sparse lift, and even connector; a created
+selected boundary uses the parity-normalized local-cycle theorem.  The
+remaining source-ancestry work is the finite even/odd base certificate and its
+iteration to the recurrence depths used by `ResidualSourceAncestorsAt`.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
