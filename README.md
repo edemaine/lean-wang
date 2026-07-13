@@ -15,8 +15,8 @@ The machine side is complete. It uses one fixed universal Mathlib TM0 machine:
 ```text
 Nat.Partrec.Code c
   -> encode c on the initial tape of one fixed universal TM0 machine
-  -> fold that finite word for one fixed one-sided Post program
-  -> force the word directly on the bottom row of a fixed-corner Wang instance
+  -> fold the TM0 tape into paired one-sided tableau cells
+  -> force the finite input directly on the bottom Wang row
   -> combine with any certified Robinson scaffold
 ```
 

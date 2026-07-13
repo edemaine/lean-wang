@@ -68,7 +68,7 @@ or descriptor decoder occurs in the retained reduction.
 
 There is no remaining source-uniform compiler, descriptor decoder, generated
 position-row obligation, code-parametric support-list construction, or
-input-specific machine control in the final reduction. More than twenty
+input-specific machine control in the final reduction. More than one hundred
 thousand lines of the obsolete route have been deleted. The retained fixed-TM0
 tableau consists only of native finite supports, the folded alphabet and tape
 geometry, direct semantic transition rows, and their step/halting simulation.
