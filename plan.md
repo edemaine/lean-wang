@@ -782,6 +782,14 @@ selectors are also proved to choose live ports whenever their interior signal
 exists.  Consequently the finite local step need only return a live coarse
 predecessor and an even connector to its sparse copy.
 
+The needed finite predecessor statement is now certified for all 104 closed
+tiles.  On each literal sparse local row, every horizontal interior segment
+has a bounded even route from a genuine coarse horizontal selector; the
+vertical statement holds dually on sparse local columns.  The exhaustive
+weighted searches are split into eight cached parent ranges, and their
+soundness theorem exposes the particular coarse predecessor and bounded path
+needed for translation into an arbitrary macrocell.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
