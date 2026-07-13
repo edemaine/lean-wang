@@ -18,11 +18,12 @@ namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
 namespace PairCoverSeamResidualDirectPathFamilyTransport
 
 open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph
-  RedShadeGraphBoards RedShadeGraphSearchSoundness RedShadeGraphTranslation
+  RedShadeGraphBoards RedShadeGraphRefinement RedShadeGraphSearchSoundness
+  RedShadeGraphTranslation
   RefinementTranslation OnCycleTranslation
   PairCoverSeamResidualCanonicalAncestors
   PairCoverSeamResidualDirectPathBridges
-  PairCoverSeamResidualDirectPathFamilySearch
+  PairCoverSeamResidualDirectPathFamilySearch Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -33,8 +34,8 @@ private theorem hierarchyAddress_translate
       (2 ^ (outerLevel - level) * parent + block) := by
   rcases within with ⟨levelLe, quotient⟩
   refine ⟨levelLe, ?_⟩
-  have denominatorNe : 2 ^ (outerLevel - level) ≠ 0 := by positivity
-  rw [Nat.mul_add_div denominatorNe, quotient]
+  have denominatorPos : 0 < 2 ^ (outerLevel - level) := by positivity
+  rw [Nat.mul_add_div denominatorPos, quotient]
   omega
 
 private theorem power_product
@@ -85,10 +86,10 @@ private theorem onCycle_translateHierarchy
     (offsetX := 2 ^ (outerLevel + 2) * parentX)
     (offsetY := 2 ^ (outerLevel + 2) * parentY) onCycle
   convert translated using 1
-  · exact cycleCoordinate_translate levelLe parentX blockX 1
-  · exact cycleCoordinate_translate levelLe parentX blockX 3
-  · exact cycleCoordinate_translate levelLe parentY blockY 1
-  · exact cycleCoordinate_translate levelLe parentY blockY 3
+  · exact (cycleCoordinate_translate levelLe parentX blockX 1).symm
+  · exact (cycleCoordinate_translate levelLe parentX blockX 3).symm
+  · exact (cycleCoordinate_translate levelLe parentY blockY 1).symm
+  · exact (cycleCoordinate_translate levelLe parentY blockY 3).symm
   · rw [portOffset_eq, portOffset_eq]
 
 /-- Transport one bounded constant-parent family reach into an arbitrary

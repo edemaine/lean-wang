@@ -1003,6 +1003,19 @@ the global refinement, and translates and reverses the even path.  Thus the
 remaining finite target enumeration can run only on constant-parent blocks;
 it no longer needs to prove global-grid family ancestry separately.
 
+Boundedness is now retained through the joint endpoint checks as well.
+`BoundedRowFamilyTarget` and `BoundedColumnFamilyTarget` keep each accepted
+target route inside the exact parent block, and the corresponding joint
+soundness theorems retain bounded routes for both the source and target in one
+chosen family.  `OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetTransport`
+translates the target inequalities, strict-between relation, live interior,
+selected port, and family ancestor together.  Its final row and column
+wrappers turn an accepted constant-parent Boolean check directly into the
+global joint certificate consumed by `FamilyTargetsAt`.  What remains at this
+layer is the finite enumeration of all applicable local base queries and the
+arithmetic normalization from successor-board coordinates to these translated
+local coordinates.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
