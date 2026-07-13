@@ -40,6 +40,18 @@ def LocalCycleRouteAt (grid : Nat → Nat → Index) (target : Port) : Prop :=
       (4 * blockY + 1) (4 * blockY + 3) entry ∧
     Path (iterateRefine 2 grid) target entry parity
 
+/-- A local-cycle route retaining the exact two-substitution macrocell in
+which the target was audited. -/
+def LocalCycleRouteAtBlock (grid : Nat → Nat → Index) (target : Port)
+    (blockX blockY : Nat) : Prop :=
+  ∃ entry parity,
+    CycleOn (iterateRefine 2 grid)
+      (4 * blockX + 1) (4 * blockX + 3)
+      (4 * blockY + 1) (4 * blockY + 3) ∧
+    OnCycle (4 * blockX + 1) (4 * blockX + 3)
+      (4 * blockY + 1) (4 * blockY + 3) entry ∧
+    Path (iterateRefine 2 grid) target entry parity
+
 private theorem local_created_of_not_sparse {coordinate : Nat}
     (created : ¬ IsSparseCoordinate coordinate) :
     coordinate % 8 ∈ createdCoordinates := by
@@ -59,14 +71,15 @@ private theorem local_created_of_not_sparse {coordinate : Nat}
 
 set_option maxHeartbeats 2000000 in
 -- The translated selector and cycle entry both depend on the macrocell split.
-theorem horizontalCreated
+theorem horizontalCreatedAtBlock
     (grid : Nat → Nat → Index) (column boundary : Nat)
     (createdBoundary : ¬ IsSparseCoordinate boundary)
     (interior : Signals.horizontalInterior?
       (componentAt (iterateRefine 2 grid) column boundary)
       (quadrantAt column boundary) ≠ none) :
-    LocalCycleRouteAt grid
-      (horizontalPort (iterateRefine 2 grid) column boundary) := by
+    LocalCycleRouteAtBlock grid
+      (horizontalPort (iterateRefine 2 grid) column boundary)
+      (column / 8) (boundary / 8) := by
   let blockX := column / 8
   let blockY := boundary / 8
   let localX := column % 8
@@ -98,22 +111,37 @@ theorem horizontalCreated
     localX localY hlocalX hlocalY
   rw [targetPort, hcolumn, hboundary] at translated
   let globalEntry := translatePort entry (8 * blockX) (8 * blockY)
-  refine ⟨blockX, blockY, globalEntry, parity,
+  refine ⟨globalEntry, parity,
     OrientedRedBoardTranslations.depthTwo_at grid blockX blockY, ?_, ?_⟩
   · exact onCycle_translate_cell blockX blockY 0 0
       (onCycle_of_mem_cyclePorts (by omega) (by omega) hentry)
   · exact path_symm translated
 
+/-- Forgetting the audited macrocell recovers the original horizontal route. -/
+theorem horizontalCreated
+    (grid : Nat → Nat → Index) (column boundary : Nat)
+    (createdBoundary : ¬ IsSparseCoordinate boundary)
+    (interior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 grid) column boundary)
+      (quadrantAt column boundary) ≠ none) :
+    LocalCycleRouteAt grid
+      (horizontalPort (iterateRefine 2 grid) column boundary) := by
+  rcases horizontalCreatedAtBlock grid column boundary createdBoundary interior with
+    ⟨entry, parity, cycle, entryOnCycle, path⟩
+  exact ⟨column / 8, boundary / 8, entry, parity,
+    cycle, entryOnCycle, path⟩
+
 set_option maxHeartbeats 2000000 in
 -- The translated selector and cycle entry both depend on the macrocell split.
-theorem verticalCreated
+theorem verticalCreatedAtBlock
     (grid : Nat → Nat → Index) (boundary row : Nat)
     (createdBoundary : ¬ IsSparseCoordinate boundary)
     (interior : Signals.verticalInterior?
       (componentAt (iterateRefine 2 grid) boundary row)
       (quadrantAt boundary row) ≠ none) :
-    LocalCycleRouteAt grid
-      (verticalPort (iterateRefine 2 grid) boundary row) := by
+    LocalCycleRouteAtBlock grid
+      (verticalPort (iterateRefine 2 grid) boundary row)
+      (boundary / 8) (row / 8) := by
   let blockX := boundary / 8
   let blockY := row / 8
   let localX := boundary % 8
@@ -145,11 +173,25 @@ theorem verticalCreated
     localX localY hlocalX hlocalY
   rw [targetPort, hboundary, hrow] at translated
   let globalEntry := translatePort entry (8 * blockX) (8 * blockY)
-  refine ⟨blockX, blockY, globalEntry, parity,
+  refine ⟨globalEntry, parity,
     OrientedRedBoardTranslations.depthTwo_at grid blockX blockY, ?_, ?_⟩
   · exact onCycle_translate_cell blockX blockY 0 0
       (onCycle_of_mem_cyclePorts (by omega) (by omega) hentry)
   · exact path_symm translated
+
+/-- Forgetting the audited macrocell recovers the original vertical route. -/
+theorem verticalCreated
+    (grid : Nat → Nat → Index) (boundary row : Nat)
+    (createdBoundary : ¬ IsSparseCoordinate boundary)
+    (interior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2 grid) boundary row)
+      (quadrantAt boundary row) ≠ none) :
+    LocalCycleRouteAt grid
+      (verticalPort (iterateRefine 2 grid) boundary row) := by
+  rcases verticalCreatedAtBlock grid boundary row createdBoundary interior with
+    ⟨entry, parity, cycle, entryOnCycle, path⟩
+  exact ⟨boundary / 8, row / 8, entry, parity,
+    cycle, entryOnCycle, path⟩
 
 end PairCoverSeamResidualCycleLocalTransport
 end Closed104

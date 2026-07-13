@@ -867,9 +867,17 @@ level block, divided by the appropriate power of two, is the outer block.
 The transported finite base now proves this relation directly: a route either
 lands on the queried outer cycle or on its one-level-lower crossing cycle at
 block address `2 * block`.  The original `SourceAncestorsIn` base remains as a
-projection of this hierarchy-localized theorem.  The next recurrence step must
-preserve the address relation in sparse cases and derive it from the collar
-coordinates in created cases.
+projection of this hierarchy-localized theorem.
+
+The localized recurrence is now complete.  Sparse sources raise both the
+ancestor and outer levels by two and preserve their quotient address.  Created
+sources retain the exact audited macrocell (`coordinate / 8`); the canonical
+collar bounds prove that cell belongs to the outer block, and the odd-parity
+normalization also preserves the relation when it moves to the cell's parent.
+`sourceAncestorsWithinAt` iterates this invariant at every phase and depth,
+while `sourceAncestorsAt` and `ResidualSourceAncestorsAt` remain compatibility
+projections.  Descendant selection can now consume the exact ancestor level,
+block, cycle, and containment proofs directly.
 
 ### 1. Obtain arbitrarily large free squares
 

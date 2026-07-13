@@ -25,15 +25,46 @@ open RedCycles RedShadeCycles PairCoverSeamArithmetic
 
 set_option maxRecDepth 20000
 
-private theorem stepAt
+/-- Canonical cycle level of the successor board at a recurrence depth. -/
+def outerLevel (phase : Phase) (depth : Nat) : Nat :=
+  2 * (depth + 1) + phase.extra
+
+private theorem successorWest_eq_canonical
+    (phase : Phase) (depth block : Nat) :
+    successorWest phase depth block =
+      2 ^ outerLevel phase depth * (4 * block + 1) := by
+  have power := two_pow_refinementLevel_eq_scale phase (depth + 1)
+  have power' : 2 ^ outerLevel phase depth = west phase (depth + 1) := by
+    simpa [outerLevel, west] using power
+  rw [successorWest, two_pow_refinementDepth_eq_four_mul_west]
+  change 4 * west phase (depth + 1) * block + west phase (depth + 1) = _
+  rw [power']
+  ring
+
+private theorem successorEast_eq_canonical
+    (phase : Phase) (depth block : Nat) :
+    successorEast phase depth block =
+      2 ^ outerLevel phase depth * (4 * block + 3) := by
+  have power := two_pow_refinementLevel_eq_scale phase (depth + 1)
+  have power' : 2 ^ outerLevel phase depth = west phase (depth + 1) := by
+    simpa [outerLevel, west] using power
+  rw [successorEast, two_pow_refinementDepth_eq_four_mul_west]
+  change 4 * west phase (depth + 1) * block +
+      3 * west phase (depth + 1) = _
+  rw [power']
+  ring
+
+private theorem stepWithinAt
     {phase : Phase} {depth : Nat} {grid : Nat → Nat → Index}
     {blockX blockY : Nat}
-    (old : SourceAncestorsIn (refinedGrid phase (depth + 1) grid)
+    (old : SourceAncestorsWithin (refinedGrid phase (depth + 1) grid)
+      (outerLevel phase depth) blockX blockY
       (successorWest phase depth blockX)
       (successorEast phase depth blockX)
       (successorWest phase depth blockY)
       (successorEast phase depth blockY)) :
-    SourceAncestorsIn (refinedGrid phase (depth + 2) grid)
+    SourceAncestorsWithin (refinedGrid phase (depth + 2) grid)
+      (outerLevel phase (depth + 1)) blockX blockY
       (successorWest phase (depth + 1) blockX)
       (successorEast phase (depth + 1) blockX)
       (successorWest phase (depth + 1) blockY)
@@ -58,14 +89,25 @@ private theorem stepAt
     congr 1
     simp [refinementDepth]
     omega
-  have lifted := PairCoverSeamResidualCanonicalAncestorRecurrence.step root
+  have lifted := PairCoverSeamResidualCanonicalAncestorRecurrence.stepWithin root
+    (successorWest_eq_canonical phase depth blockX)
+    (successorEast_eq_canonical phase depth blockX)
+    (successorWest_eq_canonical phase depth blockY)
+    (successorEast_eq_canonical phase depth blockY)
     (by simpa only [oldGrid] using old)
   rw [newGrid] at lifted
-  simpa only [successorWest_succ, successorEast_succ] using lifted
+  have levelEq : outerLevel phase depth + 2 =
+      outerLevel phase (depth + 1) := by
+    simp [outerLevel]
+    omega
+  simpa only [levelEq, successorWest_succ, successorEast_succ] using lifted
 
-theorem sourceAncestorsAt (phase : Phase) (depth : Nat)
+/-- Every successor-board source reaches a canonical cycle whose hierarchy
+address lies under that successor board. -/
+theorem sourceAncestorsWithinAt (phase : Phase) (depth : Nat)
     (grid : Nat → Nat → Index) (blockX blockY : Nat) :
-    SourceAncestorsIn (refinedGrid phase (depth + 1) grid)
+    SourceAncestorsWithin (refinedGrid phase (depth + 1) grid)
+      (outerLevel phase depth) blockX blockY
       (successorWest phase depth blockX)
       (successorEast phase depth blockX)
       (successorWest phase depth blockY)
@@ -73,14 +115,24 @@ theorem sourceAncestorsAt (phase : Phase) (depth : Nat)
   induction depth with
   | zero =>
       have base :=
-        PairCoverSeamResidualCanonicalAncestorBaseTransport.sourceAncestorsIn
+        PairCoverSeamResidualCanonicalAncestorBaseTransport.sourceAncestorsWithin
           phase grid blockX blockY
       cases phase <;>
-        simpa [refinedGrid, levels, largeLevel, largeWest, largeEast,
+        simpa [outerLevel, refinedGrid, levels, largeLevel, largeWest, largeEast,
           successorWest, successorEast, west, east, scale, refinementDepth,
           Phase.factor, Phase.extra] using base
   | succ depth ih =>
-      exact stepAt ih
+      exact stepWithinAt ih
+
+/-- Forgetting hierarchy containment recovers the previous all-depth theorem. -/
+theorem sourceAncestorsAt (phase : Phase) (depth : Nat)
+    (grid : Nat → Nat → Index) (blockX blockY : Nat) :
+    SourceAncestorsIn (refinedGrid phase (depth + 1) grid)
+      (successorWest phase depth blockX)
+      (successorEast phase depth blockX)
+      (successorWest phase depth blockY)
+      (successorEast phase depth blockY) :=
+  (sourceAncestorsWithinAt phase depth grid blockX blockY).toSourceAncestorsIn
 
 /-- Compatibility with the original factorized residual-source interface.
 The named hierarchy theorem is stronger: it also handles created boundaries. -/
