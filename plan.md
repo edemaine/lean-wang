@@ -698,6 +698,16 @@ odd lower/left coordinate lie in the opposite row/column child classes.  In
 both cases their canonical component pair belongs to the corresponding finite
 audit list.  It remains only to transport the rectangular certificates from
 that canonical pair window to the actual neighboring macrocells.
+`OllingerRobinson104PairCoverSeamCreatedAdjacentComponents` proves that the
+canonical audit window and the corresponding shifted arbitrary-grid window
+have identical refined red components.  The proof works through the
+thin/thick quotient state rather than evaluating canonical representatives.
+`OllingerRobinson104PairCoverSeamCreatedAdjacentTransport` then moves bounded
+paths, ports, and interior predicates into global quarter coordinates.  Its
+`verticalLower`, `verticalUpper`, `horizontalLeft`, and `horizontalRight`
+theorems expose all four boundary-created paths crossing one neighboring
+macrocell edge.  The next step is the board-scale coordinate decomposition
+that combines these with the same-block transport.
 
 ### 1. Obtain arbitrarily large free squares
 
