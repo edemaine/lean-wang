@@ -981,8 +981,15 @@ accepted lightweight finite flood from either localized family into a proved
 `CanonicalCycleAncestorWithinFamily`.  Its soundness proof reconstructs the
 descendant level and block addresses, proves the cycle exists in the common
 outer refinement, and reverses the certified even path to the endpoint.  The
-remaining executable audit can now reuse this trusted primitive for both its
-source and target witnesses.
+`OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetSearch` module
+now reuses this trusted primitive for both source and target witnesses.  Its
+row and column checks search the two cached family floods, require the source
+and target to occur in one common family, and prove the resulting
+`RowFamilyTarget` or `ColumnFamilyTarget`.  Thus the executable layer has a
+sound bridge all the way to the joint certificates consumed by
+`FamilyTargetsAt`; the remaining finite work is to enumerate every applicable
+even/odd base query once, then transport those certificates through the
+two-substitution recurrence.
 
 ### 1. Obtain arbitrarily large free squares
 
