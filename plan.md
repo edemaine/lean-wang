@@ -879,6 +879,16 @@ while `sourceAncestorsAt` and `ResidualSourceAncestorsAt` remain compatibility
 projections.  Descendant selection can now consume the exact ancestor level,
 block, cycle, and containment proofs directly.
 
+Canonical descendant connectivity is now available at arbitrary hierarchy
+levels.  `evenDescendantBridge` shifts the existing base-four induction by an
+arbitrary bottom level, and `oddDescendantBridge` prefixes one certified corner
+crossing before the even descent.  Thus an ancestor reaches every contained
+canonical descendant with path parity equal to the level difference.  These
+theorems live downstream of the native source certificates, so later
+connectivity work does not invalidate their caches.  Next combine two
+same-parity hierarchy addresses through their common outer canonical cycle,
+then choose row- and column-separating descendants geometrically.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
