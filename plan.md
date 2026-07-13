@@ -748,7 +748,10 @@ existential `RowSeparatingCycle` or `ColumnSeparatingCycle`, including an even
 path from the selected source into the cycle.  The separation has exactly the
 two cases in Robinson's Section 7 argument: either the queried free line
 crosses the cycle, or a parallel side of the cycle lies strictly between the
-query and its nearest selected boundary.  The module proves that the four
+query and its nearest selected boundary.  The cycle needs to contain the source's
+transverse coordinate only in the second case; a diagnostic found sources
+immediately inside the parent boundary, where imposing that condition also on
+the crossing case is false.  The module proves that the four branch-precise
 witnesses imply both residual face structures.  It remains to construct the
 witnesses from aligned canonical cycles, the sparse-boundary ancestry
 classification, the nearest-boundary hypothesis, and the failed

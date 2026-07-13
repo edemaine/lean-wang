@@ -42,12 +42,13 @@ def RowSeparatingCycle
     CycleOn grid west east south north ∧
       quarterWest outerWest < quarterWest west ∧
       quarterWest west < quarterEast outerEast ∧
-      quarterWest west < column ∧ column < quarterEast east ∧
       ∃ entry, OnCycle west east south north entry ∧
         Path grid (horizontalPort grid column boundary) entry false ∧
         ((quarterSouth south < row ∧ row < quarterNorth north) ∨
-          StrictBetween row boundary (quarterSouth south) ∨
-          StrictBetween row boundary (quarterNorth north))
+          (quarterWest west < column ∧ column < quarterEast east) ∧
+            StrictBetween row boundary (quarterSouth south) ∨
+          (quarterWest west < column ∧ column < quarterEast east) ∧
+            StrictBetween row boundary (quarterNorth north))
 
 /-- Horizontal dual of `RowSeparatingCycle`. -/
 def ColumnSeparatingCycle
@@ -57,12 +58,13 @@ def ColumnSeparatingCycle
     CycleOn grid west east south north ∧
       quarterSouth outerSouth < quarterSouth south ∧
       quarterSouth south < quarterNorth outerNorth ∧
-      quarterSouth south < row ∧ row < quarterNorth north ∧
       ∃ entry, OnCycle west east south north entry ∧
         Path grid (verticalPort grid boundary row) entry false ∧
         ((quarterWest west < column ∧ column < quarterEast east) ∨
-          StrictBetween column boundary (quarterWest west) ∨
-          StrictBetween column boundary (quarterEast east))
+          (quarterSouth south < row ∧ row < quarterNorth north) ∧
+            StrictBetween column boundary (quarterWest west) ∨
+          (quarterSouth south < row ∧ row < quarterNorth north) ∧
+            StrictBetween column boundary (quarterEast east))
 
 /-- Pure hierarchy obligations for the four wrong-facing semantic residuals.
 Validity and freeness are deliberately absent: they are consumed only after
@@ -234,8 +236,8 @@ private theorem rowSeparatingCycle_seamPath
       column boundary row) :
     VerticalSeamPath grid outerWest outerEast column row boundary := by
   rcases separating with ⟨west, east, south, north, cycle,
-    cycleWestInside, cycleWestInside', columnWest, columnEast,
-    entry, entryOnCycle, sourceToCycle, separation⟩
+    cycleWestInside, cycleWestInside', entry, entryOnCycle,
+    sourceToCycle, separation⟩
   rcases separation with crossing | southBetween | northBetween
   · left
     have targetPresent := RedShadeCycles.CycleOn.west_path
@@ -248,6 +250,7 @@ private theorem rowSeparatingCycle_seamPath
     exact Path.trans sourceToCycle
       (onCycle_connected cycle entryOnCycle targetOnCycle)
   · right
+    rcases southBetween with ⟨⟨columnWest, columnEast⟩, southBetween⟩
     have targetPresent := RedShadeCycles.CycleOn.south_path
       cycle columnWest columnEast
     have targetOnCycle : OnCycle west east south north
@@ -258,6 +261,7 @@ private theorem rowSeparatingCycle_seamPath
     exact Path.trans sourceToCycle
       (onCycle_connected cycle entryOnCycle targetOnCycle)
   · right
+    rcases northBetween with ⟨⟨columnWest, columnEast⟩, northBetween⟩
     have targetPresent := RedShadeCycles.CycleOn.north_path
       cycle columnWest columnEast
     have targetOnCycle : OnCycle west east south north
@@ -275,8 +279,8 @@ private theorem columnSeparatingCycle_seamPath
       boundary row column) :
     HorizontalSeamPath grid outerSouth outerNorth row column boundary := by
   rcases separating with ⟨west, east, south, north, cycle,
-    cycleSouthInside, cycleSouthInside', rowSouth, rowNorth,
-    entry, entryOnCycle, sourceToCycle, separation⟩
+    cycleSouthInside, cycleSouthInside', entry, entryOnCycle,
+    sourceToCycle, separation⟩
   rcases separation with crossing | westBetween | eastBetween
   · left
     have targetPresent := RedShadeCycles.CycleOn.south_path
@@ -289,6 +293,7 @@ private theorem columnSeparatingCycle_seamPath
     exact Path.trans sourceToCycle
       (onCycle_connected cycle entryOnCycle targetOnCycle)
   · right
+    rcases westBetween with ⟨⟨rowSouth, rowNorth⟩, westBetween⟩
     have targetPresent := RedShadeCycles.CycleOn.west_path
       cycle rowSouth rowNorth
     have targetOnCycle : OnCycle west east south north
@@ -299,6 +304,7 @@ private theorem columnSeparatingCycle_seamPath
     exact Path.trans sourceToCycle
       (onCycle_connected cycle entryOnCycle targetOnCycle)
   · right
+    rcases eastBetween with ⟨⟨rowSouth, rowNorth⟩, eastBetween⟩
     have targetPresent := RedShadeCycles.CycleOn.east_path
       cycle rowSouth rowNorth
     have targetOnCycle : OnCycle west east south north
