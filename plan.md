@@ -790,6 +790,15 @@ weighted searches are split into eight cached parent ranges, and their
 soundness theorem exposes the particular coarse predecessor and bounded path
 needed for translation into an arbitrary macrocell.
 
+Those finite witnesses now transport into arbitrary two-substitution
+macrocells.  Every live horizontal selector on a sparse fine boundary has a
+live coarse horizontal predecessor whose boundary maps exactly to the fine
+boundary, together with an even connector from the fine selector to the
+predecessor's sparse copy; the vertical theorem is dual.  These are precisely
+the local hypotheses of `CycleAncestor.refineThrough`.  The next step is to
+induct through the hierarchy, retaining the board bounds needed to apply the
+base-cycle audit, and thereby instantiate `ResidualSourceAncestorsAt`.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
