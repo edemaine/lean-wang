@@ -742,12 +742,20 @@ assembled.
 
 `OllingerRobinson104PairCoverSeamResidualCycles` makes that remaining boundary
 precise.  `ResidualCycleWitnessesAt` asks each wrong-facing case for an
-existential `RowCrossingCycle` or `ColumnCrossingCycle`; validity and freeness
-are intentionally not part of these geometric obligations.  The module proves
-that the four witnesses imply both residual face structures.  It remains to
+existential side-specific crossing cycle; validity and freeness are
+intentionally not part of these geometric obligations.  The module proves that
+the four witnesses imply both residual face structures.  It remains to
 construct the witnesses from aligned canonical cycles, the sparse-boundary
 classification, the nearest-boundary hypothesis, and the failed contained-child
 test.
+
+The cycle-witness interface is now side-specific: the four cases ask for a
+north, south, east, or west cycle side exactly matching the inherited boundary.
+Constructors turn those data into graph `OnCycle` witnesses even when the
+transverse query coordinate is newly created, and refinement lemmas preserve
+each retained side through two substitutions.  Thus the next classifier only
+has to find the first ancestor cycle side containing the sparse boundary and
+prove the free line lies strictly within that cycle's orthogonal span.
 
 ### 1. Obtain arbitrarily large free squares
 
