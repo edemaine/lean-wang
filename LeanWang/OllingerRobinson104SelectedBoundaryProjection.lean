@@ -44,15 +44,18 @@ theorem horizontalPort_value_eq_light
       (componentAt grid x y) (quadrantAt x y) (stateGrid x y) ≠ none) :
     value stateGrid (horizontalPort grid x y) = some .light := by
   have shade := horizontalShade_eq_light_of_selected selected
-  cases hwest : RedShades.hasWest (componentAt grid x y) (quadrantAt x y)
-  · have present := value_isSome_eq_portPresent valid ⟨x, y, .west⟩
+  cases hwest : RedShades.hasWest (componentAt grid x y) (quadrantAt x y) with
+  | false =>
+    have present := value_isSome_eq_portPresent valid ⟨x, y, .west⟩
     have absent : (stateGrid x y).west.isSome = false := by
       simpa [value, portPresent, hwest] using present
     cases hvalue : (stateGrid x y).west with
-    · simpa [horizontalPort, hwest, value, ShadedSignals.horizontalShade?,
+    | none =>
+      simpa [horizontalPort, hwest, value, ShadedSignals.horizontalShade?,
         hvalue] using shade
-    · simp [hvalue] at absent
-  · have allowed := valid.allowed x y
+    | some shade => simp [hvalue] at absent
+  | true =>
+    have allowed := valid.allowed x y
     unfold RedShades.locallyAllowed at allowed
     dsimp only at allowed
     have westLight := horizontal_west_light_of_selected allowed selected hwest
@@ -65,15 +68,18 @@ theorem verticalPort_value_eq_light
       (componentAt grid x y) (quadrantAt x y) (stateGrid x y) ≠ none) :
     value stateGrid (verticalPort grid x y) = some .light := by
   have shade := verticalShade_eq_light_of_selected selected
-  cases hsouth : RedShades.hasSouth (componentAt grid x y) (quadrantAt x y)
-  · have present := value_isSome_eq_portPresent valid ⟨x, y, .south⟩
+  cases hsouth : RedShades.hasSouth (componentAt grid x y) (quadrantAt x y) with
+  | false =>
+    have present := value_isSome_eq_portPresent valid ⟨x, y, .south⟩
     have absent : (stateGrid x y).south.isSome = false := by
       simpa [value, portPresent, hsouth] using present
     cases hvalue : (stateGrid x y).south with
-    · simpa [verticalPort, hsouth, value, ShadedSignals.verticalShade?,
+    | none =>
+      simpa [verticalPort, hsouth, value, ShadedSignals.verticalShade?,
         hvalue] using shade
-    · simp [hvalue] at absent
-  · have allowed := valid.allowed x y
+    | some shade => simp [hvalue] at absent
+  | true =>
+    have allowed := valid.allowed x y
     unfold RedShades.locallyAllowed at allowed
     dsimp only at allowed
     have southLight := vertical_south_light_of_selected allowed selected hsouth
@@ -100,29 +106,45 @@ theorem selectedHorizontal_of_even_path
   have related := path.sound valid
   have sourceLight : value stateGrid
       (sparsePort (horizontalPort grid coarseX coarseY)) = some .light :=
-    related.trans fineLight
+    (show value stateGrid (sparsePort (horizontalPort grid coarseX coarseY)) =
+        value stateGrid (horizontalPort (iterateRefine 2 grid) fineX fineY)
+      from related).trans fineLight
   have projectedLight : value (projectStateGrid stateGrid)
       (horizontalPort grid coarseX coarseY) = some .light := by
-    rw [projectStateGrid_eq_sparse valid]
-    simpa [value, sparsePort, horizontalPort] using sourceLight
+    cases hwest : RedShades.hasWest
+        (componentAt grid coarseX coarseY) (quadrantAt coarseX coarseY) with
+    | false =>
+      simp only [horizontalPort, hwest, Bool.false_eq_true, ↓reduceIte,
+        value] at sourceLight ⊢
+      rw [projectStateGrid_eq_sparse valid]
+      simpa [sparsePort] using sourceLight
+    | true =>
+      simp only [horizontalPort, hwest, ↓reduceIte, value] at sourceLight ⊢
+      rw [projectStateGrid_eq_sparse valid]
+      simpa [sparsePort] using sourceLight
   have coarseValid := projectStateGrid_valid valid
   have coarseShade : ShadedSignals.horizontalShade?
       (projectStateGrid stateGrid coarseX coarseY) = some .light := by
     cases hwest : RedShades.hasWest (componentAt grid coarseX coarseY)
-        (quadrantAt coarseX coarseY)
-    · have present := value_isSome_eq_portPresent coarseValid
+        (quadrantAt coarseX coarseY) with
+    | false =>
+      have present := value_isSome_eq_portPresent coarseValid
           ⟨coarseX, coarseY, .west⟩
       have absent : (projectStateGrid stateGrid coarseX coarseY).west = none := by
-        cases hvalue : (projectStateGrid stateGrid coarseX coarseY).west
-        · rfl
-        · have : (projectStateGrid stateGrid coarseX coarseY).west.isSome =
+        cases hvalue : (projectStateGrid stateGrid coarseX coarseY).west with
+        | none => rfl
+        | some shade =>
+          have : (projectStateGrid stateGrid coarseX coarseY).west.isSome =
               false := by
             simpa [value, portPresent, hwest] using present
           simp [hvalue] at this
       simpa [horizontalPort, hwest, value, ShadedSignals.horizontalShade?,
         absent] using projectedLight
-    · simpa [horizontalPort, hwest, value,
-        ShadedSignals.horizontalShade?] using projectedLight
+    | true =>
+      have westLight : (projectStateGrid stateGrid coarseX coarseY).west =
+          some .light := by
+        simpa [horizontalPort, hwest, value] using projectedLight
+      simp [ShadedSignals.horizontalShade?, westLight]
   unfold ShadedSignals.selectedHorizontalFor
   simp [coarseShade, coarseInterior]
 
@@ -147,29 +169,45 @@ theorem selectedVertical_of_even_path
   have related := path.sound valid
   have sourceLight : value stateGrid
       (sparsePort (verticalPort grid coarseX coarseY)) = some .light :=
-    related.trans fineLight
+    (show value stateGrid (sparsePort (verticalPort grid coarseX coarseY)) =
+        value stateGrid (verticalPort (iterateRefine 2 grid) fineX fineY)
+      from related).trans fineLight
   have projectedLight : value (projectStateGrid stateGrid)
       (verticalPort grid coarseX coarseY) = some .light := by
-    rw [projectStateGrid_eq_sparse valid]
-    simpa [value, sparsePort, verticalPort] using sourceLight
+    cases hsouth : RedShades.hasSouth
+        (componentAt grid coarseX coarseY) (quadrantAt coarseX coarseY) with
+    | false =>
+      simp only [verticalPort, hsouth, Bool.false_eq_true, ↓reduceIte,
+        value] at sourceLight ⊢
+      rw [projectStateGrid_eq_sparse valid]
+      simpa [sparsePort] using sourceLight
+    | true =>
+      simp only [verticalPort, hsouth, ↓reduceIte, value] at sourceLight ⊢
+      rw [projectStateGrid_eq_sparse valid]
+      simpa [sparsePort] using sourceLight
   have coarseValid := projectStateGrid_valid valid
   have coarseShade : ShadedSignals.verticalShade?
       (projectStateGrid stateGrid coarseX coarseY) = some .light := by
     cases hsouth : RedShades.hasSouth (componentAt grid coarseX coarseY)
-        (quadrantAt coarseX coarseY)
-    · have present := value_isSome_eq_portPresent coarseValid
+        (quadrantAt coarseX coarseY) with
+    | false =>
+      have present := value_isSome_eq_portPresent coarseValid
           ⟨coarseX, coarseY, .south⟩
       have absent : (projectStateGrid stateGrid coarseX coarseY).south = none := by
-        cases hvalue : (projectStateGrid stateGrid coarseX coarseY).south
-        · rfl
-        · have : (projectStateGrid stateGrid coarseX coarseY).south.isSome =
+        cases hvalue : (projectStateGrid stateGrid coarseX coarseY).south with
+        | none => rfl
+        | some shade =>
+          have : (projectStateGrid stateGrid coarseX coarseY).south.isSome =
               false := by
             simpa [value, portPresent, hsouth] using present
           simp [hvalue] at this
       simpa [verticalPort, hsouth, value, ShadedSignals.verticalShade?,
         absent] using projectedLight
-    · simpa [verticalPort, hsouth, value,
-        ShadedSignals.verticalShade?] using projectedLight
+    | true =>
+      have southLight : (projectStateGrid stateGrid coarseX coarseY).south =
+          some .light := by
+        simpa [verticalPort, hsouth, value] using projectedLight
+      simp [ShadedSignals.verticalShade?, southLight]
   unfold ShadedSignals.selectedVerticalFor
   simp [coarseShade, coarseInterior]
 

@@ -604,6 +604,16 @@ project free-line and nearest-selected-boundary facts through inherited
 intervals, then discharge that explicit lower-interval case by the local
 connector audit.
 
+The inherited semantic case is also available in
+`OllingerRobinson104PairCoverSeamProjection`.  On literal sparse coordinates,
+the projected shade state has exactly the same selected horizontal and
+vertical boundary values as the fine state.  Therefore sparse fine free rows
+and columns project to coarse free rows and columns, and absence of a selected
+boundary strictly between two retained fine coordinates projects to the same
+nearest-boundary fact at the coarse level.  It remains to package these facts
+as a one-depth boundary-face recurrence and handle coordinates in newly
+created intervals.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
