@@ -910,7 +910,11 @@ coordinate inequalities.  Generic conversion theorems transport the target
 cycle into the full outer refinement, connect it to the actual source ancestor
 through the common outer cycle, and package the separating path.
 `LocalizedResidualTargetsAt.toSelections` reduces the remaining residual proof
-to these pure arithmetic target certificates.
+to these pure target certificates.  The local selected-interior hypothesis is
+retained explicitly in this final obligation: diagnostics found boundary-edge
+coordinates satisfying the raw inequalities but carrying no red source in the
+actual refined board.  Keeping the concrete component fact prevents the
+target audit from quantifying over these impossible queries.
 
 ### 1. Obtain arbitrarily large free squares
 

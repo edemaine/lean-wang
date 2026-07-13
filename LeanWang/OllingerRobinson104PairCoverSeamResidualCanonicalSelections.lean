@@ -46,6 +46,10 @@ structure LocalizedResidualSelectionsAt (phase : Phase) (depth : Nat) : Prop whe
       column row boundary →
     IsSparseCoordinate boundary →
     ¬IsSparseCoordinate row →
+    Signals.horizontalInterior?
+      (componentAt (iterateRefine 2
+        (refinedGrid phase (depth + 1) grid)) column boundary)
+      (quadrantAt column boundary) ≠ none →
     CanonicalCycleAncestorWithin
       (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
       (PairCoverSeamShadePaths.horizontalPort
@@ -68,6 +72,10 @@ structure LocalizedResidualSelectionsAt (phase : Phase) (depth : Nat) : Prop whe
       column row boundary →
     IsSparseCoordinate boundary →
     ¬IsSparseCoordinate column →
+    Signals.verticalInterior?
+      (componentAt (iterateRefine 2
+        (refinedGrid phase (depth + 1) grid)) boundary row)
+      (quadrantAt boundary row) ≠ none →
     CanonicalCycleAncestorWithin
       (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
       (PairCoverSeamShadePaths.verticalPort
@@ -95,6 +103,10 @@ structure LocalizedResidualTargetsAt (phase : Phase) (depth : Nat) : Prop where
       column row boundary →
     IsSparseCoordinate boundary →
     ¬IsSparseCoordinate row →
+    Signals.horizontalInterior?
+      (componentAt (iterateRefine 2
+        (refinedGrid phase (depth + 1) grid)) column boundary)
+      (quadrantAt column boundary) ≠ none →
     ∀ ancestorLevel ancestorBlockX ancestorBlockY,
       HierarchyAddressWithin (outerLevel phase (depth + 1)) parentX
         ancestorLevel ancestorBlockX →
@@ -116,6 +128,10 @@ structure LocalizedResidualTargetsAt (phase : Phase) (depth : Nat) : Prop where
       column row boundary →
     IsSparseCoordinate boundary →
     ¬IsSparseCoordinate column →
+    Signals.verticalInterior?
+      (componentAt (iterateRefine 2
+        (refinedGrid phase (depth + 1) grid)) boundary row)
+      (quadrantAt boundary row) ≠ none →
     ∀ ancestorLevel ancestorBlockX ancestorBlockY,
       HierarchyAddressWithin (outerLevel phase (depth + 1)) parentX
         ancestorLevel ancestorBlockX →
@@ -134,7 +150,7 @@ theorem LocalizedResidualTargetsAt.toSelections
   constructor
   · intro grid parentX parentY column row boundary
       columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
-      notFits sparseBoundary createdRow ancestor
+      notFits sparseBoundary createdRow interior ancestor
     have gridEq :
         iterateRefine 2 (refinedGrid phase (depth + 1) grid) =
           iterateRefine (outerLevel phase (depth + 1) + 2) grid := by
@@ -149,11 +165,11 @@ theorem LocalizedResidualTargetsAt.toSelections
       ancestorXWithin ancestorYWithin
     exact targets.row grid parentX parentY columnWest columnEast
       rowSouth rowNorth boundarySouth boundaryNorth notFits
-      sparseBoundary createdRow ancestorLevel ancestorBlockX ancestorBlockY
+      sparseBoundary createdRow interior ancestorLevel ancestorBlockX ancestorBlockY
       ancestorXWithin ancestorYWithin
   · intro grid parentX parentY column row boundary
       columnWest columnEast boundaryWest boundaryEast rowSouth rowNorth
-      notFits sparseBoundary createdColumn ancestor
+      notFits sparseBoundary createdColumn interior ancestor
     have gridEq :
         iterateRefine 2 (refinedGrid phase (depth + 1) grid) =
           iterateRefine (outerLevel phase (depth + 1) + 2) grid := by
@@ -168,7 +184,7 @@ theorem LocalizedResidualTargetsAt.toSelections
       ancestorXWithin ancestorYWithin
     exact targets.column grid parentX parentY columnWest columnEast
       boundaryWest boundaryEast rowSouth rowNorth notFits
-      sparseBoundary createdColumn ancestorLevel ancestorBlockX ancestorBlockY
+      sparseBoundary createdColumn interior ancestorLevel ancestorBlockX ancestorBlockY
       ancestorXWithin ancestorYWithin
 
 private theorem horizontalInterior_ne_none_of_selected
@@ -292,6 +308,7 @@ theorem residualCycleWitnessesAt
     apply selections.row grid parentX parentY columnWest columnEast rowSouth
       (rowBoundary.trans boundaryNorth) (rowSouth.trans rowBoundary)
       boundaryNorth notFits sparseBoundary createdRow
+      (horizontalInterior_ne_none_of_selected selected)
     exact horizontalAncestor grid parentX parentY column boundary
       columnWest columnEast (rowSouth.trans rowBoundary) boundaryNorth
       (horizontalInterior_ne_none_of_selected selected)
@@ -301,6 +318,7 @@ theorem residualCycleWitnessesAt
     apply selections.row grid parentX parentY columnWest columnEast
       (boundarySouth.trans boundaryRow) rowNorth boundarySouth
       (boundaryRow.trans rowNorth) notFits sparseBoundary createdRow
+      (horizontalInterior_ne_none_of_selected selected)
     exact horizontalAncestor grid parentX parentY column boundary
       columnWest columnEast boundarySouth (boundaryRow.trans rowNorth)
       (horizontalInterior_ne_none_of_selected selected)
@@ -311,6 +329,7 @@ theorem residualCycleWitnessesAt
       (columnBoundary.trans boundaryEast)
       (columnWest.trans columnBoundary) boundaryEast rowSouth rowNorth
       notFits sparseBoundary createdColumn
+      (verticalInterior_ne_none_of_selected selected)
     exact verticalAncestor grid parentX parentY boundary row
       (columnWest.trans columnBoundary) boundaryEast rowSouth rowNorth
       (verticalInterior_ne_none_of_selected selected)
@@ -321,6 +340,7 @@ theorem residualCycleWitnessesAt
       (boundaryWest.trans boundaryColumn) columnEast boundaryWest
       (boundaryColumn.trans columnEast) rowSouth rowNorth
       notFits sparseBoundary createdColumn
+      (verticalInterior_ne_none_of_selected selected)
     exact verticalAncestor grid parentX parentY boundary row
       boundaryWest (boundaryColumn.trans columnEast) rowSouth rowNorth
       (verticalInterior_ne_none_of_selected selected)
