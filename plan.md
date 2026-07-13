@@ -691,6 +691,13 @@ rectangular windows.  Thus every one of the 792 vertical and 792 horizontal
 canonical adjacent states now has a proposition-level path certificate; the
 remaining step is to classify actual neighboring refined cells by those
 canonical states and transport the certified paths into the global grid.
+`OllingerRobinson104PairCoverSeamCreatedAdjacentClassification` proves the
+classification uniformly at every positive refinement depth.  Neighbors with
+an even lower/left coordinate are siblings under one parent; neighbors with an
+odd lower/left coordinate lie in the opposite row/column child classes.  In
+both cases their canonical component pair belongs to the corresponding finite
+audit list.  It remains only to transport the rectangular certificates from
+that canonical pair window to the actual neighboring macrocells.
 
 ### 1. Obtain arbitrarily large free squares
 
