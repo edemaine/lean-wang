@@ -916,6 +916,24 @@ coordinates satisfying the raw inequalities but carrying no red source in the
 actual refined board.  Keeping the concrete component fact prevents the
 target audit from quantifying over these impossible queries.
 
+Further finite diagnostics refute the canonical-target obligation itself.
+For an even successor board, the live source at `(34, 48)` reaches the outer
+level-four cycle, while the created query row `34` is too close to that outer
+boundary for any same-parity canonical descendant to separate it.  The actual
+red graph nevertheless has a 57-edge even route to a vertical segment on the
+query row.  Thus the square-cycle factorization is stronger than the semantic
+argument and is no longer the intended proof endpoint.
+
+`OllingerRobinson104PairCoverSeamResidualDirectPaths` now states the exact
+replacement.  `DirectResidualPathsAt` asks directly for the two
+shade-independent seam paths used by the contradiction: a horizontal source
+must reach either a vertical segment on the free row or a horizontal segment
+strictly between it and the row, and dually for columns.  Its
+`verticalResidual` and `horizontalResidual` theorems discharge all four
+semantic residual orientations.  Existing cycle witnesses remain valid
+sufficient certificates, but the remaining recurrence and finite audits
+should target direct paths and need not choose a canonical descendant square.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
