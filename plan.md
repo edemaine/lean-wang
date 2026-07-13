@@ -820,6 +820,15 @@ and their enclosing hierarchy block through the induction; descendant
 selection can then use the existing certified hierarchy bridges from that
 specific ancestor.
 
+`OllingerRobinson104PairCoverSeamResidualCanonicalAncestors` now makes that
+refinement concrete.  `CanonicalCycleAncestor` records the scale and block of
+the reached Robinson cycle as well as the even source path.  The created-source
+audit's arbitrary parity is normalized explicitly: an even route stays on the
+local cell cycle, while an odd route crosses the odd corner bridge back to its
+parent.  The named witness converts to the older unlabelled interface and is
+preserved by a two-substitution sparse lift, so it is ready for the exhaustive
+sparse/created hierarchy induction.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
