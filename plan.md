@@ -622,6 +622,15 @@ invariants reassemble into the existing all-depth public face structures.
 This makes a one-step semantic induction expressible without strengthening the
 hypothesis to bounded paths at every scale.
 
+`OllingerRobinson104PairCoverSeamFaceRefinement` now proves the complete
+inherited part of the one-step recurrence.  For all four orientations, when
+the query, free line, and nearest selected boundary lie on literal sparse
+coordinates, the fine hypotheses project to depth `d`; the depth-`d` face
+certificate determines the orientation; and exact sparse selection transports
+that orientation back to depth `d + 1`.  Noncontainment is preserved by the
+coordinate theorem above.  Thus only genuinely newly created coordinate
+intervals remain in the face step.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

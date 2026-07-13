@@ -36,6 +36,21 @@ def coarseCoordinate (coordinate : Nat) : Nat :=
   simp [sparseCoordinate, macroOrigin, localCoordinate]
   omega
 
+@[simp] theorem coarseCoordinate_sparseCoordinate (coordinate : Nat) :
+    coarseCoordinate (sparseCoordinate coordinate) = coordinate := by
+  have hmod := Nat.mod_lt coordinate (by decide : 0 < 2)
+  have hdecompose := Nat.mod_add_div coordinate 2
+  have hcases : coordinate % 2 = 0 ∨ coordinate % 2 = 1 := by omega
+  rcases hcases with h | h
+  · have hcoordinate : coordinate = 2 * (coordinate / 2) := by omega
+    rw [hcoordinate, sparseCoordinate_two_mul]
+    simp [coarseCoordinate]
+  · have hcoordinate : coordinate = 2 * (coordinate / 2) + 1 := by omega
+    rw [hcoordinate, sparseCoordinate_two_mul_add_one]
+    have hdiv : (8 * (coordinate / 2) + 1) / 8 = coordinate / 2 := by
+      omega
+    simp [coarseCoordinate, hdiv]
+
 /-- A fine coordinate lies in the half-open sparse interval selected by its
 coarse coordinate. -/
 theorem coarseCoordinate_spec (coordinate : Nat) :
