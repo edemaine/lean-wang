@@ -665,6 +665,14 @@ check as bounded red-graph paths.  Every intermediate port remains in the
 audited 8-by-8 macrocell, providing exactly the hypothesis needed by the
 existing component-congruence and block-translation lemmas.
 
+`OllingerRobinson104PairCoverSeamCreatedLocalTransport` now performs that
+translation at the exact depth-two scale used by the created-coordinate split.
+It identifies local and global selected ports and interior predicates, moves
+every bounded path by the `(8 * blockX, 8 * blockY)` quarter offset, and exposes
+vertical and horizontal global seam paths for every certified local query in
+an arbitrary coarse grid.  Cross-macrocell queries remain separate rather
+than being hidden behind a false one-cell sentinel claim.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
