@@ -205,6 +205,8 @@ structure VerticalBoundaryFaces : Prop where
     quarterSouth (successorWest phase depth parentY) < row →
     row < boundary →
     boundary < quarterNorth (successorEast phase depth parentY) →
+    IsFreeRow (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (successorWest phase depth parentX) (successorEast phase depth parentX) row →
     ShadedSignals.selectedHorizontalFor
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         column boundary)
@@ -229,6 +231,8 @@ structure VerticalBoundaryFaces : Prop where
     quarterSouth (successorWest phase depth parentY) < boundary →
     boundary < row →
     row < quarterNorth (successorEast phase depth parentY) →
+    IsFreeRow (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (successorWest phase depth parentX) (successorEast phase depth parentX) row →
     ShadedSignals.selectedHorizontalFor
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         column boundary)
@@ -348,7 +352,7 @@ theorem verticalBoundaryConclusion_of_faces
         parentX parentY column row found children freeRow foundSelected fits
     · have foundFacesNorth := faces.above phase depth grid shadeGrid
         parentX parentY valid hwest heast hsouth hrowFound hfoundNorth
-        foundSelected hnone fits
+        freeRow foundSelected hnone fits
       exact Or.inr (Or.inl ⟨found, hrowFound, hfoundNorth,
         foundFacesNorth, hnone⟩)
   · exact Or.inl selected
@@ -369,7 +373,7 @@ theorem verticalBoundaryConclusion_of_faces
         parentX parentY column row found children freeRow foundSelected fits
     · have foundFacesSouth := faces.below phase depth grid shadeGrid
         parentX parentY valid hwest heast hfoundSouth hfoundRow hnorth
-        foundSelected hnone fits
+        freeRow foundSelected hnone fits
       exact Or.inr (Or.inr ⟨found, hfoundSouth, hfoundRow,
         foundFacesSouth, hnone⟩)
 
@@ -385,6 +389,8 @@ structure HorizontalBoundaryFaces : Prop where
     boundary < quarterEast (successorEast phase depth parentX) →
     quarterSouth (successorWest phase depth parentY) < row →
     row < quarterNorth (successorEast phase depth parentY) →
+    IsFreeColumn (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (successorWest phase depth parentY) (successorEast phase depth parentY) column →
     ShadedSignals.selectedVerticalFor
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         boundary row)
@@ -409,6 +415,8 @@ structure HorizontalBoundaryFaces : Prop where
     column < quarterEast (successorEast phase depth parentX) →
     quarterSouth (successorWest phase depth parentY) < row →
     row < quarterNorth (successorEast phase depth parentY) →
+    IsFreeColumn (iterateRefine 2 (refinedGrid phase depth grid)) shadeGrid
+      (successorWest phase depth parentY) (successorEast phase depth parentY) column →
     ShadedSignals.selectedVerticalFor
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         boundary row)
@@ -528,7 +536,7 @@ theorem horizontalBoundaryConclusion_of_faces
         parentX parentY column row found children freeColumn foundSelected fits
     · have foundFacesEast := faces.right phase depth grid shadeGrid
         parentX parentY valid hwest hcolumnFound hfoundEast hsouth hnorth
-        foundSelected hnone fits
+        freeColumn foundSelected hnone fits
       exact Or.inr (Or.inl ⟨found, hcolumnFound, hfoundEast,
         foundFacesEast, hnone⟩)
   · exact Or.inl selected
@@ -549,7 +557,7 @@ theorem horizontalBoundaryConclusion_of_faces
         parentX parentY column row found children freeColumn foundSelected fits
     · have foundFacesWest := faces.left phase depth grid shadeGrid
         parentX parentY valid hfoundWest hfoundColumn heast hsouth hnorth
-        foundSelected hnone fits
+        freeColumn foundSelected hnone fits
       exact Or.inr (Or.inr ⟨found, hfoundWest, hfoundColumn,
         foundFacesWest, hnone⟩)
 
