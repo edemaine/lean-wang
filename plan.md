@@ -855,6 +855,12 @@ this gives the exact global canonical hierarchy block instead of attempting
 to recover it from an unnamed existential ancestor.  The transported theorem
 is already stated in the stable collar required by the two-level recurrence.
 
+The recurrence is now iterated at every hierarchy depth and stated directly
+with `refinedGrid` and `successorWest`/`successorEast`.  A compatibility theorem
+instantiates `ResidualSourceAncestorsAt` without using its sparse-boundary
+hypothesis; the stronger named theorem covers both sparse and created sources
+and retains the exact canonical cycle needed by descendant selection.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
