@@ -614,6 +614,14 @@ nearest-boundary fact at the coarse level.  It remains to package these facts
 as a one-depth boundary-face recurrence and handle coordinates in newly
 created intervals.
 
+Boundary orientation is now factored through the fixed-depth structures
+`VerticalBoundaryFacesAt phase depth` and
+`HorizontalBoundaryFacesAt phase depth`.  One `BoundedPaths phase depth`
+certificate produces exactly these local invariants, while pointwise local
+invariants reassemble into the existing all-depth public face structures.
+This makes a one-step semantic induction expressible without strengthening the
+hypothesis to bounded paths at every scale.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamComposition
+import LeanWang.OllingerRobinson104PairCoverSeamFacesAt
 import LeanWang.OllingerRobinson104PairCoverSeamPathContradictions
 import LeanWang.OllingerRobinson104PairCoverSeamPathTranslation
 
@@ -24,6 +25,7 @@ namespace PairCoverSeamPathFaces
 open Figure16 RedCycles RedShadeCycles RedShadeGraph RedShadePaths
   ShadedFreeLineRecurrence ShadedPlaneSignalGrid Signals.FreeCellLocal
   PairCoverSeamArithmetic PairCoverSeamComposition
+  PairCoverSeamFacesAt
   PairCoverSeamPathBoundedBase PairCoverSeamPathSearch
   PairCoverSeamPathTranslation SparseFreeLinePlaneBase
 
@@ -53,11 +55,11 @@ private theorem verticalInterior_eq_of_selected_eq
 
 set_option maxHeartbeats 1000000 in
 -- The four dependent grid occurrences make elaboration exceed the default.
-theorem BoundedPaths.verticalBoundaryFaces
-    (paths : ∀ (phase : Phase) (depth : Nat), BoundedPaths phase depth) :
-    VerticalBoundaryFaces := by
+theorem BoundedPaths.verticalBoundaryFacesAt
+    {phase : Phase} {depth : Nat} (paths : BoundedPaths phase depth) :
+    VerticalBoundaryFacesAt phase depth := by
   constructor
-  · intro phase depth grid shadeGrid parentX parentY column row boundary
+  · intro grid shadeGrid parentX parentY column row boundary
       valid hcolumnWest hcolumnEast hrowSouth hrowBoundary hboundaryNorth
       freeRow selected noneBetween notFits
     cases hselected : ShadedSignals.selectedHorizontalFor
@@ -75,7 +77,7 @@ theorem BoundedPaths.verticalBoundaryFaces
               rcases hbetween with hbetween | hbetween
               · exact noneBetween y hbetween.1 hbetween.2
               · omega
-            · apply BoundedPaths.verticalSeamPath (paths phase depth)
+            · apply BoundedPaths.verticalSeamPath paths
                 grid parentX parentY
                 hcolumnWest hcolumnEast hrowSouth
                 (hrowBoundary.trans hboundaryNorth)
@@ -84,7 +86,7 @@ theorem BoundedPaths.verticalBoundaryFaces
                 exact ⟨hrowBoundary,
                   horizontalInterior_eq_of_selected_eq hselected⟩
               · exact notFits
-  · intro phase depth grid shadeGrid parentX parentY column row boundary
+  · intro grid shadeGrid parentX parentY column row boundary
       valid hcolumnWest hcolumnEast hboundarySouth hboundaryRow hrowNorth
       freeRow selected noneBetween notFits
     cases hselected : ShadedSignals.selectedHorizontalFor
@@ -101,7 +103,7 @@ theorem BoundedPaths.verticalBoundaryFaces
               rcases hbetween with hbetween | hbetween
               · omega
               · exact noneBetween y hbetween.1 hbetween.2
-            · apply BoundedPaths.verticalSeamPath (paths phase depth)
+            · apply BoundedPaths.verticalSeamPath paths
                 grid parentX parentY
                 hcolumnWest hcolumnEast
                 (hboundarySouth.trans hboundaryRow) hrowNorth
@@ -112,13 +114,19 @@ theorem BoundedPaths.verticalBoundaryFaces
               · exact notFits
         | south => rfl
 
+theorem BoundedPaths.verticalBoundaryFaces
+    (paths : ∀ (phase : Phase) (depth : Nat), BoundedPaths phase depth) :
+    VerticalBoundaryFaces :=
+  verticalBoundaryFaces_of_at fun phase depth =>
+    BoundedPaths.verticalBoundaryFacesAt (paths phase depth)
+
 set_option maxHeartbeats 1000000 in
 -- The four dependent grid occurrences make elaboration exceed the default.
-theorem BoundedPaths.horizontalBoundaryFaces
-    (paths : ∀ (phase : Phase) (depth : Nat), BoundedPaths phase depth) :
-    HorizontalBoundaryFaces := by
+theorem BoundedPaths.horizontalBoundaryFacesAt
+    {phase : Phase} {depth : Nat} (paths : BoundedPaths phase depth) :
+    HorizontalBoundaryFacesAt phase depth := by
   constructor
-  · intro phase depth grid shadeGrid parentX parentY column row boundary
+  · intro grid shadeGrid parentX parentY column row boundary
       valid hcolumnWest hcolumnBoundary hboundaryEast hrowSouth hrowNorth
       freeColumn selected noneBetween notFits
     cases hselected : ShadedSignals.selectedVerticalFor
@@ -136,7 +144,7 @@ theorem BoundedPaths.horizontalBoundaryFaces
               rcases hbetween with hbetween | hbetween
               · exact noneBetween x hbetween.1 hbetween.2
               · omega
-            · apply BoundedPaths.horizontalSeamPath (paths phase depth)
+            · apply BoundedPaths.horizontalSeamPath paths
                 grid parentX parentY
                 hcolumnWest (hcolumnBoundary.trans hboundaryEast)
                 hrowSouth hrowNorth
@@ -145,7 +153,7 @@ theorem BoundedPaths.horizontalBoundaryFaces
                 exact ⟨hcolumnBoundary,
                   verticalInterior_eq_of_selected_eq hselected⟩
               · exact notFits
-  · intro phase depth grid shadeGrid parentX parentY column row boundary
+  · intro grid shadeGrid parentX parentY column row boundary
       valid hboundaryWest hboundaryColumn hcolumnEast hrowSouth hrowNorth
       freeColumn selected noneBetween notFits
     cases hselected : ShadedSignals.selectedVerticalFor
@@ -162,7 +170,7 @@ theorem BoundedPaths.horizontalBoundaryFaces
               rcases hbetween with hbetween | hbetween
               · omega
               · exact noneBetween x hbetween.1 hbetween.2
-            · apply BoundedPaths.horizontalSeamPath (paths phase depth)
+            · apply BoundedPaths.horizontalSeamPath paths
                 grid parentX parentY
                 (hboundaryWest.trans hboundaryColumn) hcolumnEast
                 hrowSouth hrowNorth hboundaryWest
@@ -172,6 +180,12 @@ theorem BoundedPaths.horizontalBoundaryFaces
                   verticalInterior_eq_of_selected_eq hselected⟩
               · exact notFits
         | west => rfl
+
+theorem BoundedPaths.horizontalBoundaryFaces
+    (paths : ∀ (phase : Phase) (depth : Nat), BoundedPaths phase depth) :
+    HorizontalBoundaryFaces :=
+  horizontalBoundaryFaces_of_at fun phase depth =>
+    BoundedPaths.horizontalBoundaryFacesAt (paths phase depth)
 
 end PairCoverSeamPathFaces
 end Closed104
