@@ -774,6 +774,14 @@ orientation.  Their assembly theorem reconstructs all four fields of
 existing local ancestor audits and treat descendant selection as pure
 hierarchy arithmetic.
 
+Cycle ancestry itself is now stable under the two-substitution recurrence.
+`CycleAncestor.refineSparse` lifts a coarse ancestor cycle, entry, and even
+route to their literal sparse copies; `CycleAncestor.refineThrough` then
+prepends any even fine-grid connector.  The horizontal and vertical source
+selectors are also proved to choose live ports whenever their interior signal
+exists.  Consequently the finite local step need only return a live coarse
+predecessor and an even connector to its sparse copy.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

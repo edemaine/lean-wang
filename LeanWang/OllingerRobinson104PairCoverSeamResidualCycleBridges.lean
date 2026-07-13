@@ -23,11 +23,13 @@ namespace Closed104
 namespace PairCoverSeamResidualCycleBridges
 
 open OrientedRedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
-  RedShadeCycleConnectivity
+  RedShadeGraphRefinement RedShadeCycleConnectivity
   RedShadeCycleBridgeComposition PairCoverSeamResidualCycles
+  ShadedFreeLinePatternRefinement
   ShadedFreeLineRecurrence ShadedObstructionPairCoverRecurrence
   PairCoverSeamArithmetic
-  RefinedCoordinateProjection SparseFreeLinePlaneBase Signals.FreeCellLocal
+  RefinedCoordinateProjection SparseFreeLineLocalProjection
+  SparseFreeLinePlaneBase Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -36,6 +38,76 @@ def CycleAncestor (grid : Nat → Nat → Index) (source : Port) : Prop :=
   ∃ west east south north, CycleOn grid west east south north ∧
     ∃ entry, OnCycle west east south north entry ∧
       Path grid source entry false
+
+/-- Prepending an even route preserves cycle ancestry. -/
+theorem CycleAncestor.of_evenPath
+    {grid : Nat → Nat → Index} {source target : Port}
+    (ancestor : CycleAncestor grid target)
+    (path : Path grid source target false) :
+    CycleAncestor grid source := by
+  rcases ancestor with
+    ⟨west, east, south, north, cycle, entry, entryOnCycle, tail⟩
+  refine ⟨west, east, south, north, cycle, entry, entryOnCycle, ?_⟩
+  simpa using Path.trans path tail
+
+/-- Cycle ancestry survives two substitutions on the literal sparse copy of a
+live source port. -/
+theorem CycleAncestor.refineSparse
+    {grid : Nat → Nat → Index} {source : Port}
+    (ancestor : CycleAncestor grid source)
+    (sourceLive : portPresent grid source = true) :
+    CycleAncestor (RedCycles.iterateRefine 2 grid) (sparsePort source) := by
+  rcases ancestor with
+    ⟨west, east, south, north, cycle, entry, entryOnCycle, path⟩
+  have fineCycle := cycle.iterateRefine 2
+  have entryLive := portPresent_of_onCycle cycle entryOnCycle
+  refine ⟨4 * west, 4 * east, 4 * south, 4 * north, ?_,
+    sparsePort entry, onCycle_sparse entryOnCycle, ?_⟩
+  · simpa [RedCycles.doubleN_eq] using fineCycle
+  · exact path_refine_sparse path sourceLive entryLive
+
+/-- An even fine-grid connector into a sparse coarse source transports the
+coarse source's cycle ancestry. -/
+theorem CycleAncestor.refineThrough
+    {grid : Nat → Nat → Index} {source target : Port}
+    (ancestor : CycleAncestor grid source)
+    (sourceLive : portPresent grid source = true)
+    (connector : Path (RedCycles.iterateRefine 2 grid)
+      target (sparsePort source) false) :
+    CycleAncestor (RedCycles.iterateRefine 2 grid) target :=
+  (ancestor.refineSparse sourceLive).of_evenPath connector
+
+/-- The horizontal selector chooses a live endpoint of every horizontal
+interior segment. -/
+theorem horizontalPort_present_of_interior
+    {grid : Nat → Nat → Index} {x y : Nat}
+    (interior : Signals.horizontalInterior?
+      (componentAt grid x y) (quadrantAt x y) ≠ none) :
+    portPresent grid (PairCoverSeamShadePaths.horizontalPort grid x y) = true := by
+  by_cases hwest :
+      RedShades.hasWest (componentAt grid x y) (quadrantAt x y) = true
+  · simpa [PairCoverSeamShadePaths.horizontalPort, hwest, portPresent]
+  · rcases live_endpoint_of_horizontalInterior interior with westLive | eastLive
+    · change RedShades.hasWest (componentAt grid x y)
+          (quadrantAt x y) = true at westLive
+      exact (hwest westLive).elim
+    · simpa [PairCoverSeamShadePaths.horizontalPort, hwest] using eastLive
+
+/-- The vertical selector chooses a live endpoint of every vertical interior
+segment. -/
+theorem verticalPort_present_of_interior
+    {grid : Nat → Nat → Index} {x y : Nat}
+    (interior : Signals.verticalInterior?
+      (componentAt grid x y) (quadrantAt x y) ≠ none) :
+    portPresent grid (PairCoverSeamShadePaths.verticalPort grid x y) = true := by
+  by_cases hsouth :
+      RedShades.hasSouth (componentAt grid x y) (quadrantAt x y) = true
+  · simpa [PairCoverSeamShadePaths.verticalPort, hsouth, portPresent]
+  · rcases live_endpoint_of_verticalInterior interior with southLive | northLive
+    · change RedShades.hasSouth (componentAt grid x y)
+          (quadrantAt x y) = true at southLive
+      exact (hsouth southLive).elim
+    · simpa [PairCoverSeamShadePaths.verticalPort, hsouth] using northLive
 
 /-- A bridged descendant of an ancestor cycle supplies the row geometry needed
 by `RowSeparatingCycle`. -/
