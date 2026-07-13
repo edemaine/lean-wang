@@ -903,6 +903,15 @@ coordinate diagnostics show that obligation is unnecessarily strong.
 selector may therefore use the source path, ancestor parity, block address,
 and local component constraints when choosing its separating cycle.
 
+Graph connectivity has now been removed from the remaining finite obligation.
+`CanonicalRowTarget` and `CanonicalColumnTarget` retain only a target level,
+target block address, the shared even/odd hierarchy family, and the required
+coordinate inequalities.  Generic conversion theorems transport the target
+cycle into the full outer refinement, connect it to the actual source ancestor
+through the common outer cycle, and package the separating path.
+`LocalizedResidualTargetsAt.toSelections` reduces the remaining residual proof
+to these pure arithmetic target certificates.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

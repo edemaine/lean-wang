@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104PairCoverSeamResidualCanonicalAncestorBridges
+import LeanWang.OllingerRobinson104PairCoverSeamResidualCanonicalTargets
 
 /-!
 # Localized descendant selections for residual seams
@@ -24,6 +24,7 @@ open RedCycles RedShadeCycles
   PairCoverSeamResidualCycleBridges
   PairCoverSeamResidualCanonicalAncestors
   PairCoverSeamResidualCanonicalAncestorHierarchy
+  PairCoverSeamResidualCanonicalTargets
   ShadedFreeLineRecurrence ShadedObstructionPairCoverRecurrence
   RefinedCoordinateProjection SparseFreeLinePlaneBase Signals.FreeCellLocal
 
@@ -77,6 +78,98 @@ structure LocalizedResidualSelectionsAt (phase : Phase) (depth : Nat) : Prop whe
       (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
       (successorWest phase (depth + 1) parentY)
       (successorEast phase (depth + 1) parentY) boundary row column
+
+/-- Pure coordinate obligations for the localized selector.  The finite
+geometry proof only chooses a canonical level and block in the same hierarchy
+family as the supplied ancestor; all graph paths are reconstructed generically. -/
+structure LocalizedResidualTargetsAt (phase : Phase) (depth : Nat) : Prop where
+  row : ∀ (grid : Nat → Nat → Index) (parentX parentY : Nat)
+      {column row boundary : Nat},
+    quarterWest (successorWest phase (depth + 1) parentX) < column →
+    column < quarterEast (successorEast phase (depth + 1) parentX) →
+    quarterSouth (successorWest phase (depth + 1) parentY) < row →
+    row < quarterNorth (successorEast phase (depth + 1) parentY) →
+    quarterSouth (successorWest phase (depth + 1) parentY) < boundary →
+    boundary < quarterNorth (successorEast phase (depth + 1) parentY) →
+    ¬FitsContainedVerticalChild phase (depth + 1) parentX parentY
+      column row boundary →
+    IsSparseCoordinate boundary →
+    ¬IsSparseCoordinate row →
+    ∀ ancestorLevel ancestorBlockX ancestorBlockY,
+      HierarchyAddressWithin (outerLevel phase (depth + 1)) parentX
+        ancestorLevel ancestorBlockX →
+      HierarchyAddressWithin (outerLevel phase (depth + 1)) parentY
+        ancestorLevel ancestorBlockY →
+      CanonicalRowTarget (outerLevel phase (depth + 1)) parentX parentY
+        (successorWest phase (depth + 1) parentX)
+        (successorEast phase (depth + 1) parentX)
+        column boundary row ancestorLevel
+  column : ∀ (grid : Nat → Nat → Index) (parentX parentY : Nat)
+      {column row boundary : Nat},
+    quarterWest (successorWest phase (depth + 1) parentX) < column →
+    column < quarterEast (successorEast phase (depth + 1) parentX) →
+    quarterWest (successorWest phase (depth + 1) parentX) < boundary →
+    boundary < quarterEast (successorEast phase (depth + 1) parentX) →
+    quarterSouth (successorWest phase (depth + 1) parentY) < row →
+    row < quarterNorth (successorEast phase (depth + 1) parentY) →
+    ¬FitsContainedHorizontalChild phase (depth + 1) parentX parentY
+      column row boundary →
+    IsSparseCoordinate boundary →
+    ¬IsSparseCoordinate column →
+    ∀ ancestorLevel ancestorBlockX ancestorBlockY,
+      HierarchyAddressWithin (outerLevel phase (depth + 1)) parentX
+        ancestorLevel ancestorBlockX →
+      HierarchyAddressWithin (outerLevel phase (depth + 1)) parentY
+        ancestorLevel ancestorBlockY →
+      CanonicalColumnTarget (outerLevel phase (depth + 1)) parentX parentY
+        (successorWest phase (depth + 1) parentY)
+        (successorEast phase (depth + 1) parentY)
+        boundary row column ancestorLevel
+
+/-- Pure canonical targets instantiate the source-dependent graph selections. -/
+theorem LocalizedResidualTargetsAt.toSelections
+    {phase : Phase} {depth : Nat}
+    (targets : LocalizedResidualTargetsAt phase depth) :
+    LocalizedResidualSelectionsAt phase depth := by
+  constructor
+  · intro grid parentX parentY column row boundary
+      columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
+      notFits sparseBoundary createdRow ancestor
+    have gridEq :
+        iterateRefine 2 (refinedGrid phase (depth + 1) grid) =
+          iterateRefine (outerLevel phase (depth + 1) + 2) grid := by
+      unfold refinedGrid
+      rw [PlaneRedBoards.iterateRefine_add]
+      unfold outerLevel refinementDepth
+      congr 1
+      omega
+    rw [gridEq] at ancestor ⊢
+    apply rowSeparatingCycle_of_target ancestor rfl
+    intro ancestorLevel ancestorBlockX ancestorBlockY
+      ancestorXWithin ancestorYWithin
+    exact targets.row grid parentX parentY columnWest columnEast
+      rowSouth rowNorth boundarySouth boundaryNorth notFits
+      sparseBoundary createdRow ancestorLevel ancestorBlockX ancestorBlockY
+      ancestorXWithin ancestorYWithin
+  · intro grid parentX parentY column row boundary
+      columnWest columnEast boundaryWest boundaryEast rowSouth rowNorth
+      notFits sparseBoundary createdColumn ancestor
+    have gridEq :
+        iterateRefine 2 (refinedGrid phase (depth + 1) grid) =
+          iterateRefine (outerLevel phase (depth + 1) + 2) grid := by
+      unfold refinedGrid
+      rw [PlaneRedBoards.iterateRefine_add]
+      unfold outerLevel refinementDepth
+      congr 1
+      omega
+    rw [gridEq] at ancestor ⊢
+    apply columnSeparatingCycle_of_target ancestor rfl
+    intro ancestorLevel ancestorBlockX ancestorBlockY
+      ancestorXWithin ancestorYWithin
+    exact targets.column grid parentX parentY columnWest columnEast
+      boundaryWest boundaryEast rowSouth rowNorth notFits
+      sparseBoundary createdColumn ancestorLevel ancestorBlockX ancestorBlockY
+      ancestorXWithin ancestorYWithin
 
 private theorem horizontalInterior_ne_none_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant}
