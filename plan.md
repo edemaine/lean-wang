@@ -651,6 +651,16 @@ and horizontal certificates together.  The remaining recurrence is therefore
 a finite geometric path-certificate problem; it no longer mentions a shade
 grid, free-line shades, or nearest selected-boundary semantics.
 
+A first finite split of that geometric problem is now certified by
+`OllingerRobinson104PairCoverSeamCreatedLocalAuditCheck`.  In every one of the
+104 two-substitution macrocells, an even seam path exists if the selected
+boundary coordinate is created.  It also exists when the boundary and queried
+free-line coordinate are sparse but the transverse coordinate is created.
+The exhaustive vertical and horizontal checks leave one dual pair of local
+families: a sparse selected boundary with a created free-row/free-column
+coordinate.  Those cases occur at recursive-child edges and need the enclosing
+hierarchy context rather than an arbitrary constant-parent macrocell.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
