@@ -93,10 +93,16 @@ structure FamilyTargetsAt (phase : Phase) (depth : Nat) : Prop where
       column row boundary →
     IsSparseCoordinate boundary →
     ¬IsSparseCoordinate row →
-    Signals.horizontalInterior?
-      (componentAt (iterateRefine 2
-        (refinedGrid phase (depth + 1) grid)) column boundary)
-      (quadrantAt column boundary) ≠ none →
+    (((row < boundary) ∧
+        Signals.horizontalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) column boundary)
+          (quadrantAt column boundary) = some .south) ∨
+      ((boundary < row) ∧
+        Signals.horizontalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) column boundary)
+          (quadrantAt column boundary) = some .north)) →
     ∀ family,
       CanonicalCycleAncestorWithinFamily
         (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
@@ -120,10 +126,16 @@ structure FamilyTargetsAt (phase : Phase) (depth : Nat) : Prop where
       column row boundary →
     IsSparseCoordinate boundary →
     ¬IsSparseCoordinate column →
-    Signals.verticalInterior?
-      (componentAt (iterateRefine 2
-        (refinedGrid phase (depth + 1) grid)) boundary row)
-      (quadrantAt boundary row) ≠ none →
+    (((column < boundary) ∧
+        Signals.verticalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) boundary row)
+          (quadrantAt boundary row) = some .west) ∨
+      ((boundary < column) ∧
+        Signals.verticalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) boundary row)
+          (quadrantAt boundary row) = some .east)) →
     ∀ family,
       CanonicalCycleAncestorWithinFamily
         (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
@@ -250,14 +262,23 @@ theorem FamilyTargetsAt.toDirectPaths
   constructor
   · intro grid parentX parentY column row boundary
       columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
-      notFits sparseBoundary createdRow interior
+      notFits sparseBoundary createdRow orientation
+    have interior : Signals.horizontalInterior?
+        (componentAt (iterateRefine 2
+          (refinedGrid phase (depth + 1) grid)) column boundary)
+        (quadrantAt column boundary) ≠ none := by
+      rcases orientation with orientation | orientation
+      · rw [orientation.2]
+        simp
+      · rw [orientation.2]
+        simp
     have source := horizontalAncestor grid parentX parentY column boundary
       columnWest columnEast boundarySouth boundaryNorth interior
     rcases CanonicalCycleAncestorWithin.exists_family source with
       ⟨family, sourceFamily⟩
     have target := targets.row grid parentX parentY columnWest columnEast
       rowSouth rowNorth boundarySouth boundaryNorth notFits sparseBoundary
-      createdRow interior family sourceFamily
+      createdRow orientation family sourceFamily
     rcases target with target | target
     · rcases target with
         ⟨targetX, targetWest, targetEast, targetInterior, targetFamily⟩
@@ -271,14 +292,23 @@ theorem FamilyTargetsAt.toDirectPaths
         sourceFamily targetFamily between targetInterior
   · intro grid parentX parentY column row boundary
       columnWest columnEast boundaryWest boundaryEast rowSouth rowNorth
-      notFits sparseBoundary createdColumn interior
+      notFits sparseBoundary createdColumn orientation
+    have interior : Signals.verticalInterior?
+        (componentAt (iterateRefine 2
+          (refinedGrid phase (depth + 1) grid)) boundary row)
+        (quadrantAt boundary row) ≠ none := by
+      rcases orientation with orientation | orientation
+      · rw [orientation.2]
+        simp
+      · rw [orientation.2]
+        simp
     have source := verticalAncestor grid parentX parentY boundary row
       boundaryWest boundaryEast rowSouth rowNorth interior
     rcases CanonicalCycleAncestorWithin.exists_family source with
       ⟨family, sourceFamily⟩
     have target := targets.column grid parentX parentY columnWest columnEast
       boundaryWest boundaryEast rowSouth rowNorth notFits sparseBoundary
-      createdColumn interior family sourceFamily
+      createdColumn orientation family sourceFamily
     rcases target with target | target
     · rcases target with
         ⟨targetY, targetSouth, targetNorth, targetInterior, targetFamily⟩

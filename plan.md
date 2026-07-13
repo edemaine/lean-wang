@@ -926,9 +926,9 @@ argument and is no longer the intended proof endpoint.
 
 `OllingerRobinson104PairCoverSeamResidualDirectPaths` now states the exact
 replacement.  `DirectResidualPathsAt` asks directly for the two
-shade-independent seam paths used by the contradiction: a horizontal source
-must reach either a vertical segment on the free row or a horizontal segment
-strictly between it and the row, and dually for columns.  Its
+shade-independent seam paths used by the contradiction: a wrong-facing
+horizontal source must reach either a vertical segment on the free row or a
+horizontal segment strictly between it and the row, and dually for columns. Its
 `verticalResidual` and `horizontalResidual` theorems discharge all four
 semantic residual orientations.  Existing cycle witnesses remain valid
 sufficient certificates, but the remaining recurrence and finite audits
@@ -954,6 +954,15 @@ with the proved all-depth source ancestry and the same-family bridge, yielding
 `DirectResidualPathsAt` with no remaining graph search.  The next finite work
 can therefore focus solely on recognizing a suitable target family from local
 two-substitution data and transporting that recognition through recurrence.
+
+The orientation premise is essential.  An initial diagnostic accidentally
+asked for a path from every live residual source, including sources already
+facing in the conclusion's required direction.  The even-board query
+`(column, boundary, row) = (34, 48, 50)` has a south-facing source and needs no
+contradiction in the below-boundary case; unsurprisingly it has no even seam
+path.  `DirectResidualPathsAt` and `FamilyTargetsAt` now retain exactly the four
+wrong-facing component equalities used by the semantic proof, avoiding this
+second overstrengthening of the finite target invariant.
 
 ### 1. Obtain arbitrarily large free squares
 

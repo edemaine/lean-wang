@@ -41,10 +41,16 @@ structure DirectResidualPathsAt (phase : Phase) (depth : Nat) : Prop where
       column row boundary) ->
     IsSparseCoordinate boundary ->
     Not (IsSparseCoordinate row) ->
-    Signals.horizontalInterior?
-      (componentAt (iterateRefine 2
-        (refinedGrid phase (depth + 1) grid)) column boundary)
-      (quadrantAt column boundary) ≠ none ->
+    (((row < boundary) ∧
+        Signals.horizontalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) column boundary)
+          (quadrantAt column boundary) = some .south) ∨
+      ((boundary < row) ∧
+        Signals.horizontalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) column boundary)
+          (quadrantAt column boundary) = some .north)) ->
     VerticalSeamPath
       (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
       (successorWest phase (depth + 1) parentX)
@@ -61,35 +67,41 @@ structure DirectResidualPathsAt (phase : Phase) (depth : Nat) : Prop where
       column row boundary) ->
     IsSparseCoordinate boundary ->
     Not (IsSparseCoordinate column) ->
-    Signals.verticalInterior?
-      (componentAt (iterateRefine 2
-        (refinedGrid phase (depth + 1) grid)) boundary row)
-      (quadrantAt boundary row) ≠ none ->
+    (((column < boundary) ∧
+        Signals.verticalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) boundary row)
+          (quadrantAt boundary row) = some .west) ∨
+      ((boundary < column) ∧
+        Signals.verticalInterior?
+          (componentAt (iterateRefine 2
+            (refinedGrid phase (depth + 1) grid)) boundary row)
+          (quadrantAt boundary row) = some .east)) ->
     HorizontalSeamPath
       (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
       (successorWest phase (depth + 1) parentY)
       (successorEast phase (depth + 1) parentY) row column boundary
 
-private theorem horizontalInterior_ne_none_of_selected
+private theorem horizontalInterior_eq_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State} {interior : Signals.VerticalInterior}
     (selected : ShadedSignals.selectedHorizontalFor component quadrant state =
       some interior) :
-    Signals.horizontalInterior? component quadrant ≠ none := by
+    Signals.horizontalInterior? component quadrant = some interior := by
   unfold ShadedSignals.selectedHorizontalFor at selected
   split at selected
-  · simp [selected]
+  · exact selected
   · contradiction
 
-private theorem verticalInterior_ne_none_of_selected
+private theorem verticalInterior_eq_of_selected
     {component : Figure16.Thick} {quadrant : Quadrant}
     {state : RedShades.State} {interior : Signals.HorizontalInterior}
     (selected : ShadedSignals.selectedVerticalFor component quadrant state =
       some interior) :
-    Signals.verticalInterior? component quadrant ≠ none := by
+    Signals.verticalInterior? component quadrant = some interior := by
   unfold ShadedSignals.selectedVerticalFor at selected
   split at selected
-  · simp [selected]
+  · exact selected
   · contradiction
 
 /-- Direct row paths discharge both vertical residual orientations. -/
@@ -118,8 +130,8 @@ theorem DirectResidualPathsAt.verticalResidual
               (paths.row grid parentX parentY columnWest columnEast rowSouth
                 (rowBoundary.trans boundaryNorth)
                 (rowSouth.trans rowBoundary) boundaryNorth notFits
-                sparseBoundary createdRow
-                (horizontalInterior_ne_none_of_selected selectedEq))).elim
+                sparseBoundary createdRow (Or.inl ⟨rowBoundary,
+                  horizontalInterior_eq_of_selected selectedEq⟩))).elim
   · intro grid shadeGrid parentX parentY column row boundary valid
       columnWest columnEast boundarySouth boundaryRow rowNorth
       freeRow selected noneBetween notFits sparseBoundary createdRow
@@ -139,7 +151,8 @@ theorem DirectResidualPathsAt.verticalResidual
               (paths.row grid parentX parentY columnWest columnEast
                 (boundarySouth.trans boundaryRow) rowNorth boundarySouth
                 (boundaryRow.trans rowNorth) notFits sparseBoundary createdRow
-                (horizontalInterior_ne_none_of_selected selectedEq))).elim
+                (Or.inr ⟨boundaryRow,
+                  horizontalInterior_eq_of_selected selectedEq⟩))).elim
         | south => rfl
 
 /-- Direct column paths discharge both horizontal residual orientations. -/
@@ -168,7 +181,8 @@ theorem DirectResidualPathsAt.horizontalResidual
                 (columnBoundary.trans boundaryEast)
                 (columnWest.trans columnBoundary) boundaryEast rowSouth
                 rowNorth notFits sparseBoundary createdColumn
-                (verticalInterior_ne_none_of_selected selectedEq))).elim
+                (Or.inl ⟨columnBoundary,
+                  verticalInterior_eq_of_selected selectedEq⟩))).elim
         | east => rfl
   · intro grid shadeGrid parentX parentY column row boundary valid
       boundaryWest boundaryColumn columnEast rowSouth rowNorth
@@ -190,8 +204,8 @@ theorem DirectResidualPathsAt.horizontalResidual
               (paths.column grid parentX parentY
                 (boundaryWest.trans boundaryColumn) columnEast boundaryWest
                 (boundaryColumn.trans columnEast) rowSouth rowNorth notFits
-                sparseBoundary createdColumn
-                (verticalInterior_ne_none_of_selected selectedEq))).elim
+                sparseBoundary createdColumn (Or.inr ⟨boundaryColumn,
+                  verticalInterior_eq_of_selected selectedEq⟩))).elim
 
 end PairCoverSeamResidualDirectPaths
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
