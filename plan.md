@@ -1037,8 +1037,10 @@ that both family floods hit the budget before reaching the first residual
 source.  Increasing this whole-board search is not the intended inductive
 proof: the existing `horizontalPredecessor` and `verticalPredecessor` theorems
 already give every sparse-boundary fine port an even local connector to a live
-coarse predecessor.  The next step is to transport the predecessor's family
-through that connector and reduce target recognition to the fixed `8 x 8`
+coarse predecessor.  The family-predecessor layer now transports a supplied
+coarse canonical-cycle family through exactly this audited even connector,
+both horizontally and vertically.  The next step is to use these wrappers in
+the collar recurrence and reduce target recognition to the fixed `8 x 8`
 local refinement cases, reserving the whole-board checker for base validation.
 
 ### 1. Obtain arbitrarily large free squares
