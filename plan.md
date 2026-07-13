@@ -892,6 +892,17 @@ cycles of the same parity through their enclosing outer cycle.  The remaining
 step is geometric: choose row- and column-separating descendants in the
 appropriate parity family and package their bridges as residual selections.
 
+The residual selection interface has now been corrected as well.  The old
+`ResidualDescendantSelectionsAt` quantified over every arbitrary `CycleOn`,
+discarding both the source route and the canonical hierarchy address; finite
+coordinate diagnostics show that obligation is unnecessarily strong.
+`LocalizedResidualSelectionsAt` instead receives the exact
+`CanonicalCycleAncestorWithin` produced for the selected source.
+`residualCycleWitnessesAt` assembles this localized obligation directly with
+`sourceAncestorsWithinAt` for all four residual orientations.  The remaining
+selector may therefore use the source path, ancestor parity, block address,
+and local component constraints when choosing its separating cycle.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
