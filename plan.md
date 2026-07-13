@@ -561,6 +561,11 @@ layer to `BoundedPaths phase depth` for all 104 parent indices. Canonical
 border-state quotient transport preserves both path endpoints and every
 intermediate search-box bound, so this strengthening does not require any new
 native certificate.
+Bounded constant-parent paths now translate into the corresponding block of an
+arbitrary coarse grid at total refinement depth `refinementDepth + 2`. The
+translation theorem computes the exact phase-dependent quarter-coordinate
+offset and returns an ordinary global red-graph path, ready for the seam shade
+contradiction.
 
 ### 1. Obtain arbitrarily large free squares
 
