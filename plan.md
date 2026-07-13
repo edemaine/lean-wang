@@ -1039,9 +1039,13 @@ proof: the existing `horizontalPredecessor` and `verticalPredecessor` theorems
 already give every sparse-boundary fine port an even local connector to a live
 coarse predecessor.  The family-predecessor layer now transports a supplied
 coarse canonical-cycle family through exactly this audited even connector,
-both horizontally and vertically.  The next step is to use these wrappers in
-the collar recurrence and reduce target recognition to the fixed `8 x 8`
-local refinement cases, reserving the whole-board checker for base validation.
+both horizontally and vertically.  The hierarchy-level wrappers additionally
+retain the selected coarse predecessor and its stable-collar bounds at every
+depth.  Combining this with the all-depth source-ancestor hierarchy now gives
+the actual inherited family at every sparse fine source without a family
+flood.  The next step is to recurse target recognition on this actual coarse
+source and reduce the nonrecursive branches to fixed `8 x 8` local refinement
+cases, reserving the whole-board checker for base validation.
 
 ### 1. Obtain arbitrarily large free squares
 
