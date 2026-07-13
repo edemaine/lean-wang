@@ -550,6 +550,13 @@ batch in 1,584 seconds, after which the proof-only aggregator established
 `Paths .odd 0` in 6.9 seconds. The even depth-one base remains to be certified
 through the same 14-chunk interface.
 
+The finite search soundness now also retains a `BoundedPath` for every node
+returned by the shared multi-query flood. This strengthening is deliberately
+separate from the executable checker and its cached Boolean certificates. It
+allows each constant-parent certificate to be transported into the matching
+block of an arbitrary coarse grid without assuming component equality outside
+the searched parent block.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
