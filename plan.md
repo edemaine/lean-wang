@@ -566,6 +566,10 @@ arbitrary coarse grid at total refinement depth `refinementDepth + 2`. The
 translation theorem computes the exact phase-dependent quarter-coordinate
 offset and returns an ordinary global red-graph path, ready for the seam shade
 contradiction.
+The same transport layer now identifies translated horizontal and vertical
+port selectors, and both interior predicates, with their global counterparts.
+Thus a local seam certificate can be consumed directly by the global shade
+contradiction after only coordinate normalization.
 
 ### 1. Obtain arbitrarily large free squares
 
