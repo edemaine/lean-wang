@@ -128,6 +128,90 @@ theorem selectedHorizontal_of_port_light
       simp [ShadedSignals.horizontalShade?, hw]
   simp [ShadedSignals.selectedHorizontalFor, shade, interior]
 
+private theorem hasNorth_of_verticalInterior_of_not_hasSouth
+    (component : Figure16.Thick) (quadrant : Quadrant)
+    (interior : Signals.verticalInterior? component quadrant ≠ none)
+    (notSouth : RedShades.hasSouth component quadrant ≠ true) :
+    RedShades.hasNorth component quadrant = true := by
+  cases component <;> cases quadrant <;>
+    simp_all [Signals.verticalInterior?, RedShades.hasSouth,
+      RedShades.hasNorth, RedShades.hasVertical,
+      RedShades.cornerSouth, RedShades.cornerNorth]
+
+private theorem hasEast_of_horizontalInterior_of_not_hasWest
+    (component : Figure16.Thick) (quadrant : Quadrant)
+    (interior : Signals.horizontalInterior? component quadrant ≠ none)
+    (notWest : RedShades.hasWest component quadrant ≠ true) :
+    RedShades.hasEast component quadrant = true := by
+  cases component <;> cases quadrant <;>
+    simp_all [Signals.horizontalInterior?, RedShades.hasWest,
+      RedShades.hasEast, RedShades.hasHorizontal,
+      RedShades.cornerWest, RedShades.cornerEast]
+
+/-- A present vertical red interior that is not selected has dark shade. -/
+theorem verticalPort_value_eq_dark_of_not_selected
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid grid stateGrid) {x y : Nat}
+    (interior : Signals.verticalInterior?
+      (componentAt grid x y) (quadrantAt x y) ≠ none)
+    (notSelected : ShadedSignals.selectedVerticalFor
+      (componentAt grid x y) (quadrantAt x y) (stateGrid x y) = none) :
+    value stateGrid (verticalPort grid x y) = some .dark := by
+  have portPresent : RedShadeGraphRefinement.portPresent grid
+      (verticalPort grid x y) = true := by
+    unfold verticalPort
+    split
+    · rename_i hsouth
+      simpa [RedShadeGraphRefinement.portPresent] using hsouth
+    · rename_i hsouth
+      have hnorth := hasNorth_of_verticalInterior_of_not_hasSouth
+        (componentAt grid x y) (quadrantAt x y) interior hsouth
+      change RedShades.hasNorth
+        (componentAt grid x y) (quadrantAt x y) = true
+      exact hnorth
+  have present := value_isSome_eq_portPresent valid (verticalPort grid x y)
+  rw [portPresent] at present
+  cases hvalue : value stateGrid (verticalPort grid x y) with
+  | none => simp [hvalue] at present
+  | some shade =>
+      cases shade with
+      | light =>
+          exact (selectedVertical_of_port_light valid interior hvalue
+            notSelected).elim
+      | dark => rfl
+
+/-- A present horizontal red interior that is not selected has dark shade. -/
+theorem horizontalPort_value_eq_dark_of_not_selected
+    {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid grid stateGrid) {x y : Nat}
+    (interior : Signals.horizontalInterior?
+      (componentAt grid x y) (quadrantAt x y) ≠ none)
+    (notSelected : ShadedSignals.selectedHorizontalFor
+      (componentAt grid x y) (quadrantAt x y) (stateGrid x y) = none) :
+    value stateGrid (horizontalPort grid x y) = some .dark := by
+  have portPresent : RedShadeGraphRefinement.portPresent grid
+      (horizontalPort grid x y) = true := by
+    unfold horizontalPort
+    split
+    · rename_i hwest
+      simpa [RedShadeGraphRefinement.portPresent] using hwest
+    · rename_i hwest
+      have heast := hasEast_of_horizontalInterior_of_not_hasWest
+        (componentAt grid x y) (quadrantAt x y) interior hwest
+      change RedShades.hasEast
+        (componentAt grid x y) (quadrantAt x y) = true
+      exact heast
+  have present := value_isSome_eq_portPresent valid (horizontalPort grid x y)
+  rw [portPresent] at present
+  cases hvalue : value stateGrid (horizontalPort grid x y) with
+  | none => simp [hvalue] at present
+  | some shade =>
+      cases shade with
+      | light =>
+          exact (selectedHorizontal_of_port_light valid interior hvalue
+            notSelected).elim
+      | dark => rfl
+
 theorem freeRow_forbids_even_path
     {grid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid grid stateGrid)

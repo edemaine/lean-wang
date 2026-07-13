@@ -717,6 +717,17 @@ intervening selected boundary, following Robinson Section 7.  After that, the
 same-cell and adjacent certificates can be assembled with the residual theorem
 into the all-depth face recurrence.
 
+The residual semantic argument now has a reusable certificate language.
+`OllingerRobinson104RedShadeConstraints` treats a finite list of red ports as
+signed shade constraints, with parity zero denoting light and parity one dark.
+It proves that a weighted graph flood reaching any constrained port with the
+opposite parity contradicts every valid shade assignment.  The accompanying
+port lemmas prove that a present unselected vertical or horizontal interior is
+dark.  The next finite audit can therefore seed the selected boundary as light,
+the free-line and intervening unselected interiors as dark, and certify each
+residual case by a signed parity conflict rather than requiring one particular
+even path shape.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
