@@ -1016,6 +1016,17 @@ layer is the finite enumeration of all applicable local base queries and the
 arithmetic normalization from successor-board coordinates to these translated
 local coordinates.
 
+That arithmetic normalization is now complete in
+`OllingerRobinson104PairCoverSeamResidualDirectPathFamilyBase`.
+`BoundedFamilyTargetsAt` is the exact finite certificate boundary: for each of
+the 104 constant parent tiles it checks every wrong-facing, non-contained row
+and column query.  This intentionally strengthens the residual obligation by
+omitting the sparse/created-coordinate filters.  Its `toFamilyTargetsAt`
+theorem translates local coordinates, interiors, child-containment tests,
+source routes, and target routes into an arbitrary parent block.  Thus the
+remaining base work no longer contains global hierarchy geometry; it only has
+to implement and certify the finite `BoundedFamilyTargetsAt` checks.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
