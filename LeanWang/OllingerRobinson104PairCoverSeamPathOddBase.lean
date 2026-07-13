@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import Mathlib.Tactic.FinCases
+import LeanWang.OllingerRobinson104PairCoverSeamPathBoundedBase
 import LeanWang.OllingerRobinson104PairCoverSeamPathOddBaseChunk00
 import LeanWang.OllingerRobinson104PairCoverSeamPathOddBaseChunk01
 import LeanWang.OllingerRobinson104PairCoverSeamPathOddBaseChunk02
@@ -28,6 +29,7 @@ namespace Closed104
 namespace PairCoverSeamPathOddBase
 
 open ShadedFreeLineRecurrence PairCoverSeamPathBaseAudit
+  PairCoverSeamPathBoundedBase
 
 theorem chunkChecks : ChunkChecks .odd 0 := by
   intro chunk
@@ -49,6 +51,9 @@ theorem chunkChecks : ChunkChecks .odd 0 := by
 
 theorem paths : Paths .odd 0 :=
   chunkChecks.paths
+
+theorem boundedPaths : BoundedPaths .odd 0 :=
+  PairCoverSeamPathBoundedBase.ChunkChecks.boundedPaths chunkChecks
 
 end PairCoverSeamPathOddBase
 end Closed104
