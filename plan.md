@@ -570,6 +570,26 @@ The same transport layer now identifies translated horizontal and vertical
 port selectors, and both interior predicates, with their global counterparts.
 Thus a local seam certificate can be consumed directly by the global shade
 contradiction after only coordinate normalization.
+Child-interval membership and the executable contained-seam checks are now
+proved invariant under the exact parent-block offset.  Consequently a global
+wrong-facing, noncontained seam query normalizes to the local query consumed by
+`BoundedPaths`; the resulting bounded path translates back to a global
+`VerticalSeamPath` or `HorizontalSeamPath` in the arbitrary parent block.
+These two route theorems discharge all four cases of `VerticalBoundaryFaces`
+and `HorizontalBoundaryFaces` by the shade-preservation contradiction.  The
+adapter `forcesRoutedFixedCornerSquares_of_boundedPaths` now connects
+`(phase depth) ↦ BoundedPaths phase depth` directly to the routed scaffold's
+forward square-forcing property.
+
+The cached odd certificate is exposed as `BoundedPaths .odd 0`; the generated
+even chunks target `BoundedPaths .even 1`.  The remaining seam-specific proof
+is therefore exactly the scale recurrence: lift these two parity bases through
+successive two-substitution refinements to bounded/global seam paths at every
+odd depth `d` and every even depth `1 + d`.  A direct sparse-coordinate lift is
+not sufficient on its own because each refinement also creates nonsparse
+quarter intervals; the recurrence must account for those newly created
+coordinates, using the existing refined-coordinate projection and local
+connector lemmas.
 
 ### 1. Obtain arbitrarily large free squares
 
