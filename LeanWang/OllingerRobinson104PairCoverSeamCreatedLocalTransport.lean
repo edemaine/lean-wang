@@ -264,6 +264,111 @@ theorem horizontalQuery
   · simpa [coordinates] using hboundary
   · exact localPath
 
+/-- A same-macrocell wrong-facing query in either audited vertical family has
+a global seam path. -/
+theorem verticalSameBlock
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {column boundary row : Nat}
+    (hcolumn : column < 8) (hboundary : boundary < 8) (hrow : row < 8)
+    (wrongFacing :
+      (row < boundary ∧
+        Signals.horizontalInterior?
+          (componentAt (iterateRefine 2 grid)
+            (8 * blockX + column) (8 * blockY + boundary))
+          (quadrantAt (8 * blockX + column) (8 * blockY + boundary)) =
+            some .south) ∨
+      (boundary < row ∧
+        Signals.horizontalInterior?
+          (componentAt (iterateRefine 2 grid)
+            (8 * blockX + column) (8 * blockY + boundary))
+          (quadrantAt (8 * blockX + column) (8 * blockY + boundary)) =
+            some .north))
+    (audited : (isCreated boundary ||
+      (!isCreated row && isCreated column)) = true) :
+    VerticalSeamPath (iterateRefine 2 grid)
+      (4 * blockX) (4 * blockX + 4)
+      (8 * blockX + column) (8 * blockY + row)
+      (8 * blockY + boundary) := by
+  have interior := horizontalInterior_twoBlock grid blockX blockY
+    column boundary hcolumn hboundary
+  have localWrongFacing :
+      (row < boundary ∧
+        Signals.horizontalInterior?
+          (componentAt
+            (RedShadeGraphRefinement.fineGrid (grid blockX blockY))
+            column boundary)
+          (quadrantAt column boundary) = some .south) ∨
+      (boundary < row ∧
+        Signals.horizontalInterior?
+          (componentAt
+            (RedShadeGraphRefinement.fineGrid (grid blockX blockY))
+            column boundary)
+          (quadrantAt column boundary) = some .north) := by
+    rcases wrongFacing with wrongFacing | wrongFacing
+    · exact Or.inl ⟨wrongFacing.1, interior.trans wrongFacing.2⟩
+    · exact Or.inr ⟨wrongFacing.1, interior.trans wrongFacing.2⟩
+  have audited' : isCreated boundary = true ∨
+      (!isCreated row) = true ∧ isCreated column = true := by
+    simpa only [Bool.or_eq_true, Bool.and_eq_true] using audited
+  apply verticalQuery grid blockX blockY
+  · simp [coordinates, hcolumn]
+  · simp [coordinates, hboundary]
+  · simp only [verticalQueries, List.mem_filter, Bool.and_eq_true,
+      Bool.or_eq_true, decide_eq_true_eq]
+    exact ⟨by simp [coordinates, hrow], localWrongFacing, audited'⟩
+
+/-- Horizontal dual of `verticalSameBlock`. -/
+theorem horizontalSameBlock
+    (grid : Nat → Nat → Index) (blockX blockY : Nat)
+    {row boundary column : Nat}
+    (hrow : row < 8) (hboundary : boundary < 8) (hcolumn : column < 8)
+    (wrongFacing :
+      (column < boundary ∧
+        Signals.verticalInterior?
+          (componentAt (iterateRefine 2 grid)
+            (8 * blockX + boundary) (8 * blockY + row))
+          (quadrantAt (8 * blockX + boundary) (8 * blockY + row)) =
+            some .west) ∨
+      (boundary < column ∧
+        Signals.verticalInterior?
+          (componentAt (iterateRefine 2 grid)
+            (8 * blockX + boundary) (8 * blockY + row))
+          (quadrantAt (8 * blockX + boundary) (8 * blockY + row)) =
+            some .east))
+    (audited : (isCreated boundary ||
+      (!isCreated column && isCreated row)) = true) :
+    HorizontalSeamPath (iterateRefine 2 grid)
+      (4 * blockY) (4 * blockY + 4)
+      (8 * blockY + row) (8 * blockX + column)
+      (8 * blockX + boundary) := by
+  have interior := verticalInterior_twoBlock grid blockX blockY
+    boundary row hboundary hrow
+  have localWrongFacing :
+      (column < boundary ∧
+        Signals.verticalInterior?
+          (componentAt
+            (RedShadeGraphRefinement.fineGrid (grid blockX blockY))
+            boundary row)
+          (quadrantAt boundary row) = some .west) ∨
+      (boundary < column ∧
+        Signals.verticalInterior?
+          (componentAt
+            (RedShadeGraphRefinement.fineGrid (grid blockX blockY))
+            boundary row)
+          (quadrantAt boundary row) = some .east) := by
+    rcases wrongFacing with wrongFacing | wrongFacing
+    · exact Or.inl ⟨wrongFacing.1, interior.trans wrongFacing.2⟩
+    · exact Or.inr ⟨wrongFacing.1, interior.trans wrongFacing.2⟩
+  have audited' : isCreated boundary = true ∨
+      (!isCreated column) = true ∧ isCreated row = true := by
+    simpa only [Bool.or_eq_true, Bool.and_eq_true] using audited
+  apply horizontalQuery grid blockX blockY
+  · simp [coordinates, hrow]
+  · simp [coordinates, hboundary]
+  · simp only [horizontalQueries, List.mem_filter, Bool.and_eq_true,
+      Bool.or_eq_true, decide_eq_true_eq]
+    exact ⟨by simp [coordinates, hcolumn], localWrongFacing, audited'⟩
+
 end PairCoverSeamCreatedLocalTransport
 end Closed104
 end Figure13Layers

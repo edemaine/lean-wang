@@ -672,6 +672,10 @@ every bounded path by the `(8 * blockX, 8 * blockY)` quarter offset, and exposes
 vertical and horizontal global seam paths for every certified local query in
 an arbitrary coarse grid.  Cross-macrocell queries remain separate rather
 than being hidden behind a false one-cell sentinel claim.
+The proposition-facing `verticalSameBlock` and `horizontalSameBlock` wrappers
+now consume the actual wrong-facing interior orientation and the audited
+created-coordinate disjunction directly, so later recurrence code does not
+need to reconstruct Boolean query-list membership.
 
 ### 1. Obtain arbitrarily large free squares
 
