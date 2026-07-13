@@ -581,8 +581,9 @@ adapter `forcesRoutedFixedCornerSquares_of_boundedPaths` now connects
 `(phase depth) ↦ BoundedPaths phase depth` directly to the routed scaffold's
 forward square-forcing property.
 
-The cached odd certificate is exposed as `BoundedPaths .odd 0`; the generated
-even chunks target `BoundedPaths .even 1`.  The remaining seam-specific proof
+The cached odd and even certificates are exposed as `BoundedPaths .odd 0` and
+`BoundedPaths .even 1`, respectively.  All fourteen even chunks passed in one
+parallel Lake build.  The remaining seam-specific proof
 is therefore exactly the scale recurrence: lift these two parity bases through
 successive two-substitution refinements to bounded/global seam paths at every
 odd depth `d` and every even depth `1 + d`.  A direct sparse-coordinate lift is
