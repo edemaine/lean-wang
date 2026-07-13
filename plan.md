@@ -631,6 +631,17 @@ that orientation back to depth `d + 1`.  Noncontainment is preserved by the
 coordinate theorem above.  Thus only genuinely newly created coordinate
 intervals remain in the face step.
 
+`OllingerRobinson104PairCoverSeamFaceStep` makes that last statement exact.
+A coordinate is now classified as either the literal sparse representative of
+its coarse interval or a strictly created point inside that interval.  The
+four next-depth face theorems split on the three queried coordinates: the
+all-sparse branch is discharged by the inherited theorem, including strict
+successor-board bounds, while every other branch is delegated to
+`CreatedVerticalBoundaryFacesAt` or `CreatedHorizontalBoundaryFacesAt`.
+Consequently a proof of those two local created-coordinate structures gives
+the complete one-depth recurrence without any additional global arithmetic or
+lower-edge exception.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

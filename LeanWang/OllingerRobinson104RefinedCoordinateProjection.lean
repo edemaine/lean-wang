@@ -78,6 +78,36 @@ theorem sparseCoordinate_mono {first second : Nat} (hle : first ≤ second) :
   · exact le_rfl
   · exact Nat.le_of_lt (sparseCoordinate_strictMono hlt)
 
+theorem sparseCoordinate_lt_iff {first second : Nat} :
+    sparseCoordinate first < sparseCoordinate second ↔ first < second := by
+  constructor
+  · intro hlt
+    by_contra hnot
+    exact (Nat.not_lt_of_ge (sparseCoordinate_mono (by omega))) hlt
+  · exact sparseCoordinate_strictMono
+
+/-- Coordinates retained literally by two-level refinement. -/
+def IsSparseCoordinate (coordinate : Nat) : Prop :=
+  ∃ coarse, sparseCoordinate coarse = coordinate
+
+theorem isSparseCoordinate_iff (coordinate : Nat) :
+    IsSparseCoordinate coordinate ↔
+      sparseCoordinate (coarseCoordinate coordinate) = coordinate := by
+  constructor
+  · rintro ⟨coarse, rfl⟩
+    simp
+  · exact fun equality => ⟨coarseCoordinate coordinate, equality⟩
+
+/-- A fine coordinate is either the literal retained quarter selected by its
+coarse interval or is genuinely created inside that interval. -/
+theorem sparse_or_created (coordinate : Nat) :
+    IsSparseCoordinate coordinate ∨
+      sparseCoordinate (coarseCoordinate coordinate) < coordinate := by
+  have spec := coarseCoordinate_spec coordinate
+  rcases spec.1.eq_or_lt with equality | created
+  · exact Or.inl ((isSparseCoordinate_iff coordinate).2 equality)
+  · exact Or.inr created
+
 /-- Assigning fine coordinates to retained sparse intervals is monotone. -/
 theorem coarseCoordinate_mono {first second : Nat} (hle : first ≤ second) :
     coarseCoordinate first ≤ coarseCoordinate second := by
