@@ -63,6 +63,16 @@ theorem sparseCoordinate_mono {first second : Nat} (hle : first ≤ second) :
   · exact le_rfl
   · exact Nat.le_of_lt (sparseCoordinate_strictMono hlt)
 
+/-- Assigning fine coordinates to retained sparse intervals is monotone. -/
+theorem coarseCoordinate_mono {first second : Nat} (hle : first ≤ second) :
+    coarseCoordinate first ≤ coarseCoordinate second := by
+  by_contra hnot
+  have hnext : coarseCoordinate second + 1 ≤ coarseCoordinate first := by omega
+  have firstSpec := coarseCoordinate_spec first
+  have secondSpec := coarseCoordinate_spec second
+  have hsparse := secondSpec.2.trans_le (sparseCoordinate_mono hnext)
+  omega
+
 /-- Strict coarse bounds imply the corresponding strict sparse bounds for the
 original fine coordinate. -/
 theorem sparse_bounds_of_coarse_bounds

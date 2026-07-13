@@ -592,6 +592,18 @@ quarter intervals; the recurrence must account for those newly created
 coordinates, using the existing refined-coordinate projection and local
 connector lemmas.
 
+The coordinate part of that recurrence is now closed in
+`OllingerRobinson104PairCoverSeamRefinementCoordinates`.  Successor boards and
+each recursive child interval scale by exactly four, `coarseCoordinate` is
+monotone, strict coarse child membership lifts to strict fine membership, and
+a fine query that does not fit one recursive child projects to a coarse query
+that likewise does not fit.  Projecting strict fine board bounds loses
+strictness only at the lower edge: the exceptional case is exactly the first
+newly created sparse interval.  The remaining recurrence work is semantic:
+project free-line and nearest-selected-boundary facts through inherited
+intervals, then discharge that explicit lower-interval case by the local
+connector audit.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
