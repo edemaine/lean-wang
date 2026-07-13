@@ -642,6 +642,15 @@ Consequently a proof of those two local created-coordinate structures gives
 the complete one-depth recurrence without any additional global arithmetic or
 lower-edge exception.
 
+`OllingerRobinson104PairCoverSeamCreatedPaths` removes shade semantics from
+that final local obligation.  It is enough to provide an ordinary red-graph
+seam path for every wrong-facing query having at least one created coordinate.
+The existing path/shade contradiction proves both created boundary-face
+structures, and the face-step theorem then lifts the previous depth's vertical
+and horizontal certificates together.  The remaining recurrence is therefore
+a finite geometric path-certificate problem; it no longer mentions a shade
+grid, free-line shades, or nearest selected-boundary semantics.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
