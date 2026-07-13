@@ -545,6 +545,10 @@ and `ChunkChecks.paths` assembles their Boolean results into the semantic
 all-parent theorem. The first isolated odd chunk passes `native_decide` and
 builds in 949 seconds; the remaining chunks can therefore be generated and
 built independently or in bounded parallel batches.
+All 14 odd chunks now pass. Lake checked the 13 uncached chunks in one parallel
+batch in 1,584 seconds, after which the proof-only aggregator established
+`Paths .odd 0` in 6.9 seconds. The even depth-one base remains to be certified
+through the same 14-chunk interface.
 
 ### 1. Obtain arbitrarily large free squares
 
