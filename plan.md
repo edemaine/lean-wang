@@ -685,6 +685,12 @@ plus 720 canonical cross-parent pairs, for 792 states in each orientation.
 edge.  Twenty-five independent cached modules cover 32 pair states each, and
 `OllingerRobinson104PairCoverSeamCreatedAdjacentAuditChunks` assembles all
 vertical and horizontal results without rerunning graph search.
+`OllingerRobinson104PairCoverSeamCreatedAdjacentAudit` proves soundness of
+those assembled checks as bounded red-graph paths in the corresponding
+rectangular windows.  Thus every one of the 792 vertical and 792 horizontal
+canonical adjacent states now has a proposition-level path certificate; the
+remaining step is to classify actual neighboring refined cells by those
+canonical states and transport the certified paths into the global grid.
 
 ### 1. Obtain arbitrarily large free squares
 
