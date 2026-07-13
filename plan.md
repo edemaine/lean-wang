@@ -948,12 +948,13 @@ source.  All graph connectivity is supplied generically.
 `OllingerRobinson104PairCoverSeamResidualDirectPathTargets` now states that
 recognizability invariant as `FamilyTargetsAt`.  `RowFamilyTarget` and
 `ColumnFamilyTarget` allow exactly the crossing and between-line alternatives
-from the seam definitions, with a target ancestor in the source's actual
-family.  `FamilyTargetsAt.toDirectPaths` combines this finite endpoint choice
-with the proved all-depth source ancestry and the same-family bridge, yielding
-`DirectResidualPathsAt` with no remaining graph search.  The next finite work
-can therefore focus solely on recognizing a suitable target family from local
-two-substitution data and transporting that recognition through recurrence.
+from the seam definitions.  Each `FamilyTargetsAt` field jointly chooses a
+source ancestor family and a target ancestor in that family; it does not demand
+a target for every possible existential ancestor witness.  Its `toDirectPaths`
+theorem applies the same-family bridge, yielding `DirectResidualPathsAt` with no
+remaining graph search.  The next finite work can therefore focus solely on
+recognizing one compatible source/target family from local two-substitution
+data and transporting that joint certificate through recurrence.
 
 The orientation premise is essential.  An initial diagnostic accidentally
 asked for a path from every live residual source, including sources already
@@ -963,6 +964,13 @@ contradiction in the below-boundary case; unsurprisingly it has no even seam
 path.  `DirectResidualPathsAt` and `FamilyTargetsAt` now retain exactly the four
 wrong-facing component equalities used by the semantic proof, avoiding this
 second overstrengthening of the finite target invariant.
+
+The first corrected diagnostic, on the constant parent-zero even board, finds
+a compatible joint family target for every wrong-facing row query.  The family
+transport API now proves that both two substitutions and an even connector to
+a sparse predecessor preserve the chosen localized family.  This is the
+inductive interface needed to combine the existing predecessor audit with the
+remaining finite source/target recognition checks.
 
 ### 1. Obtain arbitrarily large free squares
 

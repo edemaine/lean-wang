@@ -103,13 +103,13 @@ structure FamilyTargetsAt (phase : Phase) (depth : Nat) : Prop where
           (componentAt (iterateRefine 2
             (refinedGrid phase (depth + 1) grid)) column boundary)
           (quadrantAt column boundary) = some .north)) →
-    ∀ family,
+    ∃ family,
       CanonicalCycleAncestorWithinFamily
         (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
         (horizontalPort
           (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
           column boundary)
-        (outerLevel phase (depth + 1)) parentX parentY family →
+        (outerLevel phase (depth + 1)) parentX parentY family ∧
       RowFamilyTarget grid (outerLevel phase (depth + 1)) parentX parentY
         (successorWest phase (depth + 1) parentX)
         (successorEast phase (depth + 1) parentX)
@@ -136,13 +136,13 @@ structure FamilyTargetsAt (phase : Phase) (depth : Nat) : Prop where
           (componentAt (iterateRefine 2
             (refinedGrid phase (depth + 1) grid)) boundary row)
           (quadrantAt boundary row) = some .east)) →
-    ∀ family,
+    ∃ family,
       CanonicalCycleAncestorWithinFamily
         (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
         (verticalPort
           (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
           boundary row)
-        (outerLevel phase (depth + 1)) parentX parentY family →
+        (outerLevel phase (depth + 1)) parentX parentY family ∧
       ColumnFamilyTarget grid (outerLevel phase (depth + 1)) parentX parentY
         (successorWest phase (depth + 1) parentY)
         (successorEast phase (depth + 1) parentY)
@@ -158,102 +158,6 @@ private theorem fineGrid_eq
   congr 1
   omega
 
-private theorem horizontalAncestor
-    {phase : Phase} {depth : Nat}
-    (grid : Nat → Nat → Index) (parentX parentY column boundary : Nat)
-    (columnWest : quarterWest
-      (successorWest phase (depth + 1) parentX) < column)
-    (columnEast : column < quarterEast
-      (successorEast phase (depth + 1) parentX))
-    (boundarySouth : quarterSouth
-      (successorWest phase (depth + 1) parentY) < boundary)
-    (boundaryNorth : boundary < quarterNorth
-      (successorEast phase (depth + 1) parentY))
-    (interior : Signals.horizontalInterior?
-      (componentAt (iterateRefine 2
-        (refinedGrid phase (depth + 1) grid)) column boundary)
-      (quadrantAt column boundary) ≠ none) :
-    CanonicalCycleAncestorWithin
-      (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
-      (horizontalPort
-        (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
-        column boundary)
-      (outerLevel phase (depth + 1)) parentX parentY := by
-  have hierarchy := sourceAncestorsWithinAt phase (depth + 1)
-    grid parentX parentY
-  have interior' : Signals.horizontalInterior?
-      (componentAt (refinedGrid phase (depth + 2) grid) column boundary)
-      (quadrantAt column boundary) ≠ none := by
-    rw [SparseFreeLinePlaneLocalStep.refinedGrid_succ]
-    exact interior
-  have ancestor := hierarchy.horizontal
-    (by
-      constructor
-      · unfold quarterWest at columnWest ⊢
-        omega
-      · exact columnEast)
-    (by
-      constructor
-      · unfold quarterSouth at boundarySouth
-        unfold quarterWest
-        omega
-      · simpa [quarterNorth, quarterEast] using boundaryNorth)
-    interior'
-  have gridEq : refinedGrid phase (depth + 1 + 1) grid =
-      iterateRefine (outerLevel phase (depth + 1) + 2) grid := by
-    rw [SparseFreeLinePlaneLocalStep.refinedGrid_succ]
-    exact fineGrid_eq phase depth grid
-  rw [gridEq] at ancestor
-  exact ancestor
-
-private theorem verticalAncestor
-    {phase : Phase} {depth : Nat}
-    (grid : Nat → Nat → Index) (parentX parentY boundary row : Nat)
-    (boundaryWest : quarterWest
-      (successorWest phase (depth + 1) parentX) < boundary)
-    (boundaryEast : boundary < quarterEast
-      (successorEast phase (depth + 1) parentX))
-    (rowSouth : quarterSouth
-      (successorWest phase (depth + 1) parentY) < row)
-    (rowNorth : row < quarterNorth
-      (successorEast phase (depth + 1) parentY))
-    (interior : Signals.verticalInterior?
-      (componentAt (iterateRefine 2
-        (refinedGrid phase (depth + 1) grid)) boundary row)
-      (quadrantAt boundary row) ≠ none) :
-    CanonicalCycleAncestorWithin
-      (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
-      (verticalPort
-        (iterateRefine (outerLevel phase (depth + 1) + 2) grid)
-        boundary row)
-      (outerLevel phase (depth + 1)) parentX parentY := by
-  have hierarchy := sourceAncestorsWithinAt phase (depth + 1)
-    grid parentX parentY
-  have interior' : Signals.verticalInterior?
-      (componentAt (refinedGrid phase (depth + 2) grid) boundary row)
-      (quadrantAt boundary row) ≠ none := by
-    rw [SparseFreeLinePlaneLocalStep.refinedGrid_succ]
-    exact interior
-  have ancestor := hierarchy.vertical
-    (by
-      constructor
-      · unfold quarterWest at boundaryWest ⊢
-        omega
-      · exact boundaryEast)
-    (by
-      constructor
-      · unfold quarterSouth at rowSouth
-        unfold quarterWest
-        omega
-      · simpa [quarterNorth, quarterEast] using rowNorth)
-    interior'
-  have gridEq : refinedGrid phase (depth + 1 + 1) grid =
-      iterateRefine (outerLevel phase (depth + 1) + 2) grid := by
-    rw [SparseFreeLinePlaneLocalStep.refinedGrid_succ]
-    exact fineGrid_eq phase depth grid
-  rw [gridEq] at ancestor
-  exact ancestor
-
 /-- Same-family endpoint targets instantiate the direct residual paths. -/
 theorem FamilyTargetsAt.toDirectPaths
     {phase : Phase} {depth : Nat}
@@ -263,22 +167,9 @@ theorem FamilyTargetsAt.toDirectPaths
   · intro grid parentX parentY column row boundary
       columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
       notFits sparseBoundary createdRow orientation
-    have interior : Signals.horizontalInterior?
-        (componentAt (iterateRefine 2
-          (refinedGrid phase (depth + 1) grid)) column boundary)
-        (quadrantAt column boundary) ≠ none := by
-      rcases orientation with orientation | orientation
-      · rw [orientation.2]
-        simp
-      · rw [orientation.2]
-        simp
-    have source := horizontalAncestor grid parentX parentY column boundary
-      columnWest columnEast boundarySouth boundaryNorth interior
-    rcases CanonicalCycleAncestorWithin.exists_family source with
-      ⟨family, sourceFamily⟩
-    have target := targets.row grid parentX parentY columnWest columnEast
+    rcases targets.row grid parentX parentY columnWest columnEast
       rowSouth rowNorth boundarySouth boundaryNorth notFits sparseBoundary
-      createdRow orientation family sourceFamily
+      createdRow orientation with ⟨family, sourceFamily, target⟩
     rcases target with target | target
     · rcases target with
         ⟨targetX, targetWest, targetEast, targetInterior, targetFamily⟩
@@ -293,22 +184,9 @@ theorem FamilyTargetsAt.toDirectPaths
   · intro grid parentX parentY column row boundary
       columnWest columnEast boundaryWest boundaryEast rowSouth rowNorth
       notFits sparseBoundary createdColumn orientation
-    have interior : Signals.verticalInterior?
-        (componentAt (iterateRefine 2
-          (refinedGrid phase (depth + 1) grid)) boundary row)
-        (quadrantAt boundary row) ≠ none := by
-      rcases orientation with orientation | orientation
-      · rw [orientation.2]
-        simp
-      · rw [orientation.2]
-        simp
-    have source := verticalAncestor grid parentX parentY boundary row
-      boundaryWest boundaryEast rowSouth rowNorth interior
-    rcases CanonicalCycleAncestorWithin.exists_family source with
-      ⟨family, sourceFamily⟩
-    have target := targets.column grid parentX parentY columnWest columnEast
+    rcases targets.column grid parentX parentY columnWest columnEast
       boundaryWest boundaryEast rowSouth rowNorth notFits sparseBoundary
-      createdColumn orientation family sourceFamily
+      createdColumn orientation with ⟨family, sourceFamily, target⟩
     rcases target with target | target
     · rcases target with
         ⟨targetY, targetSouth, targetNorth, targetInterior, targetFamily⟩

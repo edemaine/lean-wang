@@ -22,8 +22,10 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph RedShadePaths
   RedShadeGraphBoards RedShadeGraphRefinement
   RedShadeCycleConnectivity RedShadeCycleBridgeComposition
   PairCoverSeamPathSearch PairCoverSeamShadePaths
+  PairCoverSeamResidualCycleBridges
   PairCoverSeamResidualCanonicalAncestors
   PairCoverSeamResidualCanonicalAncestorBridges
+  ShadedFreeLinePatternRefinement
   Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
@@ -72,6 +74,88 @@ theorem CanonicalCycleAncestorWithinFamily.toAncestor
       entry, entryOnCycle, path⟩
   exact ⟨level, blockX, blockY, xWithin, yWithin,
     cycle, entry, entryOnCycle, path⟩
+
+/-- Prepending an even route preserves the localized hierarchy family. -/
+theorem CanonicalCycleAncestorWithinFamily.of_evenPath
+    {grid : Nat → Nat → Index} {source target : Port}
+    {outerLevel outerBlockX outerBlockY : Nat} {family : HierarchyFamily}
+    (ancestor : CanonicalCycleAncestorWithinFamily grid target
+      outerLevel outerBlockX outerBlockY family)
+    (path : Path grid source target false) :
+    CanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+      cycle, entry, entryOnCycle, tail⟩
+  exact ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+    cycle, entry, entryOnCycle, by simpa using Path.trans path tail⟩
+
+private theorem InHierarchyFamily.refine
+    {outerLevel level : Nat} {family : HierarchyFamily}
+    (inFamily : InHierarchyFamily outerLevel level family) :
+    InHierarchyFamily (outerLevel + 2) (level + 2) family := by
+  cases family with
+  | even =>
+      rcases inFamily with ⟨depth, levelEq⟩
+      exact ⟨depth, by omega⟩
+  | odd =>
+      rcases inFamily with ⟨depth, levelEq⟩
+      exact ⟨depth, by omega⟩
+
+/-- Two substitutions preserve a localized ancestor's hierarchy family on the
+literal sparse copy of its source. -/
+theorem CanonicalCycleAncestorWithinFamily.refineSparse
+    {grid : Nat → Nat → Index} {source : Port}
+    {outerLevel outerBlockX outerBlockY : Nat} {family : HierarchyFamily}
+    (ancestor : CanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family)
+    (sourceLive : portPresent grid source = true) :
+    CanonicalCycleAncestorWithinFamily (iterateRefine 2 grid)
+      (sparsePort source) (outerLevel + 2) outerBlockX outerBlockY family := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+      cycle, entry, entryOnCycle, path⟩
+  have xWithin' : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockX (level + 2) blockX := by
+    rcases xWithin with ⟨levelLe, blockWithin⟩
+    constructor
+    · omega
+    · have exponent : outerLevel + 2 - (level + 2) =
+          outerLevel - level := by omega
+      rwa [exponent]
+  have yWithin' : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockY (level + 2) blockY := by
+    rcases yWithin with ⟨levelLe, blockWithin⟩
+    constructor
+    · omega
+    · have exponent : outerLevel + 2 - (level + 2) =
+          outerLevel - level := by omega
+      rwa [exponent]
+  have fineCycle := cycle.iterateRefine 2
+  have entryLive := portPresent_of_onCycle cycle entryOnCycle
+  have hscale : 2 ^ (level + 2) = 4 * 2 ^ level := by
+    rw [pow_add]
+    norm_num
+    ac_rfl
+  refine ⟨level + 2, blockX, blockY, xWithin', yWithin', inFamily.refine,
+    ?_, sparsePort entry, ?_, ?_⟩
+  · simpa [RedCycles.doubleN_eq, hscale, Nat.mul_assoc] using fineCycle
+  · simpa [hscale, Nat.mul_assoc] using onCycle_sparse entryOnCycle
+  · exact path_refine_sparse path sourceLive entryLive
+
+/-- An even fine-grid connector to a sparse predecessor transports that
+predecessor's localized hierarchy family. -/
+theorem CanonicalCycleAncestorWithinFamily.refineThrough
+    {grid : Nat → Nat → Index} {source target : Port}
+    {outerLevel outerBlockX outerBlockY : Nat} {family : HierarchyFamily}
+    (ancestor : CanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family)
+    (sourceLive : portPresent grid source = true)
+    (connector : Path (iterateRefine 2 grid)
+      target (sparsePort source) false) :
+    CanonicalCycleAncestorWithinFamily (iterateRefine 2 grid) target
+      (outerLevel + 2) outerBlockX outerBlockY family :=
+  (ancestor.refineSparse sourceLive).of_evenPath connector
 
 /-- Every localized ancestor belongs to exactly one of the two families; only
 existence is needed by target selection. -/
