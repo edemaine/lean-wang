@@ -3,6 +3,10 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
+import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.Tauto
 import LeanWang.OllingerRobinson104ShadedObstructionPairCoverRecurrence
 
 /-!
@@ -19,8 +23,9 @@ namespace Figure13Layers
 namespace Closed104
 namespace PairCoverSeamArithmetic
 
-open RedShadeCycles ShadedFreeLineRecurrence
-  ShadedObstructionPairCoverRecurrence
+open RedCycles RedShadeCycles RedShadePaths RedShadeGraphRefinement
+  ShadedFreeLineRecurrence ShadedObstructionPairCoverRecurrence
+  Signals.FreeCellLocal
 
 /-- The refinement block width is four times the current board scale. -/
 theorem two_pow_refinementDepth_eq_four_mul_west
@@ -78,7 +83,6 @@ theorem two_pow_refinementDepth_succ (phase : Phase) (depth : Nat) :
       4 * 2 ^ refinementDepth phase depth := by
   rw [two_pow_refinementDepth_eq_four_mul_west,
     two_pow_refinementDepth_eq_four_mul_west, west_succ]
-  ring
 
 theorem absolute_child_block_eq
     {phase : Phase} {depth parent child : Nat}
@@ -131,8 +135,10 @@ theorem absolute_child_contained
     east_succ phase depth
   have hwest := west_pos phase depth
   fin_cases side <;>
-    simp [absoluteChildBlock, childBlock, quarterWest, quarterEast,
-      hpow, hpowSucc, hwestSucc, heast, heastSucc] <;> nlinarith
+    simp only [absoluteChildBlock, childBlock,
+      quarterWest, quarterEast, hpow, hpowSucc, hwestSucc,
+      heast, heastSucc] <;>
+    constructor <;> nlinarith
 
 theorem exists_side_of_absolute_child_block_eq
     {parent child : Nat}
@@ -230,15 +236,56 @@ theorem fitsContainedHorizontalChild_iff_regions
   · rintro ⟨⟨childX, hcolumn, hboundary⟩, ⟨childY, hrow⟩⟩
     exact ⟨childX, childY, hcolumn, hrow, hboundary⟩
 
+def inAbsoluteChildIntervalCheck (phase : Phase) (depth parent : Nat)
+    (side : Fin 2) (coordinate : Nat) : Bool :=
+  decide (quarterWest
+      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
+        west phase depth) < coordinate) &&
+    decide (coordinate < quarterEast
+      (2 ^ refinementDepth phase depth * absoluteChildBlock parent side +
+        east phase depth))
+
+def inSomeAbsoluteChildCheck (phase : Phase)
+    (depth parent coordinate : Nat) : Bool :=
+  inAbsoluteChildIntervalCheck phase depth parent ⟨0, by decide⟩ coordinate ||
+    inAbsoluteChildIntervalCheck phase depth parent ⟨1, by decide⟩ coordinate
+
+def inSameAbsoluteChildCheck (phase : Phase)
+    (depth parent first second : Nat) : Bool :=
+  (inAbsoluteChildIntervalCheck phase depth parent ⟨0, by decide⟩ first &&
+      inAbsoluteChildIntervalCheck phase depth parent ⟨0, by decide⟩ second) ||
+    (inAbsoluteChildIntervalCheck phase depth parent ⟨1, by decide⟩ first &&
+      inAbsoluteChildIntervalCheck phase depth parent ⟨1, by decide⟩ second)
+
+theorem inAbsoluteChildIntervalCheck_eq_true_iff
+    (phase : Phase) (depth parent : Nat) (side : Fin 2) (coordinate : Nat) :
+    inAbsoluteChildIntervalCheck phase depth parent side coordinate = true ↔
+      InAbsoluteChildInterval phase depth parent side coordinate := by
+  simp [inAbsoluteChildIntervalCheck, InAbsoluteChildInterval]
+
+theorem inSomeAbsoluteChildCheck_eq_true_iff
+    (phase : Phase) (depth parent coordinate : Nat) :
+    inSomeAbsoluteChildCheck phase depth parent coordinate = true ↔
+      InSomeAbsoluteChild phase depth parent coordinate := by
+  simp [inSomeAbsoluteChildCheck, InSomeAbsoluteChild,
+    Fin.exists_fin_two, inAbsoluteChildIntervalCheck_eq_true_iff]
+
+theorem inSameAbsoluteChildCheck_eq_true_iff
+    (phase : Phase) (depth parent first second : Nat) :
+    inSameAbsoluteChildCheck phase depth parent first second = true ↔
+      InSameAbsoluteChild phase depth parent first second := by
+  simp [inSameAbsoluteChildCheck, InSameAbsoluteChild,
+    Fin.exists_fin_two, inAbsoluteChildIntervalCheck_eq_true_iff]
+
 def containedVerticalSeamCheck (phase : Phase)
     (depth parentX parentY column row boundary : Nat) : Bool :=
-  decide (¬InSomeAbsoluteChild phase depth parentX column ∨
-    ¬InSameAbsoluteChild phase depth parentY row boundary)
+  !inSomeAbsoluteChildCheck phase depth parentX column ||
+    !inSameAbsoluteChildCheck phase depth parentY row boundary
 
 def containedHorizontalSeamCheck (phase : Phase)
     (depth parentX parentY column row boundary : Nat) : Bool :=
-  decide (¬InSameAbsoluteChild phase depth parentX column boundary ∨
-    ¬InSomeAbsoluteChild phase depth parentY row)
+  !inSameAbsoluteChildCheck phase depth parentX column boundary ||
+    !inSomeAbsoluteChildCheck phase depth parentY row
 
 theorem containedVerticalSeamCheck_eq_true_iff
     (phase : Phase) (depth parentX parentY column row boundary : Nat) :
@@ -246,9 +293,34 @@ theorem containedVerticalSeamCheck_eq_true_iff
       column row boundary = true ↔
       ¬FitsContainedVerticalChild phase depth parentX parentY
         column row boundary := by
-  rw [containedVerticalSeamCheck, decide_eq_true_eq,
-    fitsContainedVerticalChild_iff_regions]
-  tauto
+  rw [fitsContainedVerticalChild_iff_regions]
+  constructor
+  · intro hcheck ⟨hsome, hsame⟩
+    have hsomeCheck := (inSomeAbsoluteChildCheck_eq_true_iff
+      phase depth parentX column).2 hsome
+    have hsameCheck := (inSameAbsoluteChildCheck_eq_true_iff
+      phase depth parentY row boundary).2 hsame
+    simp [containedVerticalSeamCheck, hsomeCheck, hsameCheck] at hcheck
+  · intro hnot
+    by_cases hsome : InSomeAbsoluteChild phase depth parentX column
+    · have hnotSame : ¬InSameAbsoluteChild phase depth parentY row boundary :=
+        fun hsame => hnot ⟨hsome, hsame⟩
+      have hsomeCheck := (inSomeAbsoluteChildCheck_eq_true_iff
+        phase depth parentX column).2 hsome
+      have hsameCheck : inSameAbsoluteChildCheck phase depth parentY
+          row boundary = false := by
+        cases hcheck : inSameAbsoluteChildCheck phase depth parentY row boundary
+        · rfl
+        · exact (hnotSame ((inSameAbsoluteChildCheck_eq_true_iff
+            phase depth parentY row boundary).1 hcheck)).elim
+      simp [containedVerticalSeamCheck, hsomeCheck, hsameCheck]
+    · have hsomeCheck : inSomeAbsoluteChildCheck phase depth parentX
+          column = false := by
+        cases hcheck : inSomeAbsoluteChildCheck phase depth parentX column
+        · rfl
+        · exact (hsome ((inSomeAbsoluteChildCheck_eq_true_iff
+            phase depth parentX column).1 hcheck)).elim
+      simp [containedVerticalSeamCheck, hsomeCheck]
 
 theorem containedHorizontalSeamCheck_eq_true_iff
     (phase : Phase) (depth parentX parentY column row boundary : Nat) :
@@ -256,10 +328,38 @@ theorem containedHorizontalSeamCheck_eq_true_iff
       column row boundary = true ↔
       ¬FitsContainedHorizontalChild phase depth parentX parentY
         column row boundary := by
-  rw [containedHorizontalSeamCheck, decide_eq_true_eq,
-    fitsContainedHorizontalChild_iff_regions]
-  tauto
+  rw [fitsContainedHorizontalChild_iff_regions]
+  constructor
+  · intro hcheck ⟨hsame, hsome⟩
+    have hsameCheck := (inSameAbsoluteChildCheck_eq_true_iff
+      phase depth parentX column boundary).2 hsame
+    have hsomeCheck := (inSomeAbsoluteChildCheck_eq_true_iff
+      phase depth parentY row).2 hsome
+    simp [containedHorizontalSeamCheck, hsameCheck, hsomeCheck] at hcheck
+  · intro hnot
+    by_cases hsame : InSameAbsoluteChild phase depth parentX column boundary
+    · have hnotSome : ¬InSomeAbsoluteChild phase depth parentY row :=
+        fun hsome => hnot ⟨hsame, hsome⟩
+      have hsameCheck := (inSameAbsoluteChildCheck_eq_true_iff
+        phase depth parentX column boundary).2 hsame
+      have hsomeCheck : inSomeAbsoluteChildCheck phase depth parentY row = false := by
+        cases hcheck : inSomeAbsoluteChildCheck phase depth parentY row
+        · rfl
+        · exact (hnotSome ((inSomeAbsoluteChildCheck_eq_true_iff
+            phase depth parentY row).1 hcheck)).elim
+      simp [containedHorizontalSeamCheck, hsameCheck, hsomeCheck]
+    · have hsameCheck : inSameAbsoluteChildCheck phase depth parentX
+          column boundary = false := by
+        cases hcheck : inSameAbsoluteChildCheck phase depth parentX column boundary
+        · rfl
+        · exact (hsame ((inSameAbsoluteChildCheck_eq_true_iff
+            phase depth parentX column boundary).1 hcheck)).elim
+      simp [containedHorizontalSeamCheck, hsameCheck]
 
+/- The central-board recurrence below is superseded by the contained all-block
+invariant above.  It is retained temporarily for source history but excluded
+from elaboration. -/
+/-
 theorem fitting_block_eq_child
     {phase : Phase} {depth block coordinate : Nat}
     (globalLower : quarterWest (4 * west phase depth) < coordinate)
@@ -609,6 +709,7 @@ theorem forcesRoutedFixedCornerSquares_of_regionSeamCover
     ShadedRoutedScaffoldForward.ForcesRoutedFixedCornerSquares
       ShadedSignals.routedScaffold :=
   forcesRoutedFixedCornerSquares_of_step (step_of_regionSeamCover regions)
+-/
 
 end PairCoverSeamArithmetic
 end Closed104

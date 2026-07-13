@@ -512,6 +512,15 @@ the source set, and that a clear crossing carries the seed exactly when its
 decoded quarter is `cornerQuarter`. The forward construction must choose each
 large free grid with such a crossing at its lower-left corner.
 
+The pair-cover recurrence is now separated from its final free-grid adapter,
+so local seam modules rebuild without elaborating the expensive sparse-line
+audits. Fully contained child covers compose into a parent cover once the four
+nearest selected-boundary cases are supplied. A clean finite check refuted the
+stronger shade-free shortcut: the same component orientation can face either
+way at a nonrecursive seam. The remaining seam lemma must therefore use the
+actual valid shade grid and the fact that no *selected* boundary lies between
+the query and the chosen nearest boundary, exactly as in Robinson's argument.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

@@ -20,15 +20,21 @@ namespace Figure13Layers
 namespace Closed104
 namespace PairCoverSeamComposition
 
-open RedShadeCycles ShadedFreeLineRecurrence ShadedPlaneSignalGrid
+open RedCycles RedShadeCycles RedShadePaths RedShadeGraphRefinement
+  ShadedFreeLineRecurrence ShadedPlaneSignalGrid
   ShadedObstructionGeometry ShadedObstructionGeometryCover
-  ShadedObstructionPairCoverRecurrence
+  ShadedObstructionPairCoverRecurrence SparseFreeLinePlaneBase
+  Signals.FreeCellLocal
+
+set_option maxRecDepth 20000
+set_option maxHeartbeats 1000000
 
 theorem exists_first_after
     {P : Nat → Prop} {start finish : Nat}
     (hstart : start < finish) (hfinish : P finish) :
     ∃ first, start < first ∧ first ≤ finish ∧ P first ∧
       ∀ value, start < value → value < first → ¬P value := by
+  classical
   let Q : Nat → Prop := fun distance =>
     0 < distance ∧ start + distance ≤ finish ∧ P (start + distance)
   have existsQ : ∃ distance, Q distance := by
@@ -37,15 +43,19 @@ theorem exists_first_after
     have : start + (finish - start) = finish := by omega
     exact ⟨by omega, by omega, by simpa [this] using hfinish⟩
   let distance := Nat.find existsQ
-  have found := Nat.find_spec existsQ
+  have found : Q distance := by
+    dsimp [distance]
+    exact Nat.find_spec existsQ
   refine ⟨start + distance, by omega, found.2.1, found.2.2, ?_⟩
   intro value hvalueStart hvalueFirst hvalue
   have candidate : Q (value - start) := by
     dsimp [Q]
     have hsum : start + (value - start) = value := by omega
     exact ⟨by omega, by omega, by simpa [hsum] using hvalue⟩
-  have minimal := Nat.find_min' existsQ candidate
-  dsimp [distance] at hvalueFirst minimal
+  have minimal : distance ≤ value - start := by
+    dsimp [distance]
+    exact Nat.find_min' existsQ candidate
+  dsimp [distance] at hvalueFirst
   omega
 
 theorem exists_last_before
@@ -53,6 +63,7 @@ theorem exists_last_before
     (hfirst : first < finish) (hfirstP : P first) :
     ∃ last, first ≤ last ∧ last < finish ∧ P last ∧
       ∀ value, last < value → value < finish → ¬P value := by
+  classical
   let Q : Nat → Prop := fun distance =>
     0 < distance ∧ distance ≤ finish - first ∧ P (finish - distance)
   have existsQ : ∃ distance, Q distance := by
@@ -61,15 +72,19 @@ theorem exists_last_before
     have : finish - (finish - first) = first := by omega
     exact ⟨by omega, le_rfl, by simpa [this] using hfirstP⟩
   let distance := Nat.find existsQ
-  have found := Nat.find_spec existsQ
+  have found : Q distance := by
+    dsimp [distance]
+    exact Nat.find_spec existsQ
   refine ⟨finish - distance, by omega, by omega, found.2.2, ?_⟩
   intro value hlastValue hvalueFinish hvalue
   have candidate : Q (finish - value) := by
     dsimp [Q]
     have hsub : finish - (finish - value) = value := by omega
     exact ⟨by omega, by omega, by simpa [hsub] using hvalue⟩
-  have minimal := Nat.find_min' existsQ candidate
-  dsimp [distance] at hlastValue minimal
+  have minimal : distance ≤ finish - value := by
+    dsimp [distance]
+    exact Nat.find_min' existsQ candidate
+  dsimp [distance] at hlastValue
   omega
 
 def successorWest (phase : Phase) (depth block : Nat) : Nat :=
@@ -194,6 +209,10 @@ structure VerticalBoundaryFaces : Prop where
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         column boundary)
       (quadrantAt column boundary) (shadeGrid column boundary) ≠ none →
+    (∀ y, row < y → y < boundary →
+      ShadedSignals.selectedHorizontalFor
+        (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) column y)
+        (quadrantAt column y) (shadeGrid column y) = none) →
     ¬FitsContainedVerticalChild phase depth parentX parentY
       column row boundary →
     ShadedSignals.selectedHorizontalFor
@@ -214,6 +233,10 @@ structure VerticalBoundaryFaces : Prop where
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         column boundary)
       (quadrantAt column boundary) (shadeGrid column boundary) ≠ none →
+    (∀ y, boundary < y → y < row →
+      ShadedSignals.selectedHorizontalFor
+        (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) column y)
+        (quadrantAt column y) (shadeGrid column y) = none) →
     ¬FitsContainedVerticalChild phase depth parentX parentY
       column row boundary →
     ShadedSignals.selectedHorizontalFor
@@ -308,39 +331,47 @@ theorem verticalBoundaryConclusion_of_faces
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) column y)
       (quadrantAt column y) (shadeGrid column y) ≠ none
   rcases lt_trichotomy row boundary with hrowBoundary | rfl | hboundaryRow
-  · rcases exists_first_after hrowBoundary selected with
+  · rcases exists_first_after (P := P) hrowBoundary selected with
       ⟨found, hrowFound, hfoundBoundary, foundSelected, hbetween⟩
     have hfoundNorth : found < quarterNorth (successorEast phase depth parentY) :=
       hfoundBoundary.trans_lt hboundaryNorth
+    have hnone : ∀ y, row < y → y < found →
+        ShadedSignals.selectedHorizontalFor
+          (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) column y)
+          (quadrantAt column y) (shadeGrid column y) = none := by
+      intro y hyRow hyFound
+      by_contra hySelected
+      exact hbetween y hyRow hyFound hySelected
     by_cases fits : FitsContainedVerticalChild phase depth parentX parentY
       column row found
     · exact verticalConclusion_of_child phase depth grid shadeGrid
         parentX parentY column row found children freeRow foundSelected fits
     · have foundFacesNorth := faces.above phase depth grid shadeGrid
         parentX parentY valid hwest heast hsouth hrowFound hfoundNorth
-        foundSelected fits
+        foundSelected hnone fits
       exact Or.inr (Or.inl ⟨found, hrowFound, hfoundNorth,
-        foundFacesNorth, by
-          intro y hyRow hyFound
-          by_contra hySelected
-          exact hbetween y hyRow hyFound hySelected⟩)
+        foundFacesNorth, hnone⟩)
   · exact Or.inl selected
-  · rcases exists_last_before hboundaryRow selected with
+  · rcases exists_last_before (P := P) hboundaryRow selected with
       ⟨found, hboundaryFound, hfoundRow, foundSelected, hbetween⟩
     have hfoundSouth : quarterSouth (successorWest phase depth parentY) < found :=
       hboundarySouth.trans_le hboundaryFound
+    have hnone : ∀ y, found < y → y < row →
+        ShadedSignals.selectedHorizontalFor
+          (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) column y)
+          (quadrantAt column y) (shadeGrid column y) = none := by
+      intro y hyFound hyRow
+      by_contra hySelected
+      exact hbetween y hyFound hyRow hySelected
     by_cases fits : FitsContainedVerticalChild phase depth parentX parentY
       column row found
     · exact verticalConclusion_of_child phase depth grid shadeGrid
         parentX parentY column row found children freeRow foundSelected fits
     · have foundFacesSouth := faces.below phase depth grid shadeGrid
         parentX parentY valid hwest heast hfoundSouth hfoundRow hnorth
-        foundSelected fits
+        foundSelected hnone fits
       exact Or.inr (Or.inr ⟨found, hfoundSouth, hfoundRow,
-        foundFacesSouth, by
-          intro y hyFound hyRow
-          by_contra hySelected
-          exact hbetween y hyFound hyRow hySelected⟩)
+        foundFacesSouth, hnone⟩)
 
 /-- Horizontal dual of `VerticalBoundaryFaces`. -/
 structure HorizontalBoundaryFaces : Prop where
@@ -358,6 +389,10 @@ structure HorizontalBoundaryFaces : Prop where
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         boundary row)
       (quadrantAt boundary row) (shadeGrid boundary row) ≠ none →
+    (∀ x, column < x → x < boundary →
+      ShadedSignals.selectedVerticalFor
+        (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) x row)
+        (quadrantAt x row) (shadeGrid x row) = none) →
     ¬FitsContainedHorizontalChild phase depth parentX parentY
       column row boundary →
     ShadedSignals.selectedVerticalFor
@@ -378,6 +413,10 @@ structure HorizontalBoundaryFaces : Prop where
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid))
         boundary row)
       (quadrantAt boundary row) (shadeGrid boundary row) ≠ none →
+    (∀ x, boundary < x → x < column →
+      ShadedSignals.selectedVerticalFor
+        (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) x row)
+        (quadrantAt x row) (shadeGrid x row) = none) →
     ¬FitsContainedHorizontalChild phase depth parentX parentY
       column row boundary →
     ShadedSignals.selectedVerticalFor
@@ -472,39 +511,47 @@ theorem horizontalBoundaryConclusion_of_faces
       (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) x row)
       (quadrantAt x row) (shadeGrid x row) ≠ none
   rcases lt_trichotomy column boundary with hcolumnBoundary | rfl | hboundaryColumn
-  · rcases exists_first_after hcolumnBoundary selected with
+  · rcases exists_first_after (P := P) hcolumnBoundary selected with
       ⟨found, hcolumnFound, hfoundBoundary, foundSelected, hbetween⟩
     have hfoundEast : found < quarterEast (successorEast phase depth parentX) :=
       hfoundBoundary.trans_lt hboundaryEast
+    have hnone : ∀ x, column < x → x < found →
+        ShadedSignals.selectedVerticalFor
+          (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) x row)
+          (quadrantAt x row) (shadeGrid x row) = none := by
+      intro x hxColumn hxFound
+      by_contra hxSelected
+      exact hbetween x hxColumn hxFound hxSelected
     by_cases fits : FitsContainedHorizontalChild phase depth parentX parentY
       column row found
     · exact horizontalConclusion_of_child phase depth grid shadeGrid
         parentX parentY column row found children freeColumn foundSelected fits
     · have foundFacesEast := faces.right phase depth grid shadeGrid
         parentX parentY valid hwest hcolumnFound hfoundEast hsouth hnorth
-        foundSelected fits
+        foundSelected hnone fits
       exact Or.inr (Or.inl ⟨found, hcolumnFound, hfoundEast,
-        foundFacesEast, by
-          intro x hxColumn hxFound
-          by_contra hxSelected
-          exact hbetween x hxColumn hxFound hxSelected⟩)
+        foundFacesEast, hnone⟩)
   · exact Or.inl selected
-  · rcases exists_last_before hboundaryColumn selected with
+  · rcases exists_last_before (P := P) hboundaryColumn selected with
       ⟨found, hboundaryFound, hfoundColumn, foundSelected, hbetween⟩
     have hfoundWest : quarterWest (successorWest phase depth parentX) < found :=
       hboundaryWest.trans_le hboundaryFound
+    have hnone : ∀ x, found < x → x < column →
+        ShadedSignals.selectedVerticalFor
+          (componentAt (iterateRefine 2 (refinedGrid phase depth grid)) x row)
+          (quadrantAt x row) (shadeGrid x row) = none := by
+      intro x hxFound hxColumn
+      by_contra hxSelected
+      exact hbetween x hxFound hxColumn hxSelected
     by_cases fits : FitsContainedHorizontalChild phase depth parentX parentY
       column row found
     · exact horizontalConclusion_of_child phase depth grid shadeGrid
         parentX parentY column row found children freeColumn foundSelected fits
     · have foundFacesWest := faces.left phase depth grid shadeGrid
         parentX parentY valid hfoundWest hfoundColumn heast hsouth hnorth
-        foundSelected fits
+        foundSelected hnone fits
       exact Or.inr (Or.inr ⟨found, hfoundWest, hfoundColumn,
-        foundFacesWest, by
-          intro x hxFound hxColumn
-          by_contra hxSelected
-          exact hbetween x hxFound hxColumn hxSelected⟩)
+        foundFacesWest, hnone⟩)
 
 theorem boundarySeams_of_faces
     (verticalFaces : VerticalBoundaryFaces)
@@ -681,21 +728,6 @@ theorem containedSeamCover_of_boundarySeams
       le_rfl, le_rfl, le_rfl, le_rfl,
       hwest, heast, hsouth, hnorth,
       hboundaryWest, hboundaryEast, geometry⟩
-
-theorem forcesRoutedFixedCornerSquares_of_boundarySeams
-    (seams : BoundarySeams) :
-    ShadedRoutedScaffoldForward.ForcesRoutedFixedCornerSquares
-      ShadedSignals.routedScaffold :=
-  forcesRoutedFixedCornerSquares_of_containedSeamCover
-    (containedSeamCover_of_boundarySeams seams)
-
-theorem forcesRoutedFixedCornerSquares_of_boundaryFaces
-    (verticalFaces : VerticalBoundaryFaces)
-    (horizontalFaces : HorizontalBoundaryFaces) :
-    ShadedRoutedScaffoldForward.ForcesRoutedFixedCornerSquares
-      ShadedSignals.routedScaffold :=
-  forcesRoutedFixedCornerSquares_of_boundarySeams
-    (boundarySeams_of_faces verticalFaces horizontalFaces)
 
 end PairCoverSeamComposition
 end Closed104
