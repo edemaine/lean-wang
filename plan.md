@@ -934,6 +934,17 @@ semantic residual orientations.  Existing cycle witnesses remain valid
 sufficient certificates, but the remaining recurrence and finite audits
 should target direct paths and need not choose a canonical descendant square.
 
+The hierarchy contribution to those direct paths is now isolated as well.
+`OllingerRobinson104PairCoverSeamResidualDirectPathBridges` refines every
+localized canonical ancestor into one of two parity families.  Two source
+ports whose ancestors lie in the same family are connected evenly through
+their common outer hierarchy cycle.  Four constructors then turn a
+same-family live target into either crossing or between-line alternatives for
+`VerticalSeamPath` and `HorizontalSeamPath`.  Consequently the finite
+remaining invariant is only target recognizability: for the source's actual
+family, find a live target on the query line or strictly between it and the
+source.  All graph connectivity is supplied generically.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
