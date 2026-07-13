@@ -991,6 +991,18 @@ sound bridge all the way to the joint certificates consumed by
 even/odd base query once, then transport those certificates through the
 two-substitution recurrence.
 
+The finite family flood now also retains a bounded path inside the complete
+constant-parent refinement.  Every family start is proved to lie inside the
+exact quarter-coordinate parent width, and bounded weighted-search soundness
+produces the named descendant cycle, its hierarchy family, and a confined
+path to the accepted endpoint.  The generic `OnCycleTranslation` adapter and
+`OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTransport` then move
+that certificate into any parent block of any coarse grid.  The transport
+reconstructs the absolute descendant address, obtains its canonical cycle in
+the global refinement, and translates and reverses the even path.  Thus the
+remaining finite target enumeration can run only on constant-parent blocks;
+it no longer needs to prove global-grid family ancestry separately.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

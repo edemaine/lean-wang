@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamResidualCanonicalAncestorBaseComplete
 import LeanWang.OllingerRobinson104PairCoverSeamPathTranslation
+import LeanWang.OllingerRobinson104OnCycleTranslation
 
 /-!
 # Transport the canonical residual-source base
@@ -37,63 +38,7 @@ private theorem onCycle_translate
     OnCycle (offsetX + west) (offsetX + east)
       (offsetY + south) (offsetY + north)
       (translatePort port (2 * offsetX) (2 * offsetY)) := by
-  cases onCycle with
-  | southWest qx hwest heast =>
-      convert OnCycle.southWest
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetX + qx) (by simp [quarterWest] at *; omega)
-        (by simp [quarterEast] at *; omega) using 1 <;>
-        simp [translatePort, quarterSouth] <;> omega
-  | southEast qx hwest heast =>
-      convert OnCycle.southEast
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetX + qx) (by simp [quarterWest] at *; omega)
-        (by simp [quarterEast] at *; omega) using 1 <;>
-        simp [translatePort, quarterSouth] <;> omega
-  | northWest qx hwest heast =>
-      convert OnCycle.northWest
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetX + qx) (by simp [quarterWest] at *; omega)
-        (by simp [quarterEast] at *; omega) using 1 <;>
-        simp [translatePort, quarterNorth] <;> omega
-  | northEast qx hwest heast =>
-      convert OnCycle.northEast
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetX + qx) (by simp [quarterWest] at *; omega)
-        (by simp [quarterEast] at *; omega) using 1 <;>
-        simp [translatePort, quarterNorth] <;> omega
-  | westSouth qy hsouth hnorth =>
-      convert OnCycle.westSouth
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetY + qy) (by simp [quarterSouth] at *; omega)
-        (by simp [quarterNorth] at *; omega) using 1 <;>
-        simp [translatePort, quarterWest] <;> omega
-  | westNorth qy hsouth hnorth =>
-      convert OnCycle.westNorth
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetY + qy) (by simp [quarterSouth] at *; omega)
-        (by simp [quarterNorth] at *; omega) using 1 <;>
-        simp [translatePort, quarterWest] <;> omega
-  | eastSouth qy hsouth hnorth =>
-      convert OnCycle.eastSouth
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetY + qy) (by simp [quarterSouth] at *; omega)
-        (by simp [quarterNorth] at *; omega) using 1 <;>
-        simp [translatePort, quarterEast] <;> omega
-  | eastNorth qy hsouth hnorth =>
-      convert OnCycle.eastNorth
-        (west := offsetX + west) (east := offsetX + east)
-        (south := offsetY + south) (north := offsetY + north)
-        (2 * offsetY + qy) (by simp [quarterSouth] at *; omega)
-        (by simp [quarterNorth] at *; omega) using 1 <;>
-        simp [translatePort, quarterEast] <;> omega
+  exact OnCycleTranslation.translate onCycle
 
 private theorem horizontalRoute
     {phase : Phase} {parent : Index} {column boundary : Nat}
