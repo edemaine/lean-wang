@@ -142,10 +142,11 @@ private theorem BaseRoute.translate
     (grid : Nat → Nat → Index) (blockX blockY : Nat)
     (parentEq : grid blockX blockY = parent)
     (route : BaseRoute phase parent target) :
-    CanonicalCycleAncestor (iterateRefine (levels phase) grid)
+    CanonicalCycleAncestorWithin (iterateRefine (levels phase) grid)
       (translatePort target
         (2 ^ (levels phase + 1) * blockX)
-        (2 ^ (levels phase + 1) * blockY)) := by
+        (2 ^ (levels phase + 1) * blockY))
+      (largeLevel phase) blockX blockY := by
   rcases route with ⟨entry, onLarge | onSmall, path⟩
   all_goals
     have componentsEq : ∀ x y, x < width phase → y < width phase →
@@ -161,9 +162,11 @@ private theorem BaseRoute.translate
         componentsEq path).path
     have globalPath := path_translate (grid := grid)
       (blockX := blockX) (blockY := blockY) shiftedPath
-  · refine ⟨largeLevel phase, blockX, blockY, ?_,
+  · refine ⟨largeLevel phase, blockX, blockY, ?_, ?_, ?_,
       translatePort entry (2 ^ (levels phase + 1) * blockX)
         (2 ^ (levels phase + 1) * blockY), ?_, path_symm globalPath⟩
+    · simp [HierarchyAddressWithin]
+    · simp [HierarchyAddressWithin]
     · cases phase with
       | even =>
           simpa [levels, largeLevel, refinementDepth, Phase.extra,
@@ -180,9 +183,15 @@ private theorem BaseRoute.translate
         convert translated using 1 <;>
         simp [levels, largeLevel, largeWest, largeEast, refinementDepth,
           Phase.extra, translatePort] <;> ring_nf <;> simp
-  · refine ⟨smallLevel phase, 2 * blockX, 2 * blockY, ?_,
+  · refine ⟨smallLevel phase, 2 * blockX, 2 * blockY, ?_, ?_, ?_,
       translatePort entry (2 ^ (levels phase + 1) * blockX)
         (2 ^ (levels phase + 1) * blockY), ?_, path_symm globalPath⟩
+    · cases phase <;>
+        simp [HierarchyAddressWithin, largeLevel, smallLevel, levels,
+          refinementDepth, Phase.extra]
+    · cases phase <;>
+        simp [HierarchyAddressWithin, largeLevel, smallLevel, levels,
+          refinementDepth, Phase.extra]
     · cases phase with
       | even =>
           have cycle := at_scale (iterateRefine 1 grid) 1
@@ -204,9 +213,10 @@ private theorem BaseRoute.translate
         simp [levels, smallLevel, smallWest, smallEast, refinementDepth,
           Phase.extra, translatePort] <;> ring_nf <;> simp
 
-theorem sourceAncestorsIn (phase : Phase) (grid : Nat → Nat → Index)
+theorem sourceAncestorsWithin (phase : Phase) (grid : Nat → Nat → Index)
     (blockX blockY : Nat) :
-    SourceAncestorsIn (iterateRefine (levels phase) grid)
+    SourceAncestorsWithin (iterateRefine (levels phase) grid)
+      (largeLevel phase) blockX blockY
       (2 ^ levels phase * blockX + largeWest phase)
       (2 ^ levels phase * blockX + largeEast phase)
       (2 ^ levels phase * blockY + largeWest phase)
@@ -340,6 +350,16 @@ theorem sourceAncestorsIn (phase : Phase) (grid : Nat → Nat → Index)
       rfl
     rw [portEq, verticalPort_translate] at ancestor
     simpa only [offsetX, offsetY, hboundary, hrow] using ancestor
+
+/-- The hierarchy-localized base implies the original named-ancestor base. -/
+theorem sourceAncestorsIn (phase : Phase) (grid : Nat → Nat → Index)
+    (blockX blockY : Nat) :
+    SourceAncestorsIn (iterateRefine (levels phase) grid)
+      (2 ^ levels phase * blockX + largeWest phase)
+      (2 ^ levels phase * blockX + largeEast phase)
+      (2 ^ levels phase * blockY + largeWest phase)
+      (2 ^ levels phase * blockY + largeEast phase) :=
+  (sourceAncestorsWithin phase grid blockX blockY).toSourceAncestorsIn
 
 end PairCoverSeamResidualCanonicalAncestorBaseTransport
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104

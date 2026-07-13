@@ -51,6 +51,43 @@ def CanonicalCycleAncestor (grid : Nat → Nat → Index)
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- A hierarchy address belongs to the binary descendant block of an outer
+canonical cycle. -/
+def HierarchyAddressWithin (outerLevel outerBlock level block : Nat) : Prop :=
+  level ≤ outerLevel ∧
+    block / 2 ^ (outerLevel - level) = outerBlock
+
+/-- A named cycle ancestor together with its position in a specified outer
+hierarchy block.  Descendant selection needs this relation in addition to the
+cycle's absolute name. -/
+def CanonicalCycleAncestorWithin (grid : Nat → Nat → Index)
+    (source : Port) (outerLevel outerBlockX outerBlockY : Nat) : Prop :=
+  ∃ level blockX blockY,
+    HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      Path grid source entry false
+
+theorem CanonicalCycleAncestorWithin.toCanonical
+    {grid : Nat → Nat → Index} {source : Port}
+    {outerLevel outerBlockX outerBlockY : Nat}
+    (ancestor : CanonicalCycleAncestorWithin grid source
+      outerLevel outerBlockX outerBlockY) :
+    CanonicalCycleAncestor grid source := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, _, _, cycle, entry, entryOnCycle, path⟩
+  exact ⟨level, blockX, blockY, cycle, entry, entryOnCycle, path⟩
+
 /-- Forgetting the hierarchy name recovers the original cycle-ancestry
 interface. -/
 theorem CanonicalCycleAncestor.toCycleAncestor

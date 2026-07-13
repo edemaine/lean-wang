@@ -49,6 +49,37 @@ structure SourceAncestorsIn
       (componentAt grid boundary row) (quadrantAt boundary row) ≠ none →
     CanonicalCycleAncestor grid (verticalPort grid boundary row)
 
+/-- Source ancestry retaining the relationship between every reached cycle
+and the enclosing canonical hierarchy block. -/
+structure SourceAncestorsWithin
+    (grid : Nat → Nat → Index)
+    (outerLevel outerBlockX outerBlockY west east south north : Nat) : Prop where
+  horizontal : ∀ {column boundary : Nat},
+    InCollar west east column →
+    InCollar south north boundary →
+    Signals.horizontalInterior?
+      (componentAt grid column boundary) (quadrantAt column boundary) ≠ none →
+    CanonicalCycleAncestorWithin grid (horizontalPort grid column boundary)
+      outerLevel outerBlockX outerBlockY
+  vertical : ∀ {boundary row : Nat},
+    InCollar west east boundary →
+    InCollar south north row →
+    Signals.verticalInterior?
+      (componentAt grid boundary row) (quadrantAt boundary row) ≠ none →
+    CanonicalCycleAncestorWithin grid (verticalPort grid boundary row)
+      outerLevel outerBlockX outerBlockY
+
+theorem SourceAncestorsWithin.toSourceAncestorsIn
+    {grid : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY west east south north : Nat}
+    (ancestors : SourceAncestorsWithin grid outerLevel outerBlockX outerBlockY
+      west east south north) :
+    SourceAncestorsIn grid west east south north where
+  horizontal columnBounds boundaryBounds interior :=
+    (ancestors.horizontal columnBounds boundaryBounds interior).toCanonical
+  vertical boundaryBounds rowBounds interior :=
+    (ancestors.vertical boundaryBounds rowBounds interior).toCanonical
+
 set_option maxHeartbeats 3000000 in
 -- Both selector endpoints depend on the equality between nested refinements.
 /-- One two-substitution step preserves source ancestry in the scaled collar. -/

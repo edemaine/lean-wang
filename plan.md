@@ -861,6 +861,16 @@ instantiates `ResidualSourceAncestorsAt` without using its sparse-boundary
 hypothesis; the stronger named theorem covers both sparse and created sources
 and retains the exact canonical cycle needed by descendant selection.
 
+Descendant selection also needs to know that this named cycle belongs to the
+queried outer hierarchy block.  `HierarchyAddressWithin` records that a lower
+level block, divided by the appropriate power of two, is the outer block.
+The transported finite base now proves this relation directly: a route either
+lands on the queried outer cycle or on its one-level-lower crossing cycle at
+block address `2 * block`.  The original `SourceAncestorsIn` base remains as a
+projection of this hierarchy-localized theorem.  The next recurrence step must
+preserve the address relation in sparse cases and derive it from the collar
+coordinates in created cases.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
