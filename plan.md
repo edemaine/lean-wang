@@ -744,12 +744,14 @@ the all-depth pair-cover recurrence can be assembled.
 
 `OllingerRobinson104PairCoverSeamResidualCycles` makes that remaining boundary
 precise.  `ResidualCycleWitnessesAt` asks each wrong-facing case for an
-existential `RowCrossingCycle` or `ColumnCrossingCycle`, including an even path
-from the selected source into the cycle; validity and freeness are
-intentionally not part of these geometric obligations.  The module proves that
-the four witnesses imply both residual face structures.  It remains to
-construct the witnesses from aligned canonical cycles, the sparse-boundary
-ancestry classification, the nearest-boundary hypothesis, and the failed
+existential `RowSeparatingCycle` or `ColumnSeparatingCycle`, including an even
+path from the selected source into the cycle.  The separation has exactly the
+two cases in Robinson's Section 7 argument: either the queried free line
+crosses the cycle, or a parallel side of the cycle lies strictly between the
+query and its nearest selected boundary.  The module proves that the four
+witnesses imply both residual face structures.  It remains to construct the
+witnesses from aligned canonical cycles, the sparse-boundary ancestry
+classification, the nearest-boundary hypothesis, and the failed
 contained-child test.
 
 ### 1. Obtain arbitrarily large free squares
