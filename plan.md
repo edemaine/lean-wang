@@ -765,6 +765,15 @@ descendant directly as a separation witness.  Thus the residual proof no
 longer needs to build a graph path for each query: it needs one source-ancestry
 route and an arithmetic choice of a bridged descendant cycle.
 
+That last boundary is now represented without the four semantic face cases.
+`ResidualSourceAncestorsAt` has one horizontal and one vertical obligation,
+independent of the query line.  `ResidualDescendantSelectionsAt` has one row
+and one column obligation, independent of shade states and selected-boundary
+orientation.  Their assembly theorem reconstructs all four fields of
+`ResidualCycleWitnessesAt`; the remaining proofs can therefore reuse the
+existing local ancestor audits and treat descendant selection as pure
+hierarchy arithmetic.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
