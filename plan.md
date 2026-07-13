@@ -799,6 +799,27 @@ the local hypotheses of `CycleAncestor.refineThrough`.  The next step is to
 induct through the hierarchy, retaining the board bounds needed to apply the
 base-cycle audit, and thereby instantiate `ResidualSourceAncestorsAt`.
 
+A second finite audit now handles the complementary created-boundary case.
+Every live horizontal selector at local rows `2` through `7`, and every live
+vertical selector at local columns `2` through `7`, has a bounded route to the
+canonical depth-two cell cycle.  The route parity is retained rather than
+incorrectly required to be even: exhaustive diagnostics show that both
+parities genuinely occur.  The certificate is proved for all 104 parents and
+transported into arbitrary macrocells.  An even local route gives cycle
+ancestry directly; an odd local route composes with Robinson's existing odd
+parent-child cycle bridge to give an even route.  Thus the hierarchy induction
+now has exhaustive local cases: sparse boundaries project to a coarse source,
+and created boundaries terminate at a local hierarchy cycle.
+
+This also exposes a needed refinement of the current factorization.
+`CycleAncestor` forgets which canonical hierarchy cycle was reached, while
+`ResidualDescendantSelectionsAt` consequently asks for a descendant of an
+arbitrary `CycleOn`, which is stronger than Robinson's argument and need not be
+true.  The retained ancestry theorem should carry canonical cycle coordinates
+and their enclosing hierarchy block through the induction; descendant
+selection can then use the existing certified hierarchy bridges from that
+specific ancestor.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
