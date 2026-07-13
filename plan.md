@@ -972,6 +972,18 @@ a sparse predecessor preserve the chosen localized family.  This is the
 inductive interface needed to combine the existing predecessor audit with the
 remaining finite source/target recognition checks.
 
+The stronger possibility that every wrong-facing query has targets in both
+families is false: the earlier `(34, 48, 34)` query has only the odd-family
+target required by its source.  The joint-family formulation is therefore
+necessary, not just a proof convenience.  The new
+`OllingerRobinson104PairCoverSeamResidualDirectPathFamilySearch` module turns an
+accepted lightweight finite flood from either localized family into a proved
+`CanonicalCycleAncestorWithinFamily`.  Its soundness proof reconstructs the
+descendant level and block addresses, proves the cycle exists in the common
+outer refinement, and reverses the certified even path to the endpoint.  The
+remaining executable audit can now reuse this trusted primitive for both its
+source and target witnesses.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

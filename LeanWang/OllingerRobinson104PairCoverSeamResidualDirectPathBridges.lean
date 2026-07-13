@@ -62,6 +62,23 @@ def CanonicalCycleAncestorWithinFamily
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- Every canonical descendant named by a hierarchy level is present in the
+common outer refinement. -/
+theorem cycleAtLevelWithin
+    (root : Nat → Nat → Index) {outerLevel level blockX blockY : Nat}
+    (levelLe : level ≤ outerLevel) :
+    CycleOn (iterateRefine (outerLevel + 2) root)
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) := by
+  have cycle := OrientedRedBoardTranslations.at_scale
+    (iterateRefine (outerLevel - level) root) level blockX blockY
+  rw [PlaneRedBoards.iterateRefine_add] at cycle
+  have levels : level + 2 + (outerLevel - level) = outerLevel + 2 := by
+    omega
+  rwa [levels] at cycle
+
 theorem CanonicalCycleAncestorWithinFamily.toAncestor
     {grid : Nat → Nat → Index} {source : Port}
     {outerLevel outerBlockX outerBlockY : Nat} {family : HierarchyFamily}
