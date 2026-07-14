@@ -1206,6 +1206,19 @@ type-local shade table is required for backward realization.  The remaining
 shade obligation is the hierarchy-specific bipartiteness certificate for one
 sufficiently large finite substitution supertile.
 
+That hierarchy-specific certificate is now represented as a finite-state
+shaded substitution.  The 104 corrected tiles admit 176 locally valid
+tile/shade-block states, each with one or two valid two-substitution (`4 x 4`)
+expansions.  A memoryless choice table does not close under iteration, but one
+additional context bit with a 16-position transition table does.  Starting
+from the selected seed gives a closed subsystem of 312 context/state nodes.
+The SAT search was used only to discover the two finite tables; Lean's native
+checker independently reconstructs the expansions and verifies that every
+reachable node has all 16 children, every child remains reachable, and all
+generated horizontal and vertical boundaries are compatible.  The next proof
+step is to iterate this checked child system into finite shaded supertiles and
+feed those rectangles to the routed-core patch constructor.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply
