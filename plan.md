@@ -1181,11 +1181,13 @@ details.
 The all-depth boundary-face induction is now packaged independently of the
 finite searches. `PairCoverSeamFaceRecurrence.StepData` contains exactly the
 created-coordinate paths and direct residual paths consumed by one refinement;
-same-family targets instantiate its residual field. The cached odd depth-zero
-and even depth-one bounded searches seed the two face families, and
-`requiredFaces` iterates precisely the odd depths `d` and even depths `1 + d`
-used by the final light-board construction. Thus no all-depth `BoundedPaths`
-hypothesis is required by the retained forward architecture.
+same-family targets instantiate its residual field. The separate
+`PairCoverSeamFaceRequired` adapter alone imports the cached odd depth-zero and
+even depth-one bounded searches, seeds the two face families, and exposes
+`requiredFaces` at precisely the odd depths `d` and even depths `1 + d` used by
+the final light-board construction. Thus ordinary changes to the semantic
+recurrence avoid replaying the native parity certificates, and no all-depth
+`BoundedPaths` hypothesis is required by the retained forward architecture.
 
 ### 1. Obtain arbitrarily large free squares
 
@@ -1216,6 +1218,18 @@ compactness interface.  The remaining constructive work is purely the
 Robinson routing core: index active crossings by one supplied fixed-corner
 square and place constant horizontal/vertical wire payloads along the clear
 corridors between them.
+
+That payload construction is now factored through
+`RoutedCoreLabeling.Labeling`. A concrete finite scaffold box labels each
+constrained cell as a logical square tile, a horizontal edge wire, or a
+vertical edge wire. The finite compatibility relations certify the only
+possible constrained adjacencies. For every supplied fixed-corner square,
+`Labeling.toRoutedCoreBoxLayerPatch` then constructs all payload tiles, proves
+wire-palette membership, places the seed at every corner label, and derives
+physical matching from the logical square. The remaining backward theorem is
+therefore the scaffold-only finite statement `HasRoutedCoreLabelings`.
+`hasRoutedCoreBoxLayerPatches_of_labelings` connects that statement directly
+to the generic compactness pipeline.
 
 Backward shade construction is also reduced to its actual finite invariant.
 `RedShadeGraphColoring.ValidParityColoringOn` records a Boolean XOR coloring

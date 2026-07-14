@@ -4,26 +4,21 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamCreatedPaths
-import LeanWang.OllingerRobinson104PairCoverSeamPathEvenBase
-import LeanWang.OllingerRobinson104PairCoverSeamPathOddBase
-import LeanWang.OllingerRobinson104PairCoverSeamPathFaces
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathTargets
 
 /-!
 # All-depth boundary-face recurrence
 
-The expensive bounded seam searches are needed only at the two parity bases.
-After that, the face refinement theorem consumes two smaller semantic inputs:
-the finite created-coordinate paths and the exact residual paths.  This module
-packages that induction with the actual even-depth-one and odd-depth-zero
-bases used by the light-board construction.
+After the parity bases, the face refinement theorem consumes two smaller
+semantic inputs: the finite created-coordinate paths and the exact residual
+paths.  This lightweight module packages that induction without importing the
+expensive bounded-search certificates.
 -/
 
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
 namespace PairCoverSeamFaceRecurrence
 
 open PairCoverSeamCreatedPaths PairCoverSeamFacesAt
-  PairCoverSeamPathBoundedBase PairCoverSeamPathFaces
   PairCoverSeamResidualDirectPaths PairCoverSeamResidualDirectPathTargets
   ShadedFreeLineRecurrence
 
@@ -48,8 +43,8 @@ theorem StepData.refine
       HorizontalBoundaryFacesAt phase depth) :
     VerticalBoundaryFacesAt phase (depth + 1) ∧
       HorizontalBoundaryFacesAt phase (depth + 1) :=
-  data.created.refineFaces faces data.created
-    data.residual.verticalResidual data.residual.horizontalResidual
+  data.created.refineFaces faces data.residual.verticalResidual
+    data.residual.horizontalResidual
 
 /-- Iterate semantic face refinement from any certified starting depth. -/
 theorem iterateFrom
@@ -66,33 +61,6 @@ theorem iterateFrom
   | succ offset ih =>
       have next := (steps offset).refine ih
       simpa [Nat.add_assoc] using next
-
-/-- The cached odd search supplies both odd depth-zero face invariants. -/
-theorem oddBase :
-    VerticalBoundaryFacesAt .odd 0 ∧ HorizontalBoundaryFacesAt .odd 0 :=
-  ⟨PairCoverSeamPathOddBase.boundedPaths.verticalBoundaryFacesAt,
-    PairCoverSeamPathOddBase.boundedPaths.horizontalBoundaryFacesAt⟩
-
-/-- The cached even search supplies both even depth-one face invariants. -/
-theorem evenBase :
-    VerticalBoundaryFacesAt .even 1 ∧ HorizontalBoundaryFacesAt .even 1 :=
-  ⟨PairCoverSeamPathEvenBase.boundedPaths.verticalBoundaryFacesAt,
-    PairCoverSeamPathEvenBase.boundedPaths.horizontalBoundaryFacesAt⟩
-
-/-- All face invariants used by the two canonical light-board families. -/
-theorem requiredFaces
-    (oddSteps : ∀ depth : Nat, StepData .odd depth)
-    (evenSteps : ∀ depth : Nat, StepData .even (1 + depth)) :
-    ∀ depth : Nat,
-      (VerticalBoundaryFacesAt .even (1 + depth) ∧
-        HorizontalBoundaryFacesAt .even (1 + depth)) ∧
-      (VerticalBoundaryFacesAt .odd depth ∧
-        HorizontalBoundaryFacesAt .odd depth) := by
-  intro depth
-  constructor
-  · have faces := iterateFrom evenBase evenSteps depth
-    simpa [Nat.add_comm] using faces
-  · exact iterateFrom oddBase (by simpa using oddSteps) depth
 
 end PairCoverSeamFaceRecurrence
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104

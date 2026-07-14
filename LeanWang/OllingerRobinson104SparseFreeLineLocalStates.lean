@@ -20,7 +20,7 @@ namespace Figure13Layers
 namespace Closed104
 namespace SparseFreeLineLocalStates
 
-open RedCycles RedShadeGraphRefinement Signals.FreeCellLocal
+open RedCycles RedShadeGraph RedShadeGraphRefinement Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 

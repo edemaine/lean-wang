@@ -157,12 +157,12 @@ theorem verticalPort_value_eq_dark_of_not_selected
     (notSelected : ShadedSignals.selectedVerticalFor
       (componentAt grid x y) (quadrantAt x y) (stateGrid x y) = none) :
     value stateGrid (verticalPort grid x y) = some .dark := by
-  have portPresent : RedShadeGraphRefinement.portPresent grid
+  have portPresent : RedShadeGraph.portPresent grid
       (verticalPort grid x y) = true := by
     unfold verticalPort
     split
     · rename_i hsouth
-      simpa [RedShadeGraphRefinement.portPresent] using hsouth
+      simpa [RedShadeGraph.portPresent] using hsouth
     · rename_i hsouth
       have hnorth := hasNorth_of_verticalInterior_of_not_hasSouth
         (componentAt grid x y) (quadrantAt x y) interior hsouth
@@ -189,12 +189,12 @@ theorem horizontalPort_value_eq_dark_of_not_selected
     (notSelected : ShadedSignals.selectedHorizontalFor
       (componentAt grid x y) (quadrantAt x y) (stateGrid x y) = none) :
     value stateGrid (horizontalPort grid x y) = some .dark := by
-  have portPresent : RedShadeGraphRefinement.portPresent grid
+  have portPresent : RedShadeGraph.portPresent grid
       (horizontalPort grid x y) = true := by
     unfold horizontalPort
     split
     · rename_i hwest
-      simpa [RedShadeGraphRefinement.portPresent] using hwest
+      simpa [RedShadeGraph.portPresent] using hwest
     · rename_i hwest
       have heast := hasEast_of_horizontalInterior_of_not_hasWest
         (componentAt grid x y) (quadrantAt x y) interior hwest
