@@ -1223,9 +1223,18 @@ proof-facing API packages reachability as a `Node` subtype with a total
 `Fin 16` child operation and defines its iterated `4 x 4` supertile grids.
 The resulting flattening theorem constructs, for every level, a concrete
 quarter-state square of side `2 * 4^level` and proves all local shade rules and
-all internal horizontal and vertical matches.  The next step is to align these
-valid shaded supertiles with the audited free-grid geometry and feed them to
-the routed-core patch constructor.
+all internal horizontal and vertical matches.
+
+The obstruction-signal layer is now constructive on every such finite shaded
+rectangle.  Its horizontal and vertical constraints separate into finite
+one-dimensional flow paths.  A three-endpoint induction proves that every
+finite sequence of selected-border orientations admits a matching path; row
+and column paths then combine into signal states satisfying every local rule
+and all internal edge matches.  Thus backward realization needs no second
+substitution certificate and no pre-existing infinite signal plane.  The next
+step is to align these valid shaded signal supertiles with the audited
+free-grid geometry, index one clear grid by a supplied fixed-corner payload
+square, and feed that data to the routed-core patch constructor.
 
 ### 3. Package and finish
 
