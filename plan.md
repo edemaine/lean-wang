@@ -1054,6 +1054,16 @@ to the fine pair.  The next step is to certify the finite endpoint-choice
 transitions and show that every nonlocal branch projects to another coarse
 pair, reserving the whole-board checker for base validation.
 
+Literal-sparse target refinement is now complete as well.
+`RowFamilyTarget.refineSparse` and `ColumnFamilyTarget.refineSparse` preserve
+both target alternatives, their selected ports, and their hierarchy family
+through two substitutions.  The associated interval lemma is stronger than
+the exact sparse case: a coarse parallel target remains strictly between any
+fine point assigned to the coarse query interval and the sparse copy of the
+boundary.  Consequently the remaining finite endpoint transition only needs
+to handle genuinely created query coordinates and the local connector from
+the actual fine source; it no longer needs to re-prove sparse target transport.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
