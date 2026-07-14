@@ -1113,10 +1113,12 @@ Its horizontal and vertical records carry the projected coordinate, collar
 bounds, preserved orientation, coarse family ancestor, and refined family
 ancestor.  Their `refineTarget` eliminators lift any target for the exact
 coarse source directly to the original fine query.  The next step is only the
-finite-depth seed recursion: follow exact sparse predecessors until the
-boundary or transverse coordinate is newly created, convert the existing
-created seam path to a same-family target, and apply these eliminators while
-unwinding the recursion.
+finite-depth seed recursion.  The existing complete bounded seam-path bases
+are now exposed directly as same-family target seeds: the even certificate at
+depth one and the odd certificate at depth zero require no additional family
+flood or generated audit.  Follow exact sparse predecessors to one of these
+cached depths and apply the hierarchy eliminators while unwinding the
+recursion.
 
 ### 1. Obtain arbitrarily large free squares
 
