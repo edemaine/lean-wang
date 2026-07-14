@@ -188,6 +188,38 @@ def allowedFor (component : Thick) (quadrant : Quadrant) (state : State) : Bool 
     (if hasHorizontal component quadrant && hasVertical component quadrant then
       decide (state.west ≠ state.south) else true)
 
+/-- Constructor form of the local red-shade rule. -/
+theorem allowedFor_of {component : Thick} {quadrant : Quadrant} {state : State}
+    (hwest : state.west.isSome = hasWest component quadrant)
+    (heast : state.east.isSome = hasEast component quadrant)
+    (hsouth : state.south.isSome = hasSouth component quadrant)
+    (hnorth : state.north.isSome = hasNorth component quadrant)
+    (hhorizontal : hasHorizontal component quadrant = true →
+      state.west = state.east)
+    (hvertical : hasVertical component quadrant = true →
+      state.south = state.north)
+    (heastSouth : cornerEast component quadrant = true →
+      cornerSouth component quadrant = true → state.east = state.south)
+    (heastNorth : cornerEast component quadrant = true →
+      cornerNorth component quadrant = true → state.east = state.north)
+    (hwestSouth : cornerWest component quadrant = true →
+      cornerSouth component quadrant = true → state.west = state.south)
+    (hwestNorth : cornerWest component quadrant = true →
+      cornerNorth component quadrant = true → state.west = state.north)
+    (hcrossing : hasHorizontal component quadrant = true →
+      hasVertical component quadrant = true → state.west ≠ state.south) :
+    allowedFor component quadrant state = true := by
+  simp only [allowedFor, Bool.and_eq_true, decide_eq_true_eq, optionPresent]
+  refine ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨hwest, heast⟩, hsouth⟩, hnorth⟩, ?_⟩, ?_⟩,
+    ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
+  · split <;> simp_all
+  · split <;> simp_all
+  · split <;> simp_all
+  · split <;> simp_all
+  · split <;> simp_all
+  · split <;> simp_all
+  · split <;> simp_all
+
 /-- Local red-path incidence, propagation, corner, and crossing rules. -/
 def locallyAllowed (site : QuarterIndex) (state : State) : Bool :=
   allowedFor (components site.1).2.1 site.2 state

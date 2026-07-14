@@ -45,15 +45,6 @@ def externalPort (side : ExitSide) (offset : Nat) : Port :=
   | .east => ⟨7, offset, .east⟩
   | .north => ⟨offset, 7, .north⟩
 
-def portPresent (grid : Nat → Nat → Index) (port : Port) : Bool :=
-  let component := componentAt grid port.x port.y
-  let quadrant := quadrantAt port.x port.y
-  match port.side with
-  | .west => RedShades.hasWest component quadrant
-  | .east => RedShades.hasEast component quadrant
-  | .south => RedShades.hasSouth component quadrant
-  | .north => RedShades.hasNorth component quadrant
-
 def connectorSearch (parent : Index) (side : ExitSide) (offset : Nat) :=
   search (fineGrid parent) 8 8 1000 (internalPort side offset) fun port parity =>
     decide (port = externalPort side offset) && !parity

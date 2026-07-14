@@ -45,6 +45,16 @@ def value (stateGrid : Nat → Nat → RedShades.State) (port : Port) :
   | .south => (stateGrid port.x port.y).south
   | .north => (stateGrid port.x port.y).north
 
+/-- Whether the unshaded quarter geometry carries a red wire at a port. -/
+def portPresent (grid : Nat → Nat → Index) (port : Port) : Bool :=
+  let component := componentAt grid port.x port.y
+  let quadrant := quadrantAt port.x port.y
+  match port.side with
+  | .west => RedShades.hasWest component quadrant
+  | .east => RedShades.hasEast component quadrant
+  | .south => RedShades.hasSouth component quadrant
+  | .north => RedShades.hasNorth component quadrant
+
 /-- Even parity means equal shades; odd parity means opposite present shades. -/
 def Related (parity : Bool) (first second : Option RedShades.Shade) : Prop :=
   match parity with
@@ -186,6 +196,91 @@ theorem Link.sound {indexGrid : Nat → Nat → Index}
           simp only [RedShades.hasSouth, hvertical, Bool.true_or])
       · exact valid.crossing_opposite x y hhorizontal hvertical
   | symm link ih => exact Related.symm ih
+
+/-- A parity-consistent assignment to all red-graph ports.  Incidence is part
+of the data because match links exist independently of whether the shared
+edge carries a red wire. -/
+structure ValidPortLabeling (indexGrid : Nat → Nat → Index) where
+  label : Port → Option RedShades.Shade
+  present : ∀ port, (label port).isSome = portPresent indexGrid port
+  related : ∀ {first second parity}, Link indexGrid first second parity →
+    Related parity (label first) (label second)
+
+namespace ValidPortLabeling
+
+/-- Regroup four labeled ports into the corresponding quarter shade state. -/
+def stateGrid {indexGrid : Nat → Nat → Index}
+    (labeling : ValidPortLabeling indexGrid) :
+    Nat → Nat → RedShades.State := fun x y =>
+  { west := labeling.label ⟨x, y, .west⟩
+    east := labeling.label ⟨x, y, .east⟩
+    south := labeling.label ⟨x, y, .south⟩
+    north := labeling.label ⟨x, y, .north⟩ }
+
+private theorem ne_of_related_true
+    {first second : Option RedShades.Shade}
+    (related : Related true first second) : first ≠ second := by
+  rcases related with ⟨shade, rfl, rfl⟩
+  intro equal
+  simp only [Option.some.injEq] at equal
+  cases shade <;> contradiction
+
+/-- Port incidence and parity-link consistency are exactly the local shade
+tile and edge-matching rules. -/
+theorem validShadeGrid {indexGrid : Nat → Nat → Index}
+    (labeling : ValidPortLabeling indexGrid) :
+    ValidShadeGrid indexGrid labeling.stateGrid := by
+  constructor
+  · intro x y
+    simp only [RedShades.locallyAllowed]
+    apply RedShades.allowedFor_of
+    · simpa only [stateGrid, portPresent, componentAt] using
+        labeling.present ⟨x, y, .west⟩
+    · simpa only [stateGrid, portPresent, componentAt] using
+        labeling.present ⟨x, y, .east⟩
+    · simpa only [stateGrid, portPresent, componentAt] using
+        labeling.present ⟨x, y, .south⟩
+    · simpa only [stateGrid, portPresent, componentAt] using
+        labeling.present ⟨x, y, .north⟩
+    · intro hpath
+      change labeling.label ⟨x, y, .west⟩ =
+        labeling.label ⟨x, y, .east⟩
+      exact labeling.related (Link.horizontal x y hpath)
+    · intro hpath
+      change labeling.label ⟨x, y, .south⟩ =
+        labeling.label ⟨x, y, .north⟩
+      exact labeling.related (Link.vertical x y hpath)
+    · intro heast hsouth
+      change labeling.label ⟨x, y, .east⟩ =
+        labeling.label ⟨x, y, .south⟩
+      exact labeling.related (Link.eastSouth x y heast hsouth)
+    · intro heast hnorth
+      change labeling.label ⟨x, y, .east⟩ =
+        labeling.label ⟨x, y, .north⟩
+      exact labeling.related (Link.eastNorth x y heast hnorth)
+    · intro hwest hsouth
+      change labeling.label ⟨x, y, .west⟩ =
+        labeling.label ⟨x, y, .south⟩
+      exact labeling.related (Link.westSouth x y hwest hsouth)
+    · intro hwest hnorth
+      change labeling.label ⟨x, y, .west⟩ =
+        labeling.label ⟨x, y, .north⟩
+      exact labeling.related (Link.westNorth x y hwest hnorth)
+    · intro hhorizontal hvertical
+      change labeling.label ⟨x, y, .west⟩ ≠
+        labeling.label ⟨x, y, .south⟩
+      exact ne_of_related_true
+        (labeling.related (Link.crossing x y hhorizontal hvertical))
+  · intro x y
+    change labeling.label ⟨x, y, .east⟩ =
+      labeling.label ⟨x + 1, y, .west⟩
+    exact labeling.related (Link.horizontalMatch x y)
+  · intro x y
+    change labeling.label ⟨x, y, .north⟩ =
+      labeling.label ⟨x, y + 1, .south⟩
+    exact labeling.related (Link.verticalMatch x y)
+
+end ValidPortLabeling
 
 /-- A finite red-wire walk, labelled by the parity of its crossings. -/
 inductive Path (indexGrid : Nat → Nat → Index) : Port → Port → Bool → Prop where

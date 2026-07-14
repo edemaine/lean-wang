@@ -1196,6 +1196,16 @@ Robinson routing core: index active crossings by one supplied fixed-corner
 square and place constant horizontal/vertical wire payloads along the clear
 corridors between them.
 
+Backward shade construction is also reduced to its actual finite invariant.
+`RedShadeGraphColoring.ValidParityColoringOn` records a Boolean XOR coloring
+of the live red-port graph in a finite rectangle: continuations preserve the
+bit and crossings reverse it.  Its `validShadeRectangle` theorem constructs
+the concrete `RedShades.State` rectangle and proves every local incidence,
+corner, crossing, and edge-match rule.  Thus no infinite shaded plane or
+type-local shade table is required for backward realization.  The remaining
+shade obligation is the hierarchy-specific bipartiteness certificate for one
+sufficiently large finite substitution supertile.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply
