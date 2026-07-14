@@ -6,13 +6,14 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetPathBase
 
 /-!
-# Projection-closed residual family targets
+# Free-line-general residual family targets
 
 Coarse projection does not preserve the fact that a free-line coordinate was
 newly created.  This downstream interface therefore strengthens
-`FamilyTargetsAt` by accepting either kind of free-line coordinate.  It stays
-outside the finite-audit import cone, so recurrence work does not invalidate
-the cached native certificates.
+`FamilyTargetsAt` by accepting either kind of free-line coordinate.  The full
+recurrence additionally splits the projected selected boundary into retained
+and newly created cases.  This module stays outside the finite-audit import
+cone, so recurrence work does not invalidate the cached native certificates.
 -/
 
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
@@ -32,9 +33,9 @@ open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
 
 set_option maxRecDepth 20000
 
-/-- Endpoint-selection obligations closed under coarse-coordinate projection.
-Unlike `FamilyTargetsAt`, this state does not require the free-line coordinate
-to be newly created. -/
+/-- Endpoint-selection obligations generalized over the free-line coordinate.
+Unlike `FamilyTargetsAt`, this state does not require that coordinate to be
+newly created. -/
 structure AllFamilyTargetsAt (phase : Phase) (depth : Nat) : Prop where
   row : ∀ (grid : Nat → Nat → Index) (parentX parentY : Nat)
       {column row boundary : Nat},

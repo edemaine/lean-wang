@@ -1206,6 +1206,14 @@ the exact-predecessor dispatch and exceptional certificates.  Both modules sit
 downstream of all native audits so the remaining target recurrence can be
 developed without invalidating finite certificates.
 
+The target recurrence now has an explicit created-boundary branch.
+`PairCoverSeamResidualDirectPathAllFamilyTargetsCreated` converts the existing
+created seam paths into row and column targets in any hierarchy family already
+carried by the selected source.  Thus the recursive step can split the coarse
+selected boundary: retained boundaries recurse, while created boundaries use
+these adapters; only the separately packaged exceptional query shapes bypass
+that split.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
