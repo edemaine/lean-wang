@@ -139,5 +139,106 @@ def evenPaths : BoundedPaths .even 1 :=
 def oddPaths : BoundedPaths .odd 0 :=
   PairCoverSeamPathOddBase.boundedPaths
 
+private theorem evenQueryGrid_eq_refinedGrid
+    (grid : Nat → Nat → Index) :
+    iterateRefine 2 (refinedGrid .even 1 grid) =
+      refinedGrid .even 2 grid := by
+  exact (SparseFreeLinePlaneLocalStep.refinedGrid_succ .even 1 grid).symm
+
+private theorem evenQueryGrid_eq_outerGrid
+    (grid : Nat → Nat → Index) :
+    iterateRefine 2 (refinedGrid .even 1 grid) =
+      iterateRefine (outerLevel .even 1 + 2) grid := by
+  exact fineGrid_eq_outerLevel .even 1 grid
+
+private theorem inCollar_of_horizontal_bounds
+    {west east coordinate : Nat}
+    (lower : quarterWest west < coordinate)
+    (upper : coordinate < quarterEast east) :
+    PairCoverSeamResidualCanonicalAncestorRecurrence.InCollar
+      west east coordinate := by
+  constructor
+  · omega
+  · exact upper
+
+private theorem inCollar_of_vertical_bounds
+    {south north coordinate : Nat}
+    (lower : quarterSouth south < coordinate)
+    (upper : coordinate < quarterNorth north) :
+    PairCoverSeamResidualCanonicalAncestorRecurrence.InCollar
+      south north coordinate := by
+  constructor
+  · simp only [quarterSouth] at lower
+    simp only [quarterWest]
+    omega
+  · simpa only [quarterNorth, quarterEast] using upper
+
+set_option maxHeartbeats 1000000 in
+-- The selected source family occurs dependently in the target conclusion.
+/-- The cached even depth-one paths close the first complete endpoint-choice
+obligation used by the residual recurrence. -/
+theorem evenFamilyTargets : FamilyTargetsAt .even 0 := by
+  constructor
+  · intro grid parentX parentY column row boundary
+      columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
+      notFits _sparseBoundary _createdRow wrongFacing
+    have sourceInterior : Signals.horizontalInterior?
+        (componentAt (refinedGrid .even 2 grid) column boundary)
+        (quadrantAt column boundary) ≠ none := by
+      rw [← evenQueryGrid_eq_refinedGrid grid]
+      rcases wrongFacing with wrongFacing | wrongFacing
+      · rw [wrongFacing.2]
+        simp
+      · rw [wrongFacing.2]
+        simp
+    have ancestor :=
+      (sourceAncestorsWithinAt .even 1 grid parentX parentY).horizontal
+        (inCollar_of_horizontal_bounds columnWest columnEast)
+        (inCollar_of_vertical_bounds boundarySouth boundaryNorth)
+        sourceInterior
+    rcases CanonicalCycleAncestorWithin.exists_family ancestor with
+      ⟨family, sourceFamily⟩
+    have boardEq : refinedGrid .even 2 grid =
+        iterateRefine (outerLevel .even 1 + 2) grid :=
+      (evenQueryGrid_eq_refinedGrid grid).symm.trans
+        (evenQueryGrid_eq_outerGrid grid)
+    rw [boardEq] at sourceFamily
+    have wrongFacing' := wrongFacing
+    rw [evenQueryGrid_eq_outerGrid grid] at wrongFacing'
+    refine ⟨family, sourceFamily, ?_⟩
+    exact BoundedPaths.rowFamilyTarget evenPaths grid parentX parentY
+      columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
+      wrongFacing' notFits sourceFamily
+  · intro grid parentX parentY column row boundary
+      columnWest columnEast boundaryWest boundaryEast rowSouth rowNorth
+      notFits _sparseBoundary _createdColumn wrongFacing
+    have sourceInterior : Signals.verticalInterior?
+        (componentAt (refinedGrid .even 2 grid) boundary row)
+        (quadrantAt boundary row) ≠ none := by
+      rw [← evenQueryGrid_eq_refinedGrid grid]
+      rcases wrongFacing with wrongFacing | wrongFacing
+      · rw [wrongFacing.2]
+        simp
+      · rw [wrongFacing.2]
+        simp
+    have ancestor :=
+      (sourceAncestorsWithinAt .even 1 grid parentX parentY).vertical
+        (inCollar_of_horizontal_bounds boundaryWest boundaryEast)
+        (inCollar_of_vertical_bounds rowSouth rowNorth)
+        sourceInterior
+    rcases CanonicalCycleAncestorWithin.exists_family ancestor with
+      ⟨family, sourceFamily⟩
+    have boardEq : refinedGrid .even 2 grid =
+        iterateRefine (outerLevel .even 1 + 2) grid :=
+      (evenQueryGrid_eq_refinedGrid grid).symm.trans
+        (evenQueryGrid_eq_outerGrid grid)
+    rw [boardEq] at sourceFamily
+    have wrongFacing' := wrongFacing
+    rw [evenQueryGrid_eq_outerGrid grid] at wrongFacing'
+    refine ⟨family, sourceFamily, ?_⟩
+    exact BoundedPaths.columnFamilyTarget evenPaths grid parentX parentY
+      columnWest columnEast boundaryWest boundaryEast rowSouth rowNorth
+      wrongFacing' notFits sourceFamily
+
 end PairCoverSeamResidualDirectPathFamilyTargetPathBase
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104

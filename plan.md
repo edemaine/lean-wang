@@ -1118,7 +1118,11 @@ are now exposed directly as same-family target seeds: the even certificate at
 depth one and the odd certificate at depth zero require no additional family
 flood or generated audit.  Follow exact sparse predecessors to one of these
 cached depths and apply the hierarchy eliminators while unwinding the
-recursion.
+recursion.  In particular, the even certificate now closes the complete
+`FamilyTargetsAt .even 0` interface, including canonical source-family
+selection.  Projection can place a created query coordinate exactly on the
+coarse collar's lower edge, so the remaining recursion must handle that case
+explicitly instead of assuming strict bounds survive every projection.
 
 ### 1. Obtain arbitrarily large free squares
 
