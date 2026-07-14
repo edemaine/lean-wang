@@ -1143,6 +1143,13 @@ All 26 chunks are now certified in both phases and assembled as
 two proof-level depth-zero target interfaces.
 The certified local witnesses now transport into arbitrary parent blocks while
 preserving both the selected source family and its row/column target.
+Exact inherited sources now retain the stronger projected bounds needed by
+that checker: transverse coordinates may equal the lower collar edge, while
+the projected sparse source boundary remains strictly inside.  The query
+projection is packaged into four cases with preserved orientation: ordinary
+strict south/west and north/east queries, south/west at the lower edge, and
+north/east equal to the source boundary.  Thus the remaining recursion can
+dispatch its two stopping cases directly to the certified exceptional base.
 
 ### 1. Obtain arbitrarily large free squares
 

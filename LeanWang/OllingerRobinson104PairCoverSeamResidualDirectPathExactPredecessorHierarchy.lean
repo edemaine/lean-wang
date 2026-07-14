@@ -19,7 +19,7 @@ family ancestors while identifying the coarse parallel selector by
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
 namespace PairCoverSeamResidualDirectPathExactPredecessorHierarchy
 
-open RedCycles RedShadeGraph RedShadeGraphRefinement
+open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
   PairCoverSeamArithmetic
   PairCoverSeamRefinementCoordinates
   PairCoverSeamResidualCanonicalAncestorRecurrence
@@ -46,9 +46,17 @@ structure HorizontalExactInheritedSource
   oldColumnBounds : InCollar
     (successorWest phase depth parentX)
     (successorEast phase depth parentX) (coarseCoordinate column)
+  oldColumnWeakBounds :
+    quarterWest (successorWest phase depth parentX) ≤
+        coarseCoordinate column ∧
+      coarseCoordinate column <
+        quarterEast (successorEast phase depth parentX)
   oldBoundaryBounds : InCollar
     (successorWest phase depth parentY)
     (successorEast phase depth parentY) oldBoundary
+  oldBoundaryStrictBounds :
+    quarterSouth (successorWest phase depth parentY) < oldBoundary ∧
+      oldBoundary < quarterNorth (successorEast phase depth parentY)
   boundarySparse : sparseCoordinate oldBoundary = boundary
   oldInterior : Signals.horizontalInterior?
     (componentAt (refinedGrid phase (depth + 1) grid)
@@ -90,9 +98,17 @@ structure VerticalExactInheritedSource
   oldBoundaryBounds : InCollar
     (successorWest phase depth parentX)
     (successorEast phase depth parentX) oldBoundary
+  oldBoundaryStrictBounds :
+    quarterWest (successorWest phase depth parentX) < oldBoundary ∧
+      oldBoundary < quarterEast (successorEast phase depth parentX)
   oldRowBounds : InCollar
     (successorWest phase depth parentY)
     (successorEast phase depth parentY) (coarseCoordinate row)
+  oldRowWeakBounds :
+    quarterSouth (successorWest phase depth parentY) ≤
+        coarseCoordinate row ∧
+      coarseCoordinate row <
+        quarterNorth (successorEast phase depth parentY)
   boundarySparse : sparseCoordinate oldBoundary = boundary
   oldInterior : Signals.verticalInterior?
     (componentAt (refinedGrid phase (depth + 1) grid)
@@ -143,12 +159,14 @@ set_option maxHeartbeats 1000000 in
 theorem horizontalExactInheritedSource
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
     (parentX parentY : Nat) {column boundary : Nat}
-    (columnBounds : InCollar
-      (successorWest phase (depth + 1) parentX)
-      (successorEast phase (depth + 1) parentX) column)
-    (boundaryBounds : InCollar
-      (successorWest phase (depth + 1) parentY)
-      (successorEast phase (depth + 1) parentY) boundary)
+    (columnLower : quarterWest (successorWest phase (depth + 1) parentX) <
+      column)
+    (columnUpper : column <
+      quarterEast (successorEast phase (depth + 1) parentX))
+    (boundaryLower :
+      quarterSouth (successorWest phase (depth + 1) parentY) < boundary)
+    (boundaryUpper : boundary <
+      quarterNorth (successorEast phase (depth + 1) parentY))
     (sparseBoundary : IsSparseCoordinate boundary)
     (interior : Signals.horizontalInterior?
       (componentAt (refinedGrid phase (depth + 2) grid) column boundary)
@@ -172,14 +190,40 @@ theorem horizontalExactInheritedSource
       (successorEast phase depth parentX) (coarseCoordinate column) :=
     predecessor_in_collar_of_collar
       (div_two_eq_div_eight_of_coarseCoordinate rfl)
-      (by simpa only [successorWest_succ] using columnBounds.1)
-      (by simpa only [successorEast_succ] using columnBounds.2)
+      (by
+        rw [successorWest_succ] at columnLower
+        omega)
+      (by simpa only [successorEast_succ] using columnUpper)
+  have oldColumnWeakBounds := coarse_successor_bounds_of_fine_bounds
+    columnLower columnUpper
   have oldBoundaryBounds : InCollar
       (successorWest phase depth parentY)
       (successorEast phase depth parentY) oldBoundary :=
     sparse_preimage_in_collar boundarySparse
-      (by simpa only [successorWest_succ] using boundaryBounds.1)
-      (by simpa only [successorEast_succ] using boundaryBounds.2)
+      (by
+        rw [successorWest_succ] at boundaryLower
+        simp only [quarterSouth, quarterWest] at boundaryLower ⊢
+        omega)
+      (by
+        rw [successorEast_succ] at boundaryUpper
+        simpa only [quarterNorth, quarterEast] using boundaryUpper)
+  have oldBoundaryStrictBounds :
+      quarterSouth (successorWest phase depth parentY) < oldBoundary ∧
+        oldBoundary < quarterNorth (successorEast phase depth parentY) := by
+    have projected := coarse_successor_bounds_of_fine_bounds
+      (by simpa only [quarterSouth, quarterWest] using boundaryLower)
+      (by simpa only [quarterNorth, quarterEast] using boundaryUpper)
+    have boundaryCoarse : coarseCoordinate boundary = oldBoundary := by
+      rw [← boundarySparse, coarseCoordinate_sparseCoordinate]
+    constructor
+    · have sparseLower :
+          sparseCoordinate (quarterSouth (successorWest phase depth parentY)) <
+            sparseCoordinate oldBoundary := by
+        rw [boundarySparse]
+        simpa only [successorWest_succ, sparseCoordinate_quarterSouth]
+          using boundaryLower
+      exact sparseCoordinate_lt_iff.mp sparseLower
+    · simpa only [boundaryCoarse, quarterNorth, quarterEast] using projected.2
   have hierarchy := sourceAncestorsWithinAt phase depth
     grid parentX parentY
   have oldAncestor := hierarchy.horizontal
@@ -204,8 +248,9 @@ theorem horizontalExactInheritedSource
     simpa only [oldGrid, fineGrid_eq phase depth grid,
       outerLevel_succ phase depth] using refined
   have fineFamily := refineFamily family oldFamily
-  refine ⟨⟨oldBoundary, family, oldColumnBounds, oldBoundaryBounds,
-    boundarySparse, ?_, ?_, refineFamily, oldFamily, fineFamily⟩⟩
+  refine ⟨⟨oldBoundary, family, oldColumnBounds, oldColumnWeakBounds,
+    oldBoundaryBounds, oldBoundaryStrictBounds, boundarySparse, ?_, ?_,
+    refineFamily, oldFamily, fineFamily⟩⟩
   · simpa only [oldGrid] using oldInterior
   · simpa only [oldGrid, fineGrid_eq phase depth grid] using orientationEq
 
@@ -215,12 +260,13 @@ set_option maxHeartbeats 1000000 in
 theorem verticalExactInheritedSource
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
     (parentX parentY : Nat) {boundary row : Nat}
-    (boundaryBounds : InCollar
-      (successorWest phase (depth + 1) parentX)
-      (successorEast phase (depth + 1) parentX) boundary)
-    (rowBounds : InCollar
-      (successorWest phase (depth + 1) parentY)
-      (successorEast phase (depth + 1) parentY) row)
+    (boundaryLower :
+      quarterWest (successorWest phase (depth + 1) parentX) < boundary)
+    (boundaryUpper : boundary <
+      quarterEast (successorEast phase (depth + 1) parentX))
+    (rowLower : quarterSouth (successorWest phase (depth + 1) parentY) < row)
+    (rowUpper : row <
+      quarterNorth (successorEast phase (depth + 1) parentY))
     (sparseBoundary : IsSparseCoordinate boundary)
     (interior : Signals.verticalInterior?
       (componentAt (refinedGrid phase (depth + 2) grid) boundary row)
@@ -243,15 +289,40 @@ theorem verticalExactInheritedSource
       (successorWest phase depth parentX)
       (successorEast phase depth parentX) oldBoundary :=
     sparse_preimage_in_collar boundarySparse
-      (by simpa only [successorWest_succ] using boundaryBounds.1)
-      (by simpa only [successorEast_succ] using boundaryBounds.2)
+      (by
+        rw [successorWest_succ] at boundaryLower
+        omega)
+      (by simpa only [successorEast_succ] using boundaryUpper)
+  have oldBoundaryStrictBounds :
+      quarterWest (successorWest phase depth parentX) < oldBoundary ∧
+        oldBoundary < quarterEast (successorEast phase depth parentX) := by
+    have projected := coarse_successor_bounds_of_fine_bounds
+      boundaryLower boundaryUpper
+    have boundaryCoarse : coarseCoordinate boundary = oldBoundary := by
+      rw [← boundarySparse, coarseCoordinate_sparseCoordinate]
+    constructor
+    · have sparseLower :
+          sparseCoordinate (quarterWest (successorWest phase depth parentX)) <
+            sparseCoordinate oldBoundary := by
+        rw [boundarySparse]
+        simpa only [successorWest_succ, sparseCoordinate_quarterWest]
+          using boundaryLower
+      exact sparseCoordinate_lt_iff.mp sparseLower
+    · simpa only [boundaryCoarse] using projected.2
   have oldRowBounds : InCollar
       (successorWest phase depth parentY)
       (successorEast phase depth parentY) (coarseCoordinate row) :=
     predecessor_in_collar_of_collar
       (div_two_eq_div_eight_of_coarseCoordinate rfl)
-      (by simpa only [successorWest_succ] using rowBounds.1)
-      (by simpa only [successorEast_succ] using rowBounds.2)
+      (by
+        rw [successorWest_succ] at rowLower
+        simp only [quarterSouth, quarterWest] at rowLower ⊢
+        omega)
+      (by simpa only [successorEast_succ, quarterNorth, quarterEast]
+        using rowUpper)
+  have oldRowWeakBounds := coarse_successor_bounds_of_fine_bounds
+    (by simpa only [quarterSouth, quarterWest] using rowLower)
+    (by simpa only [quarterNorth, quarterEast] using rowUpper)
   have hierarchy := sourceAncestorsWithinAt phase depth
     grid parentX parentY
   have oldAncestor := hierarchy.vertical
@@ -276,8 +347,9 @@ theorem verticalExactInheritedSource
     simpa only [oldGrid, fineGrid_eq phase depth grid,
       outerLevel_succ phase depth] using refined
   have fineFamily := refineFamily family oldFamily
-  refine ⟨⟨oldBoundary, family, oldBoundaryBounds, oldRowBounds,
-    boundarySparse, ?_, ?_, refineFamily, oldFamily, fineFamily⟩⟩
+  refine ⟨⟨oldBoundary, family, oldBoundaryBounds, oldBoundaryStrictBounds,
+    oldRowBounds, oldRowWeakBounds, boundarySparse, ?_, ?_, refineFamily,
+    oldFamily, fineFamily⟩⟩
   · simpa only [oldGrid] using oldInterior
   · simpa only [oldGrid, fineGrid_eq phase depth grid] using orientationEq
 

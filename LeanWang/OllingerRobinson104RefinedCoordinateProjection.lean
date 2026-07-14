@@ -118,6 +118,29 @@ theorem coarseCoordinate_mono {first second : Nat} (hle : first ≤ second) :
   have hsparse := secondSpec.2.trans_le (sparseCoordinate_mono hnext)
   omega
 
+/-- A point strictly below a literal sparse coordinate projects strictly below
+that coordinate's coarse source. -/
+theorem coarseCoordinate_lt_of_lt_sparseCoordinate
+    {fine coarse : Nat} (below : fine < sparseCoordinate coarse) :
+    coarseCoordinate fine < coarse := by
+  by_contra notBelow
+  have sourceLe : coarse ≤ coarseCoordinate fine := by omega
+  have fineSpec := coarseCoordinate_spec fine
+  have := (sparseCoordinate_mono sourceLe).trans fineSpec.1
+  omega
+
+/-- A point strictly above a literal sparse coordinate projects weakly above
+its coarse source.  Equality is possible inside the source's created
+interval. -/
+theorem le_coarseCoordinate_of_sparseCoordinate_lt
+    {coarse fine : Nat} (above : sparseCoordinate coarse < fine) :
+    coarse ≤ coarseCoordinate fine := by
+  by_contra notAbove
+  have nextLe : coarseCoordinate fine + 1 ≤ coarse := by omega
+  have fineSpec := coarseCoordinate_spec fine
+  have := fineSpec.2.trans_le (sparseCoordinate_mono nextLe)
+  omega
+
 /-- Strict coarse bounds imply the corresponding strict sparse bounds for the
 original fine coordinate. -/
 theorem sparse_bounds_of_coarse_bounds
