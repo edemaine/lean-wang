@@ -1129,6 +1129,15 @@ family, and that chosen source/target pair transports together to the fine
 query.  This avoids fixing an unrelated family witness before endpoint
 selection.
 
+The two projection-stopping cases are now represented by a small finite
+interface, `BoundedExceptionalTargetsAt`.  It checks the source boundary for
+north/east sources (the relation-collapse case) and the lower collar edge for
+south/west sources (the bound-collapse case).
+The checker reuses one indexed pair of family floods per parent and is split
+into 26 four-parent chunks; only depth-zero even and odd certificates are
+needed, because arbitrary-family predecessor transport lifts these seeds to
+all later hierarchy levels.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
