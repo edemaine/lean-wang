@@ -91,6 +91,33 @@ theorem strictBetween_sparse_of_coarseCoordinate
         ((sparseCoordinate_mono nextLe).trans fineBounds.1)
     exact ⟨sparseCoordinate_strictMono between.1, targetFine⟩
 
+/-- Strict betweenness lifts when both the query and target are arbitrary
+points of their respective coarse sparse intervals. -/
+theorem strictBetween_of_coarseCoordinates
+    {first second value fine target : Nat}
+    (firstEq : coarseCoordinate fine = first)
+    (targetEq : coarseCoordinate target = value)
+    (between : StrictBetween first second value) :
+    StrictBetween fine (sparseCoordinate second) target := by
+  have fineBounds := coarseCoordinate_spec fine
+  have targetBounds := coarseCoordinate_spec target
+  rw [firstEq] at fineBounds
+  rw [targetEq] at targetBounds
+  rcases between with between | between
+  · left
+    have nextFirst : first + 1 ≤ value := by omega
+    have nextValue : value + 1 ≤ second := by omega
+    exact ⟨fineBounds.2.trans_le
+        ((sparseCoordinate_mono nextFirst).trans targetBounds.1),
+      targetBounds.2.trans_le (sparseCoordinate_mono nextValue)⟩
+  · right
+    have nextValue : value + 1 ≤ first := by omega
+    have nextSecond : second + 1 ≤ value := by omega
+    exact ⟨(sparseCoordinate_strictMono (Nat.lt_succ_self second)).trans_le
+        ((sparseCoordinate_mono nextSecond).trans targetBounds.1),
+      targetBounds.2.trans_le
+        ((sparseCoordinate_mono nextValue).trans fineBounds.1)⟩
+
 /-- The exact sparse image preserves strict betweenness. -/
 theorem strictBetween_sparse
     {first second value : Nat} (between : StrictBetween first second value) :

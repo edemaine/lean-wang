@@ -1075,6 +1075,18 @@ the first eight parent tiles remain exceptional, so the next semantic lift can
 use the generic certificate outside that finite family and isolate only those
 eight transition cases.
 
+That semantic lift is now complete for every nonexceptional selected target.
+The local bounded path translates into an arbitrary hierarchy macrocell, and
+the translated endpoint is proved to have the same `coarseCoordinate` as the
+old target.  A strengthened interval theorem lifts strict betweenness when
+both the query and target are arbitrary points of their respective sparse
+intervals.  Four branch-specific constructors now cover the transverse and
+parallel alternatives of `RowFamilyTarget` and `ColumnFamilyTarget`, preserving
+board bounds, live interiors, and the exact hierarchy family.  Each constructor
+requires only that its one selected parent tile has index at least eight.  The
+remaining recurrence problem is therefore a finite transition for parent
+tiles `0..7`, not a global path-transport obligation.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
