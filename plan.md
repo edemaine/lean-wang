@@ -1046,9 +1046,13 @@ the actual inherited family at every sparse fine source without a family
 flood.  `InheritedFamilyTargetsAt` now exposes this coarse source, its old
 family ancestor, and the transported fine ancestor to a target-only
 recognition obligation; its adapter proves the complete `FamilyTargetsAt`
-interface.  The next step is to recurse target recognition on this actual
-coarse source and reduce the nonrecursive branches to fixed `8 x 8` local
-refinement cases, reserving the whole-board checker for base validation.
+interface.  Finite diagnostics show the first two target forms: a local
+transverse turn, and a parallel target at the sparse projection of the query
+line.  `SameFamilyPredecessors.refine` now proves the common recursive step:
+even local connectors at both endpoints lift any coarse same-family relation
+to the fine pair.  The next step is to certify the finite endpoint-choice
+transitions and show that every nonlocal branch projects to another coarse
+pair, reserving the whole-board checker for base validation.
 
 ### 1. Obtain arbitrarily large free squares
 
