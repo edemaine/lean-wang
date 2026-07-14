@@ -1154,6 +1154,12 @@ strict south/west and north/east queries, south/west at the lower edge, and
 north/east equal to the source boundary.  Thus the remaining recursion can
 dispatch its stopping cases and lower-edge transverse sources directly to the
 certified exceptional base.
+This dispatch now closes `FamilyTargetsAt .odd 0`.  Every exact inherited
+query projects either to a strict cached odd path, a lower-edge query, a
+source-boundary query, or a strict query whose transverse source lies on the
+lower edge.  The latter three cases use the transported exceptional
+certificate; all four preserve the selected canonical hierarchy family while
+refining the target back to the original query.
 
 ### 1. Obtain arbitrarily large free squares
 
