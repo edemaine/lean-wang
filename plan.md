@@ -1183,6 +1183,19 @@ or equivalently finite layer patches that compactness assembles into the
 required plane tiling. Show arbitrary payload tiles can be routed through the
 active square and obstruction channels.
 
+The generic payload assembly is now separated from this geometry.
+`RoutedCoreBoxLayerPatch` prescribes payloads only on non-inactive scaffold
+cells and asks for matching only between adjacent prescribed cells.  Its
+`toRoutedCombinedBoxLayerPatch` construction fills every inactive cell with a
+complete-palette absorber, preserving all routed membership and matching
+conditions.  Consequently the concrete backward target can be stated as
+`HasRoutedCoreBoxLayerPatches`; the generic adapter
+`hasRoutedCombinedBoxLayerPatches_of_coreBoxLayerPatches` then supplies the
+compactness interface.  The remaining constructive work is purely the
+Robinson routing core: index active crossings by one supplied fixed-corner
+square and place constant horizontal/vertical wire payloads along the clear
+corridors between them.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply

@@ -72,6 +72,19 @@ def isCorner : RouteRole → Bool
   | .corner => true
   | _ => false
 
+/-- Whether a routed payload cell has a prescribed channel or source role. -/
+def isConstrained : RouteRole → Bool
+  | .inactive => false
+  | _ => true
+
+@[simp] theorem isConstrained_eq_false_iff {role : RouteRole} :
+    role.isConstrained = false ↔ role = .inactive := by
+  cases role <;> simp [isConstrained]
+
+@[simp] theorem isConstrained_eq_true_iff {role : RouteRole} :
+    role.isConstrained = true ↔ role ≠ .inactive := by
+  cases role <;> simp [isConstrained]
+
 theorem isHorizontal_primrec : Primrec isHorizontal := by
   exact (Primrec.eq.decide.comp Primrec.id
     (Primrec.const RouteRole.horizontal)).of_eq fun role => by
@@ -119,6 +132,15 @@ theorem mem_verticalPayloadWires_iff {T : TileSet} {tile : WangTile} :
       tile ∈ completePayloads T ∧ tile.s = tile.n := by
   simp [verticalPayloadWires]
 
+/-- Membership in the complete payload palette exposes all four edge colors. -/
+theorem edge_mem_payloadPalette_of_mem_completePayloads
+    {T : TileSet} {tile : WangTile} (htile : tile ∈ completePayloads T) :
+    tile.n ∈ payloadPalette T ∧ tile.s ∈ payloadPalette T ∧
+      tile.e ∈ payloadPalette T ∧ tile.w ∈ payloadPalette T := by
+  rcases tile with ⟨n, s, e, w⟩
+  simpa [completePayloads, completePayloadsFromColors, payloadsWithN,
+    payloadsWithNParams, payloadsWithNSParams, payloadsWithNSEParams] using htile
+
 theorem horizontalPayloadWires_primrec : Primrec horizontalPayloadWires := by
   have hpredicate : PrimrecPred (fun tile : WangTile => tile.w = tile.e) :=
     Primrec.eq.comp WangTile.w_primrec WangTile.e_primrec
@@ -160,6 +182,24 @@ theorem mem_routedPayloads_iff {S : RoutedScaffold} {T : TileSet}
   cases hrole : S.role base <;>
     simp [routedPayloads, hrole, horizontalPayloadWires,
       verticalPayloadWires]
+
+/-- Every routed payload uses only colors from the complete payload palette. -/
+theorem mem_completePayloads_of_mem_routedPayloads
+    {S : RoutedScaffold} {T : TileSet} {seed base payload : WangTile}
+    (hpayload : payload ∈ routedPayloads S T seed base) :
+    payload ∈ completePayloads T := by
+  rw [mem_routedPayloads_iff] at hpayload
+  cases hrole : S.role base
+  · simpa only [hrole] using hpayload
+  · exact (show payload ∈ completePayloads T ∧ payload.w = payload.e from
+      by simpa only [hrole] using hpayload).1
+  · exact (show payload ∈ completePayloads T ∧ payload.s = payload.n from
+      by simpa only [hrole] using hpayload).1
+  · apply mem_completePayloads_of_mem
+    simpa only [hrole] using hpayload
+  · apply mem_completePayloads_of_mem
+    exact (show payload ∈ T ∧ payload = seed from
+      by simpa only [hrole] using hpayload).1
 
 theorem mem_combineWithRoutedScaffold_iff
     {S : RoutedScaffold} {T : TileSet} {seed tile : WangTile} :
@@ -245,6 +285,132 @@ structure RoutedCombinedBoxLayerPatch
     WangTile.VMatches (payload p)
       (payload ⟨(p.1.1, p.1.2 + 1), hp⟩)
 
+/--
+A routed finite box whose payload is prescribed only on constrained cells.
+
+Inactive cells are deliberately left out of the local matching obligations;
+`toRoutedCombinedBoxLayerPatch` fills them from the complete payload palette.
+-/
+structure RoutedCoreBoxLayerPatch
+    (S : RoutedScaffold) (T : TileSet) (seed : WangTile) (r : Nat) where
+  base : BoxPattern S.tiles r
+  core : Box r → WangTile
+  base_valid : ValidBoxTiling S.tiles r base
+  core_mem : ∀ p : Box r,
+    core p ∈ routedPayloads S T seed (base p).1
+  core_hmatch :
+    ∀ p : Box r, ∀ hp : InBox r (p.1.1 + 1, p.1.2),
+      (S.role (base p).1).isConstrained = true →
+        (S.role (base ⟨(p.1.1 + 1, p.1.2), hp⟩).1).isConstrained = true →
+          WangTile.HMatches (core p)
+            (core ⟨(p.1.1 + 1, p.1.2), hp⟩)
+  core_vmatch :
+    ∀ p : Box r, ∀ hp : InBox r (p.1.1, p.1.2 + 1),
+      (S.role (base p).1).isConstrained = true →
+        (S.role (base ⟨(p.1.1, p.1.2 + 1), hp⟩).1).isConstrained = true →
+          WangTile.VMatches (core p)
+            (core ⟨(p.1.1, p.1.2 + 1), hp⟩)
+
+namespace RoutedCoreBoxLayerPatch
+
+private def constrained
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCoreBoxLayerPatch S T seed r) (p : Box r) : Bool :=
+  (S.role (patch.base p).1).isConstrained
+
+private theorem core_mem_completePayloads
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCoreBoxLayerPatch S T seed r) (p : Box r) :
+    patch.core p ∈ completePayloads T :=
+  mem_completePayloads_of_mem_routedPayloads (patch.core_mem p)
+
+set_option linter.unusedSimpArgs false in
+private theorem inactivePayloadAround_mem
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCoreBoxLayerPatch S T seed r) (p : Box r) :
+    CombinedBoxLayerPatch.inactivePayloadAround
+      patch.constrained patch.core p ∈
+      completePayloads T := by
+  apply mk_mem_completePayloads
+  · split
+    · rename_i hp
+      by_cases hcore : patch.constrained
+          ⟨(p.1.1, p.1.2 + 1), hp⟩ = true
+      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+          dif_pos hp, hcore, if_true]
+        exact (edge_mem_payloadPalette_of_mem_completePayloads
+          (patch.core_mem_completePayloads _)).2.1
+      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+          hp, hcore, zero_mem_payloadPalette]
+    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+        zero_mem_payloadPalette]
+  · split
+    · rename_i hp
+      by_cases hcore : patch.constrained
+          ⟨(p.1.1, p.1.2 - 1), hp⟩ = true
+      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+          dif_pos hp, hcore, if_true]
+        exact (edge_mem_payloadPalette_of_mem_completePayloads
+          (patch.core_mem_completePayloads _)).1
+      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+          hp, hcore, zero_mem_payloadPalette]
+    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+        zero_mem_payloadPalette]
+  · split
+    · rename_i hp
+      by_cases hcore : patch.constrained
+          ⟨(p.1.1 + 1, p.1.2), hp⟩ = true
+      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+          dif_pos hp, hcore, if_true]
+        exact (edge_mem_payloadPalette_of_mem_completePayloads
+          (patch.core_mem_completePayloads _)).2.2.2
+      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+          hp, hcore, zero_mem_payloadPalette]
+    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+        zero_mem_payloadPalette]
+  · split
+    · rename_i hp
+      by_cases hcore : patch.constrained
+          ⟨(p.1.1 - 1, p.1.2), hp⟩ = true
+      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+          dif_pos hp, hcore, if_true]
+        exact (edge_mem_payloadPalette_of_mem_completePayloads
+          (patch.core_mem_completePayloads _)).2.2.1
+      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+          hp, hcore, zero_mem_payloadPalette]
+    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+        zero_mem_payloadPalette]
+
+/-- Fill all inactive cells around a locally compatible routed core. -/
+def toRoutedCombinedBoxLayerPatch
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCoreBoxLayerPatch S T seed r) :
+    RoutedCombinedBoxLayerPatch S T seed r where
+  base := patch.base
+  payload := CombinedBoxLayerPatch.payloadWithInactiveAround
+    patch.constrained patch.core
+  base_valid := patch.base_valid
+  payload_mem := by
+    intro p
+    by_cases hcore : patch.constrained p = true
+    · simpa [CombinedBoxLayerPatch.payloadWithInactiveAround, hcore] using
+        patch.core_mem p
+    · have hfalse : patch.constrained p = false :=
+        Bool.eq_false_of_not_eq_true hcore
+      have hrole : S.role (patch.base p).1 = .inactive := by
+        exact RouteRole.isConstrained_eq_false_iff.mp hfalse
+      simpa [CombinedBoxLayerPatch.payloadWithInactiveAround, hfalse,
+        routedPayloads, hrole] using
+        patch.inactivePayloadAround_mem p
+  payload_hmatch := by
+    exact CombinedBoxLayerPatch.payloadWithInactiveAround_hmatch
+      patch.core_hmatch
+  payload_vmatch := by
+    exact CombinedBoxLayerPatch.payloadWithInactiveAround_vmatch
+      patch.core_vmatch
+
+end RoutedCoreBoxLayerPatch
+
 namespace RoutedCombinedBoxLayerPatch
 
 theorem product_mem
@@ -296,6 +462,20 @@ def HasRoutedCombinedBoxLayerPatches (S : RoutedScaffold) : Prop :=
   ∀ (T : TileSet) (seed : WangTile),
     (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
       ∀ r : Nat, Nonempty (RoutedCombinedBoxLayerPatch S T seed r)
+
+/-- Core-patch form of the backward routed scaffold construction. -/
+def HasRoutedCoreBoxLayerPatches (S : RoutedScaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile),
+    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
+      ∀ r : Nat, Nonempty (RoutedCoreBoxLayerPatch S T seed r)
+
+/-- Locally compatible constrained cores supply the required full patches. -/
+theorem hasRoutedCombinedBoxLayerPatches_of_coreBoxLayerPatches
+    {S : RoutedScaffold} (cores : HasRoutedCoreBoxLayerPatches S) :
+    HasRoutedCombinedBoxLayerPatches S := by
+  intro T seed squares r
+  rcases cores T seed squares r with ⟨core⟩
+  exact ⟨core.toRoutedCombinedBoxLayerPatch⟩
 
 /-- The abstract property required of a channel-aware routed scaffold. -/
 def IsRoutedScaffold (S : RoutedScaffold) : Prop :=
