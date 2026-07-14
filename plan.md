@@ -1141,6 +1141,8 @@ All 26 chunks are now certified in both phases and assembled as
 `PairCoverSeamResidualDirectPathFamilyExceptionalBase.evenTargets` and
 `.oddTargets`.  The expensive finite computation is therefore isolated behind
 two proof-level depth-zero target interfaces.
+The certified local witnesses now transport into arbitrary parent blocks while
+preserving both the selected source family and its row/column target.
 
 ### 1. Obtain arbitrarily large free squares
 
