@@ -1087,8 +1087,21 @@ board bounds, live interiors, and the exact hierarchy family.  No exceptional
 parent hypothesis remains.  `RowFamilyTarget.refineAt` and
 `ColumnFamilyTarget.refineAt` package the four constructors into one theorem
 for an arbitrary target alternative and arbitrary fine query coordinates in
-the selected coarse intervals.  The next recurrence step is to iterate these
-two theorems through the inherited row and column hierarchy.
+the selected coarse intervals.  `RowFamilyTarget.refineIterate` and its column
+dual now iterate this transport through an arbitrary number of hierarchy
+levels using only repeated coarse-coordinate equations; recursive level and
+scale indices keep the dependent proof fast to elaborate, with separate
+closed-form lemmas recovering `level + 2 * depth` and `4 ^ depth * bound`.
+Conversely, an existing even `VerticalSeamPath` or `HorizontalSeamPath` now
+recovers a target in the source's exact hierarchy family, so the established
+created-coordinate path audits can seed the target recurrence.
+
+The predecessor audit's published interface currently retains only a common
+two-cell block.  A finite diagnostic strengthening the selected predecessor to
+`oldColumn = coarseCoordinate fineColumn` (and the row-dual equality) succeeds
+for all 104 parent tiles.  The next step is to package this stronger exact
+predecessor certificate and use it to connect created-path seeds to the
+all-depth target iteration without a coordinate mismatch branch.
 
 ### 1. Obtain arbitrarily large free squares
 
