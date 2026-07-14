@@ -1197,6 +1197,13 @@ light-board construction.  Consequently `forcesRoutedFixedCornerSquares_of_stepD
 requires only semantic `StepData` at the used depths; the unused even depth-zero
 face obligation has disappeared from the final forward theorem surface.
 
+`PairCoverSeamResidualDirectPathAllFamilyTargets` isolates the target state
+that is actually closed under coarse projection: unlike the older residual
+interface, it does not require the projected free-line coordinate to remain
+newly created.  The cached even path base proves this stronger state directly,
+and the module sits downstream of all native audits so the remaining target
+recurrence can be developed without invalidating finite certificates.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
