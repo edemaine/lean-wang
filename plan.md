@@ -1215,9 +1215,14 @@ from the selected seed gives a closed subsystem of 312 context/state nodes.
 The SAT search was used only to discover the two finite tables; Lean's native
 checker independently reconstructs the expansions and verifies that every
 reachable node has all 16 children, every child remains reachable, and all
-generated horizontal and vertical boundaries are compatible.  The next proof
-step is to iterate this checked child system into finite shaded supertiles and
-feed those rectangles to the routed-core patch constructor.
+generated horizontal and vertical boundaries are compatible.  A second
+all-pairs audit verifies that every compatible pair among the 312 reachable
+states preserves its compatibility under expansion; this is the induction
+invariant needed across descendants with different immediate parents.  The
+proof-facing API packages reachability as a `Node` subtype with a total
+`Fin 16` child operation and now defines its iterated `4 x 4` supertile grids.
+The next step is to prove bounded shade-rectangle validity for those grids and
+feed the resulting rectangles to the routed-core patch constructor.
 
 ### 3. Package and finish
 

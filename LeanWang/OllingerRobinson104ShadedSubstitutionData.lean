@@ -248,10 +248,62 @@ def modelNodeValid (node : Nat) : Bool :=
   (modelData node).isSome && decide ((children node).length = 16) &&
     modelBoundariesValid node
 
+/-- Local shade validity and matching of one selected `4 x 4` expansion. -/
+def expansionInternallyValid (data : DecoratedData) : Bool :=
+  decide (data.expansion.length = 16) &&
+    ((List.range 16).all fun position =>
+        match data.expansion[position]? with
+        | none => false
+        | some block =>
+            decide (block ∈ validShadeBlocks
+              (fineGrid data.parent (position % 4) (position / 4)))) &&
+    ((List.range 3).all fun x => (List.range 4).all fun y =>
+        match data.expansion[x + 4 * y]?, data.expansion[x + 1 + 4 * y]? with
+        | some left, some right => left.hMatches right
+        | _, _ => false) &&
+    ((List.range 4).all fun x => (List.range 3).all fun y =>
+        match data.expansion[x + 4 * y]?, data.expansion[x + 4 * (y + 1)]? with
+        | some lower, some upper => lower.vMatches upper
+        | _, _ => false)
+
+/-- Exact relation between one selected expansion entry and its encoded child. -/
+def modelChildValid (node position : Nat) : Bool :=
+  match modelData node, childNode node position with
+  | some data, some child =>
+      match modelData child, data.expansion[position]? with
+      | some childData, some block =>
+          decide (child ∈ reachable) &&
+            decide (childData.parent =
+              fineGrid data.parent (position % 4) (position / 4)) &&
+            decide (childData.block = block)
+      | _, _ => false
+  | _, _ => false
+
 /-- Executable closure and compatibility audit. -/
 def reachableClosed : Bool :=
   reachable.all fun node =>
     modelNodeValid node && (children node).all fun child => child ∈ reachable
+
+/-- Every pair of reachable decorated states preserves any horizontal or
+vertical compatibility it already has when both states are expanded. -/
+def reachablePairsValid : Bool :=
+  reachable.all fun first => reachable.all fun second =>
+    match modelData first, modelData second with
+    | some firstData, some secondData =>
+        decoratedHCompatible firstData secondData &&
+          decoratedVCompatible firstData secondData
+    | _, _ => false
+
+/-- Proof-facing structural audit for recursively iterating the selected
+decorated substitution. -/
+def reachableStructureValid : Bool :=
+  reachable.all fun node =>
+    match modelData node with
+    | none => false
+    | some data =>
+        decide (data.block ∈ validShadeBlocks data.parent) &&
+          expansionInternallyValid data &&
+          (List.range 16).all fun position => modelChildValid node position
 
 end ShadedSubstitution
 end Closed104
