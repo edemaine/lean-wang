@@ -145,16 +145,30 @@ def expansionVMatches (lower upper : List ShadeBlock) : Bool :=
     | some lowerBlock, some upperBlock => lowerBlock.vMatches upperBlock
     | _, _ => false
 
+def indexExpansionHMatches (left right : Index) : Bool :=
+  (List.range 4).all fun y =>
+    decide (WangTile.HMatches
+      (tile (components (fineGrid left 3 y)))
+      (tile (components (fineGrid right 0 y))))
+
+def indexExpansionVMatches (lower upper : Index) : Bool :=
+  (List.range 4).all fun x =>
+    decide (WangTile.VMatches
+      (tile (components (fineGrid lower x 3)))
+      (tile (components (fineGrid upper x 0))))
+
 def decoratedHCompatible (left right : DecoratedData) : Bool :=
   if WangTile.HMatches (tile (components left.parent))
       (tile (components right.parent)) && left.block.hMatches right.block then
-    expansionHMatches left.expansion right.expansion
+    indexExpansionHMatches left.parent right.parent &&
+      expansionHMatches left.expansion right.expansion
   else true
 
 def decoratedVCompatible (lower upper : DecoratedData) : Bool :=
   if WangTile.VMatches (tile (components lower.parent))
       (tile (components upper.parent)) && lower.block.vMatches upper.block then
-    expansionVMatches lower.expansion upper.expansion
+    indexExpansionVMatches lower.parent upper.parent &&
+      expansionVMatches lower.expansion upper.expansion
   else true
 
 /-- SAT-selected expansion-choice bits for the two hierarchy contexts. -/
@@ -259,11 +273,19 @@ def expansionInternallyValid (data : DecoratedData) : Bool :=
               (fineGrid data.parent (position % 4) (position / 4)))) &&
     ((List.range 3).all fun x => (List.range 4).all fun y =>
         match data.expansion[x + 4 * y]?, data.expansion[x + 1 + 4 * y]? with
-        | some left, some right => left.hMatches right
+        | some left, some right =>
+            decide (WangTile.HMatches
+              (tile (components (fineGrid data.parent x y)))
+              (tile (components (fineGrid data.parent (x + 1) y)))) &&
+              left.hMatches right
         | _, _ => false) &&
     ((List.range 4).all fun x => (List.range 3).all fun y =>
         match data.expansion[x + 4 * y]?, data.expansion[x + 4 * (y + 1)]? with
-        | some lower, some upper => lower.vMatches upper
+        | some lower, some upper =>
+            decide (WangTile.VMatches
+              (tile (components (fineGrid data.parent x y)))
+              (tile (components (fineGrid data.parent x (y + 1))))) &&
+              lower.vMatches upper
         | _, _ => false)
 
 /-- Exact relation between one selected expansion entry and its encoded child. -/

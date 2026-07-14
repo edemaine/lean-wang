@@ -64,6 +64,18 @@ theorem decoratedCompatible_of_mem {first second : Nat}
     cases hsecondData : modelData second <;>
     simp_all [Bool.and_eq_true]
 
+theorem decoratedCompatible_data_of_mem
+    {first second : Nat} {firstData secondData : DecoratedData}
+    (hfirst : first ∈ reachable) (hsecond : second ∈ reachable)
+    (hfirstData : modelData first = some firstData)
+    (hsecondData : modelData second = some secondData) :
+    decoratedHCompatible firstData secondData = true ∧
+      decoratedVCompatible firstData secondData = true := by
+  have firstChecked := List.all_eq_true.1 reachablePairsValid_eq_true
+    first hfirst
+  have pairChecked := List.all_eq_true.1 firstChecked second hsecond
+  simpa only [hfirstData, hsecondData, Bool.and_eq_true] using pairChecked
+
 theorem reachableStructureValid_of_mem {node : Nat}
     (hnode : node ∈ reachable) :
     match modelData node with
@@ -84,6 +96,15 @@ theorem reachableStructureValid_of_mem {node : Nat}
 theorem modelData_exists_of_mem {node : Nat} (hnode : node ∈ reachable) :
     ∃ data, modelData node = some data := by
   exact Option.isSome_iff_exists.mp (modelData_isSome_of_mem hnode)
+
+theorem modelData_structure_of_mem {node : Nat} {data : DecoratedData}
+    (hnode : node ∈ reachable) (hdata : modelData node = some data) :
+    data.block ∈ validShadeBlocks data.parent ∧
+      expansionInternallyValid data = true := by
+  have checked := List.all_eq_true.1 reachableStructureValid_eq_true node hnode
+  simp only [hdata, decide_eq_true_eq, Bool.and_eq_true,
+    List.all_eq_true] at checked
+  exact checked.1
 
 theorem modelChildValid_of_mem {node position : Nat}
     (hnode : node ∈ reachable) (hposition : position < 16) :

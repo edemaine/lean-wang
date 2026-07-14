@@ -1220,9 +1220,12 @@ all-pairs audit verifies that every compatible pair among the 312 reachable
 states preserves its compatibility under expansion; this is the induction
 invariant needed across descendants with different immediate parents.  The
 proof-facing API packages reachability as a `Node` subtype with a total
-`Fin 16` child operation and now defines its iterated `4 x 4` supertile grids.
-The next step is to prove bounded shade-rectangle validity for those grids and
-feed the resulting rectangles to the routed-core patch constructor.
+`Fin 16` child operation and defines its iterated `4 x 4` supertile grids.
+The resulting flattening theorem constructs, for every level, a concrete
+quarter-state square of side `2 * 4^level` and proves all local shade rules and
+all internal horizontal and vertical matches.  The next step is to align these
+valid shaded supertiles with the audited free-grid geometry and feed them to
+the routed-core patch constructor.
 
 ### 3. Package and finish
 
