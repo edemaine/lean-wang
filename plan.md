@@ -1064,6 +1064,17 @@ boundary.  Consequently the remaining finite endpoint transition only needs
 to handle genuinely created query coordinates and the local connector from
 the actual fine source; it no longer needs to re-prove sparse target transport.
 
+The first forward endpoint-transition audit is now proof-producing and split
+into independently cached chunks.  Starting from an exact sparse copy of a
+coarse horizontal or vertical target, it searches the corresponding `8 x 8`
+two-substitution macrocell for an even route to every aligned fine coordinate,
+while constraining the new parallel coordinate to the old target's sparse
+interval.  Search soundness recovers a `BoundedPath`; no Boolean result is
+trusted directly.  The audit succeeds for all parent tiles `8..103`.  Exactly
+the first eight parent tiles remain exceptional, so the next semantic lift can
+use the generic certificate outside that finite family and isolate only those
+eight transition cases.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
