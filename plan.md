@@ -1123,6 +1123,11 @@ recursion.  In particular, the even certificate now closes the complete
 selection.  Projection can place a created query coordinate exactly on the
 coarse collar's lower edge, so the remaining recursion must handle that case
 explicitly instead of assuming strict bounds survive every projection.
+The exact predecessor now retains a family-polymorphic transport theorem as
+well: a base or diagonal finite certificate may choose either hierarchy
+family, and that chosen source/target pair transports together to the fine
+query.  This avoids fixing an unrelated family witness before endpoint
+selection.
 
 ### 1. Obtain arbitrarily large free squares
 

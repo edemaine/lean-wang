@@ -61,6 +61,16 @@ structure HorizontalExactInheritedSource
     Signals.horizontalInterior?
       (componentAt (refinedGrid phase (depth + 2) grid) column boundary)
       (quadrantAt column boundary)
+  refineFamily : ∀ selectedFamily,
+    CanonicalCycleAncestorWithinFamily
+        (refinedGrid phase (depth + 1) grid)
+        (horizontalPort (refinedGrid phase (depth + 1) grid)
+          (coarseCoordinate column) oldBoundary)
+        (outerLevel phase depth) parentX parentY selectedFamily →
+      CanonicalCycleAncestorWithinFamily
+        (refinedGrid phase (depth + 2) grid)
+        (horizontalPort (refinedGrid phase (depth + 2) grid) column boundary)
+        (outerLevel phase (depth + 1)) parentX parentY selectedFamily
   oldFamily : CanonicalCycleAncestorWithinFamily
     (refinedGrid phase (depth + 1) grid)
     (horizontalPort (refinedGrid phase (depth + 1) grid)
@@ -95,6 +105,16 @@ structure VerticalExactInheritedSource
     Signals.verticalInterior?
       (componentAt (refinedGrid phase (depth + 2) grid) boundary row)
       (quadrantAt boundary row)
+  refineFamily : ∀ selectedFamily,
+    CanonicalCycleAncestorWithinFamily
+        (refinedGrid phase (depth + 1) grid)
+        (verticalPort (refinedGrid phase (depth + 1) grid)
+          oldBoundary (coarseCoordinate row))
+        (outerLevel phase depth) parentX parentY selectedFamily →
+      CanonicalCycleAncestorWithinFamily
+        (refinedGrid phase (depth + 2) grid)
+        (verticalPort (refinedGrid phase (depth + 2) grid) boundary row)
+        (outerLevel phase (depth + 1)) parentX parentY selectedFamily
   oldFamily : CanonicalCycleAncestorWithinFamily
     (refinedGrid phase (depth + 1) grid)
     (verticalPort (refinedGrid phase (depth + 1) grid)
@@ -167,15 +187,27 @@ theorem horizontalExactInheritedSource
       simpa only [oldGrid] using oldInterior)
   rcases CanonicalCycleAncestorWithin.exists_family oldAncestor with
     ⟨family, oldFamily⟩
-  have fineFamily := oldFamily.refineThrough
-    (horizontalPort_present_of_interior (by
-      simpa only [oldGrid] using oldInterior)) connector
+  have refineFamily : ∀ selectedFamily,
+      CanonicalCycleAncestorWithinFamily
+          (refinedGrid phase (depth + 1) grid)
+          (horizontalPort (refinedGrid phase (depth + 1) grid)
+            (coarseCoordinate column) oldBoundary)
+          (outerLevel phase depth) parentX parentY selectedFamily →
+        CanonicalCycleAncestorWithinFamily
+          (refinedGrid phase (depth + 2) grid)
+          (horizontalPort (refinedGrid phase (depth + 2) grid) column boundary)
+          (outerLevel phase (depth + 1)) parentX parentY selectedFamily := by
+    intro selectedFamily ancestor
+    have refined := ancestor.refineThrough
+      (horizontalPort_present_of_interior (by
+        simpa only [oldGrid] using oldInterior)) connector
+    simpa only [oldGrid, fineGrid_eq phase depth grid,
+      outerLevel_succ phase depth] using refined
+  have fineFamily := refineFamily family oldFamily
   refine ⟨⟨oldBoundary, family, oldColumnBounds, oldBoundaryBounds,
-    boundarySparse, ?_, ?_, oldFamily, ?_⟩⟩
+    boundarySparse, ?_, ?_, refineFamily, oldFamily, fineFamily⟩⟩
   · simpa only [oldGrid] using oldInterior
   · simpa only [oldGrid, fineGrid_eq phase depth grid] using orientationEq
-  · simpa only [oldGrid, fineGrid_eq phase depth grid,
-      outerLevel_succ phase depth] using fineFamily
 
 set_option maxHeartbeats 1000000 in
 -- The family witness depends on the exact predecessor endpoint.
@@ -227,15 +259,27 @@ theorem verticalExactInheritedSource
       simpa only [oldGrid] using oldInterior)
   rcases CanonicalCycleAncestorWithin.exists_family oldAncestor with
     ⟨family, oldFamily⟩
-  have fineFamily := oldFamily.refineThrough
-    (verticalPort_present_of_interior (by
-      simpa only [oldGrid] using oldInterior)) connector
+  have refineFamily : ∀ selectedFamily,
+      CanonicalCycleAncestorWithinFamily
+          (refinedGrid phase (depth + 1) grid)
+          (verticalPort (refinedGrid phase (depth + 1) grid)
+            oldBoundary (coarseCoordinate row))
+          (outerLevel phase depth) parentX parentY selectedFamily →
+        CanonicalCycleAncestorWithinFamily
+          (refinedGrid phase (depth + 2) grid)
+          (verticalPort (refinedGrid phase (depth + 2) grid) boundary row)
+          (outerLevel phase (depth + 1)) parentX parentY selectedFamily := by
+    intro selectedFamily ancestor
+    have refined := ancestor.refineThrough
+      (verticalPort_present_of_interior (by
+        simpa only [oldGrid] using oldInterior)) connector
+    simpa only [oldGrid, fineGrid_eq phase depth grid,
+      outerLevel_succ phase depth] using refined
+  have fineFamily := refineFamily family oldFamily
   refine ⟨⟨oldBoundary, family, oldBoundaryBounds, oldRowBounds,
-    boundarySparse, ?_, ?_, oldFamily, ?_⟩⟩
+    boundarySparse, ?_, ?_, refineFamily, oldFamily, fineFamily⟩⟩
   · simpa only [oldGrid] using oldInterior
   · simpa only [oldGrid, fineGrid_eq phase depth grid] using orientationEq
-  · simpa only [oldGrid, fineGrid_eq phase depth grid,
-      outerLevel_succ phase depth] using fineFamily
 
 set_option maxHeartbeats 1000000 in
 -- The target contains dependent refined-grid family endpoints.
@@ -261,6 +305,40 @@ theorem HorizontalExactInheritedSource.refineTarget
 
 set_option maxHeartbeats 1000000 in
 -- The target contains dependent refined-grid family endpoints.
+/-- Lift a target in any coarse source family, without committing to the
+record's canonical family choice. -/
+theorem HorizontalExactInheritedSource.refineFamilyTarget
+    {phase : Phase} {depth : Nat} {grid : Nat → Nat → Index}
+    {parentX parentY column row boundary : Nat}
+    (source : HorizontalExactInheritedSource phase depth grid
+      parentX parentY column boundary)
+    {selectedFamily : HierarchyFamily}
+    (oldFamily : CanonicalCycleAncestorWithinFamily
+      (refinedGrid phase (depth + 1) grid)
+      (horizontalPort (refinedGrid phase (depth + 1) grid)
+        (coarseCoordinate column) source.oldBoundary)
+      (outerLevel phase depth) parentX parentY selectedFamily)
+    (target : RowFamilyTarget grid (outerLevel phase depth) parentX parentY
+      (successorWest phase depth parentX)
+      (successorEast phase depth parentX)
+      (coarseCoordinate column) (coarseCoordinate row)
+      source.oldBoundary selectedFamily) :
+    CanonicalCycleAncestorWithinFamily
+        (refinedGrid phase (depth + 2) grid)
+        (horizontalPort (refinedGrid phase (depth + 2) grid) column boundary)
+        (outerLevel phase (depth + 1)) parentX parentY selectedFamily ∧
+      RowFamilyTarget grid (outerLevel phase (depth + 1)) parentX parentY
+        (successorWest phase (depth + 1) parentX)
+        (successorEast phase (depth + 1) parentX)
+        column row boundary selectedFamily := by
+  have refined := RowFamilyTarget.refineAt target
+    (fineColumn := column) (fineRow := row) rfl rfl
+  exact ⟨source.refineFamily selectedFamily oldFamily, by
+    simpa only [outerLevel_succ, successorWest_succ, successorEast_succ,
+      source.boundarySparse] using refined⟩
+
+set_option maxHeartbeats 1000000 in
+-- The target contains dependent refined-grid family endpoints.
 /-- Column-dual exact-source target refinement. -/
 theorem VerticalExactInheritedSource.refineTarget
     {phase : Phase} {depth : Nat} {grid : Nat → Nat → Index}
@@ -280,6 +358,39 @@ theorem VerticalExactInheritedSource.refineTarget
     (fineRow := row) (fineColumn := column) rfl rfl
   simpa only [outerLevel_succ, successorWest_succ, successorEast_succ,
     source.boundarySparse] using refined
+
+set_option maxHeartbeats 1000000 in
+-- The target contains dependent refined-grid family endpoints.
+/-- Column-dual arbitrary-family source and target refinement. -/
+theorem VerticalExactInheritedSource.refineFamilyTarget
+    {phase : Phase} {depth : Nat} {grid : Nat → Nat → Index}
+    {parentX parentY boundary row column : Nat}
+    (source : VerticalExactInheritedSource phase depth grid
+      parentX parentY boundary row)
+    {selectedFamily : HierarchyFamily}
+    (oldFamily : CanonicalCycleAncestorWithinFamily
+      (refinedGrid phase (depth + 1) grid)
+      (verticalPort (refinedGrid phase (depth + 1) grid)
+        source.oldBoundary (coarseCoordinate row))
+      (outerLevel phase depth) parentX parentY selectedFamily)
+    (target : ColumnFamilyTarget grid (outerLevel phase depth) parentX parentY
+      (successorWest phase depth parentY)
+      (successorEast phase depth parentY)
+      (coarseCoordinate row) (coarseCoordinate column)
+      source.oldBoundary selectedFamily) :
+    CanonicalCycleAncestorWithinFamily
+        (refinedGrid phase (depth + 2) grid)
+        (verticalPort (refinedGrid phase (depth + 2) grid) boundary row)
+        (outerLevel phase (depth + 1)) parentX parentY selectedFamily ∧
+      ColumnFamilyTarget grid (outerLevel phase (depth + 1)) parentX parentY
+        (successorWest phase (depth + 1) parentY)
+        (successorEast phase (depth + 1) parentY)
+        row column boundary selectedFamily := by
+  have refined := ColumnFamilyTarget.refineAt target
+    (fineRow := row) (fineColumn := column) rfl rfl
+  exact ⟨source.refineFamily selectedFamily oldFamily, by
+    simpa only [outerLevel_succ, successorWest_succ, successorEast_succ,
+      source.boundarySparse] using refined⟩
 
 end PairCoverSeamResidualDirectPathExactPredecessorHierarchy
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
