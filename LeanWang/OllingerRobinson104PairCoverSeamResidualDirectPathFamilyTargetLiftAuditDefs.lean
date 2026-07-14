@@ -21,6 +21,7 @@ namespace PairCoverSeamResidualDirectPathFamilyTargetLiftAudit
 open RedCycles RedShadeGraph RedShadeGraphRefinement
   RedShadeGraphSearchSoundness RedShadeGraphWeightedSearch
   PairCoverSeamShadePaths Signals.FreeCellLocal
+  RefinedCoordinateProjection
 
 set_option maxRecDepth 20000
 
@@ -58,7 +59,8 @@ def horizontalCheckParent (parent : Index) : Bool :=
     (List.range 2).all fun sourceY =>
       !horizontalSourceRequired parent sourceX sourceY ||
         (List.range 8).all fun targetX =>
-          horizontalTargetFound parent sourceX sourceY targetX
+          !decide (coarseCoordinate targetX = sourceX) ||
+            horizontalTargetFound parent sourceX sourceY targetX
 
 def verticalStart (parent : Index) (sourceX sourceY : Nat) : WeightedStart :=
   ⟨sparsePort (verticalPort (coarseGrid parent) sourceX sourceY), false⟩
@@ -90,7 +92,8 @@ def verticalCheckParent (parent : Index) : Bool :=
     (List.range 2).all fun sourceY =>
       !verticalSourceRequired parent sourceX sourceY ||
         (List.range 8).all fun targetY =>
-          verticalTargetFound parent sourceX sourceY targetY
+          !decide (coarseCoordinate targetY = sourceY) ||
+            verticalTargetFound parent sourceX sourceY targetY
 
 def checkParent (parent : Index) : Bool :=
   horizontalCheckParent parent && verticalCheckParent parent
@@ -189,6 +192,7 @@ theorem horizontalTargetFound_of_checkParent
     (checked : checkParent parent = true)
     (sourceXLt : sourceX < 2) (sourceYLt : sourceY < 2)
     (targetXLt : targetX < 8)
+    (targetAligned : coarseCoordinate targetX = sourceX)
     (sourceInterior : Signals.horizontalInterior?
       (componentAt (coarseGrid parent) sourceX sourceY)
       (quadrantAt sourceX sourceY) ≠ none) :
@@ -199,9 +203,11 @@ theorem horizontalTargetFound_of_checkParent
   have horizontal := checked.1
   simp only [horizontalCheckParent, List.all_eq_true, List.mem_range] at horizontal
   have source := horizontal sourceX sourceXLt sourceY sourceYLt
-  simp only [required, Bool.not_true, Bool.false_or, List.all_eq_true,
-    List.mem_range] at source
-  exact source targetX targetXLt
+  simp only [required, Bool.not_true, Bool.false_or] at source
+  simp only [List.all_eq_true, List.mem_range] at source
+  have target := source targetX targetXLt
+  simp only [targetAligned, decide_true, Bool.not_true, Bool.false_or] at target
+  exact target
 
 /-- Vertical dual of `horizontalTargetFound_of_checkParent`. -/
 theorem verticalTargetFound_of_checkParent
@@ -209,6 +215,7 @@ theorem verticalTargetFound_of_checkParent
     (checked : checkParent parent = true)
     (sourceXLt : sourceX < 2) (sourceYLt : sourceY < 2)
     (targetYLt : targetY < 8)
+    (targetAligned : coarseCoordinate targetY = sourceY)
     (sourceInterior : Signals.verticalInterior?
       (componentAt (coarseGrid parent) sourceX sourceY)
       (quadrantAt sourceX sourceY) ≠ none) :
@@ -219,9 +226,11 @@ theorem verticalTargetFound_of_checkParent
   have vertical := checked.2
   simp only [verticalCheckParent, List.all_eq_true, List.mem_range] at vertical
   have source := vertical sourceX sourceXLt sourceY sourceYLt
-  simp only [required, Bool.not_true, Bool.false_or, List.all_eq_true,
-    List.mem_range] at source
-  exact source targetY targetYLt
+  simp only [required, Bool.not_true, Bool.false_or] at source
+  simp only [List.all_eq_true, List.mem_range] at source
+  have target := source targetY targetYLt
+  simp only [targetAligned, decide_true, Bool.not_true, Bool.false_or] at target
+  exact target
 
 end PairCoverSeamResidualDirectPathFamilyTargetLiftAudit
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104

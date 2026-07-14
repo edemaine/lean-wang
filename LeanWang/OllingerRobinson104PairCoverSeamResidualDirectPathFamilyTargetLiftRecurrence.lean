@@ -9,9 +9,9 @@ import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetLi
 # Semantic recurrence from transported family-target lifts
 
 Each constructor below lifts one of the two alternatives in `RowFamilyTarget`
-or `ColumnFamilyTarget` to arbitrary fine query coordinates.  It asks only
-that the single macrocell containing the selected old target is outside the
-eight exceptional parent tiles.
+or `ColumnFamilyTarget` to arbitrary fine query coordinates.  The finite audit
+is restricted to coordinates selected by the old target's sparse interval, so
+the constructors apply uniformly to all 104 parent tiles.
 -/
 
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
@@ -52,17 +52,12 @@ theorem RowFamilyTarget.ofVerticalLift
     (targetFamily : CanonicalCycleAncestorWithinFamily
       (iterateRefine (outerLevel + 2) root)
       (verticalPort (iterateRefine (outerLevel + 2) root) targetX oldRow)
-      outerLevel outerBlockX outerBlockY family)
-    (nonexceptional : 8 ≤
-      (iterateRefine (outerLevel + 2) root (targetX / 2) (oldRow / 2)).val) :
+      outerLevel outerBlockX outerBlockY family) :
     RowFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
       (4 * outerWest) (4 * outerEast)
       fineColumn fineRow fineBoundary family := by
   let oldGrid := iterateRefine (outerLevel + 2) root
-  have sameBlock : oldRow / 2 = fineRow / 8 :=
-    div_two_eq_div_eight_of_coarseCoordinate rowCoarse
-  rcases verticalTargetFamily oldGrid targetX oldRow fineRow sameBlock
-      (by simpa only [oldGrid] using nonexceptional)
+  rcases verticalTargetFamily oldGrid targetX oldRow fineRow rowCoarse
       (by simpa only [oldGrid] using targetInterior)
       (by simpa only [oldGrid] using targetFamily) with
     ⟨fineTargetX, targetCoarse, fineInterior, fineFamily⟩
@@ -93,18 +88,12 @@ theorem RowFamilyTarget.ofHorizontalLift
     (targetFamily : CanonicalCycleAncestorWithinFamily
       (iterateRefine (outerLevel + 2) root)
       (horizontalPort (iterateRefine (outerLevel + 2) root) oldColumn targetY)
-      outerLevel outerBlockX outerBlockY family)
-    (nonexceptional : 8 ≤
-      (iterateRefine (outerLevel + 2) root
-        (oldColumn / 2) (targetY / 2)).val) :
+      outerLevel outerBlockX outerBlockY family) :
     RowFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
       (4 * outerWest) (4 * outerEast)
       fineColumn fineRow (sparseCoordinate oldBoundary) family := by
   let oldGrid := iterateRefine (outerLevel + 2) root
-  have sameBlock : oldColumn / 2 = fineColumn / 8 :=
-    div_two_eq_div_eight_of_coarseCoordinate columnCoarse
-  rcases horizontalTargetFamily oldGrid oldColumn targetY fineColumn sameBlock
-      (by simpa only [oldGrid] using nonexceptional)
+  rcases horizontalTargetFamily oldGrid oldColumn targetY fineColumn columnCoarse
       (by simpa only [oldGrid] using targetInterior)
       (by simpa only [oldGrid] using targetFamily) with
     ⟨fineTargetY, targetCoarse, fineInterior, fineFamily⟩
@@ -133,18 +122,12 @@ theorem ColumnFamilyTarget.ofHorizontalLift
     (targetFamily : CanonicalCycleAncestorWithinFamily
       (iterateRefine (outerLevel + 2) root)
       (horizontalPort (iterateRefine (outerLevel + 2) root) oldColumn targetY)
-      outerLevel outerBlockX outerBlockY family)
-    (nonexceptional : 8 ≤
-      (iterateRefine (outerLevel + 2) root
-        (oldColumn / 2) (targetY / 2)).val) :
+      outerLevel outerBlockX outerBlockY family) :
     ColumnFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
       (4 * outerSouth) (4 * outerNorth)
       fineRow fineColumn fineBoundary family := by
   let oldGrid := iterateRefine (outerLevel + 2) root
-  have sameBlock : oldColumn / 2 = fineColumn / 8 :=
-    div_two_eq_div_eight_of_coarseCoordinate columnCoarse
-  rcases horizontalTargetFamily oldGrid oldColumn targetY fineColumn sameBlock
-      (by simpa only [oldGrid] using nonexceptional)
+  rcases horizontalTargetFamily oldGrid oldColumn targetY fineColumn columnCoarse
       (by simpa only [oldGrid] using targetInterior)
       (by simpa only [oldGrid] using targetFamily) with
     ⟨fineTargetY, targetCoarse, fineInterior, fineFamily⟩
@@ -180,17 +163,12 @@ theorem ColumnFamilyTarget.ofVerticalLift
     (targetFamily : CanonicalCycleAncestorWithinFamily
       (iterateRefine (outerLevel + 2) root)
       (verticalPort (iterateRefine (outerLevel + 2) root) targetX oldRow)
-      outerLevel outerBlockX outerBlockY family)
-    (nonexceptional : 8 ≤
-      (iterateRefine (outerLevel + 2) root (targetX / 2) (oldRow / 2)).val) :
+      outerLevel outerBlockX outerBlockY family) :
     ColumnFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
       (4 * outerSouth) (4 * outerNorth)
       fineRow fineColumn (sparseCoordinate oldBoundary) family := by
   let oldGrid := iterateRefine (outerLevel + 2) root
-  have sameBlock : oldRow / 2 = fineRow / 8 :=
-    div_two_eq_div_eight_of_coarseCoordinate rowCoarse
-  rcases verticalTargetFamily oldGrid targetX oldRow fineRow sameBlock
-      (by simpa only [oldGrid] using nonexceptional)
+  rcases verticalTargetFamily oldGrid targetX oldRow fineRow rowCoarse
       (by simpa only [oldGrid] using targetInterior)
       (by simpa only [oldGrid] using targetFamily) with
     ⟨fineTargetX, targetCoarse, fineInterior, fineFamily⟩

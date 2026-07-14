@@ -12,16 +12,15 @@ import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetLi
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetLiftAuditChunk06
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetLiftAuditChunk07
 
-/-! Assemble the cached forward family-target lift audit outside parents 0--7. -/
+/-! Assemble the cached forward family-target lift audit for all 104 parents. -/
 
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
 namespace PairCoverSeamResidualDirectPathFamilyTargetLiftAudit
 
-theorem complete (parent : Index) (nonexceptional : 8 <= parent.val) :
-    checkParent parent = true := by
+theorem complete (parent : Index) : checkParent parent = true := by
   by_cases h20 : parent.val < 20
   · exact PairCoverSeamResidualDirectPathFamilyTargetLiftAuditChunk00.complete
-      parent nonexceptional h20
+      parent (by omega) h20
   by_cases h32 : parent.val < 32
   · exact PairCoverSeamResidualDirectPathFamilyTargetLiftAuditChunk01.complete
       parent (by omega) h32

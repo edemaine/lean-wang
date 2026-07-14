@@ -1070,22 +1070,22 @@ coarse horizontal or vertical target, it searches the corresponding `8 x 8`
 two-substitution macrocell for an even route to every aligned fine coordinate,
 while constraining the new parallel coordinate to the old target's sparse
 interval.  Search soundness recovers a `BoundedPath`; no Boolean result is
-trusted directly.  The audit succeeds for all parent tiles `8..103`.  Exactly
-the first eight parent tiles remain exceptional, so the next semantic lift can
-use the generic certificate outside that finite family and isolate only those
-eight transition cases.
+trusted directly.  An initial diagnostic appeared to fail on parent tiles
+`0..7`, but those cases all asked for a fine coordinate in the same `8`-block
+rather than in the old target's actual sparse interval.  After restricting the
+checker to `coarseCoordinate fine = old`, the audit succeeds for all 104 parent
+tiles.
 
-That semantic lift is now complete for every nonexceptional selected target.
+The semantic lift is therefore complete for every selected target.
 The local bounded path translates into an arbitrary hierarchy macrocell, and
 the translated endpoint is proved to have the same `coarseCoordinate` as the
 old target.  A strengthened interval theorem lifts strict betweenness when
 both the query and target are arbitrary points of their respective sparse
 intervals.  Four branch-specific constructors now cover the transverse and
 parallel alternatives of `RowFamilyTarget` and `ColumnFamilyTarget`, preserving
-board bounds, live interiors, and the exact hierarchy family.  Each constructor
-requires only that its one selected parent tile has index at least eight.  The
-remaining recurrence problem is therefore a finite transition for parent
-tiles `0..7`, not a global path-transport obligation.
+board bounds, live interiors, and the exact hierarchy family.  No exceptional
+parent hypothesis remains.  The next recurrence step is to apply these four
+constructors to inherited row and column targets at every hierarchy depth.
 
 ### 1. Obtain arbitrarily large free squares
 
