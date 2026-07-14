@@ -37,13 +37,13 @@ def nodes (parent : Index) : List Node :=
 
 def verticalReached (parent : Index) (offset quarterX : Nat) (node : Node) : Bool :=
   node.parity &&
-    RedShadeGraphRefinement.portPresent (localGrid parent) node.current &&
+    RedShadeGraph.portPresent (localGrid parent) node.current &&
     (decide (node.current = ⟨quarterX, 9 + offset, .south⟩) ||
       decide (node.current = ⟨quarterX, 9 + offset, .north⟩))
 
 def horizontalReached (parent : Index) (offset quarterY : Nat) (node : Node) : Bool :=
   node.parity &&
-    RedShadeGraphRefinement.portPresent (localGrid parent) node.current &&
+    RedShadeGraph.portPresent (localGrid parent) node.current &&
     (decide (node.current = ⟨9 + offset, quarterY, .west⟩) ||
       decide (node.current = ⟨9 + offset, quarterY, .east⟩))
 
