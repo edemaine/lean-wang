@@ -1178,6 +1178,15 @@ certificates instantiate it, so the all-depth proof can recurse over a small
 proof-level state without exposing finite flood or checker implementation
 details.
 
+The all-depth boundary-face induction is now packaged independently of the
+finite searches. `PairCoverSeamFaceRecurrence.StepData` contains exactly the
+created-coordinate paths and direct residual paths consumed by one refinement;
+same-family targets instantiate its residual field. The cached odd depth-zero
+and even depth-one bounded searches seed the two face families, and
+`requiredFaces` iterates precisely the odd depths `d` and even depths `1 + d`
+used by the final light-board construction. Thus no all-depth `BoundedPaths`
+hypothesis is required by the retained forward architecture.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
