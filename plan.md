@@ -1137,6 +1137,10 @@ The checker reuses one indexed pair of family floods per parent and is split
 into 26 four-parent chunks; only depth-zero even and odd certificates are
 needed, because arbitrary-family predecessor transport lifts these seeds to
 all later hierarchy levels.
+All 26 chunks are now certified in both phases and assembled as
+`PairCoverSeamResidualDirectPathFamilyExceptionalBase.evenTargets` and
+`.oddTargets`.  The expensive finite computation is therefore isolated behind
+two proof-level depth-zero target interfaces.
 
 ### 1. Obtain arbitrarily large free squares
 
