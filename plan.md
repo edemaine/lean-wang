@@ -1132,7 +1132,10 @@ selection.
 The two projection-stopping cases are now represented by a small finite
 interface, `BoundedExceptionalTargetsAt`.  It checks the source boundary for
 north/east sources (the relation-collapse case) and the lower collar edge for
-south/west sources (the bound-collapse case).
+south/west sources (the bound-collapse case).  The same certificate also
+checks every ordinary residual query when the transverse source coordinate is
+exactly the lower collar edge; this is the remaining weak-bound case omitted
+by the strict cached seam-path interface.
 The checker reuses one indexed pair of family floods per parent and is split
 into 26 four-parent chunks; only depth-zero even and odd certificates are
 needed, because arbitrary-family predecessor transport lifts these seeds to
@@ -1149,7 +1152,8 @@ the projected sparse source boundary remains strictly inside.  The query
 projection is packaged into four cases with preserved orientation: ordinary
 strict south/west and north/east queries, south/west at the lower edge, and
 north/east equal to the source boundary.  Thus the remaining recursion can
-dispatch its two stopping cases directly to the certified exceptional base.
+dispatch its stopping cases and lower-edge transverse sources directly to the
+certified exceptional base.
 
 ### 1. Obtain arbitrarily large free squares
 

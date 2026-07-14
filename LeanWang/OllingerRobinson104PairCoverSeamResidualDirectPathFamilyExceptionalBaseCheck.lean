@@ -38,19 +38,29 @@ def weakCoordinates (phase : Phase) (depth : Nat) : List Nat :=
 
 def rowExceptionalQueries (phase : Phase) (depth : Nat)
     (grid : Nat → Nat → Index) (column boundary : Nat) : List Nat :=
-  match Signals.horizontalInterior?
-      (componentAt grid column boundary) (quadrantAt column boundary) with
-  | some .north => [boundary]
-  | some .south => [quarterSouth (successorWest phase depth 0)]
-  | none => []
+  let stopping :=
+    match Signals.horizontalInterior?
+        (componentAt grid column boundary) (quadrantAt column boundary) with
+    | some .north => [boundary]
+    | some .south => [quarterSouth (successorWest phase depth 0)]
+    | none => []
+  stopping ++
+    if column = quarterSouth (successorWest phase depth 0) then
+      verticalQueries phase depth grid (coordinates phase depth) column boundary
+    else []
 
 def columnExceptionalQueries (phase : Phase) (depth : Nat)
     (grid : Nat → Nat → Index) (boundary row : Nat) : List Nat :=
-  match Signals.verticalInterior?
-      (componentAt grid boundary row) (quadrantAt boundary row) with
-  | some .east => [boundary]
-  | some .west => [quarterWest (successorWest phase depth 0)]
-  | none => []
+  let stopping :=
+    match Signals.verticalInterior?
+        (componentAt grid boundary row) (quadrantAt boundary row) with
+    | some .east => [boundary]
+    | some .west => [quarterWest (successorWest phase depth 0)]
+    | none => []
+  stopping ++
+    if row = quarterWest (successorWest phase depth 0) then
+      horizontalQueries phase depth grid (coordinates phase depth) row boundary
+    else []
 
 /-- Proof-level interface extracted from the exceptional finite check. -/
 structure BoundedExceptionalParentTargetsAt
