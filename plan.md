@@ -498,6 +498,18 @@ geometry, direct semantic transition rows, and their step/halting simulation.
   enumerations. Every ordered `FreeGrid` witness injects into these sets, so a
   size-`n` recursive witness certifies at least `n` actual free rows and columns
   for the later consecutive-channel routing argument.
+- A finite reachable-state certificate now selects compatible shade blocks
+  through every `4 x 4` substitution step. Iterating its total child operation
+  constructs valid shaded supertiles of side `2 * 4^level` at every depth.
+- Every finite valid shaded rectangle admits a matching obstruction-signal
+  decoration: horizontal and vertical signal constraints split into independent
+  one-dimensional flow paths, each of which can be extended through every
+  selected-border orientation.
+- Flattening the shaded supertiles into corrected quarter tiles preserves both
+  internal and parent-boundary Wang matches. Combining those matches with the
+  shade and signal edges gives genuine `ShadedSignals.tileSet` squares at
+  cofinal side lengths; square compactness therefore proves an unconditional
+  plane tiling of the concrete scaffold tileset.
 
 ## Remaining scaffold proof
 
