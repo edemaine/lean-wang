@@ -39,8 +39,14 @@ def horizontalAt (parent : Index) (sourceY targetX : Nat) : Bool :=
     ((Signals.horizontalInterior?
       (componentAt coarse sourceX sourceY)
       (quadrantAt sourceX sourceY)).isSome &&
-    reachesEven parent [horizontalStart parent sourceY targetX]
-      (horizontalPort fine targetX targetY))
+    (decide (Signals.horizontalInterior?
+        (componentAt coarse sourceX sourceY)
+        (quadrantAt sourceX sourceY) =
+      Signals.horizontalInterior?
+        (componentAt fine targetX targetY)
+        (quadrantAt targetX targetY)) &&
+      reachesEven parent [horizontalStart parent sourceY targetX]
+        (horizontalPort fine targetX targetY)))
 
 def verticalStart (parent : Index) (sourceX targetY : Nat) : WeightedStart :=
   ⟨sparsePort (verticalPort (coarseGrid parent)
@@ -57,8 +63,14 @@ def verticalAt (parent : Index) (sourceX targetY : Nat) : Bool :=
     ((Signals.verticalInterior?
       (componentAt coarse sourceX sourceY)
       (quadrantAt sourceX sourceY)).isSome &&
-    reachesEven parent [verticalStart parent sourceX targetY]
-      (verticalPort fine targetX targetY))
+    (decide (Signals.verticalInterior?
+        (componentAt coarse sourceX sourceY)
+        (quadrantAt sourceX sourceY) =
+      Signals.verticalInterior?
+        (componentAt fine targetX targetY)
+        (quadrantAt targetX targetY)) &&
+      reachesEven parent [verticalStart parent sourceX targetY]
+        (verticalPort fine targetX targetY)))
 
 def checkParent (parent : Index) : Bool :=
   ((List.range 2).all fun sourceY =>
@@ -107,6 +119,12 @@ theorem horizontalAt_sound
     Signals.horizontalInterior?
         (componentAt (coarseGrid parent) (coarseCoordinate targetX) sourceY)
         (quadrantAt (coarseCoordinate targetX) sourceY) ≠ none ∧
+      Signals.horizontalInterior?
+          (componentAt (coarseGrid parent) (coarseCoordinate targetX) sourceY)
+          (quadrantAt (coarseCoordinate targetX) sourceY) =
+        Signals.horizontalInterior?
+          (componentAt (fineGrid parent) targetX (sparseCoordinate sourceY))
+          (quadrantAt targetX (sparseCoordinate sourceY)) ∧
       BoundedPath (fineGrid parent) 8 8
         (sparsePort (horizontalPort (coarseGrid parent)
           (coarseCoordinate targetX) sourceY))
@@ -117,8 +135,8 @@ theorem horizontalAt_sound
       (quadrantAt targetX (sparseCoordinate sourceY))).isSome = true :=
     Option.isSome_iff_ne_none.mpr interior
   simp only [horizontalAt, required, Bool.not_true, Bool.false_or,
-    Bool.and_eq_true] at checked
-  refine ⟨Option.isSome_iff_ne_none.mp checked.1, ?_⟩
+    Bool.and_eq_true, decide_eq_true_eq] at checked
+  refine ⟨Option.isSome_iff_ne_none.mp checked.1, checked.2.1, ?_⟩
   rcases reachesEven_bounded_sound
       (starts := [horizontalStart parent sourceY targetX])
       (by
@@ -131,7 +149,7 @@ theorem horizontalAt_sound
         simp only [List.mem_singleton] at startMem
         subst start
         rfl)
-      checked.2 with ⟨start, startMem, path⟩
+      checked.2.2 with ⟨start, startMem, path⟩
   simp only [List.mem_singleton] at startMem
   subst start
   simpa [horizontalStart] using path
@@ -147,6 +165,12 @@ theorem verticalAt_sound
     Signals.verticalInterior?
         (componentAt (coarseGrid parent) sourceX (coarseCoordinate targetY))
         (quadrantAt sourceX (coarseCoordinate targetY)) ≠ none ∧
+      Signals.verticalInterior?
+          (componentAt (coarseGrid parent) sourceX (coarseCoordinate targetY))
+          (quadrantAt sourceX (coarseCoordinate targetY)) =
+        Signals.verticalInterior?
+          (componentAt (fineGrid parent) (sparseCoordinate sourceX) targetY)
+          (quadrantAt (sparseCoordinate sourceX) targetY) ∧
       BoundedPath (fineGrid parent) 8 8
         (sparsePort (verticalPort (coarseGrid parent)
           sourceX (coarseCoordinate targetY)))
@@ -157,8 +181,8 @@ theorem verticalAt_sound
       (quadrantAt (sparseCoordinate sourceX) targetY)).isSome = true :=
     Option.isSome_iff_ne_none.mpr interior
   simp only [verticalAt, required, Bool.not_true, Bool.false_or,
-    Bool.and_eq_true] at checked
-  refine ⟨Option.isSome_iff_ne_none.mp checked.1, ?_⟩
+    Bool.and_eq_true, decide_eq_true_eq] at checked
+  refine ⟨Option.isSome_iff_ne_none.mp checked.1, checked.2.1, ?_⟩
   rcases reachesEven_bounded_sound
       (starts := [verticalStart parent sourceX targetY])
       (by
@@ -171,7 +195,7 @@ theorem verticalAt_sound
         simp only [List.mem_singleton] at startMem
         subst start
         rfl)
-      checked.2 with ⟨start, startMem, path⟩
+      checked.2.2 with ⟨start, startMem, path⟩
   simp only [List.mem_singleton] at startMem
   subst start
   simpa [verticalStart] using path

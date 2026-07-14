@@ -1102,9 +1102,21 @@ A new proof-producing exact checker instead fixes the selected predecessor to
 native certificates prove this stronger property for all 104 parent tiles.
 Its soundness theorem recovers a bounded even path, and the transport theorem
 moves that path into an arbitrary hierarchy macrocell while preserving the
-exact projection equation.  The next step is to package this exact predecessor
-with the all-depth source-family hierarchy, then connect created-path seeds to
-the target iteration without a coordinate mismatch branch.
+exact projection equation.  The same finite certificate also proves that the
+projected source has exactly the fine source's directional interior, so the
+recursive argument retains the wrong-facing orientation required by the
+created-path seed theorem.
+
+`OllingerRobinson104PairCoverSeamResidualDirectPathExactPredecessorHierarchy`
+packages that exact predecessor with the all-depth source-family hierarchy.
+Its horizontal and vertical records carry the projected coordinate, collar
+bounds, preserved orientation, coarse family ancestor, and refined family
+ancestor.  Their `refineTarget` eliminators lift any target for the exact
+coarse source directly to the original fine query.  The next step is only the
+finite-depth seed recursion: follow exact sparse predecessors until the
+boundary or transverse coordinate is newly created, convert the existing
+created seam path to a same-family target, and apply these eliminators while
+unwinding the recursion.
 
 ### 1. Obtain arbitrarily large free squares
 

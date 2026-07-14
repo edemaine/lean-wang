@@ -36,6 +36,12 @@ def HorizontalExactPredecessor (grid : Nat → Nat → Index)
     Signals.horizontalInterior?
       (componentAt grid (coarseCoordinate column) oldBoundary)
       (quadrantAt (coarseCoordinate column) oldBoundary) ≠ none ∧
+    Signals.horizontalInterior?
+        (componentAt grid (coarseCoordinate column) oldBoundary)
+        (quadrantAt (coarseCoordinate column) oldBoundary) =
+      Signals.horizontalInterior?
+        (componentAt (iterateRefine 2 grid) column boundary)
+        (quadrantAt column boundary) ∧
     Path (iterateRefine 2 grid)
       (horizontalPort (iterateRefine 2 grid) column boundary)
       (sparsePort (horizontalPort grid
@@ -49,6 +55,12 @@ def VerticalExactPredecessor (grid : Nat → Nat → Index)
     Signals.verticalInterior?
       (componentAt grid oldBoundary (coarseCoordinate row))
       (quadrantAt oldBoundary (coarseCoordinate row)) ≠ none ∧
+    Signals.verticalInterior?
+        (componentAt grid oldBoundary (coarseCoordinate row))
+        (quadrantAt oldBoundary (coarseCoordinate row)) =
+      Signals.verticalInterior?
+        (componentAt (iterateRefine 2 grid) boundary row)
+        (quadrantAt boundary row) ∧
     Path (iterateRefine 2 grid)
       (verticalPort (iterateRefine 2 grid) boundary row)
       (sparsePort (verticalPort grid
@@ -151,27 +163,58 @@ theorem horizontalExactPredecessor
   have checked := horizontalAt_of_checkParent
     (complete (grid blockX blockY)) sourceYLt targetXLt
   rcases horizontalAt_sound sourceYLt targetXLt checked localInterior with
-    ⟨sourceInterior, localPath⟩
+    ⟨sourceInterior, orientationEq, localPath⟩
+  have component := componentAt_old_block grid 0 blockX blockY
+    sourceX sourceY sourceXLt sourceYLt
+  have quadrant := quadrantAt_old_block blockX blockY
+    sourceX sourceY sourceXLt sourceYLt
+  have component' : componentAt grid (2 * blockX + sourceX)
+      (2 * blockY + sourceY) =
+      componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY := by
+    simpa only [iterateRefine] using component
+  have oldInteriorEq : Signals.horizontalInterior?
+      (componentAt grid (coarseCoordinate column) oldBoundary)
+      (quadrantAt (coarseCoordinate column) oldBoundary) =
+    Signals.horizontalInterior?
+      (componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY)
+      (quadrantAt sourceX sourceY) := by
+    rw [← oldColumnEq, ← oldBoundaryEq, component', quadrant]
   have globalSourceInterior : Signals.horizontalInterior?
       (componentAt grid (coarseCoordinate column) oldBoundary)
       (quadrantAt (coarseCoordinate column) oldBoundary) ≠ none := by
-    have component := componentAt_old_block grid 0 blockX blockY
-      sourceX sourceY sourceXLt sourceYLt
-    have quadrant := quadrantAt_old_block blockX blockY
-      sourceX sourceY sourceXLt sourceYLt
-    have component' : componentAt grid (2 * blockX + sourceX)
-        (2 * blockY + sourceY) =
-        componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY := by
-      simpa only [iterateRefine] using component
-    rw [← oldColumnEq, ← oldBoundaryEq, component', quadrant]
+    rw [oldInteriorEq]
     exact sourceInterior
+  have globalOrientationEq : Signals.horizontalInterior?
+        (componentAt grid (coarseCoordinate column) oldBoundary)
+        (quadrantAt (coarseCoordinate column) oldBoundary) =
+      Signals.horizontalInterior?
+        (componentAt (iterateRefine 2 grid) column boundary)
+        (quadrantAt column boundary) := by
+    calc
+      _ = Signals.horizontalInterior?
+          (componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY)
+          (quadrantAt sourceX sourceY) := oldInteriorEq
+      _ = Signals.horizontalInterior?
+          (componentAt (fineGrid (grid blockX blockY))
+            targetX (sparseCoordinate sourceY))
+          (quadrantAt targetX (sparseCoordinate sourceY)) := orientationEq
+      _ = Signals.horizontalInterior?
+          (componentAt (iterateRefine 2 grid)
+            (8 * blockX + targetX)
+            (8 * blockY + sparseCoordinate sourceY))
+          (quadrantAt (8 * blockX + targetX)
+            (8 * blockY + sparseCoordinate sourceY)) :=
+        horizontalInterior_twoBlock grid blockX blockY targetX
+          (sparseCoordinate sourceY) targetXLt localYBound
+      _ = _ := by rw [columnEq, boundaryLocal]
   have translated := boundedPath_twoBlock grid blockX blockY localPath
   have targetPort := horizontalPort_twoBlock grid blockX blockY
     targetX (sparseCoordinate sourceY) targetXLt localYBound
   have sourcePort := horizontalSparsePort_oldBlock grid blockX blockY
     sourceX sourceY sourceXLt sourceYLt
   rw [sourcePort, targetPort, columnEq, boundaryLocal] at translated
-  refine ⟨oldBoundary, boundaryEq, globalSourceInterior, ?_⟩
+  refine ⟨oldBoundary, boundaryEq, globalSourceInterior,
+    globalOrientationEq, ?_⟩
   simpa only [oldColumnEq, oldBoundaryEq] using path_symm translated
 
 set_option maxHeartbeats 2000000 in
@@ -229,27 +272,58 @@ theorem verticalExactPredecessor
   have checked := verticalAt_of_checkParent
     (complete (grid blockX blockY)) sourceXLt targetYLt
   rcases verticalAt_sound sourceXLt targetYLt checked localInterior with
-    ⟨sourceInterior, localPath⟩
+    ⟨sourceInterior, orientationEq, localPath⟩
+  have component := componentAt_old_block grid 0 blockX blockY
+    sourceX sourceY sourceXLt sourceYLt
+  have quadrant := quadrantAt_old_block blockX blockY
+    sourceX sourceY sourceXLt sourceYLt
+  have component' : componentAt grid (2 * blockX + sourceX)
+      (2 * blockY + sourceY) =
+      componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY := by
+    simpa only [iterateRefine] using component
+  have oldInteriorEq : Signals.verticalInterior?
+      (componentAt grid oldBoundary (coarseCoordinate row))
+      (quadrantAt oldBoundary (coarseCoordinate row)) =
+    Signals.verticalInterior?
+      (componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY)
+      (quadrantAt sourceX sourceY) := by
+    rw [← oldBoundaryEq, ← oldRowEq, component', quadrant]
   have globalSourceInterior : Signals.verticalInterior?
       (componentAt grid oldBoundary (coarseCoordinate row))
       (quadrantAt oldBoundary (coarseCoordinate row)) ≠ none := by
-    have component := componentAt_old_block grid 0 blockX blockY
-      sourceX sourceY sourceXLt sourceYLt
-    have quadrant := quadrantAt_old_block blockX blockY
-      sourceX sourceY sourceXLt sourceYLt
-    have component' : componentAt grid (2 * blockX + sourceX)
-        (2 * blockY + sourceY) =
-        componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY := by
-      simpa only [iterateRefine] using component
-    rw [← oldBoundaryEq, ← oldRowEq, component', quadrant]
+    rw [oldInteriorEq]
     exact sourceInterior
+  have globalOrientationEq : Signals.verticalInterior?
+        (componentAt grid oldBoundary (coarseCoordinate row))
+        (quadrantAt oldBoundary (coarseCoordinate row)) =
+      Signals.verticalInterior?
+        (componentAt (iterateRefine 2 grid) boundary row)
+        (quadrantAt boundary row) := by
+    calc
+      _ = Signals.verticalInterior?
+          (componentAt (coarseGrid (grid blockX blockY)) sourceX sourceY)
+          (quadrantAt sourceX sourceY) := oldInteriorEq
+      _ = Signals.verticalInterior?
+          (componentAt (fineGrid (grid blockX blockY))
+            (sparseCoordinate sourceX) targetY)
+          (quadrantAt (sparseCoordinate sourceX) targetY) := orientationEq
+      _ = Signals.verticalInterior?
+          (componentAt (iterateRefine 2 grid)
+            (8 * blockX + sparseCoordinate sourceX)
+            (8 * blockY + targetY))
+          (quadrantAt (8 * blockX + sparseCoordinate sourceX)
+            (8 * blockY + targetY)) :=
+        verticalInterior_twoBlock grid blockX blockY
+          (sparseCoordinate sourceX) targetY localXBound targetYLt
+      _ = _ := by rw [boundaryLocal, rowEq]
   have translated := boundedPath_twoBlock grid blockX blockY localPath
   have targetPort := verticalPort_twoBlock grid blockX blockY
     (sparseCoordinate sourceX) targetY localXBound targetYLt
   have sourcePort := verticalSparsePort_oldBlock grid blockX blockY
     sourceX sourceY sourceXLt sourceYLt
   rw [sourcePort, targetPort, boundaryLocal, rowEq] at translated
-  refine ⟨oldBoundary, boundaryEq, globalSourceInterior, ?_⟩
+  refine ⟨oldBoundary, boundaryEq, globalSourceInterior,
+    globalOrientationEq, ?_⟩
   simpa only [oldBoundaryEq, oldRowEq] using path_symm translated
 
 end PairCoverSeamResidualDirectPathExactPredecessorTransport
