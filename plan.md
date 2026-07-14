@@ -1084,8 +1084,11 @@ both the query and target are arbitrary points of their respective sparse
 intervals.  Four branch-specific constructors now cover the transverse and
 parallel alternatives of `RowFamilyTarget` and `ColumnFamilyTarget`, preserving
 board bounds, live interiors, and the exact hierarchy family.  No exceptional
-parent hypothesis remains.  The next recurrence step is to apply these four
-constructors to inherited row and column targets at every hierarchy depth.
+parent hypothesis remains.  `RowFamilyTarget.refineAt` and
+`ColumnFamilyTarget.refineAt` package the four constructors into one theorem
+for an arbitrary target alternative and arbitrary fine query coordinates in
+the selected coarse intervals.  The next recurrence step is to iterate these
+two theorems through the inherited row and column hierarchy.
 
 ### 1. Obtain arbitrarily large free squares
 

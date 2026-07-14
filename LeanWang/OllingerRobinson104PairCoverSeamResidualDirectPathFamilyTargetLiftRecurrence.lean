@@ -181,5 +181,54 @@ theorem ColumnFamilyTarget.ofVerticalLift
   · rw [← refinedGrid_eq root outerLevel]
     exact fineFamily
 
+set_option maxHeartbeats 1000000 in
+-- Each target alternative contains a dependent refined-grid family endpoint.
+/-- Lift an arbitrary row target to fine query coordinates selected by the
+coarse-coordinate projection. -/
+theorem RowFamilyTarget.refineAt
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerWest outerEast : Nat}
+    {column row boundary fineColumn fineRow : Nat}
+    {family : HierarchyFamily}
+    (target : RowFamilyTarget root outerLevel outerBlockX outerBlockY
+      outerWest outerEast column row boundary family)
+    (columnCoarse : coarseCoordinate fineColumn = column)
+    (rowCoarse : coarseCoordinate fineRow = row) :
+    RowFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
+      (4 * outerWest) (4 * outerEast)
+      fineColumn fineRow (sparseCoordinate boundary) family := by
+  rcases target with target | target
+  · rcases target with
+      ⟨targetX, targetWest, targetEast, targetInterior, targetFamily⟩
+    exact RowFamilyTarget.ofVerticalLift rowCoarse targetWest targetEast
+      targetInterior targetFamily
+  · rcases target with ⟨targetY, between, targetInterior, targetFamily⟩
+    exact RowFamilyTarget.ofHorizontalLift columnCoarse rowCoarse between
+      targetInterior targetFamily
+
+set_option maxHeartbeats 1000000 in
+-- Each target alternative contains a dependent refined-grid family endpoint.
+/-- Column-dual arbitrary-coordinate target refinement. -/
+theorem ColumnFamilyTarget.refineAt
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerSouth outerNorth : Nat}
+    {row column boundary fineRow fineColumn : Nat}
+    {family : HierarchyFamily}
+    (target : ColumnFamilyTarget root outerLevel outerBlockX outerBlockY
+      outerSouth outerNorth row column boundary family)
+    (rowCoarse : coarseCoordinate fineRow = row)
+    (columnCoarse : coarseCoordinate fineColumn = column) :
+    ColumnFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
+      (4 * outerSouth) (4 * outerNorth)
+      fineRow fineColumn (sparseCoordinate boundary) family := by
+  rcases target with target | target
+  · rcases target with
+      ⟨targetY, targetSouth, targetNorth, targetInterior, targetFamily⟩
+    exact ColumnFamilyTarget.ofHorizontalLift columnCoarse targetSouth
+      targetNorth targetInterior targetFamily
+  · rcases target with ⟨targetX, between, targetInterior, targetFamily⟩
+    exact ColumnFamilyTarget.ofVerticalLift rowCoarse columnCoarse between
+      targetInterior targetFamily
+
 end PairCoverSeamResidualDirectPathFamilyTargetLiftRecurrence
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
