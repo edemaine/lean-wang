@@ -1160,6 +1160,11 @@ source-boundary query, or a strict query whose transverse source lies on the
 lower edge.  The latter three cases use the transported exceptional
 certificate; all four preserve the selected canonical hierarchy family while
 refining the target back to the original query.
+The six exceptional row/column shapes are now packaged as the two-field
+semantic interface `ExceptionalFamilyTargetsAt`.  Both finite base
+certificates instantiate it, so the all-depth proof can recurse over a small
+proof-level state without exposing finite flood or checker implementation
+details.
 
 ### 1. Obtain arbitrarily large free squares
 
