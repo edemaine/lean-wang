@@ -1096,12 +1096,15 @@ Conversely, an existing even `VerticalSeamPath` or `HorizontalSeamPath` now
 recovers a target in the source's exact hierarchy family, so the established
 created-coordinate path audits can seed the target recurrence.
 
-The predecessor audit's published interface currently retains only a common
-two-cell block.  A finite diagnostic strengthening the selected predecessor to
-`oldColumn = coarseCoordinate fineColumn` (and the row-dual equality) succeeds
-for all 104 parent tiles.  The next step is to package this stronger exact
-predecessor certificate and use it to connect created-path seeds to the
-all-depth target iteration without a coordinate mismatch branch.
+The predecessor audit's older interface retains only a common two-cell block.
+A new proof-producing exact checker instead fixes the selected predecessor to
+`oldColumn = coarseCoordinate fineColumn` (and the row-dual equality); cached
+native certificates prove this stronger property for all 104 parent tiles.
+Its soundness theorem recovers a bounded even path, and the transport theorem
+moves that path into an arbitrary hierarchy macrocell while preserving the
+exact projection equation.  The next step is to package this exact predecessor
+with the all-depth source-family hierarchy, then connect created-path seeds to
+the target iteration without a coordinate mismatch branch.
 
 ### 1. Obtain arbitrarily large free squares
 
