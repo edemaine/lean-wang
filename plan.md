@@ -1189,6 +1189,14 @@ the final light-board construction. Thus ordinary changes to the semantic
 recurrence avoid replaying the native parity certificates, and no all-depth
 `BoundedPaths` hypothesis is required by the retained forward architecture.
 
+`PairCoverSeamRequiredForward` now carries these fixed-depth faces through the
+rest of the forward proof.  It builds the successor board's contained geometry
+directly from its child covers and the two local face structures, iterates only
+the even `1 + d` and odd `d` families, and invokes the existing unbounded
+light-board construction.  Consequently `forcesRoutedFixedCornerSquares_of_stepData`
+requires only semantic `StepData` at the used depths; the unused even depth-zero
+face obligation has disappeared from the final forward theorem surface.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
