@@ -1350,6 +1350,23 @@ therefore the scaffold-only finite statement `HasRoutedCoreLabelings`.
 `hasRoutedCoreBoxLayerPatches_of_labelings` connects that statement directly
 to the generic compactness pipeline.
 
+Wire labels now retain only the logical tile whose edge they carry; they no
+longer require the next logical crossing to lie in the supplied square. This
+is necessary when a finite centered box cuts a horizontal or vertical corridor
+before reaching its next active crossing.
+
+An executable audit of the selected consecutive grids exposed a required
+correction to the concrete corner role. The current four-quarter predicate is
+not unique in the even light-board branch: at larger depths, additional
+selected diagonal crossings also receive the corner role. The backward claim
+for arbitrary payload tilesets is false with that predicate because every such
+crossing would force the same seed. Before constructing the final labelings,
+the marker predicate must be refined to the distinguished Figure 18 crossing
+and accompanied by a finite uniqueness certificate on both light-board
+branches. The unconditional forward theorem remains valid for the current
+broader predicate, but will need its lower-left marker lemma transported to the
+refined role.
+
 Backward shade construction is also reduced to its actual finite invariant.
 `RedShadeGraphColoring.ValidParityColoringOn` records a Boolean XOR coloring
 of the live red-port graph in a finite rectangle: continuations preserve the

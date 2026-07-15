@@ -32,12 +32,13 @@ theorem FixedCornerSquareData.nonempty
   rcases square with ⟨positive, tile, valid, corner⟩
   exact ⟨⟨positive, tile, valid, corner⟩⟩
 
-/-- Logical meaning of one physical scaffold cell. -/
+/-- Logical meaning of one physical scaffold cell. Wire labels may continue
+beyond the last logical crossing visible in a finite box. -/
 inductive Label (n : Nat) where
   | inactive
   | tile (column row : Fin n)
-  | horizontal (column row : Fin n) (next : column.val + 1 < n)
-  | vertical (column row : Fin n) (next : row.val + 1 < n)
+  | horizontal (column row : Fin n)
+  | vertical (column row : Fin n)
 
 namespace Label
 
@@ -47,11 +48,11 @@ def payload
     (square : FixedCornerSquareData T seed n) : Label n → WangTile
   | .inactive => { n := 0, s := 0, e := 0, w := 0 }
   | .tile column row => square.tile column row
-  | .horizontal column row _ =>
+  | .horizontal column row =>
       { n := 0, s := 0,
         e := (square.tile column row).e,
         w := (square.tile column row).e }
-  | .vertical column row _ =>
+  | .vertical column row =>
       { n := (square.tile column row).n,
         s := (square.tile column row).n,
         e := 0, w := 0 }
@@ -61,27 +62,23 @@ def FitsRole : Label n → RouteRole → Prop
   | .inactive, .inactive => True
   | .tile _ _, .active => True
   | .tile column row, .corner => column.val = 0 ∧ row.val = 0
-  | .horizontal _ _ _, .horizontal => True
-  | .vertical _ _ _, .vertical => True
+  | .horizontal _ _, .horizontal => True
+  | .vertical _ _, .vertical => True
   | _, _ => False
 
 /-- Horizontal adjacency patterns that are valid for every payload square. -/
 inductive HCompatible : Label n → Label n → Prop where
   | inactive : HCompatible .inactive .inactive
   | vertical
-      (firstColumn firstRow secondColumn secondRow : Fin n)
-      (firstNext : firstRow.val + 1 < n)
-      (secondNext : secondRow.val + 1 < n) :
-      HCompatible (.vertical firstColumn firstRow firstNext)
-        (.vertical secondColumn secondRow secondNext)
-  | tile_horizontal (column row : Fin n) (next : column.val + 1 < n) :
-      HCompatible (.tile column row) (.horizontal column row next)
-  | horizontal_horizontal (column row : Fin n)
-      (firstNext secondNext : column.val + 1 < n) :
-      HCompatible (.horizontal column row firstNext)
-        (.horizontal column row secondNext)
+      (firstColumn firstRow secondColumn secondRow : Fin n) :
+      HCompatible (.vertical firstColumn firstRow)
+        (.vertical secondColumn secondRow)
+  | tile_horizontal (column row : Fin n) :
+      HCompatible (.tile column row) (.horizontal column row)
+  | horizontal_horizontal (column row : Fin n) :
+      HCompatible (.horizontal column row) (.horizontal column row)
   | horizontal_tile (column row : Fin n) (next : column.val + 1 < n) :
-      HCompatible (.horizontal column row next)
+      HCompatible (.horizontal column row)
         (.tile ⟨column.val + 1, next⟩ row)
   | tile_tile (column row : Fin n) (next : column.val + 1 < n) :
       HCompatible (.tile column row) (.tile ⟨column.val + 1, next⟩ row)
@@ -90,19 +87,15 @@ inductive HCompatible : Label n → Label n → Prop where
 inductive VCompatible : Label n → Label n → Prop where
   | inactive : VCompatible .inactive .inactive
   | horizontal
-      (firstColumn firstRow secondColumn secondRow : Fin n)
-      (firstNext : firstColumn.val + 1 < n)
-      (secondNext : secondColumn.val + 1 < n) :
-      VCompatible (.horizontal firstColumn firstRow firstNext)
-        (.horizontal secondColumn secondRow secondNext)
-  | tile_vertical (column row : Fin n) (next : row.val + 1 < n) :
-      VCompatible (.tile column row) (.vertical column row next)
-  | vertical_vertical (column row : Fin n)
-      (firstNext secondNext : row.val + 1 < n) :
-      VCompatible (.vertical column row firstNext)
-        (.vertical column row secondNext)
+      (firstColumn firstRow secondColumn secondRow : Fin n) :
+      VCompatible (.horizontal firstColumn firstRow)
+        (.horizontal secondColumn secondRow)
+  | tile_vertical (column row : Fin n) :
+      VCompatible (.tile column row) (.vertical column row)
+  | vertical_vertical (column row : Fin n) :
+      VCompatible (.vertical column row) (.vertical column row)
   | vertical_tile (column row : Fin n) (next : row.val + 1 < n) :
-      VCompatible (.vertical column row next)
+      VCompatible (.vertical column row)
         (.tile column ⟨row.val + 1, next⟩)
   | tile_tile (column row : Fin n) (next : row.val + 1 < n) :
       VCompatible (.tile column row) (.tile column ⟨row.val + 1, next⟩)
@@ -149,12 +142,12 @@ theorem payload_mem_routedPayloads
   · simpa [payload] using mk_mem_completePayloads (T := T)
       (zero_mem_payloadPalette T) (zero_mem_payloadPalette T)
       (zero_mem_payloadPalette T) (zero_mem_payloadPalette T)
-  · rename_i column row next
+  · rename_i column row
     have edge := mem_payloadPalette_e (square.valid.1 column row)
     refine ⟨?_, rfl⟩
     simpa [payload] using mk_mem_completePayloads (T := T)
       (zero_mem_payloadPalette T) (zero_mem_payloadPalette T) edge edge
-  · rename_i column row next
+  · rename_i column row
     have edge := mem_payloadPalette_n (square.valid.1 column row)
     refine ⟨?_, rfl⟩
     simpa [payload] using mk_mem_completePayloads (T := T)
