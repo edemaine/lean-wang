@@ -107,6 +107,43 @@ theorem RowFamilyTarget.ofHorizontalLift
 
 set_option maxHeartbeats 1000000 in
 -- The family witness contains a dependent refined-grid endpoint.
+/-- Lift the parallel horizontal alternative when the fine boundary is an
+arbitrary point of the old boundary's coarse interval. -/
+theorem RowFamilyTarget.ofHorizontalLiftAtBoundary
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerWest outerEast : Nat}
+    {oldColumn oldRow oldBoundary targetY fineColumn fineRow fineBoundary : Nat}
+    {family : HierarchyFamily}
+    (columnCoarse : coarseCoordinate fineColumn = oldColumn)
+    (rowCoarse : coarseCoordinate fineRow = oldRow)
+    (boundaryCoarse : coarseCoordinate fineBoundary = oldBoundary)
+    (between : StrictBetween oldRow oldBoundary targetY)
+    (targetInterior : Signals.horizontalInterior?
+      (componentAt (iterateRefine (outerLevel + 2) root) oldColumn targetY)
+      (quadrantAt oldColumn targetY) ≠ none)
+    (targetFamily : CanonicalCycleAncestorWithinFamily
+      (iterateRefine (outerLevel + 2) root)
+      (horizontalPort (iterateRefine (outerLevel + 2) root) oldColumn targetY)
+      outerLevel outerBlockX outerBlockY family) :
+    RowFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
+      (4 * outerWest) (4 * outerEast)
+      fineColumn fineRow fineBoundary family := by
+  let oldGrid := iterateRefine (outerLevel + 2) root
+  rcases horizontalTargetFamily oldGrid oldColumn targetY fineColumn columnCoarse
+      (by simpa only [oldGrid] using targetInterior)
+      (by simpa only [oldGrid] using targetFamily) with
+    ⟨fineTargetY, targetCoarse, fineInterior, fineFamily⟩
+  right
+  refine ⟨fineTargetY,
+    strictBetween_of_threeCoarseCoordinates rowCoarse boundaryCoarse
+      targetCoarse between, ?_, ?_⟩
+  · rw [← refinedGrid_eq root outerLevel]
+    exact fineInterior
+  · rw [← refinedGrid_eq root outerLevel]
+    exact fineFamily
+
+set_option maxHeartbeats 1000000 in
+-- The family witness contains a dependent refined-grid endpoint.
 /-- Lift the transverse horizontal alternative of a column target. -/
 theorem ColumnFamilyTarget.ofHorizontalLift
     {root : Nat → Nat → Index}
@@ -182,6 +219,43 @@ theorem ColumnFamilyTarget.ofVerticalLift
     exact fineFamily
 
 set_option maxHeartbeats 1000000 in
+-- The family witness contains a dependent refined-grid endpoint.
+/-- Lift the parallel vertical alternative when the fine boundary is an
+arbitrary point of the old boundary's coarse interval. -/
+theorem ColumnFamilyTarget.ofVerticalLiftAtBoundary
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerSouth outerNorth : Nat}
+    {oldRow oldColumn oldBoundary targetX fineRow fineColumn fineBoundary : Nat}
+    {family : HierarchyFamily}
+    (rowCoarse : coarseCoordinate fineRow = oldRow)
+    (columnCoarse : coarseCoordinate fineColumn = oldColumn)
+    (boundaryCoarse : coarseCoordinate fineBoundary = oldBoundary)
+    (between : StrictBetween oldColumn oldBoundary targetX)
+    (targetInterior : Signals.verticalInterior?
+      (componentAt (iterateRefine (outerLevel + 2) root) targetX oldRow)
+      (quadrantAt targetX oldRow) ≠ none)
+    (targetFamily : CanonicalCycleAncestorWithinFamily
+      (iterateRefine (outerLevel + 2) root)
+      (verticalPort (iterateRefine (outerLevel + 2) root) targetX oldRow)
+      outerLevel outerBlockX outerBlockY family) :
+    ColumnFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
+      (4 * outerSouth) (4 * outerNorth)
+      fineRow fineColumn fineBoundary family := by
+  let oldGrid := iterateRefine (outerLevel + 2) root
+  rcases verticalTargetFamily oldGrid targetX oldRow fineRow rowCoarse
+      (by simpa only [oldGrid] using targetInterior)
+      (by simpa only [oldGrid] using targetFamily) with
+    ⟨fineTargetX, targetCoarse, fineInterior, fineFamily⟩
+  right
+  refine ⟨fineTargetX,
+    strictBetween_of_threeCoarseCoordinates columnCoarse boundaryCoarse
+      targetCoarse between, ?_, ?_⟩
+  · rw [← refinedGrid_eq root outerLevel]
+    exact fineInterior
+  · rw [← refinedGrid_eq root outerLevel]
+    exact fineFamily
+
+set_option maxHeartbeats 1000000 in
 -- Each target alternative contains a dependent refined-grid family endpoint.
 /-- Lift an arbitrary row target to fine query coordinates selected by the
 coarse-coordinate projection. -/
@@ -208,6 +282,32 @@ theorem RowFamilyTarget.refineAt
 
 set_option maxHeartbeats 1000000 in
 -- Each target alternative contains a dependent refined-grid family endpoint.
+/-- Lift a row target when all three fine query coordinates are arbitrary
+points of their old coarse intervals. -/
+theorem RowFamilyTarget.refineAtBoundary
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerWest outerEast : Nat}
+    {column row boundary fineColumn fineRow fineBoundary : Nat}
+    {family : HierarchyFamily}
+    (target : RowFamilyTarget root outerLevel outerBlockX outerBlockY
+      outerWest outerEast column row boundary family)
+    (columnCoarse : coarseCoordinate fineColumn = column)
+    (rowCoarse : coarseCoordinate fineRow = row)
+    (boundaryCoarse : coarseCoordinate fineBoundary = boundary) :
+    RowFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
+      (4 * outerWest) (4 * outerEast)
+      fineColumn fineRow fineBoundary family := by
+  rcases target with target | target
+  · rcases target with
+      ⟨targetX, targetWest, targetEast, targetInterior, targetFamily⟩
+    exact RowFamilyTarget.ofVerticalLift rowCoarse targetWest targetEast
+      targetInterior targetFamily
+  · rcases target with ⟨targetY, between, targetInterior, targetFamily⟩
+    exact RowFamilyTarget.ofHorizontalLiftAtBoundary columnCoarse rowCoarse
+      boundaryCoarse between targetInterior targetFamily
+
+set_option maxHeartbeats 1000000 in
+-- Each target alternative contains a dependent refined-grid family endpoint.
 /-- Column-dual arbitrary-coordinate target refinement. -/
 theorem ColumnFamilyTarget.refineAt
     {root : Nat → Nat → Index}
@@ -229,6 +329,31 @@ theorem ColumnFamilyTarget.refineAt
   · rcases target with ⟨targetX, between, targetInterior, targetFamily⟩
     exact ColumnFamilyTarget.ofVerticalLift rowCoarse columnCoarse between
       targetInterior targetFamily
+
+set_option maxHeartbeats 1000000 in
+-- Each target alternative contains a dependent refined-grid family endpoint.
+/-- Column-dual target lift with an arbitrary fine selected boundary. -/
+theorem ColumnFamilyTarget.refineAtBoundary
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerSouth outerNorth : Nat}
+    {row column boundary fineRow fineColumn fineBoundary : Nat}
+    {family : HierarchyFamily}
+    (target : ColumnFamilyTarget root outerLevel outerBlockX outerBlockY
+      outerSouth outerNorth row column boundary family)
+    (rowCoarse : coarseCoordinate fineRow = row)
+    (columnCoarse : coarseCoordinate fineColumn = column)
+    (boundaryCoarse : coarseCoordinate fineBoundary = boundary) :
+    ColumnFamilyTarget root (outerLevel + 2) outerBlockX outerBlockY
+      (4 * outerSouth) (4 * outerNorth)
+      fineRow fineColumn fineBoundary family := by
+  rcases target with target | target
+  · rcases target with
+      ⟨targetY, targetSouth, targetNorth, targetInterior, targetFamily⟩
+    exact ColumnFamilyTarget.ofHorizontalLift columnCoarse targetSouth
+      targetNorth targetInterior targetFamily
+  · rcases target with ⟨targetX, between, targetInterior, targetFamily⟩
+    exact ColumnFamilyTarget.ofVerticalLiftAtBoundary rowCoarse columnCoarse
+      boundaryCoarse between targetInterior targetFamily
 
 end PairCoverSeamResidualDirectPathFamilyTargetLiftRecurrence
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104

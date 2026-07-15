@@ -1306,29 +1306,27 @@ are compatibility projections. The all-depth selector can therefore branch on
 the audited residue and use the same named level for both source ancestry and
 canonical-side arithmetic.
 
-The apparent canonical-side gap was an artifact of exposing only west and
-south sides. The arithmetic triple
-`(column,row,boundary) = (49,49,36)` is not a north-facing source in any of the
-104 constant-parent states. Among the actual sources in the normalized
-outer-level-four vertical slice, the west/south-only selector misses 3328
-cases; allowing the north and east sides eliminates every one of them.
-`PairCoverSeamResidualDirectPathCornerTargets` now proves closed-side target
-theorems for all four sides, including all four corners, and
-`RowFamilyTarget.ofAllCanonicalSides` and
-`ColumnFamilyTarget.ofAllCanonicalSides` expose the resulting four-way
-arithmetic interface. The remaining forward work is to lift this finite
-observation into an all-depth hierarchy selector and use it to close the far
-created-boundary case.
+All four canonical cycle sides remain useful target constructors, but they do
+not cover every realizable far query.  An exact coordinate audit found, for
+example, a realizable outer-level-four source at
+`(column,row,boundary) = (34,49,68)` whose family has no canonical closed side
+accepted by the query.  The rejected `FarCanonicalChoicesAt` interface has
+therefore been removed instead of being retained as an unprovable obligation.
 
-The far-case boundary is now explicit and independent of red-graph semantics.
-`FarCanonicalChoicesAt` asks only for a same-family canonical closed side when
-the query and created source are separated by at least one complete 8-wide
-macrocell. Its adapter first dispatches same-macrocell queries to
+The replacement `FarFamilyTargetsAt` asks for the actual semantic fact needed
+by path composition: some endpoint in the created source's exact hierarchy
+family.  The endpoint may be a noncanonical red segment produced by target
+refinement.  Its adapter still dispatches same-macrocell queries to
 `PairCoverSeamCreatedBoundarySameBlock` and neighboring-macrocell queries to
 `PairCoverSeamCreatedBoundaryAdjacent`; only the remaining strict quotient
-inequality uses exact route parity, a canonical-side choice, and same-family
-path composition. Thus proving `FarCanonicalChoicesAt` is exactly the remaining
-forward hierarchy invariant needed to recover `CreatedBoundaryPathsAt`.
+inequality consumes the family target and exact route parity.
+
+Target refinement now supports that invariant.  In addition to sparse selected
+boundaries, `RowFamilyTarget.refineAtBoundary` and its column dual lift a target
+when the fine query, source boundary, and target are arbitrary points of their
+three coarse intervals.  The next forward step is a well-founded recurrence
+for `FarFamilyTargetsAt`, using these general lifts and finite stopping cases,
+then feeding its result to `toCreatedBoundaryPathsAt`.
 
 ### 1. Obtain arbitrarily large free squares
 

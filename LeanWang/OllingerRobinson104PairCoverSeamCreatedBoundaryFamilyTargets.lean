@@ -5,20 +5,23 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamCreatedBoundaryAdjacent
 import LeanWang.OllingerRobinson104PairCoverSeamCreatedLowFamilyAncestors
-import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathCanonicalSideTargets
+import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathTargets
 
 /-!
-# Canonical-side choices for far created boundaries
+# Same-family targets for far created boundaries
 
-This module isolates the remaining forward invariant from red-graph semantics.
-For the hierarchy family fixed by a created source's audited route parity,
-choose one canonical cycle whose closed side crosses the query or separates it
-from the source.  The adapter below reconstructs the source ancestor, target
-cycle, and even path required by `CreatedBoundaryPathsAt`.
+A far created source need not meet a canonical cycle side at the query line.
+The correct invariant is instead that the source's hierarchy family contains
+some endpoint accepted by `RowFamilyTarget` or `ColumnFamilyTarget`.  Such an
+endpoint may be a noncanonical red segment produced by target refinement.
+
+The adapter below handles same-block and adjacent queries by their finite
+local certificates.  Only genuinely far queries consume the family-target
+invariant and the exact parity-normalized source ancestor.
 -/
 
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
-namespace PairCoverSeamCreatedBoundaryCanonicalChoices
+namespace PairCoverSeamCreatedBoundaryFamilyTargets
 
 open RedCycles RedShadeCycles RedShadeGraph
   PairCoverSeamArithmetic PairCoverSeamCreatedBoundaryPaths
@@ -27,16 +30,16 @@ open RedCycles RedShadeCycles RedShadeGraph
   PairCoverSeamPathSearch PairCoverSeamShadePaths
   PairCoverSeamResidualCanonicalAncestorHierarchy
   PairCoverSeamResidualDirectPathBridges
-  PairCoverSeamResidualDirectPathCanonicalSideTargets
   PairCoverSeamResidualDirectPathTargets RefinedCoordinateProjection
   ShadedFreeLineRecurrence ShadedObstructionPairCoverRecurrence
   SparseFreeLinePlaneBase Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
-/-- The remaining coordinate/state-recognition obligation for created
-boundaries.  All red-graph paths are absent from its conclusion. -/
-structure FarCanonicalChoicesAt (phase : Phase) (depth : Nat) : Prop where
+/-- Endpoint targets in the exact hierarchy family of every far created
+source.  Unlike the rejected canonical-side condition, the target is allowed
+to be any red segment carrying the same family ancestor. -/
+structure FarFamilyTargetsAt (phase : Phase) (depth : Nat) : Prop where
   vertical : ∀ (grid : Nat → Nat → Index) (parentX parentY : Nat)
       {column row boundary : Nat},
     quarterWest (successorWest phase (depth + 1) parentX) < column →
@@ -62,8 +65,8 @@ structure FarCanonicalChoicesAt (phase : Phase) (depth : Nat) : Prop where
     ∀ family,
       InHierarchyFamily (outerLevel phase (depth + 1))
         (if createdParity (boundary % 8) then 1 else 0) family →
-      CanonicalRowSideChoiceWithin
-        (outerLevel phase (depth + 1)) parentX parentY
+      RowFamilyTarget grid (outerLevel phase (depth + 1))
+        parentX parentY
         (successorWest phase (depth + 1) parentX)
         (successorEast phase (depth + 1) parentX)
         column row boundary family
@@ -92,8 +95,8 @@ structure FarCanonicalChoicesAt (phase : Phase) (depth : Nat) : Prop where
     ∀ family,
       InHierarchyFamily (outerLevel phase (depth + 1))
         (if createdParity (boundary % 8) then 1 else 0) family →
-      CanonicalColumnSideChoiceWithin
-        (outerLevel phase (depth + 1)) parentX parentY
+      ColumnFamilyTarget grid (outerLevel phase (depth + 1))
+        parentX parentY
         (successorWest phase (depth + 1) parentY)
         (successorEast phase (depth + 1) parentY)
         row column boundary family
@@ -108,10 +111,10 @@ private theorem queryGrid_eq_outerGrid
   congr 1
   omega
 
-/-- Canonical side choices reconstruct every created-boundary seam path. -/
-theorem FarCanonicalChoicesAt.toCreatedBoundaryPathsAt
+/-- Same-family targets reconstruct every created-boundary seam path. -/
+theorem FarFamilyTargetsAt.toCreatedBoundaryPathsAt
     {phase : Phase} {depth : Nat}
-    (choices : FarCanonicalChoicesAt phase depth) :
+    (targets : FarFamilyTargetsAt phase depth) :
     CreatedBoundaryPathsAt phase depth := by
   constructor
   · intro grid parentX parentY column row boundary
@@ -141,13 +144,9 @@ theorem FarCanonicalChoicesAt.toCreatedBoundaryPathsAt
     rcases horizontalCreatedAtExactParity phase depth grid parentX parentY
         columnWest columnEast boundarySouth boundaryNorth createdBoundary
         sourceInterior with ⟨family, source⟩
-    have choice := choices.vertical grid parentX parentY
+    have target := targets.vertical grid parentX parentY
       columnWest columnEast rowSouth rowNorth boundarySouth boundaryNorth
       wrongFacing notFits createdBoundary far family source.inFamily
-    have target : RowFamilyTarget grid (outerLevel phase (depth + 1))
-        parentX parentY (successorWest phase (depth + 1) parentX)
-        (successorEast phase (depth + 1) parentX)
-        column row boundary family := choice.toFamilyTarget
     have sourceFamily := source.toAncestorFamily
     rw [queryGrid_eq_outerGrid phase depth grid]
     rw [queryGrid_eq_outerGrid phase depth grid] at sourceFamily
@@ -187,13 +186,9 @@ theorem FarCanonicalChoicesAt.toCreatedBoundaryPathsAt
     rcases verticalCreatedAtExactParity phase depth grid parentX parentY
         boundaryWest boundaryEast rowSouth rowNorth createdBoundary
         sourceInterior with ⟨family, source⟩
-    have choice := choices.horizontal grid parentX parentY
+    have target := targets.horizontal grid parentX parentY
       columnWest columnEast rowSouth rowNorth boundaryWest boundaryEast
       wrongFacing notFits createdBoundary far family source.inFamily
-    have target : ColumnFamilyTarget grid (outerLevel phase (depth + 1))
-        parentX parentY (successorWest phase (depth + 1) parentY)
-        (successorEast phase (depth + 1) parentY)
-        row column boundary family := choice.toFamilyTarget
     have sourceFamily := source.toAncestorFamily
     rw [queryGrid_eq_outerGrid phase depth grid]
     rw [queryGrid_eq_outerGrid phase depth grid] at sourceFamily
@@ -207,5 +202,5 @@ theorem FarCanonicalChoicesAt.toCreatedBoundaryPathsAt
       exact horizontalSeamPath_of_sameFamilyBetweenTarget rfl
         sourceFamily targetFamily between targetInterior
 
-end PairCoverSeamCreatedBoundaryCanonicalChoices
+end PairCoverSeamCreatedBoundaryFamilyTargets
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
