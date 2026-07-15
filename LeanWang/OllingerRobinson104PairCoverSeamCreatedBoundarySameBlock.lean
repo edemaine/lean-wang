@@ -58,11 +58,11 @@ theorem HorizontalSeamPath.widen
       targetNorth.trans_le north, interior, targetPath⟩
   · exact Or.inr path
 
-/-- The depth-two macrocell containing an interior coordinate lies within its
-enclosing hierarchy collar. -/
+/-- The depth-two macrocell containing a coordinate on or inside the lower
+collar edge lies within its enclosing hierarchy collar. -/
 theorem localBlock_within_collar
     (phase : Phase) (depth parent coordinate : Nat)
-    (lower : quarterWest (successorWest phase depth parent) < coordinate)
+    (lower : quarterWest (successorWest phase depth parent) ≤ coordinate)
     (upper : coordinate < quarterEast (successorEast phase depth parent)) :
     quarterWest (successorWest phase depth parent) ≤
         quarterWest (4 * (coordinate / 8)) ∧
@@ -125,7 +125,7 @@ theorem vertical
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
     (parentX _parentY : Nat) {column row boundary : Nat}
     (columnWest :
-      quarterWest (successorWest phase (depth + 1) parentX) < column)
+      quarterWest (successorWest phase (depth + 1) parentX) ≤ column)
     (columnEast :
       column < quarterEast (successorEast phase (depth + 1) parentX))
     (wrongFacing :
@@ -189,7 +189,7 @@ theorem horizontal
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
     (_parentX parentY : Nat) {column row boundary : Nat}
     (rowSouth :
-      quarterSouth (successorWest phase (depth + 1) parentY) < row)
+      quarterSouth (successorWest phase (depth + 1) parentY) ≤ row)
     (rowNorth :
       row < quarterNorth (successorEast phase (depth + 1) parentY))
     (wrongFacing :

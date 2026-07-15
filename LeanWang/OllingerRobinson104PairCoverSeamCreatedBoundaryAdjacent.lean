@@ -89,7 +89,7 @@ theorem vertical
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
     (parentX _parentY : Nat) {column row boundary : Nat}
     (columnWest :
-      quarterWest (successorWest phase (depth + 1) parentX) < column)
+      quarterWest (successorWest phase (depth + 1) parentX) ≤ column)
     (columnEast :
       column < quarterEast (successorEast phase (depth + 1) parentX))
     (wrongFacing :
@@ -193,7 +193,7 @@ theorem horizontal
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
     (_parentX parentY : Nat) {column row boundary : Nat}
     (rowSouth :
-      quarterSouth (successorWest phase (depth + 1) parentY) < row)
+      quarterSouth (successorWest phase (depth + 1) parentY) ≤ row)
     (rowNorth :
       row < quarterNorth (successorEast phase (depth + 1) parentY))
     (wrongFacing :

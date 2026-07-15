@@ -159,7 +159,7 @@ set_option maxHeartbeats 1000000 in
 theorem horizontalExactInheritedSource
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
     (parentX parentY : Nat) {column boundary : Nat}
-    (columnLower : quarterWest (successorWest phase (depth + 1) parentX) <
+    (columnLower : quarterWest (successorWest phase (depth + 1) parentX) ≤
       column)
     (columnUpper : column <
       quarterEast (successorEast phase (depth + 1) parentX))
@@ -188,13 +188,13 @@ theorem horizontalExactInheritedSource
   have oldColumnBounds : InCollar
       (successorWest phase depth parentX)
       (successorEast phase depth parentX) (coarseCoordinate column) :=
-    predecessor_in_collar_of_collar
-      (div_two_eq_div_eight_of_coarseCoordinate rfl)
-      (by
-        rw [successorWest_succ] at columnLower
-        omega)
-      (by simpa only [successorEast_succ] using columnUpper)
-  have oldColumnWeakBounds := coarse_successor_bounds_of_fine_bounds
+    ⟨by
+      have bounds := coarse_successor_bounds_of_fine_weak_bounds
+        columnLower columnUpper
+      omega,
+    (coarse_successor_bounds_of_fine_weak_bounds
+      columnLower columnUpper).2⟩
+  have oldColumnWeakBounds := coarse_successor_bounds_of_fine_weak_bounds
     columnLower columnUpper
   have oldBoundaryBounds : InCollar
       (successorWest phase depth parentY)
@@ -264,7 +264,7 @@ theorem verticalExactInheritedSource
       quarterWest (successorWest phase (depth + 1) parentX) < boundary)
     (boundaryUpper : boundary <
       quarterEast (successorEast phase (depth + 1) parentX))
-    (rowLower : quarterSouth (successorWest phase (depth + 1) parentY) < row)
+    (rowLower : quarterSouth (successorWest phase (depth + 1) parentY) ≤ row)
     (rowUpper : row <
       quarterNorth (successorEast phase (depth + 1) parentY))
     (sparseBoundary : IsSparseCoordinate boundary)
@@ -312,15 +312,15 @@ theorem verticalExactInheritedSource
   have oldRowBounds : InCollar
       (successorWest phase depth parentY)
       (successorEast phase depth parentY) (coarseCoordinate row) :=
-    predecessor_in_collar_of_collar
-      (div_two_eq_div_eight_of_coarseCoordinate rfl)
-      (by
-        rw [successorWest_succ] at rowLower
-        simp only [quarterSouth, quarterWest] at rowLower ⊢
-        omega)
-      (by simpa only [successorEast_succ, quarterNorth, quarterEast]
-        using rowUpper)
-  have oldRowWeakBounds := coarse_successor_bounds_of_fine_bounds
+    ⟨by
+      have bounds := coarse_successor_bounds_of_fine_weak_bounds
+        (by simpa only [quarterSouth, quarterWest] using rowLower)
+        (by simpa only [quarterNorth, quarterEast] using rowUpper)
+      omega,
+    (coarse_successor_bounds_of_fine_weak_bounds
+      (by simpa only [quarterSouth, quarterWest] using rowLower)
+      (by simpa only [quarterNorth, quarterEast] using rowUpper)).2⟩
+  have oldRowWeakBounds := coarse_successor_bounds_of_fine_weak_bounds
     (by simpa only [quarterSouth, quarterWest] using rowLower)
     (by simpa only [quarterNorth, quarterEast] using rowUpper)
   have hierarchy := sourceAncestorsWithinAt phase depth

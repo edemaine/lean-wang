@@ -186,7 +186,7 @@ theorem rowSucc
     · rw [north.2]
       simp
   rcases horizontalExactInheritedSource phase (depth + 1) grid
-      parentX parentY columnWest columnEast boundarySouth boundaryNorth
+      parentX parentY columnWest.le columnEast boundarySouth boundaryNorth
       sparseBoundary sourceInterior with ⟨source⟩
   have projected := HorizontalExactInheritedSource.projectedQuery source
     rowSouth rowNorth wrongFacingFine

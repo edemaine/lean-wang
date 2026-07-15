@@ -29,12 +29,12 @@ theorem atDepth (phase : Phase) (depth : Nat) :
       wrongFacing _notFits createdBoundary
     by_cases sameBlock : row / 8 = boundary / 8
     · exact PairCoverSeamCreatedBoundarySameBlock.vertical
-        phase depth grid parentX parentY columnWest columnEast
+        phase depth grid parentX parentY columnWest.le columnEast
         wrongFacing createdBoundary sameBlock
     by_cases adjacent :
         row / 8 + 1 = boundary / 8 ∨ boundary / 8 + 1 = row / 8
     · exact PairCoverSeamCreatedBoundaryAdjacent.vertical
-        phase depth grid parentX parentY columnWest columnEast
+        phase depth grid parentX parentY columnWest.le columnEast
         wrongFacing createdBoundary adjacent
     have far : row / 8 + 1 < boundary / 8 ∨
         boundary / 8 + 1 < row / 8 := by
@@ -46,12 +46,12 @@ theorem atDepth (phase : Phase) (depth : Nat) :
       wrongFacing _notFits createdBoundary
     by_cases sameBlock : column / 8 = boundary / 8
     · exact PairCoverSeamCreatedBoundarySameBlock.horizontal
-        phase depth grid parentX parentY rowSouth rowNorth
+        phase depth grid parentX parentY rowSouth.le rowNorth
         wrongFacing createdBoundary sameBlock
     by_cases adjacent :
         column / 8 + 1 = boundary / 8 ∨ boundary / 8 + 1 = column / 8
     · exact PairCoverSeamCreatedBoundaryAdjacent.horizontal
-        phase depth grid parentX parentY rowSouth rowNorth
+        phase depth grid parentX parentY rowSouth.le rowNorth
         wrongFacing createdBoundary adjacent
     have far : column / 8 + 1 < boundary / 8 ∨
         boundary / 8 + 1 < column / 8 := by

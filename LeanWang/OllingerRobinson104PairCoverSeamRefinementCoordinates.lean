@@ -54,6 +54,38 @@ theorem coarse_successor_bounds_of_fine_bounds
   rw [successorEast_succ] at hupper
   exact coarse_board_bounds_of_fine_bounds hlower hupper
 
+/-- Fine successor-collar bounds project to the previous successor collar.
+Unlike the board-interior form above, the collar includes its lower edge. -/
+theorem coarse_successor_bounds_of_fine_weak_bounds
+    {phase : Phase} {depth parent coordinate : Nat}
+    (hlower : quarterWest (successorWest phase (depth + 1) parent) ≤ coordinate)
+    (hupper : coordinate < quarterEast
+      (successorEast phase (depth + 1) parent)) :
+    quarterWest (successorWest phase depth parent) ≤
+        coarseCoordinate coordinate ∧
+      coarseCoordinate coordinate <
+        quarterEast (successorEast phase depth parent) := by
+  rcases hlower.eq_or_lt with rfl | hlower
+  · rw [successorWest_succ] at hupper ⊢
+    rw [successorEast_succ] at hupper
+    have hcoarse :
+        coarseCoordinate (quarterWest (4 * successorWest phase depth parent)) =
+          quarterWest (successorWest phase depth parent) := by
+      have hmod :
+          (2 * (4 * successorWest phase depth parent) + 1) % 8 = 1 := by
+        omega
+      have hdiv :
+          (2 * (4 * successorWest phase depth parent) + 1) / 8 =
+            successorWest phase depth parent := by
+        omega
+      unfold coarseCoordinate quarterWest
+      rw [hmod]
+      norm_num [hdiv]
+    rw [hcoarse]
+    simp only [quarterWest, quarterEast] at hupper ⊢
+    omega
+  · exact coarse_successor_bounds_of_fine_bounds hlower hupper
+
 /-- A previous-level successor-board interior lifts to the corresponding fine
 successor-board interior. -/
 theorem fine_successor_bounds_of_coarse_bounds

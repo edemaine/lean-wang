@@ -1297,20 +1297,26 @@ adjacent, and separated depth-two macrocells.  This proves
 `CreatedBoundaryPathsAt` for both phases at every depth without hierarchy
 induction and deletes the obsolete `FarFamilyTargetsAt` adapter.
 
-The all-depth target and forward-scaffold APIs now consume created-boundary
-paths internally.  Their sole remaining forward input is
-`ExceptionalFamilyTargetsAt` for the projected lower-collar, source-equality,
-and lower-transverse stopping cases.
+The exceptional target recurrence is now closed at every depth. Sparse source
+boundaries use an exact predecessor and inherit the old same-family target.
+Non-sparse boundaries use the already certified same/adjacent/far created
+paths for the lower-collar and lower-transverse cases. The remaining
+source-equality case has its own small 104-parent, 8-by-8 finite path audit;
+its bounded certificate transports into any hierarchy block and preserves the
+source family. Starting from the certified even and odd depth-zero targets
+therefore proves `ExceptionalFamilyTargetsAt` for both phases at every depth.
+`PairCoverSeamRequiredForward.closed104_forcesRoutedFixedCornerSquares` now
+discharges the routed scaffold's forward fixed-corner-square property with no
+hypotheses.
 
-### 1. Obtain arbitrarily large free squares
+### 1. Obtain arbitrarily large free squares (complete)
 
-The shade decoration already selects a noncrossing family of red borders with
+The shade decoration selects a noncrossing family of red borders with
 unbounded light members, and Robinson obstruction signals are instantiated on
-exactly those borders. Next prove the board/free-line recurrence on the
-combined natural grid: a uniformly light board forces sufficiently many clear
-rows and columns in its interior. Their crossings must have active routing
-role. Use the unbounded light boards to obtain arbitrarily large recognizable
-active squares with a distinguished lower-left corner.
+exactly those borders. The board/free-line recurrence, contained pair covers,
+and all exceptional residual seam cases now combine into the unconditional
+forward theorem above, which supplies arbitrarily large recognizable active
+squares with their routed fixed corner.
 
 ### 2. Prove backward realization
 

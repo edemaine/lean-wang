@@ -75,7 +75,7 @@ theorem oddFamilyTargets : FamilyTargetsAt .odd 0 := by
       · rw [north.2]
         simp
     rcases horizontalExactInheritedSource .odd 0 grid parentX parentY
-      columnWest columnEast boundarySouth boundaryNorth sparseBoundary
+      columnWest.le columnEast boundarySouth boundaryNorth sparseBoundary
       sourceInterior with ⟨source⟩
     have projected := HorizontalExactInheritedSource.projectedQuery
       source rowSouth rowNorth wrongFacingFine
@@ -260,7 +260,7 @@ theorem oddFamilyTargets : FamilyTargetsAt .odd 0 := by
       · rw [east.2]
         simp
     rcases verticalExactInheritedSource .odd 0 grid parentX parentY
-      boundaryWest boundaryEast rowSouth rowNorth sparseBoundary
+      boundaryWest boundaryEast rowSouth.le rowNorth sparseBoundary
       sourceInterior with ⟨source⟩
     have projected := VerticalExactInheritedSource.projectedQuery
       source columnWest columnEast wrongFacingFine

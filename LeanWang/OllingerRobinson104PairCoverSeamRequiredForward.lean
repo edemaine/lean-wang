@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinson104PairCoverSeamFaceRequired
 import LeanWang.OllingerRobinson104PairCoverSeamForward
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathAllFamilyTargetsAllDepth
+import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyExceptionalAllDepth
 
 /-!
 # Required-depth seam faces imply forward square forcing
@@ -29,6 +30,7 @@ open RedCycles RedShadeCycles RedShadePaths RedShadeGraphRefinement
   PairCoverSeamArithmetic PairCoverSeamComposition PairCoverSeamFacesAt
   PairCoverSeamFaceRecurrence PairCoverSeamFaceRequired
   PairCoverSeamResidualDirectPathAllFamilyTargetsAllDepth
+  PairCoverSeamResidualDirectPathFamilyExceptionalAllDepth
   PairCoverSeamResidualDirectPathFamilyExceptionalTargets
 
 set_option maxRecDepth 20000
@@ -418,6 +420,14 @@ theorem forcesRoutedFixedCornerSquares_of_exceptionalTargets
     ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
   forcesRoutedFixedCornerSquares_of_stepData
     (oddStepData oddExceptional) (evenStepData evenExceptional)
+
+/-- The corrected 104-symbol substitution unconditionally forces every routed
+fixed-corner square required by the scaffold reduction. -/
+theorem closed104_forcesRoutedFixedCornerSquares :
+    ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
+  forcesRoutedFixedCornerSquares_of_exceptionalTargets
+    (fun depth => odd (depth + 1))
+    (fun depth => even (depth + 1))
 
 end PairCoverSeamRequiredForward
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
