@@ -1263,6 +1263,11 @@ coordinate in the opposite macrocell. The finite computation is therefore
 fully separated from the remaining coordinate transport and hierarchy
 arithmetic.
 
+`PairCoverSeamCreatedAdjacentFullTransport` now moves each of those bounded
+certificates into an arbitrary global refined grid. Unlike the earlier
+edge-only transport, these theorems preserve the actual opposite-macrocell
+query coordinate, which is what the created-boundary obligation requires.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
