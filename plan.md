@@ -1296,14 +1296,19 @@ forming another large native target. `horizontalCreatedAtBlockWithParity` and
 `verticalCreatedAtBlockWithParity` transport this exact parity to arbitrary
 macrocells, while the old existential route theorems remain projections.
 
-A coordinate exhaustiveness check also exposed a real limitation of the
-current canonical-side target route. At outer level four, for example, an odd
-source at `(column,row,boundary) = (49,49,36)` has neither a same-family cycle
-crossing the query row nor a same-family south side crossing the source column.
-Adding north/east sides alone does not fix the surrounding hierarchy gap. Thus
-the far created-boundary proof must retain a small exceptional-gap connector or
-project that gap recursively; a proof claiming arbitrary canonical-side
-selection from the low ancestor would be false.
+The apparent canonical-side gap was an artifact of exposing only west and
+south sides. The arithmetic triple
+`(column,row,boundary) = (49,49,36)` is not a north-facing source in any of the
+104 constant-parent states. Among the actual sources in the normalized
+outer-level-four vertical slice, the west/south-only selector misses 3328
+cases; allowing the north and east sides eliminates every one of them.
+`PairCoverSeamResidualDirectPathCornerTargets` now proves closed-side target
+theorems for all four sides, including all four corners, and
+`RowFamilyTarget.ofAllCanonicalSides` and
+`ColumnFamilyTarget.ofAllCanonicalSides` expose the resulting four-way
+arithmetic interface. The remaining forward work is to lift this finite
+observation into an all-depth hierarchy selector and use it to close the far
+created-boundary case.
 
 ### 1. Obtain arbitrarily large free squares
 
