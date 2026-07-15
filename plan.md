@@ -1238,6 +1238,15 @@ path audit to prove `CreatedBoundaryPathsAt .even 0` directly.  No new native
 search is introduced: the theorem only adapts the already checked global seam
 paths to the narrower created-boundary interface.
 
+The local part of every created-boundary obligation is now closed at all
+depths. `PairCoverSeamCreatedBoundarySameBlock.vertical` and `.horizontal`
+translate the existing 8-by-8 created-source audit into an arbitrary refined
+grid whenever the query and selected boundary lie in the same depth-two
+macrocell. A generic seam-path widening lemma moves the finite target interval
+to the enclosing canonical collar; the collar alignment follows arithmetically
+from its level being at least two. Thus the remaining created-boundary work is
+only the cross-macrocell case, and this step adds no native computation.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
