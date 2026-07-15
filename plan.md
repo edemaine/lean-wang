@@ -1286,6 +1286,25 @@ projections preserve the previous low-ancestor API. The remaining far-case
 arithmetic can therefore choose a separating canonical side from the actual
 source block and route parity instead of an unrelated low-level existential.
 
+The local audit now determines that route parity rather than merely returning
+one existentially. `PairCoverSeamCreatedRouteParityAudit` proves, in eight
+independent cached chunks, that a created coordinate has odd route parity
+exactly at local residues four and five; all other created residues route
+evenly (the live cases are residues three through six). The checker shares one
+weighted flood per parent, so all 104 tile cases rebuild in seconds rather than
+forming another large native target. `horizontalCreatedAtBlockWithParity` and
+`verticalCreatedAtBlockWithParity` transport this exact parity to arbitrary
+macrocells, while the old existential route theorems remain projections.
+
+A coordinate exhaustiveness check also exposed a real limitation of the
+current canonical-side target route. At outer level four, for example, an odd
+source at `(column,row,boundary) = (49,49,36)` has neither a same-family cycle
+crossing the query row nor a same-family south side crossing the source column.
+Adding north/east sides alone does not fix the surrounding hierarchy gap. Thus
+the far created-boundary proof must retain a small exceptional-gap connector or
+project that gap recursively; a proof claiming arbitrary canonical-side
+selection from the low ancestor would be false.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
