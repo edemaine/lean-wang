@@ -1247,13 +1247,14 @@ to the enclosing canonical collar; the collar alignment follows arithmetically
 from its level being at least two. Thus the remaining created-boundary work is
 only the cross-macrocell case, and this step adds no native computation.
 
-The adjacent finite case is being strengthened without making one monolithic
+The adjacent finite case is strengthened without making one monolithic
 certificate. `PairCoverSeamCreatedAdjacentFullAuditDefs` asks one weighted
 flood to cover every query coordinate in the neighboring 8-wide macrocell,
-rather than only its shared edge; both directions pass on the first 32-pair
-chunk in `PairCoverSeamCreatedAdjacentFullAuditChunk00`. The 792 realizable
-pair states remain split into 25 independent chunks, with roughly two minutes
-to rebuild one chunk on the current machine.
+rather than only its shared edge. All 792 realizable pair states pass in both
+directions; `PairCoverSeamCreatedAdjacentFullAuditChunks` assembles the 25
+independent 32-pair certificates. A single chunk takes roughly two minutes to
+rebuild on the current machine, while Lake can build changed chunks in
+parallel.
 
 ### 1. Obtain arbitrarily large free squares
 
