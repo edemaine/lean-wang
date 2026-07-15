@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamFaceRequired
 import LeanWang.OllingerRobinson104PairCoverSeamForward
+import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathAllFamilyTargetsAllDepth
 
 /-!
 # Required-depth seam faces imply forward square forcing
@@ -27,6 +28,8 @@ open RedCycles RedShadeCycles RedShadePaths RedShadeGraphRefinement
   SparseFreeLinePlaneBase Signals.FreeCellLocal
   PairCoverSeamArithmetic PairCoverSeamComposition PairCoverSeamFacesAt
   PairCoverSeamFaceRecurrence PairCoverSeamFaceRequired
+  PairCoverSeamResidualDirectPathAllFamilyTargetsAllDepth
+  PairCoverSeamResidualDirectPathFamilyExceptionalTargets
 
 set_option maxRecDepth 20000
 
@@ -404,6 +407,17 @@ theorem forcesRoutedFixedCornerSquares_of_stepData
     ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
   forcesRoutedFixedCornerSquares_of_requiredFaces
     (requiredFaces oddSteps evenSteps)
+
+/-- Exceptional projected-query targets are the sole remaining semantic input
+to forward square forcing. -/
+theorem forcesRoutedFixedCornerSquares_of_exceptionalTargets
+    (oddExceptional :
+      ∀ depth, ExceptionalFamilyTargetsAt .odd (depth + 1))
+    (evenExceptional :
+      ∀ depth, ExceptionalFamilyTargetsAt .even (depth + 1)) :
+    ForcesRoutedFixedCornerSquares ShadedSignals.routedScaffold :=
+  forcesRoutedFixedCornerSquares_of_stepData
+    (oddStepData oddExceptional) (evenStepData evenExceptional)
 
 end PairCoverSeamRequiredForward
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104

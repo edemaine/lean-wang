@@ -1275,37 +1275,6 @@ coordinates into its 8-by-16 or 16-by-8 window, and widens the result to the
 hierarchy collar. Together with the same-block theorem, only queries separated
 from their created boundary by at least one whole intervening macrocell remain.
 
-The far-case source witness now retains the coordinate information needed for
-canonical target selection. `ExactLowCanonicalCycleAncestorWithin` records the
-two literal outcomes of local parity normalization: level zero at the audited
-source macrocell, or level one at that macrocell's halved parent. Its family
-variant preserves the same exact address together with even/odd hierarchy
-family membership. `horizontalCreatedAtExact` and `verticalCreatedAtExact`
-expose these witnesses at arbitrary recurrence depth, while compatibility
-projections preserve the previous low-ancestor API. The remaining far-case
-arithmetic can therefore choose a separating canonical side from the actual
-source block and route parity instead of an unrelated low-level existential.
-
-The local audit now determines that route parity rather than merely returning
-one existentially. `PairCoverSeamCreatedRouteParityAudit` proves, in eight
-independent cached chunks, that a created coordinate has odd route parity
-exactly at local residues four and five; all other created residues route
-evenly (the live cases are residues three through six). The checker shares one
-weighted flood per parent, so all 104 tile cases rebuild in seconds rather than
-forming another large native target. `horizontalCreatedAtBlockWithParity` and
-`verticalCreatedAtBlockWithParity` transport this exact parity to arbitrary
-macrocells, while the old existential route theorems remain projections.
-
-Parity normalization now preserves that fact through the hierarchy interface
-instead of immediately hiding it. `ExactParityCanonicalCycleAncestorWithin`
-names the normalized level as zero for an even route and one for an odd route;
-its family variant retains the corresponding `InHierarchyFamily` witness.
-`horizontalCreatedAtExactParity` and `verticalCreatedAtExactParity` expose
-these witnesses at every recurrence depth, while the prior exact-low theorems
-are compatibility projections. The all-depth selector can therefore branch on
-the audited residue and use the same named level for both source ancestry and
-canonical-side arithmetic.
-
 All four canonical cycle sides remain useful target constructors, but they do
 not cover every realizable far query.  An exact coordinate audit found, for
 example, a realizable outer-level-four source at
@@ -1313,20 +1282,25 @@ example, a realizable outer-level-four source at
 accepted by the query.  The rejected `FarCanonicalChoicesAt` interface has
 therefore been removed instead of being retained as an unprovable obligation.
 
-The replacement `FarFamilyTargetsAt` asks for the actual semantic fact needed
-by path composition: some endpoint in the created source's exact hierarchy
-family.  The endpoint may be a noncanonical red segment produced by target
-refinement.  Its adapter still dispatches same-macrocell queries to
-`PairCoverSeamCreatedBoundarySameBlock` and neighboring-macrocell queries to
-`PairCoverSeamCreatedBoundaryAdjacent`; only the remaining strict quotient
-inequality consumes the family target and exact route parity.
+The far case instead has a simpler local proof.  In every realizable adjacent
+pair of depth-two macrocells, a created source has an even path to a parallel
+red segment on each live query-facing side.  The 25 cached
+`PairCoverSeamCreatedFarParallelAudit` chunks certify this finite fact for all
+792 vertical and 792 horizontal pair states.  Their proposition-level API
+returns a bounded path, so translation cannot leave the audited rectangle.
 
-Target refinement now supports that invariant.  In addition to sparse selected
-boundaries, `RowFamilyTarget.refineAtBoundary` and its column dual lift a target
-when the fine query, source boundary, and target are arbitrary points of their
-three coarse intervals.  The next forward step is a well-founded recurrence
-for `FarFamilyTargetsAt`, using these general lifts and finite stopping cases,
-then feeding its result to `toCreatedBoundaryPathsAt`.
+`PairCoverSeamCreatedBoundaryFar` places that adjacent pair at the source,
+translates the bounded path into the global refined grid, and observes that
+the parallel segment lies strictly between any separated query and source.
+`PairCoverSeamCreatedBoundaryAllDepth` then splits coordinates into same,
+adjacent, and separated depth-two macrocells.  This proves
+`CreatedBoundaryPathsAt` for both phases at every depth without hierarchy
+induction and deletes the obsolete `FarFamilyTargetsAt` adapter.
+
+The all-depth target and forward-scaffold APIs now consume created-boundary
+paths internally.  Their sole remaining forward input is
+`ExceptionalFamilyTargetsAt` for the projected lower-collar, source-equality,
+and lower-transverse stopping cases.
 
 ### 1. Obtain arbitrarily large free squares
 

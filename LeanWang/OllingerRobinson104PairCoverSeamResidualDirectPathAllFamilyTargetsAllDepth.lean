@@ -5,7 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathAllFamilyTargetsRecurrence
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathAllFamilyTargetsOddBase
-import LeanWang.OllingerRobinson104PairCoverSeamCreatedBoundaryPaths
+import LeanWang.OllingerRobinson104PairCoverSeamCreatedBoundaryAllDepth
 import LeanWang.OllingerRobinson104PairCoverSeamFaceRecurrence
 
 /-!
@@ -20,7 +20,8 @@ inputs are created-boundary paths and exceptional projected-query targets.
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
 namespace PairCoverSeamResidualDirectPathAllFamilyTargetsAllDepth
 
-open PairCoverSeamCreatedBoundaryPaths PairCoverSeamCreatedPaths
+open PairCoverSeamCreatedBoundaryAllDepth PairCoverSeamCreatedBoundaryPaths
+  PairCoverSeamCreatedPaths
   PairCoverSeamFaceRecurrence
   PairCoverSeamResidualDirectPathAllFamilyTargets
   PairCoverSeamResidualDirectPathAllFamilyTargetsRecurrence
@@ -54,42 +55,40 @@ theorem allDepth
     ∀ depth, AllFamilyTargetsAt phase depth := fun depth =>
   (allDepthState base exceptional created depth).1
 
-/-- All even target depths, conditional only on the two local semantic inputs. -/
+/-- All even target depths, conditional only on exceptional projected-query
+targets. -/
 theorem even
-    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .even (depth + 1))
-    (created : ∀ depth, CreatedBoundaryPathsAt .even depth) :
+    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .even (depth + 1)) :
     ∀ depth, AllFamilyTargetsAt .even depth :=
   allDepth PairCoverSeamResidualDirectPathAllFamilyTargets.evenBase
-    exceptional created
+    exceptional PairCoverSeamCreatedBoundaryAllDepth.even
 
-/-- All odd target depths, conditional only on the two local semantic inputs. -/
+/-- All odd target depths, conditional only on exceptional projected-query
+targets. -/
 theorem odd
-    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .odd (depth + 1))
-    (created : ∀ depth, CreatedBoundaryPathsAt .odd depth) :
+    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .odd (depth + 1)) :
     ∀ depth, AllFamilyTargetsAt .odd depth :=
   allDepth PairCoverSeamResidualDirectPathAllFamilyTargetsOddBase.oddBase
-    exceptional created
+    exceptional PairCoverSeamCreatedBoundaryAllDepth.odd
 
 /-- The all-depth target recurrence supplies every odd face-refinement step. -/
 theorem oddStepData
-    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .odd (depth + 1))
-    (created : ∀ depth, CreatedBoundaryPathsAt .odd depth) :
+    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .odd (depth + 1)) :
     ∀ depth, StepData .odd depth := by
   intro depth
   have state := allDepthState
     PairCoverSeamResidualDirectPathAllFamilyTargetsOddBase.oddBase
-    exceptional created depth
+    exceptional PairCoverSeamCreatedBoundaryAllDepth.odd depth
   exact StepData.ofFamilyTargets state.2 state.1.toFamilyTargetsAt
 
 /-- The all-depth target recurrence supplies every required even step. -/
 theorem evenStepData
-    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .even (depth + 1))
-    (created : ∀ depth, CreatedBoundaryPathsAt .even depth) :
+    (exceptional : ∀ depth, ExceptionalFamilyTargetsAt .even (depth + 1)) :
     ∀ depth, StepData .even (1 + depth) := by
   intro depth
   have state := allDepthState
     PairCoverSeamResidualDirectPathAllFamilyTargets.evenBase
-    exceptional created (1 + depth)
+    exceptional PairCoverSeamCreatedBoundaryAllDepth.even (1 + depth)
   exact StepData.ofFamilyTargets state.2 state.1.toFamilyTargetsAt
 
 end PairCoverSeamResidualDirectPathAllFamilyTargetsAllDepth
