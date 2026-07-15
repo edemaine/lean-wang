@@ -1275,6 +1275,17 @@ coordinates into its 8-by-16 or 16-by-8 window, and widens the result to the
 hierarchy collar. Together with the same-block theorem, only queries separated
 from their created boundary by at least one whole intervening macrocell remain.
 
+The far-case source witness now retains the coordinate information needed for
+canonical target selection. `ExactLowCanonicalCycleAncestorWithin` records the
+two literal outcomes of local parity normalization: level zero at the audited
+source macrocell, or level one at that macrocell's halved parent. Its family
+variant preserves the same exact address together with even/odd hierarchy
+family membership. `horizontalCreatedAtExact` and `verticalCreatedAtExact`
+expose these witnesses at arbitrary recurrence depth, while compatibility
+projections preserve the previous low-ancestor API. The remaining far-case
+arithmetic can therefore choose a separating canonical side from the actual
+source block and route parity instead of an unrelated low-level existential.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

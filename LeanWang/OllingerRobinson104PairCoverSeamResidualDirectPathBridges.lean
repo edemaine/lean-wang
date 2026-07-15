@@ -86,6 +86,79 @@ def LowCanonicalCycleAncestorWithinFamily
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- An exact low ancestor retaining both the audited source macrocell and its
+hierarchy family. -/
+def ExactLowCanonicalCycleAncestorWithinFamily
+    (grid : Nat → Nat → Index) (source : Port)
+    (sourceBlockX sourceBlockY : Nat)
+    (outerLevel outerBlockX outerBlockY : Nat)
+    (family : HierarchyFamily) : Prop :=
+  ∃ level blockX blockY,
+    ((level = 0 ∧ blockX = sourceBlockX ∧ blockY = sourceBlockY) ∨
+      (level = 1 ∧ blockX = sourceBlockX / 2 ∧
+        blockY = sourceBlockY / 2)) ∧
+    HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    InHierarchyFamily outerLevel level family ∧
+    CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      Path grid source entry false
+
+/-- Forget the exact audited macrocell while retaining the low ancestor and
+its family. -/
+theorem ExactLowCanonicalCycleAncestorWithinFamily.toLowFamily
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    {family : HierarchyFamily}
+    (ancestor : ExactLowCanonicalCycleAncestorWithinFamily grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY family) :
+    LowCanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, exactBlock, xWithin, yWithin, inFamily,
+      cycle, entry, entryOnCycle, path⟩
+  refine ⟨level, blockX, blockY, ?_, xWithin, yWithin, inFamily,
+    cycle, entry, entryOnCycle, path⟩
+  rcases exactBlock with exactBlock | exactBlock <;> omega
+
+/-- Every exact low ancestor belongs to one hierarchy family without changing
+its witnessed level or blocks. -/
+theorem ExactLowCanonicalCycleAncestorWithin.exists_family
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    (ancestor : ExactLowCanonicalCycleAncestorWithin grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY) :
+    ∃ family, ExactLowCanonicalCycleAncestorWithinFamily grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY family := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, exactBlock, xWithin, yWithin,
+      cycle, entry, entryOnCycle, path⟩
+  let difference := outerLevel - level
+  have levelLe : level ≤ outerLevel := xWithin.1
+  have modLt : difference % 2 < 2 := Nat.mod_lt _ (by decide)
+  have decompose := Nat.mod_add_div difference 2
+  by_cases even : difference % 2 = 0
+  · refine ⟨.even, level, blockX, blockY, exactBlock, xWithin, yWithin,
+      ?_, cycle, entry, entryOnCycle, path⟩
+    refine ⟨difference / 2, ?_⟩
+    dsimp [difference] at decompose ⊢
+    omega
+  · have odd : difference % 2 = 1 := by omega
+    refine ⟨.odd, level, blockX, blockY, exactBlock, xWithin, yWithin,
+      ?_, cycle, entry, entryOnCycle, path⟩
+    refine ⟨difference / 2, ?_⟩
+    dsimp [difference] at decompose ⊢
+    omega
+
 /-- Forget the low-level bound while retaining the source family. -/
 theorem LowCanonicalCycleAncestorWithinFamily.toAncestorFamily
     {grid : Nat → Nat → Index} {source : Port}

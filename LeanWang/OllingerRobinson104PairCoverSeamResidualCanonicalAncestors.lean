@@ -99,6 +99,46 @@ def LowCanonicalCycleAncestorWithin (grid : Nat → Nat → Index)
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- A low canonical ancestor retaining the exact audited macrocell from which
+parity normalization started.  An even local route stays at that level-zero
+cell, while an odd route moves to its level-one parent. -/
+def ExactLowCanonicalCycleAncestorWithin (grid : Nat → Nat → Index)
+    (source : Port) (sourceBlockX sourceBlockY : Nat)
+    (outerLevel outerBlockX outerBlockY : Nat) : Prop :=
+  ∃ level blockX blockY,
+    ((level = 0 ∧ blockX = sourceBlockX ∧ blockY = sourceBlockY) ∨
+      (level = 1 ∧ blockX = sourceBlockX / 2 ∧
+        blockY = sourceBlockY / 2)) ∧
+    HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      Path grid source entry false
+
+/-- Forget the exact audited macrocell while retaining the low-level bound. -/
+theorem ExactLowCanonicalCycleAncestorWithin.toLow
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    (ancestor : ExactLowCanonicalCycleAncestorWithin grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY) :
+    LowCanonicalCycleAncestorWithin grid source
+      outerLevel outerBlockX outerBlockY := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, exactBlock, xWithin, yWithin,
+      cycle, entry, entryOnCycle, path⟩
+  refine ⟨level, blockX, blockY, ?_, xWithin, yWithin,
+    cycle, entry, entryOnCycle, path⟩
+  rcases exactBlock with exactBlock | exactBlock <;> omega
+
 /-- Forget the low-level bound on a created source ancestor. -/
 theorem LowCanonicalCycleAncestorWithin.toCanonicalCycleAncestorWithin
     {grid : Nat → Nat → Index} {source : Port}
@@ -292,7 +332,7 @@ theorem ofLocalCycleRoute
 /-- Parity normalization for a local route whose audited macrocell is known to
 belong to a specified outer hierarchy block.  The resulting cycle is at level
 zero or one. -/
-theorem ofLocalCycleRouteAtBlockWithinLow
+theorem ofLocalCycleRouteAtBlockWithinExactLow
     (grid : Nat → Nat → Index) {source : Port}
     {outerLevel outerBlockX outerBlockY blockX blockY : Nat}
     (route : LocalCycleRouteAtBlock (iterateRefine 1 grid)
@@ -301,14 +341,15 @@ theorem ofLocalCycleRouteAtBlockWithinLow
       (outerLevel + 2) outerBlockX 0 blockX)
     (yWithin : HierarchyAddressWithin
       (outerLevel + 2) outerBlockY 0 blockY) :
-    LowCanonicalCycleAncestorWithin (iterateRefine 3 grid) source
-      (outerLevel + 2) outerBlockX outerBlockY := by
+    ExactLowCanonicalCycleAncestorWithin (iterateRefine 3 grid) source
+      blockX blockY (outerLevel + 2) outerBlockX outerBlockY := by
   unfold LocalCycleRouteAtBlock at route
   rw [PlaneRedBoards.iterateRefine_add] at route
   rcases route with
     ⟨entry, parity, childCycle, entryOnChild, sourcePath⟩
   cases hparity : parity
-  · refine ⟨0, blockX, blockY, by omega, xWithin, yWithin,
+  · refine ⟨0, blockX, blockY, Or.inl ⟨rfl, rfl, rfl⟩,
+      xWithin, yWithin,
       ?_, entry, ?_, ?_⟩
     · simpa using childCycle
     · simpa using entryOnChild
@@ -345,12 +386,28 @@ theorem ofLocalCycleRouteAtBlockWithinLow
       simpa [Bool.xor_assoc] using
         Path.trans sourcePath'
           (Path.trans aroundChild (path_symm bridgePath))
-    refine ⟨1, parentX, parentY, by omega,
+    refine ⟨1, parentX, parentY,
+      Or.inr ⟨rfl, rfl, rfl⟩,
       HierarchyAddressWithin.parent_of_level_zero xWithin,
       HierarchyAddressWithin.parent_of_level_zero yWithin,
       ?_, parentEntry, ?_, sourceToParent⟩
     · simpa using at_scale grid 1 parentX parentY
     · simpa using parentEntryOnCycle
+
+/-- Compatibility projection of
+`ofLocalCycleRouteAtBlockWithinExactLow`. -/
+theorem ofLocalCycleRouteAtBlockWithinLow
+    (grid : Nat → Nat → Index) {source : Port}
+    {outerLevel outerBlockX outerBlockY blockX blockY : Nat}
+    (route : LocalCycleRouteAtBlock (iterateRefine 1 grid)
+      source blockX blockY)
+    (xWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockX 0 blockX)
+    (yWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockY 0 blockY) :
+    LowCanonicalCycleAncestorWithin (iterateRefine 3 grid) source
+      (outerLevel + 2) outerBlockX outerBlockY :=
+  (ofLocalCycleRouteAtBlockWithinExactLow grid route xWithin yWithin).toLow
 
 /-- Compatibility projection of `ofLocalCycleRouteAtBlockWithinLow`. -/
 theorem ofLocalCycleRouteAtBlockWithin
