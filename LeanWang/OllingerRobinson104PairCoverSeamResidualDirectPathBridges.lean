@@ -167,6 +167,69 @@ theorem ExactParityCanonicalCycleAncestorWithinFamily.toExactLowFamily
         Or.inr ⟨rfl, rfl, rfl⟩,
         xWithin, yWithin, inFamily, cycle, entry, entryOnCycle, path⟩
 
+/-- Project the parity-exact source to the ordinary same-family ancestor used
+by direct path composition. -/
+theorem ExactParityCanonicalCycleAncestorWithinFamily.toAncestorFamily
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    {parity : Bool} {family : HierarchyFamily}
+    (ancestor : ExactParityCanonicalCycleAncestorWithinFamily grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY
+      parity family) :
+    CanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family := by
+  let level := if parity then 1 else 0
+  let blockX := if parity then sourceBlockX / 2 else sourceBlockX
+  let blockY := if parity then sourceBlockY / 2 else sourceBlockY
+  change HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+      HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+      InHierarchyFamily outerLevel level family ∧
+      CycleOn grid
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) ∧
+      ∃ entry,
+        OnCycle
+          (2 ^ level * (4 * blockX + 1))
+          (2 ^ level * (4 * blockX + 3))
+          (2 ^ level * (4 * blockY + 1))
+          (2 ^ level * (4 * blockY + 3)) entry ∧
+        Path grid source entry false at ancestor
+  rcases ancestor with
+    ⟨xWithin, yWithin, inFamily, cycle, entry, entryOnCycle, path⟩
+  exact ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+    cycle, entry, entryOnCycle, path⟩
+
+/-- The source's family membership at its parity-normalized level. -/
+theorem ExactParityCanonicalCycleAncestorWithinFamily.inFamily
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    {parity : Bool} {family : HierarchyFamily}
+    (ancestor : ExactParityCanonicalCycleAncestorWithinFamily grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY
+      parity family) :
+    InHierarchyFamily outerLevel (if parity then 1 else 0) family := by
+  let level := if parity then 1 else 0
+  let blockX := if parity then sourceBlockX / 2 else sourceBlockX
+  let blockY := if parity then sourceBlockY / 2 else sourceBlockY
+  change HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+      HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+      InHierarchyFamily outerLevel level family ∧
+      CycleOn grid
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) ∧
+      ∃ entry,
+        OnCycle
+          (2 ^ level * (4 * blockX + 1))
+          (2 ^ level * (4 * blockX + 3))
+          (2 ^ level * (4 * blockY + 1))
+          (2 ^ level * (4 * blockY + 3)) entry ∧
+        Path grid source entry false at ancestor
+  exact ancestor.2.2.1
+
 /-- Every exact parity ancestor belongs to one hierarchy family without
 discarding its normalized level. -/
 theorem ExactParityCanonicalCycleAncestorWithin.exists_family

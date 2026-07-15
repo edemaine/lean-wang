@@ -1320,6 +1320,16 @@ arithmetic interface. The remaining forward work is to lift this finite
 observation into an all-depth hierarchy selector and use it to close the far
 created-boundary case.
 
+The far-case boundary is now explicit and independent of red-graph semantics.
+`FarCanonicalChoicesAt` asks only for a same-family canonical closed side when
+the query and created source are separated by at least one complete 8-wide
+macrocell. Its adapter first dispatches same-macrocell queries to
+`PairCoverSeamCreatedBoundarySameBlock` and neighboring-macrocell queries to
+`PairCoverSeamCreatedBoundaryAdjacent`; only the remaining strict quotient
+inequality uses exact route parity, a canonical-side choice, and same-family
+path composition. Thus proving `FarCanonicalChoicesAt` is exactly the remaining
+forward hierarchy invariant needed to recover `CreatedBoundaryPathsAt`.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

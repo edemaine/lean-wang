@@ -26,6 +26,78 @@ open RedCycles RedShadeCycles PairCoverSeamPathSearch
 
 set_option maxRecDepth 20000
 
+/-- Pure coordinate condition saying that one of a canonical cycle's four
+closed sides is a valid row-seam target. -/
+def CanonicalRowSideChoice
+    (outerWest outerEast column row boundary level blockX blockY : Nat) : Prop :=
+  ((quarterWest outerWest <
+        quarterWest (2 ^ level * (4 * blockX + 1)) ∧
+      quarterWest (2 ^ level * (4 * blockX + 1)) <
+        quarterEast outerEast) ∧
+    (quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
+      row ≤ quarterNorth (2 ^ level * (4 * blockY + 3)))) ∨
+  ((quarterWest outerWest <
+        quarterEast (2 ^ level * (4 * blockX + 3)) ∧
+      quarterEast (2 ^ level * (4 * blockX + 3)) <
+        quarterEast outerEast) ∧
+    (quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
+      row ≤ quarterNorth (2 ^ level * (4 * blockY + 3)))) ∨
+  ((quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
+      column ≤ quarterEast (2 ^ level * (4 * blockX + 3))) ∧
+    StrictBetween row boundary
+      (quarterSouth (2 ^ level * (4 * blockY + 1)))) ∨
+  ((quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
+      column ≤ quarterEast (2 ^ level * (4 * blockX + 3))) ∧
+    StrictBetween row boundary
+      (quarterNorth (2 ^ level * (4 * blockY + 3))))
+
+/-- Horizontal dual of `CanonicalRowSideChoice`. -/
+def CanonicalColumnSideChoice
+    (outerSouth outerNorth row column boundary level blockX blockY : Nat) : Prop :=
+  ((quarterSouth outerSouth <
+        quarterSouth (2 ^ level * (4 * blockY + 1)) ∧
+      quarterSouth (2 ^ level * (4 * blockY + 1)) <
+        quarterNorth outerNorth) ∧
+    (quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
+      column ≤ quarterEast (2 ^ level * (4 * blockX + 3)))) ∨
+  ((quarterSouth outerSouth <
+        quarterNorth (2 ^ level * (4 * blockY + 3)) ∧
+      quarterNorth (2 ^ level * (4 * blockY + 3)) <
+        quarterNorth outerNorth) ∧
+    (quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
+      column ≤ quarterEast (2 ^ level * (4 * blockX + 3)))) ∨
+  ((quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
+      row ≤ quarterNorth (2 ^ level * (4 * blockY + 3))) ∧
+    StrictBetween column boundary
+      (quarterWest (2 ^ level * (4 * blockX + 1)))) ∨
+  ((quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
+      row ≤ quarterNorth (2 ^ level * (4 * blockY + 3))) ∧
+    StrictBetween column boundary
+      (quarterEast (2 ^ level * (4 * blockX + 3))))
+
+/-- A row-side choice localized to one hierarchy family inside an outer
+canonical block. -/
+def CanonicalRowSideChoiceWithin
+    (outerLevel outerBlockX outerBlockY outerWest outerEast : Nat)
+    (column row boundary : Nat) (family : HierarchyFamily) : Prop :=
+  ∃ level blockX blockY,
+    HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    InHierarchyFamily outerLevel level family ∧
+    CanonicalRowSideChoice outerWest outerEast
+      column row boundary level blockX blockY
+
+/-- Horizontal dual of `CanonicalRowSideChoiceWithin`. -/
+def CanonicalColumnSideChoiceWithin
+    (outerLevel outerBlockX outerBlockY outerSouth outerNorth : Nat)
+    (row column boundary : Nat) (family : HierarchyFamily) : Prop :=
+  ∃ level blockX blockY,
+    HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    InHierarchyFamily outerLevel level family ∧
+    CanonicalColumnSideChoice outerSouth outerNorth
+      row column boundary level blockX blockY
+
 /-- A canonical closed west side crossing the query row, or a canonical closed
 south side strictly between the source and query, supplies a row target. -/
 theorem RowFamilyTarget.ofCanonicalSides
@@ -109,31 +181,13 @@ theorem RowFamilyTarget.ofAllCanonicalSides
     (xWithin : HierarchyAddressWithin outerLevel outerBlockX level blockX)
     (yWithin : HierarchyAddressWithin outerLevel outerBlockY level blockY)
     (inFamily : InHierarchyFamily outerLevel level family)
-    (separates :
-      ((quarterWest outerWest <
-            quarterWest (2 ^ level * (4 * blockX + 1)) ∧
-          quarterWest (2 ^ level * (4 * blockX + 1)) <
-            quarterEast outerEast) ∧
-        (quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
-          row ≤ quarterNorth (2 ^ level * (4 * blockY + 3)))) ∨
-      ((quarterWest outerWest <
-            quarterEast (2 ^ level * (4 * blockX + 3)) ∧
-          quarterEast (2 ^ level * (4 * blockX + 3)) <
-            quarterEast outerEast) ∧
-        (quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
-          row ≤ quarterNorth (2 ^ level * (4 * blockY + 3)))) ∨
-      ((quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
-          column ≤ quarterEast (2 ^ level * (4 * blockX + 3))) ∧
-        StrictBetween row boundary
-          (quarterSouth (2 ^ level * (4 * blockY + 1)))) ∨
-      ((quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
-          column ≤ quarterEast (2 ^ level * (4 * blockX + 3))) ∧
-        StrictBetween row boundary
-          (quarterNorth (2 ^ level * (4 * blockY + 3))))) :
+    (separates : CanonicalRowSideChoice outerWest outerEast
+      column row boundary level blockX blockY) :
     RowFamilyTarget root outerLevel outerBlockX outerBlockY
       outerWest outerEast column row boundary family := by
   have cycle := cycleAtLevelWithin root (blockX := blockX) (blockY := blockY)
     xWithin.1
+  unfold CanonicalRowSideChoice at separates
   rcases separates with westCrosses | eastCrosses | southBetween | northBetween
   · left
     rcases verticalWest xWithin yWithin inFamily cycle
@@ -165,31 +219,13 @@ theorem ColumnFamilyTarget.ofAllCanonicalSides
     (xWithin : HierarchyAddressWithin outerLevel outerBlockX level blockX)
     (yWithin : HierarchyAddressWithin outerLevel outerBlockY level blockY)
     (inFamily : InHierarchyFamily outerLevel level family)
-    (separates :
-      ((quarterSouth outerSouth <
-            quarterSouth (2 ^ level * (4 * blockY + 1)) ∧
-          quarterSouth (2 ^ level * (4 * blockY + 1)) <
-            quarterNorth outerNorth) ∧
-        (quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
-          column ≤ quarterEast (2 ^ level * (4 * blockX + 3)))) ∨
-      ((quarterSouth outerSouth <
-            quarterNorth (2 ^ level * (4 * blockY + 3)) ∧
-          quarterNorth (2 ^ level * (4 * blockY + 3)) <
-            quarterNorth outerNorth) ∧
-        (quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column ∧
-          column ≤ quarterEast (2 ^ level * (4 * blockX + 3)))) ∨
-      ((quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
-          row ≤ quarterNorth (2 ^ level * (4 * blockY + 3))) ∧
-        StrictBetween column boundary
-          (quarterWest (2 ^ level * (4 * blockX + 1)))) ∨
-      ((quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row ∧
-          row ≤ quarterNorth (2 ^ level * (4 * blockY + 3))) ∧
-        StrictBetween column boundary
-          (quarterEast (2 ^ level * (4 * blockX + 3))))) :
+    (separates : CanonicalColumnSideChoice outerSouth outerNorth
+      row column boundary level blockX blockY) :
     ColumnFamilyTarget root outerLevel outerBlockX outerBlockY
       outerSouth outerNorth row column boundary family := by
   have cycle := cycleAtLevelWithin root (blockX := blockX) (blockY := blockY)
     xWithin.1
+  unfold CanonicalColumnSideChoice at separates
   rcases separates with southCrosses | northCrosses | westBetween | eastBetween
   · left
     rcases horizontalSouth xWithin yWithin inFamily cycle
@@ -211,6 +247,35 @@ theorem ColumnFamilyTarget.ofAllCanonicalSides
         eastBetween.1.1 eastBetween.1.2 with ⟨ancestor, interior⟩
     exact ⟨quarterEast (2 ^ level * (4 * blockX + 3)),
       eastBetween.2, interior, ancestor⟩
+
+/-- A localized pure row-side choice constructs the corresponding semantic
+family target. -/
+theorem CanonicalRowSideChoiceWithin.toFamilyTarget
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerWest outerEast : Nat}
+    {column row boundary : Nat} {family : HierarchyFamily}
+    (choice : CanonicalRowSideChoiceWithin outerLevel outerBlockX outerBlockY
+      outerWest outerEast column row boundary family) :
+    RowFamilyTarget root outerLevel outerBlockX outerBlockY
+      outerWest outerEast column row boundary family := by
+  rcases choice with
+    ⟨level, blockX, blockY, xWithin, yWithin, inFamily, separates⟩
+  exact RowFamilyTarget.ofAllCanonicalSides
+    xWithin yWithin inFamily separates
+
+/-- Horizontal dual of `CanonicalRowSideChoiceWithin.toFamilyTarget`. -/
+theorem CanonicalColumnSideChoiceWithin.toFamilyTarget
+    {root : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY outerSouth outerNorth : Nat}
+    {row column boundary : Nat} {family : HierarchyFamily}
+    (choice : CanonicalColumnSideChoiceWithin outerLevel outerBlockX outerBlockY
+      outerSouth outerNorth row column boundary family) :
+    ColumnFamilyTarget root outerLevel outerBlockX outerBlockY
+      outerSouth outerNorth row column boundary family := by
+  rcases choice with
+    ⟨level, blockX, blockY, xWithin, yWithin, inFamily, separates⟩
+  exact ColumnFamilyTarget.ofAllCanonicalSides
+    xWithin yWithin inFamily separates
 
 end PairCoverSeamResidualDirectPathCanonicalSideTargets
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
