@@ -78,6 +78,41 @@ def CanonicalCycleAncestorWithin (grid : Nat → Nat → Index)
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- A localized canonical ancestor at one of the two levels produced directly
+by the created-source parity normalization. -/
+def LowCanonicalCycleAncestorWithin (grid : Nat → Nat → Index)
+    (source : Port) (outerLevel outerBlockX outerBlockY : Nat) : Prop :=
+  ∃ level blockX blockY,
+    level ≤ 1 ∧
+    HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      Path grid source entry false
+
+/-- Forget the low-level bound on a created source ancestor. -/
+theorem LowCanonicalCycleAncestorWithin.toCanonicalCycleAncestorWithin
+    {grid : Nat → Nat → Index} {source : Port}
+    {outerLevel outerBlockX outerBlockY : Nat}
+    (ancestor : LowCanonicalCycleAncestorWithin grid source
+      outerLevel outerBlockX outerBlockY) :
+    CanonicalCycleAncestorWithin grid source
+      outerLevel outerBlockX outerBlockY := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, _low, xWithin, yWithin,
+      cycle, entry, entryOnCycle, path⟩
+  exact ⟨level, blockX, blockY, xWithin, yWithin,
+    cycle, entry, entryOnCycle, path⟩
+
 theorem CanonicalCycleAncestorWithin.toCanonical
     {grid : Nat → Nat → Index} {source : Port}
     {outerLevel outerBlockX outerBlockY : Nat}
@@ -255,8 +290,9 @@ theorem ofLocalCycleRoute
     · simpa using parentEntryOnCycle
 
 /-- Parity normalization for a local route whose audited macrocell is known to
-belong to a specified outer hierarchy block. -/
-theorem ofLocalCycleRouteAtBlockWithin
+belong to a specified outer hierarchy block.  The resulting cycle is at level
+zero or one. -/
+theorem ofLocalCycleRouteAtBlockWithinLow
     (grid : Nat → Nat → Index) {source : Port}
     {outerLevel outerBlockX outerBlockY blockX blockY : Nat}
     (route : LocalCycleRouteAtBlock (iterateRefine 1 grid)
@@ -265,14 +301,14 @@ theorem ofLocalCycleRouteAtBlockWithin
       (outerLevel + 2) outerBlockX 0 blockX)
     (yWithin : HierarchyAddressWithin
       (outerLevel + 2) outerBlockY 0 blockY) :
-    CanonicalCycleAncestorWithin (iterateRefine 3 grid) source
+    LowCanonicalCycleAncestorWithin (iterateRefine 3 grid) source
       (outerLevel + 2) outerBlockX outerBlockY := by
   unfold LocalCycleRouteAtBlock at route
   rw [PlaneRedBoards.iterateRefine_add] at route
   rcases route with
     ⟨entry, parity, childCycle, entryOnChild, sourcePath⟩
   cases hparity : parity
-  · refine ⟨0, blockX, blockY, xWithin, yWithin,
+  · refine ⟨0, blockX, blockY, by omega, xWithin, yWithin,
       ?_, entry, ?_, ?_⟩
     · simpa using childCycle
     · simpa using entryOnChild
@@ -309,12 +345,27 @@ theorem ofLocalCycleRouteAtBlockWithin
       simpa [Bool.xor_assoc] using
         Path.trans sourcePath'
           (Path.trans aroundChild (path_symm bridgePath))
-    refine ⟨1, parentX, parentY,
+    refine ⟨1, parentX, parentY, by omega,
       HierarchyAddressWithin.parent_of_level_zero xWithin,
       HierarchyAddressWithin.parent_of_level_zero yWithin,
       ?_, parentEntry, ?_, sourceToParent⟩
     · simpa using at_scale grid 1 parentX parentY
     · simpa using parentEntryOnCycle
+
+/-- Compatibility projection of `ofLocalCycleRouteAtBlockWithinLow`. -/
+theorem ofLocalCycleRouteAtBlockWithin
+    (grid : Nat → Nat → Index) {source : Port}
+    {outerLevel outerBlockX outerBlockY blockX blockY : Nat}
+    (route : LocalCycleRouteAtBlock (iterateRefine 1 grid)
+      source blockX blockY)
+    (xWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockX 0 blockX)
+    (yWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockY 0 blockY) :
+    CanonicalCycleAncestorWithin (iterateRefine 3 grid) source
+      (outerLevel + 2) outerBlockX outerBlockY :=
+  LowCanonicalCycleAncestorWithin.toCanonicalCycleAncestorWithin
+    (ofLocalCycleRouteAtBlockWithinLow grid route xWithin yWithin)
 
 set_option maxHeartbeats 2000000 in
 -- The selector depends on the refinement equality used to expose its route.

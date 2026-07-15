@@ -62,6 +62,73 @@ def CanonicalCycleAncestorWithinFamily
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- A created source ancestor retaining both its hierarchy family and the fact
+that parity normalization stopped at level zero or one. -/
+def LowCanonicalCycleAncestorWithinFamily
+    (grid : Nat → Nat → Index) (source : Port)
+    (outerLevel outerBlockX outerBlockY : Nat)
+    (family : HierarchyFamily) : Prop :=
+  ∃ level blockX blockY,
+    level ≤ 1 ∧
+    HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    InHierarchyFamily outerLevel level family ∧
+    CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      Path grid source entry false
+
+/-- Forget the low-level bound while retaining the source family. -/
+theorem LowCanonicalCycleAncestorWithinFamily.toAncestorFamily
+    {grid : Nat → Nat → Index} {source : Port}
+    {outerLevel outerBlockX outerBlockY : Nat} {family : HierarchyFamily}
+    (ancestor : LowCanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family) :
+    CanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, _low, xWithin, yWithin, inFamily,
+      cycle, entry, entryOnCycle, path⟩
+  exact ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+    cycle, entry, entryOnCycle, path⟩
+
+/-- Every low created ancestor belongs to one of the two hierarchy families,
+without changing its witnessed level or block. -/
+theorem LowCanonicalCycleAncestorWithin.exists_family
+    {grid : Nat → Nat → Index} {source : Port}
+    {outerLevel outerBlockX outerBlockY : Nat}
+    (ancestor : LowCanonicalCycleAncestorWithin grid source
+      outerLevel outerBlockX outerBlockY) :
+    ∃ family, LowCanonicalCycleAncestorWithinFamily grid source
+      outerLevel outerBlockX outerBlockY family := by
+  rcases ancestor with
+    ⟨level, blockX, blockY, low, xWithin, yWithin,
+      cycle, entry, entryOnCycle, path⟩
+  let difference := outerLevel - level
+  have levelLe : level ≤ outerLevel := xWithin.1
+  have modLt : difference % 2 < 2 := Nat.mod_lt _ (by decide)
+  have decompose := Nat.mod_add_div difference 2
+  by_cases even : difference % 2 = 0
+  · refine ⟨.even, level, blockX, blockY, low, xWithin, yWithin, ?_,
+      cycle, entry, entryOnCycle, path⟩
+    refine ⟨difference / 2, ?_⟩
+    dsimp [difference] at decompose ⊢
+    omega
+  · have odd : difference % 2 = 1 := by omega
+    refine ⟨.odd, level, blockX, blockY, low, xWithin, yWithin, ?_,
+      cycle, entry, entryOnCycle, path⟩
+    refine ⟨difference / 2, ?_⟩
+    dsimp [difference] at decompose ⊢
+    omega
+
 /-- Every canonical descendant named by a hierarchy level is present in the
 common outer refinement. -/
 theorem cycleAtLevelWithin
