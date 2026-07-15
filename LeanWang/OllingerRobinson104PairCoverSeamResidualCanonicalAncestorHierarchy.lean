@@ -29,7 +29,8 @@ set_option maxRecDepth 20000
 def outerLevel (phase : Phase) (depth : Nat) : Nat :=
   2 * (depth + 1) + phase.extra
 
-private theorem successorWest_eq_canonical
+/-- The successor board's west side is the west side of its canonical cycle. -/
+theorem successorWest_eq_canonical
     (phase : Phase) (depth block : Nat) :
     successorWest phase depth block =
       2 ^ outerLevel phase depth * (4 * block + 1) := by
@@ -41,7 +42,8 @@ private theorem successorWest_eq_canonical
   rw [power']
   ring
 
-private theorem successorEast_eq_canonical
+/-- The successor board's east side is the east side of its canonical cycle. -/
+theorem successorEast_eq_canonical
     (phase : Phase) (depth block : Nat) :
     successorEast phase depth block =
       2 ^ outerLevel phase depth * (4 * block + 3) := by

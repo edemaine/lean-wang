@@ -80,7 +80,9 @@ theorem SourceAncestorsWithin.toSourceAncestorsIn
   vertical boundaryBounds rowBounds interior :=
     (ancestors.vertical boundaryBounds rowBounds interior).toCanonical
 
-private theorem levelZeroWithin_of_fine_collar
+/-- A coordinate in the twice-refined canonical collar names a level-zero
+descendant of the original outer block. -/
+theorem levelZeroWithin_of_fine_collar
     {outerLevel outerBlock west east coordinate : Nat}
     (westEq : west = 2 ^ outerLevel * (4 * outerBlock + 1))
     (eastEq : east = 2 ^ outerLevel * (4 * outerBlock + 3))
