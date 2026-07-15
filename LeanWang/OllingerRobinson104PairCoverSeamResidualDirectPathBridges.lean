@@ -113,6 +113,107 @@ def ExactLowCanonicalCycleAncestorWithinFamily
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- An exact created-source ancestor retaining both its audited route parity
+and its resulting hierarchy family. -/
+def ExactParityCanonicalCycleAncestorWithinFamily
+    (grid : Nat → Nat → Index) (source : Port)
+    (sourceBlockX sourceBlockY : Nat)
+    (outerLevel outerBlockX outerBlockY : Nat)
+    (parity : Bool) (family : HierarchyFamily) : Prop :=
+  let level := if parity then 1 else 0
+  let blockX := if parity then sourceBlockX / 2 else sourceBlockX
+  let blockY := if parity then sourceBlockY / 2 else sourceBlockY
+  HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    InHierarchyFamily outerLevel level family ∧
+    CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      Path grid source entry false
+
+/-- Forgetting the audited route parity retains the exact low family
+ancestor. -/
+theorem ExactParityCanonicalCycleAncestorWithinFamily.toExactLowFamily
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    {parity : Bool} {family : HierarchyFamily}
+    (ancestor : ExactParityCanonicalCycleAncestorWithinFamily grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY
+      parity family) :
+    ExactLowCanonicalCycleAncestorWithinFamily grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY family := by
+  cases parity with
+  | false =>
+      simp only [ExactParityCanonicalCycleAncestorWithinFamily,
+        Bool.false_eq_true, ↓reduceIte] at ancestor
+      rcases ancestor with ⟨xWithin, yWithin, inFamily,
+        cycle, entry, entryOnCycle, path⟩
+      exact ⟨0, sourceBlockX, sourceBlockY, Or.inl ⟨rfl, rfl, rfl⟩,
+        xWithin, yWithin, inFamily, cycle, entry, entryOnCycle, path⟩
+  | true =>
+      simp only [ExactParityCanonicalCycleAncestorWithinFamily, ↓reduceIte]
+        at ancestor
+      rcases ancestor with ⟨xWithin, yWithin, inFamily,
+        cycle, entry, entryOnCycle, path⟩
+      exact ⟨1, sourceBlockX / 2, sourceBlockY / 2,
+        Or.inr ⟨rfl, rfl, rfl⟩,
+        xWithin, yWithin, inFamily, cycle, entry, entryOnCycle, path⟩
+
+/-- Every exact parity ancestor belongs to one hierarchy family without
+discarding its normalized level. -/
+theorem ExactParityCanonicalCycleAncestorWithin.exists_family
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    {parity : Bool}
+    (ancestor : ExactParityCanonicalCycleAncestorWithin grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY parity) :
+    ∃ family, ExactParityCanonicalCycleAncestorWithinFamily grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY
+      parity family := by
+  let level := if parity then 1 else 0
+  let blockX := if parity then sourceBlockX / 2 else sourceBlockX
+  let blockY := if parity then sourceBlockY / 2 else sourceBlockY
+  change HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+      HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+      CycleOn grid
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) ∧
+      ∃ entry,
+        OnCycle
+          (2 ^ level * (4 * blockX + 1))
+          (2 ^ level * (4 * blockX + 3))
+          (2 ^ level * (4 * blockY + 1))
+          (2 ^ level * (4 * blockY + 3)) entry ∧
+        Path grid source entry false at ancestor
+  rcases ancestor with
+    ⟨xWithin, yWithin, cycle, entry, entryOnCycle, path⟩
+  let difference := outerLevel - level
+  have levelLe : level ≤ outerLevel := xWithin.1
+  have modLt : difference % 2 < 2 := Nat.mod_lt _ (by decide)
+  have decompose := Nat.mod_add_div difference 2
+  by_cases even : difference % 2 = 0
+  · refine ⟨.even, xWithin, yWithin, ?_, cycle,
+      entry, entryOnCycle, path⟩
+    refine ⟨difference / 2, ?_⟩
+    dsimp [difference] at decompose ⊢
+    omega
+  · have odd : difference % 2 = 1 := by omega
+    refine ⟨.odd, xWithin, yWithin, ?_, cycle,
+      entry, entryOnCycle, path⟩
+    refine ⟨difference / 2, ?_⟩
+    dsimp [difference] at decompose ⊢
+    omega
+
 /-- Forget the exact audited macrocell while retaining the low ancestor and
 its family. -/
 theorem ExactLowCanonicalCycleAncestorWithinFamily.toLowFamily

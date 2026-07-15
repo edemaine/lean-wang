@@ -19,13 +19,51 @@ namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
 namespace PairCoverSeamCreatedLowFamilyAncestors
 
 open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
-  PairCoverSeamArithmetic PairCoverSeamRefinementCoordinates
+  PairCoverSeamArithmetic PairCoverSeamCreatedRouteParityAudit
+  PairCoverSeamRefinementCoordinates
   PairCoverSeamShadePaths PairCoverSeamResidualCycleLocalTransport
   PairCoverSeamResidualCanonicalAncestors
   PairCoverSeamResidualCanonicalAncestorHierarchy
   PairCoverSeamResidualCanonicalAncestorRecurrence
   PairCoverSeamResidualDirectPathBridges RefinedCoordinateProjection
   ShadedFreeLineRecurrence SparseFreeLinePlaneBase Signals.FreeCellLocal
+
+set_option maxHeartbeats 2000000 in
+-- The translated selector depends on the equality between nested refinements.
+/-- A horizontal created selector retains the exact audited route parity,
+normalized level, and resulting hierarchy family. -/
+theorem horizontalCreatedWithinExactParity
+    (grid : Nat → Nat → Index) (column boundary : Nat)
+    {outerLevel outerBlockX outerBlockY : Nat}
+    (createdBoundary : ¬ IsSparseCoordinate boundary)
+    (interior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 3 grid) column boundary)
+      (quadrantAt column boundary) ≠ none)
+    (xWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockX 0 (column / 8))
+    (yWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockY 0 (boundary / 8)) :
+    ∃ family, ExactParityCanonicalCycleAncestorWithinFamily
+      (iterateRefine 3 grid)
+      (horizontalPort (iterateRefine 3 grid) column boundary)
+      (column / 8) (boundary / 8)
+      (outerLevel + 2) outerBlockX outerBlockY
+      (createdParity (boundary % 8)) family := by
+  have hgrid : iterateRefine 2 (iterateRefine 1 grid) =
+      iterateRefine 3 grid := by
+    simpa using PlaneRedBoards.iterateRefine_add 2 1 grid
+  have interior' : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2 (iterateRefine 1 grid)) column boundary)
+      (quadrantAt column boundary) ≠ none := by
+    rw [hgrid]
+    exact interior
+  have route :=
+    PairCoverSeamResidualCycleLocalTransport.horizontalCreatedAtBlockWithParity
+      (iterateRefine 1 grid) column boundary createdBoundary interior'
+  have exact := ofLocalCycleRouteAtBlockWithParityWithinExact
+    grid route xWithin yWithin
+  simpa only [hgrid] using
+    ExactParityCanonicalCycleAncestorWithin.exists_family exact
 
 set_option maxHeartbeats 2000000 in
 -- The translated selector depends on the equality between nested refinements.
@@ -46,23 +84,9 @@ theorem horizontalCreatedWithinExact
       (horizontalPort (iterateRefine 3 grid) column boundary)
       (column / 8) (boundary / 8)
       (outerLevel + 2) outerBlockX outerBlockY family := by
-  have hgrid : iterateRefine 2 (iterateRefine 1 grid) =
-      iterateRefine 3 grid := by
-    simpa using PlaneRedBoards.iterateRefine_add 2 1 grid
-  have interior' : Signals.horizontalInterior?
-      (componentAt (iterateRefine 2 (iterateRefine 1 grid)) column boundary)
-      (quadrantAt column boundary) ≠ none := by
-    rw [hgrid]
-    exact interior
-  have route := PairCoverSeamResidualCycleLocalTransport.horizontalCreatedAtBlock
-    (iterateRefine 1 grid) column boundary createdBoundary interior'
-  have low : ExactLowCanonicalCycleAncestorWithin (iterateRefine 3 grid)
-      (horizontalPort (iterateRefine 3 grid) column boundary)
-      (column / 8) (boundary / 8)
-      (outerLevel + 2) outerBlockX outerBlockY := by
-    simpa only [hgrid] using
-      ofLocalCycleRouteAtBlockWithinExactLow grid route xWithin yWithin
-  exact ExactLowCanonicalCycleAncestorWithin.exists_family (ancestor := low)
+  rcases horizontalCreatedWithinExactParity grid column boundary
+      createdBoundary interior xWithin yWithin with ⟨family, ancestor⟩
+  exact ⟨family, ancestor.toExactLowFamily⟩
 
 /-- Compatibility projection of `horizontalCreatedWithinExact`. -/
 theorem horizontalCreatedWithin
@@ -85,6 +109,42 @@ theorem horizontalCreatedWithin
 
 set_option maxHeartbeats 2000000 in
 -- The translated selector depends on the equality between nested refinements.
+/-- Vertical dual of `horizontalCreatedWithinExactParity`. -/
+theorem verticalCreatedWithinExactParity
+    (grid : Nat → Nat → Index) (boundary row : Nat)
+    {outerLevel outerBlockX outerBlockY : Nat}
+    (createdBoundary : ¬ IsSparseCoordinate boundary)
+    (interior : Signals.verticalInterior?
+      (componentAt (iterateRefine 3 grid) boundary row)
+      (quadrantAt boundary row) ≠ none)
+    (xWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockX 0 (boundary / 8))
+    (yWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockY 0 (row / 8)) :
+    ∃ family, ExactParityCanonicalCycleAncestorWithinFamily
+      (iterateRefine 3 grid)
+      (verticalPort (iterateRefine 3 grid) boundary row)
+      (boundary / 8) (row / 8)
+      (outerLevel + 2) outerBlockX outerBlockY
+      (createdParity (boundary % 8)) family := by
+  have hgrid : iterateRefine 2 (iterateRefine 1 grid) =
+      iterateRefine 3 grid := by
+    simpa using PlaneRedBoards.iterateRefine_add 2 1 grid
+  have interior' : Signals.verticalInterior?
+      (componentAt (iterateRefine 2 (iterateRefine 1 grid)) boundary row)
+      (quadrantAt boundary row) ≠ none := by
+    rw [hgrid]
+    exact interior
+  have route :=
+    PairCoverSeamResidualCycleLocalTransport.verticalCreatedAtBlockWithParity
+      (iterateRefine 1 grid) boundary row createdBoundary interior'
+  have exact := ofLocalCycleRouteAtBlockWithParityWithinExact
+    grid route xWithin yWithin
+  simpa only [hgrid] using
+    ExactParityCanonicalCycleAncestorWithin.exists_family exact
+
+set_option maxHeartbeats 2000000 in
+-- The translated selector depends on the equality between nested refinements.
 /-- Vertical dual of `horizontalCreatedWithinExact`. -/
 theorem verticalCreatedWithinExact
     (grid : Nat → Nat → Index) (boundary row : Nat)
@@ -101,23 +161,9 @@ theorem verticalCreatedWithinExact
       (verticalPort (iterateRefine 3 grid) boundary row)
       (boundary / 8) (row / 8)
       (outerLevel + 2) outerBlockX outerBlockY family := by
-  have hgrid : iterateRefine 2 (iterateRefine 1 grid) =
-      iterateRefine 3 grid := by
-    simpa using PlaneRedBoards.iterateRefine_add 2 1 grid
-  have interior' : Signals.verticalInterior?
-      (componentAt (iterateRefine 2 (iterateRefine 1 grid)) boundary row)
-      (quadrantAt boundary row) ≠ none := by
-    rw [hgrid]
-    exact interior
-  have route := PairCoverSeamResidualCycleLocalTransport.verticalCreatedAtBlock
-    (iterateRefine 1 grid) boundary row createdBoundary interior'
-  have low : ExactLowCanonicalCycleAncestorWithin (iterateRefine 3 grid)
-      (verticalPort (iterateRefine 3 grid) boundary row)
-      (boundary / 8) (row / 8)
-      (outerLevel + 2) outerBlockX outerBlockY := by
-    simpa only [hgrid] using
-      ofLocalCycleRouteAtBlockWithinExactLow grid route xWithin yWithin
-  exact ExactLowCanonicalCycleAncestorWithin.exists_family (ancestor := low)
+  rcases verticalCreatedWithinExactParity grid boundary row
+      createdBoundary interior xWithin yWithin with ⟨family, ancestor⟩
+  exact ⟨family, ancestor.toExactLowFamily⟩
 
 /-- Compatibility projection of `verticalCreatedWithinExact`. -/
 theorem verticalCreatedWithin
@@ -168,6 +214,51 @@ private theorem inFineCollar
 
 set_option maxHeartbeats 2000000 in
 -- The source route is exposed through the root one level below the old grid.
+/-- A recurrence-board horizontal source retains the exact audited route
+parity, normalized level, and hierarchy family. -/
+theorem horizontalCreatedAtExactParity
+    (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+    (parentX parentY : Nat) {column boundary : Nat}
+    (columnWest :
+      quarterWest (successorWest phase (depth + 1) parentX) < column)
+    (columnEast :
+      column < quarterEast (successorEast phase (depth + 1) parentX))
+    (boundarySouth :
+      quarterSouth (successorWest phase (depth + 1) parentY) < boundary)
+    (boundaryNorth :
+      boundary < quarterNorth (successorEast phase (depth + 1) parentY))
+    (createdBoundary : ¬ IsSparseCoordinate boundary)
+    (interior : Signals.horizontalInterior?
+      (componentAt (iterateRefine 2
+        (refinedGrid phase (depth + 1) grid)) column boundary)
+      (quadrantAt column boundary) ≠ none) :
+    ∃ family, ExactParityCanonicalCycleAncestorWithinFamily
+      (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
+      (horizontalPort
+        (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
+        column boundary)
+      (column / 8) (boundary / 8)
+      (outerLevel phase (depth + 1)) parentX parentY
+      (createdParity (boundary % 8)) family := by
+  have westEq := successorWest_eq_canonical phase depth parentX
+  have eastEq := successorEast_eq_canonical phase depth parentX
+  have southEq := successorWest_eq_canonical phase depth parentY
+  have northEq := successorEast_eq_canonical phase depth parentY
+  rw [successorWest_succ] at columnWest boundarySouth
+  rw [successorEast_succ] at columnEast boundaryNorth
+  have xWithin := levelZeroWithin_of_fine_collar westEq eastEq
+    (inFineCollar columnWest columnEast)
+  have yWithin := levelZeroWithin_of_fine_collar southEq northEq
+    (by simpa only [quarterSouth, quarterWest, quarterNorth, quarterEast]
+      using inFineCollar boundarySouth boundaryNorth)
+  have gridEq := queryGrid_eq_rootAt phase depth grid
+  have result := horizontalCreatedWithinExactParity (rootAt phase depth grid)
+    column boundary createdBoundary (by simpa only [gridEq] using interior)
+    xWithin yWithin
+  simpa only [gridEq, outerLevel_succ] using result
+
+set_option maxHeartbeats 2000000 in
+-- The source route is exposed through the root one level below the old grid.
 /-- A created horizontal selector in a recurrence board reaches the exact
 audited level-zero block or its level-one parent, retaining the hierarchy
 family. -/
@@ -194,22 +285,10 @@ theorem horizontalCreatedAtExact
         column boundary)
       (column / 8) (boundary / 8)
       (outerLevel phase (depth + 1)) parentX parentY family := by
-  have westEq := successorWest_eq_canonical phase depth parentX
-  have eastEq := successorEast_eq_canonical phase depth parentX
-  have southEq := successorWest_eq_canonical phase depth parentY
-  have northEq := successorEast_eq_canonical phase depth parentY
-  rw [successorWest_succ] at columnWest boundarySouth
-  rw [successorEast_succ] at columnEast boundaryNorth
-  have xWithin := levelZeroWithin_of_fine_collar westEq eastEq
-    (inFineCollar columnWest columnEast)
-  have yWithin := levelZeroWithin_of_fine_collar southEq northEq
-    (by simpa only [quarterSouth, quarterWest, quarterNorth, quarterEast]
-      using inFineCollar boundarySouth boundaryNorth)
-  have gridEq := queryGrid_eq_rootAt phase depth grid
-  have result := horizontalCreatedWithinExact (rootAt phase depth grid)
-    column boundary createdBoundary (by simpa only [gridEq] using interior)
-    xWithin yWithin
-  simpa only [gridEq, outerLevel_succ] using result
+  rcases horizontalCreatedAtExactParity phase depth grid parentX parentY
+      columnWest columnEast boundarySouth boundaryNorth createdBoundary
+      interior with ⟨family, ancestor⟩
+  exact ⟨family, ancestor.toExactLowFamily⟩
 
 /-- Compatibility projection of `horizontalCreatedAtExact`. -/
 theorem horizontalCreatedAt
@@ -241,6 +320,50 @@ theorem horizontalCreatedAt
 
 set_option maxHeartbeats 2000000 in
 -- The source route is exposed through the root one level below the old grid.
+/-- Vertical dual of `horizontalCreatedAtExactParity`. -/
+theorem verticalCreatedAtExactParity
+    (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
+    (parentX parentY : Nat) {boundary row : Nat}
+    (boundaryWest :
+      quarterWest (successorWest phase (depth + 1) parentX) < boundary)
+    (boundaryEast :
+      boundary < quarterEast (successorEast phase (depth + 1) parentX))
+    (rowSouth :
+      quarterSouth (successorWest phase (depth + 1) parentY) < row)
+    (rowNorth :
+      row < quarterNorth (successorEast phase (depth + 1) parentY))
+    (createdBoundary : ¬ IsSparseCoordinate boundary)
+    (interior : Signals.verticalInterior?
+      (componentAt (iterateRefine 2
+        (refinedGrid phase (depth + 1) grid)) boundary row)
+      (quadrantAt boundary row) ≠ none) :
+    ∃ family, ExactParityCanonicalCycleAncestorWithinFamily
+      (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
+      (verticalPort
+        (iterateRefine 2 (refinedGrid phase (depth + 1) grid))
+        boundary row)
+      (boundary / 8) (row / 8)
+      (outerLevel phase (depth + 1)) parentX parentY
+      (createdParity (boundary % 8)) family := by
+  have westEq := successorWest_eq_canonical phase depth parentX
+  have eastEq := successorEast_eq_canonical phase depth parentX
+  have southEq := successorWest_eq_canonical phase depth parentY
+  have northEq := successorEast_eq_canonical phase depth parentY
+  rw [successorWest_succ] at boundaryWest rowSouth
+  rw [successorEast_succ] at boundaryEast rowNorth
+  have xWithin := levelZeroWithin_of_fine_collar westEq eastEq
+    (inFineCollar boundaryWest boundaryEast)
+  have yWithin := levelZeroWithin_of_fine_collar southEq northEq
+    (by simpa only [quarterSouth, quarterWest, quarterNorth, quarterEast]
+      using inFineCollar rowSouth rowNorth)
+  have gridEq := queryGrid_eq_rootAt phase depth grid
+  have result := verticalCreatedWithinExactParity (rootAt phase depth grid)
+    boundary row createdBoundary (by simpa only [gridEq] using interior)
+    xWithin yWithin
+  simpa only [gridEq, outerLevel_succ] using result
+
+set_option maxHeartbeats 2000000 in
+-- The source route is exposed through the root one level below the old grid.
 /-- Vertical dual of `horizontalCreatedAtExact`. -/
 theorem verticalCreatedAtExact
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index)
@@ -265,22 +388,10 @@ theorem verticalCreatedAtExact
         boundary row)
       (boundary / 8) (row / 8)
       (outerLevel phase (depth + 1)) parentX parentY family := by
-  have westEq := successorWest_eq_canonical phase depth parentX
-  have eastEq := successorEast_eq_canonical phase depth parentX
-  have southEq := successorWest_eq_canonical phase depth parentY
-  have northEq := successorEast_eq_canonical phase depth parentY
-  rw [successorWest_succ] at boundaryWest rowSouth
-  rw [successorEast_succ] at boundaryEast rowNorth
-  have xWithin := levelZeroWithin_of_fine_collar westEq eastEq
-    (inFineCollar boundaryWest boundaryEast)
-  have yWithin := levelZeroWithin_of_fine_collar southEq northEq
-    (by simpa only [quarterSouth, quarterWest, quarterNorth, quarterEast]
-      using inFineCollar rowSouth rowNorth)
-  have gridEq := queryGrid_eq_rootAt phase depth grid
-  have result := verticalCreatedWithinExact (rootAt phase depth grid)
-    boundary row createdBoundary (by simpa only [gridEq] using interior)
-    xWithin yWithin
-  simpa only [gridEq, outerLevel_succ] using result
+  rcases verticalCreatedAtExactParity phase depth grid parentX parentY
+      boundaryWest boundaryEast rowSouth rowNorth createdBoundary interior with
+    ⟨family, ancestor⟩
+  exact ⟨family, ancestor.toExactLowFamily⟩
 
 /-- Compatibility projection of `verticalCreatedAtExact`. -/
 theorem verticalCreatedAt

@@ -124,6 +124,56 @@ def ExactLowCanonicalCycleAncestorWithin (grid : Nat → Nat → Index)
         (2 ^ level * (4 * blockY + 3)) entry ∧
       Path grid source entry false
 
+/-- The exact low ancestor with its audited route parity still visible.
+`false` stops at the source macrocell's level-zero cycle; `true` crosses to
+its level-one parent. -/
+def ExactParityCanonicalCycleAncestorWithin (grid : Nat → Nat → Index)
+    (source : Port) (sourceBlockX sourceBlockY : Nat)
+    (outerLevel outerBlockX outerBlockY : Nat) (parity : Bool) : Prop :=
+  let level := if parity then 1 else 0
+  let blockX := if parity then sourceBlockX / 2 else sourceBlockX
+  let blockY := if parity then sourceBlockY / 2 else sourceBlockY
+  HierarchyAddressWithin outerLevel outerBlockX level blockX ∧
+    HierarchyAddressWithin outerLevel outerBlockY level blockY ∧
+    CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      Path grid source entry false
+
+/-- Forgetting the audited parity retains the exact low ancestor. -/
+theorem ExactParityCanonicalCycleAncestorWithin.toExactLow
+    {grid : Nat → Nat → Index} {source : Port}
+    {sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY : Nat}
+    {parity : Bool}
+    (ancestor : ExactParityCanonicalCycleAncestorWithin grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY parity) :
+    ExactLowCanonicalCycleAncestorWithin grid source
+      sourceBlockX sourceBlockY outerLevel outerBlockX outerBlockY := by
+  cases parity with
+  | false =>
+      simp only [ExactParityCanonicalCycleAncestorWithin, Bool.false_eq_true,
+        ↓reduceIte] at ancestor
+      rcases ancestor with ⟨xWithin, yWithin,
+        cycle, entry, entryOnCycle, path⟩
+      exact ⟨0, sourceBlockX, sourceBlockY, Or.inl ⟨rfl, rfl, rfl⟩,
+        xWithin, yWithin, cycle, entry, entryOnCycle, path⟩
+  | true =>
+      simp only [ExactParityCanonicalCycleAncestorWithin, ↓reduceIte]
+        at ancestor
+      rcases ancestor with ⟨xWithin, yWithin,
+        cycle, entry, entryOnCycle, path⟩
+      exact ⟨1, sourceBlockX / 2, sourceBlockY / 2,
+        Or.inr ⟨rfl, rfl, rfl⟩,
+        xWithin, yWithin, cycle, entry, entryOnCycle, path⟩
+
 /-- Forget the exact audited macrocell while retaining the low-level bound. -/
 theorem ExactLowCanonicalCycleAncestorWithin.toLow
     {grid : Nat → Nat → Index} {source : Port}
@@ -329,28 +379,27 @@ theorem ofLocalCycleRoute
     · simpa using at_scale grid 1 parentX parentY
     · simpa using parentEntryOnCycle
 
-/-- Parity normalization for a local route whose audited macrocell is known to
-belong to a specified outer hierarchy block.  The resulting cycle is at level
-zero or one. -/
-theorem ofLocalCycleRouteAtBlockWithinExactLow
+/-- Parity normalization retaining the audited route parity and therefore the
+exact normalized hierarchy level. -/
+theorem ofLocalCycleRouteAtBlockWithParityWithinExact
     (grid : Nat → Nat → Index) {source : Port}
     {outerLevel outerBlockX outerBlockY blockX blockY : Nat}
-    (route : LocalCycleRouteAtBlock (iterateRefine 1 grid)
-      source blockX blockY)
+    {parity : Bool}
+    (route : LocalCycleRouteAtBlockWithParity (iterateRefine 1 grid)
+      source blockX blockY parity)
     (xWithin : HierarchyAddressWithin
       (outerLevel + 2) outerBlockX 0 blockX)
     (yWithin : HierarchyAddressWithin
       (outerLevel + 2) outerBlockY 0 blockY) :
-    ExactLowCanonicalCycleAncestorWithin (iterateRefine 3 grid) source
-      blockX blockY (outerLevel + 2) outerBlockX outerBlockY := by
-  unfold LocalCycleRouteAtBlock at route
+    ExactParityCanonicalCycleAncestorWithin (iterateRefine 3 grid) source
+      blockX blockY (outerLevel + 2) outerBlockX outerBlockY parity := by
+  unfold LocalCycleRouteAtBlockWithParity at route
   rw [PlaneRedBoards.iterateRefine_add] at route
-  rcases route with
-    ⟨entry, parity, childCycle, entryOnChild, sourcePath⟩
+  rcases route with ⟨entry, childCycle, entryOnChild, sourcePath⟩
   cases hparity : parity
-  · refine ⟨0, blockX, blockY, Or.inl ⟨rfl, rfl, rfl⟩,
-      xWithin, yWithin,
-      ?_, entry, ?_, ?_⟩
+  · simp only [ExactParityCanonicalCycleAncestorWithin,
+      Bool.false_eq_true, ↓reduceIte]
+    refine ⟨xWithin, yWithin, ?_, entry, ?_, ?_⟩
     · simpa using childCycle
     · simpa using entryOnChild
     · simpa [hparity] using sourcePath
@@ -386,13 +435,35 @@ theorem ofLocalCycleRouteAtBlockWithinExactLow
       simpa [Bool.xor_assoc] using
         Path.trans sourcePath'
           (Path.trans aroundChild (path_symm bridgePath))
-    refine ⟨1, parentX, parentY,
-      Or.inr ⟨rfl, rfl, rfl⟩,
-      HierarchyAddressWithin.parent_of_level_zero xWithin,
+    simp only [ExactParityCanonicalCycleAncestorWithin, ↓reduceIte]
+    refine ⟨HierarchyAddressWithin.parent_of_level_zero xWithin,
       HierarchyAddressWithin.parent_of_level_zero yWithin,
       ?_, parentEntry, ?_, sourceToParent⟩
-    · simpa using at_scale grid 1 parentX parentY
-    · simpa using parentEntryOnCycle
+    · simpa [parentX, parentY] using at_scale grid 1 parentX parentY
+    · simpa [parentX, parentY] using parentEntryOnCycle
+
+/-- Parity normalization for a local route whose audited macrocell is known to
+belong to a specified outer hierarchy block.  The resulting cycle is at level
+zero or one. -/
+theorem ofLocalCycleRouteAtBlockWithinExactLow
+    (grid : Nat → Nat → Index) {source : Port}
+    {outerLevel outerBlockX outerBlockY blockX blockY : Nat}
+    (route : LocalCycleRouteAtBlock (iterateRefine 1 grid)
+      source blockX blockY)
+    (xWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockX 0 blockX)
+    (yWithin : HierarchyAddressWithin
+      (outerLevel + 2) outerBlockY 0 blockY) :
+    ExactLowCanonicalCycleAncestorWithin (iterateRefine 3 grid) source
+      blockX blockY (outerLevel + 2) outerBlockX outerBlockY := by
+  unfold LocalCycleRouteAtBlock at route
+  rcases route with
+    ⟨entry, parity, childCycle, entryOnChild, sourcePath⟩
+  let exactRoute : LocalCycleRouteAtBlockWithParity (iterateRefine 1 grid)
+      source blockX blockY parity :=
+    ⟨entry, childCycle, entryOnChild, sourcePath⟩
+  exact (ofLocalCycleRouteAtBlockWithParityWithinExact
+    grid exactRoute xWithin yWithin).toExactLow
 
 /-- Compatibility projection of
 `ofLocalCycleRouteAtBlockWithinExactLow`. -/

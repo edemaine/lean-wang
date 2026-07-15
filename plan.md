@@ -1296,6 +1296,16 @@ forming another large native target. `horizontalCreatedAtBlockWithParity` and
 `verticalCreatedAtBlockWithParity` transport this exact parity to arbitrary
 macrocells, while the old existential route theorems remain projections.
 
+Parity normalization now preserves that fact through the hierarchy interface
+instead of immediately hiding it. `ExactParityCanonicalCycleAncestorWithin`
+names the normalized level as zero for an even route and one for an odd route;
+its family variant retains the corresponding `InHierarchyFamily` witness.
+`horizontalCreatedAtExactParity` and `verticalCreatedAtExactParity` expose
+these witnesses at every recurrence depth, while the prior exact-low theorems
+are compatibility projections. The all-depth selector can therefore branch on
+the audited residue and use the same named level for both source ancestry and
+canonical-side arithmetic.
+
 The apparent canonical-side gap was an artifact of exposing only west and
 south sides. The arithmetic triple
 `(column,row,boundary) = (49,49,36)` is not a north-facing source in any of the
