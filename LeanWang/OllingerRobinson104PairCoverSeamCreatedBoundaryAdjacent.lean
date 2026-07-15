@@ -30,7 +30,7 @@ open RedCycles RedShadeCycles RedShadeGraph
 
 set_option maxRecDepth 20000
 
-private theorem local_created_of_not_sparse {coordinate : Nat}
+theorem local_created_of_not_sparse {coordinate : Nat}
     (created : ¬ IsSparseCoordinate coordinate) :
     coordinate % 8 ∈ createdCoordinates := by
   have hlocal : coordinate % 8 < 8 := Nat.mod_lt _ (by decide)
@@ -47,7 +47,7 @@ private theorem local_created_of_not_sparse {coordinate : Nat}
     rw [sparseCoordinate_two_mul_add_one]
     omega
 
-private theorem refinedGrid_verticalPair_mem
+theorem refinedGrid_verticalPair_mem
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index) (x y : Nat) :
     canonicalPair
         (refinedGrid phase (depth + 1) grid x y,
@@ -64,7 +64,7 @@ private theorem refinedGrid_verticalPair_mem
   rw [levelsEq]
   exact verticalPair_mem (levels - 1) grid x y
 
-private theorem refinedGrid_horizontalPair_mem
+theorem refinedGrid_horizontalPair_mem
     (phase : Phase) (depth : Nat) (grid : Nat → Nat → Index) (x y : Nat) :
     canonicalPair
         (refinedGrid phase (depth + 1) grid x y,
