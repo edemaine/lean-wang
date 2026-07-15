@@ -657,36 +657,6 @@ def cornerFreeGrid_shift (grid : Nat → Nat → Index) (blockX blockY : Nat)
     freeColumn := fun index => full.freeColumn (cornerGridIndex index)
     freeRow := fun index => full.freeRow (cornerGridIndex index) }
 
-set_option linter.style.nativeDecide false in
-theorem cornerFreeGrid_lowerLeft_marker (parent : Index) :
-    (localGrid parent
-        ((9 + offsetAt (cornerGridIndex 0)) / 2)
-        ((9 + offsetAt (cornerGridIndex 0)) / 2),
-      quadrantAt
-        (9 + offsetAt (cornerGridIndex 0))
-        (9 + offsetAt (cornerGridIndex 0))) ∈
-      ShadedSignals.markerQuarters := by
-  revert parent
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem markerQuarter_at_sixteen (parent : Index) :
-    (localGrid parent 8 8, quadrantAt 16 16) ∈
-      ShadedSignals.markerQuarters := by
-  revert parent
-  native_decide
-
-theorem cornerFreeGrid_shift_lowerLeft_marker
-    (grid : Nat → Nat → Index) (blockX blockY : Nat)
-    {parent : Index} (hparent : grid blockX blockY = parent) :
-    (iterateRefine 4 (shiftGrid grid blockX blockY) 8 8,
-      quadrantAt 16 16) ∈ ShadedSignals.markerQuarters := by
-  have hlocal := iterateRefine_shift_eq_constant 4 grid blockX blockY 8 8
-    (by norm_num) (by norm_num)
-  rw [hparent] at hlocal
-  rw [hlocal]
-  exact markerQuarter_at_sixteen parent
-
 /-- The marked free grid transported to its absolute refined coordinates. -/
 def cornerFreeGrid_at (grid : Nat → Nat → Index)
     {stateGrid : Nat → Nat → RedShades.State}

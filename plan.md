@@ -1355,17 +1355,19 @@ longer require the next logical crossing to lie in the supplied square. This
 is necessary when a finite centered box cuts a horizontal or vertical corridor
 before reaching its next active crossing.
 
-An executable audit of the selected consecutive grids exposed a required
-correction to the concrete corner role. The current four-quarter predicate is
-not unique in the even light-board branch: at larger depths, additional
-selected diagonal crossings also receive the corner role. The backward claim
-for arbitrary payload tilesets is false with that predicate because every such
-crossing would force the same seed. Before constructing the final labelings,
-the marker predicate must be refined to the distinguished Figure 18 crossing
-and accompanied by a finite uniqueness certificate on both light-board
-branches. The unconditional forward theorem remains valid for the current
-broader predicate, but will need its lower-left marker lemma transported to the
-refined role.
+The concrete corner role has been revised after an executable audit exposed
+that the old prepended southwest marker recurred at additional diagonal
+crossings. The retained sparse pivot supplies the forward marker: its first
+crossing is a northeast quarter with corrected index `0`, `1`, `2`, or `3`.
+Every later even-branch sparse crossing is southwest, while the later
+odd-branch northeast crossings have corrected index `4` or `7` in the finite
+base and its recurrence. `SparseFreeLinePivotMarker` proves the two base cases
+and closes the marker under the two southwest-child refinements. The marked
+grids now start directly at the pivot, the obsolete prepended-marker audit and
+recurrence have been removed, and the full forward routed-scaffold theorem
+builds with the revised role. The backward construction must still certify the
+role's behavior at every constrained site of its chosen finite supertiles; the
+selected sparse-grid audit alone is not a global uniqueness theorem.
 
 Backward shade construction is also reduced to its actual finite invariant.
 `RedShadeGraphColoring.ValidParityColoringOn` records a Boolean XOR coloring

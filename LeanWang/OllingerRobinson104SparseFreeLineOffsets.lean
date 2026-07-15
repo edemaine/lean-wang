@@ -210,6 +210,28 @@ theorem pivot_mem_offsets (depth : Nat) : pivot depth ∈ offsets depth := by
       rw [hpivot]
       simp [children, heven]
 
+/-- The unique even pivot is the first retained offset. -/
+theorem offsets_eq_pivot_cons (depth : Nat) :
+    ∃ rest, offsets depth = pivot depth :: rest := by
+  induction depth with
+  | zero => exact ⟨[], rfl⟩
+  | succ depth ih =>
+      rcases ih with ⟨rest, hrest⟩
+      refine ⟨extraChild (pivot depth) :: rest.flatMap children, ?_⟩
+      rw [offsets_succ, hrest]
+      simp only [List.flatMap_cons]
+      rw [show children (pivot depth) =
+          [4 * pivot depth, extraChild (pivot depth)] by
+        simp [children, pivot_even, extraChild]]
+      simp only [List.cons_append, List.nil_append]
+      congr 1
+      simp [pivot, pow_succ, Nat.mul_comm, Nat.mul_left_comm]
+
+theorem offsetAt_zero (depth : Nat) (positive : 0 < (offsets depth).length) :
+    offsetAt depth ⟨0, positive⟩ = pivot depth := by
+  rcases offsets_eq_pivot_cons depth with ⟨rest, hrest⟩
+  simp [offsetAt, hrest]
+
 theorem even_offset_eq_pivot (depth : Nat) {offset : Nat}
     (hoffset : offset ∈ offsets depth) (heven : offset % 2 = 0) :
     offset = pivot depth := by

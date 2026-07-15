@@ -38,7 +38,7 @@ theorem unboundedMarkedFreeGrid_with_light
         (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level) .light ∧
       Nonempty (MarkedFreeGrid (iterateRefine (level + 2) coarse) state
         (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level)
-        (size + 3))) ∨
+        (size + 2))) ∨
       (CycleOn (iterateRefine (level + 2) coarse)
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) ∧
@@ -47,7 +47,7 @@ theorem unboundedMarkedFreeGrid_with_light
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) .light ∧
         Nonempty (MarkedFreeGrid (iterateRefine (level + 2) coarse) state
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
-          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 2))) := by
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 1))) := by
   let level := 2 * (1 + size)
   let coarse := ShadedPlaneShadeGrid.coarseGrid decoded (level + 2) coarseOrigin
   let state := ShadedPlaneShadeGrid.stateGrid decoded
@@ -129,10 +129,10 @@ theorem unboundedMarkedFreeGrid
       (ShadedPlaneShadeGrid.fineParentOrigin decoded (level + 2) coarseOrigin)
     Nonempty (MarkedFreeGrid (iterateRefine (level + 2) coarse) state
         (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level)
-        (size + 3)) ∨
+        (size + 2)) ∨
       Nonempty (MarkedFreeGrid (iterateRefine (level + 2) coarse) state
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
-        (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 2)) := by
+        (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 1)) := by
   rcases unboundedMarkedFreeGrid_with_light decoded size coarseOrigin with
     ⟨_, _, grid⟩ | ⟨_, _, grid⟩
   · exact Or.inl grid

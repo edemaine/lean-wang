@@ -8,8 +8,8 @@ import LeanWang.OllingerRobinson104SignalRoutingScaffold
 
 /-!
 Role-sensitive payload routing over the corrected shaded obstruction layer.
-An all-clear occurrence of the distinguished corrected quarter tile marks the
-fixed-corner payload seed.
+An all-clear occurrence of the northeast quarter at the retained sparse pivot
+marks the fixed-corner payload seed.
 -/
 
 namespace LeanWang
@@ -41,16 +41,16 @@ theorem quarterLayer_primrec : Primrec quarterLayer :=
     quarterLayer (tile site) = Quarters.quarterTile site.1.1 := by
   simp [quarterLayer, tile, RedShades.tile]
 
-/-- Quarter types appearing at the canonical marked crossing of every parent. -/
+/-- Quarter types appearing at the first retained sparse crossing. -/
 def markerQuarters : List Quarters.QuarterIndex :=
-  [(0, .southwest), (1, .southwest),
-    (2, .southwest), (3, .southwest)]
+  [(0, .northeast), (1, .northeast),
+    (2, .northeast), (3, .northeast)]
 
 def isMarkerQuarterTile (wang : WangTile) : Bool :=
-  wang == Quarters.quarterTile (0, .southwest) ||
-    wang == Quarters.quarterTile (1, .southwest) ||
-    wang == Quarters.quarterTile (2, .southwest) ||
-    wang == Quarters.quarterTile (3, .southwest)
+  wang == Quarters.quarterTile (0, .northeast) ||
+    wang == Quarters.quarterTile (1, .northeast) ||
+    wang == Quarters.quarterTile (2, .northeast) ||
+    wang == Quarters.quarterTile (3, .northeast)
 
 theorem isMarkerQuarterTile_primrec : Primrec isMarkerQuarterTile := by
   have heq (quarter : Quarters.QuarterIndex) :
@@ -59,9 +59,9 @@ theorem isMarkerQuarterTile_primrec : Primrec isMarkerQuarterTile := by
       (Primrec.const (Quarters.quarterTile quarter))
   exact Primrec.or.comp
     (Primrec.or.comp
-      (Primrec.or.comp (heq (0, .southwest)) (heq (1, .southwest)))
-      (heq (2, .southwest)))
-    (heq (3, .southwest))
+      (Primrec.or.comp (heq (0, .northeast)) (heq (1, .northeast)))
+      (heq (2, .northeast)))
+    (heq (3, .northeast))
 
 set_option linter.style.nativeDecide false in
 theorem isMarkerQuarterTile_quarterTile_eq_true_iff

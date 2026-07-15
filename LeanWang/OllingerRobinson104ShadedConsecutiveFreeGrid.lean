@@ -268,7 +268,7 @@ theorem unboundedConsecutiveMarkedFreeGrid_with_light
       Nonempty (ConsecutiveMarkedFreeGrid
         (iterateRefine (level + 2) coarse) state
         (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level)
-        (size + 3))) ∨
+        (size + 2))) ∨
       (CycleOn (iterateRefine (level + 2) coarse)
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) ∧
@@ -278,7 +278,7 @@ theorem unboundedConsecutiveMarkedFreeGrid_with_light
         Nonempty (ConsecutiveMarkedFreeGrid
           (iterateRefine (level + 2) coarse) state
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
-          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 2))) := by
+          (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 1))) := by
   rcases SparseFreeLineDecodedMarkedGrid.unboundedMarkedFreeGrid_with_light
       decoded size coarseOrigin with
     ⟨cycle, shaded, marked⟩ | ⟨cycle, shaded, marked⟩
@@ -297,10 +297,10 @@ theorem unboundedConsecutiveMarkedFreeGrid
       (ShadedPlaneShadeGrid.fineParentOrigin decoded (level + 2) coarseOrigin)
     Nonempty (ConsecutiveMarkedFreeGrid (iterateRefine (level + 2) coarse) state
         (2 ^ level) (3 * 2 ^ level) (2 ^ level) (3 * 2 ^ level)
-        (size + 3)) ∨
+        (size + 2)) ∨
       Nonempty (ConsecutiveMarkedFreeGrid (iterateRefine (level + 2) coarse) state
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
-        (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 2)) := by
+        (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 1)) := by
   rcases unboundedConsecutiveMarkedFreeGrid_with_light
       decoded size coarseOrigin with
     ⟨_, _, grid⟩ | ⟨_, _, grid⟩
