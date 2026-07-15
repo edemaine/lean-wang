@@ -14,12 +14,11 @@ give direct seam paths for every query with a sparse selected boundary.
 -/
 
 namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
-namespace PairCoverSeamResidualDirectPathAllFamilyTargetsPaths
+namespace PairCoverSeamResidualDirectPathAllFamilyTargets
 
 open RedCycles RedShadeCycles RedShadeGraph
   PairCoverSeamArithmetic PairCoverSeamPathSearch PairCoverSeamShadePaths
   PairCoverSeamResidualDirectPaths
-  PairCoverSeamResidualDirectPathAllFamilyTargets
   PairCoverSeamResidualDirectPathBridges
   PairCoverSeamResidualDirectPathTargets
   PairCoverSeamResidualCanonicalAncestorHierarchy
@@ -137,5 +136,5 @@ theorem AllFamilyTargetsAt.horizontalPath
     exact horizontalSeamPath_of_sameFamilyBetweenTarget rfl sourceFamily
       targetFamily between targetInterior
 
-end PairCoverSeamResidualDirectPathAllFamilyTargetsPaths
+end PairCoverSeamResidualDirectPathAllFamilyTargets
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
