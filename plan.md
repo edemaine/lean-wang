@@ -1223,6 +1223,15 @@ path to a strict south-side `OnCycle` entry, so it defines a
 selected hierarchy family.  This removes the artificial loss caused by the
 strict-side-only `OnCycle` syntax at exact cycle-corner coordinates.
 
+The corner cases are now hidden behind a closed-side target API.
+`PairCoverSeamResidualDirectPathCornerTargets.verticalWest` and
+`.horizontalSouth` cover every point of a canonical west or south side,
+including both endpoints.  `PairCoverSeamResidualDirectPathCanonicalSideTargets`
+then converts a purely arithmetic choice of a crossing or separating canonical
+side directly into `RowFamilyTarget` or `ColumnFamilyTarget`.  The remaining
+created-boundary proof can therefore work entirely with hierarchy addresses,
+family parity, and inequalities; it no longer needs to inspect red-graph ports.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

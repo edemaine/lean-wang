@@ -331,5 +331,127 @@ theorem horizontalSoutheast
   exact ⟨⟨level, blockX, blockY, xWithin, yWithin, inFamily,
     cycle, entry, entryOnCycle, path⟩, interior⟩
 
+private theorem verticalInterior_of_hasVertical
+    {component : Thick} {quadrant : Quadrant}
+    (present : RedShades.hasVertical component quadrant = true) :
+    Signals.verticalInterior? component quadrant ≠ none := by
+  cases component <;> cases quadrant <;>
+    simp_all [Signals.verticalInterior?, RedShades.hasVertical,
+      Quadrant.xBit]
+
+private theorem horizontalInterior_of_hasHorizontal
+    {component : Thick} {quadrant : Quadrant}
+    (present : RedShades.hasHorizontal component quadrant = true) :
+    Signals.horizontalInterior? component quadrant ≠ none := by
+  cases component <;> cases quadrant <;>
+    simp_all [Signals.horizontalInterior?, RedShades.hasHorizontal,
+      Quadrant.yBit]
+
+private theorem verticalPort_on_west
+    {grid : Nat → Nat → Index} {west east south north row : Nat}
+    (rowSouth : quarterSouth south < row)
+    (rowNorth : row < quarterNorth north) :
+    OnCycle west east south north
+      (verticalPort grid (quarterWest west) row) := by
+  unfold verticalPort
+  split
+  · exact OnCycle.westSouth row rowSouth rowNorth
+  · exact OnCycle.westNorth row rowSouth rowNorth
+
+private theorem horizontalPort_on_south
+    {grid : Nat → Nat → Index} {west east south north column : Nat}
+    (columnWest : quarterWest west < column)
+    (columnEast : column < quarterEast east) :
+    OnCycle west east south north
+      (horizontalPort grid column (quarterSouth south)) := by
+  unfold horizontalPort
+  split
+  · exact OnCycle.southWest column columnWest columnEast
+  · exact OnCycle.southEast column columnWest columnEast
+
+/-- Every point on the closed west side of a canonical descendant is a live
+vertical target in that descendant's hierarchy family. -/
+theorem verticalWest
+    {grid : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY level blockX blockY row : Nat}
+    {family : HierarchyFamily}
+    (xWithin : HierarchyAddressWithin outerLevel outerBlockX level blockX)
+    (yWithin : HierarchyAddressWithin outerLevel outerBlockY level blockY)
+    (inFamily : InHierarchyFamily outerLevel level family)
+    (cycle : CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)))
+    (rowSouth :
+      quarterSouth (2 ^ level * (4 * blockY + 1)) ≤ row)
+    (rowNorth :
+      row ≤ quarterNorth (2 ^ level * (4 * blockY + 3))) :
+    CanonicalCycleAncestorWithinFamily grid
+        (verticalPort grid
+          (quarterWest (2 ^ level * (4 * blockX + 1))) row)
+        outerLevel outerBlockX outerBlockY family ∧
+      Signals.verticalInterior?
+        (componentAt grid
+          (quarterWest (2 ^ level * (4 * blockX + 1))) row)
+        (quadrantAt
+          (quarterWest (2 ^ level * (4 * blockX + 1))) row) ≠ none := by
+  rcases rowSouth.eq_or_lt with rowEq | rowInside
+  · subst row
+    exact verticalSouthwest xWithin yWithin inFamily cycle
+  · rcases rowNorth.eq_or_lt with rowEq | rowInsideNorth
+    · subst row
+      exact verticalNorthwest xWithin yWithin inFamily cycle
+    · have present := CycleOn.west_path cycle rowInside rowInsideNorth
+      have onCycle := verticalPort_on_west (grid := grid)
+        (west := 2 ^ level * (4 * blockX + 1))
+        (east := 2 ^ level * (4 * blockX + 3))
+        rowInside rowInsideNorth
+      exact ⟨⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+        cycle, _, onCycle, Path.refl _⟩,
+        verticalInterior_of_hasVertical present⟩
+
+/-- Every point on the closed south side of a canonical descendant is a live
+horizontal target in that descendant's hierarchy family. -/
+theorem horizontalSouth
+    {grid : Nat → Nat → Index}
+    {outerLevel outerBlockX outerBlockY level blockX blockY column : Nat}
+    {family : HierarchyFamily}
+    (xWithin : HierarchyAddressWithin outerLevel outerBlockX level blockX)
+    (yWithin : HierarchyAddressWithin outerLevel outerBlockY level blockY)
+    (inFamily : InHierarchyFamily outerLevel level family)
+    (cycle : CycleOn grid
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)))
+    (columnWest :
+      quarterWest (2 ^ level * (4 * blockX + 1)) ≤ column)
+    (columnEast :
+      column ≤ quarterEast (2 ^ level * (4 * blockX + 3))) :
+    CanonicalCycleAncestorWithinFamily grid
+        (horizontalPort grid column
+          (quarterSouth (2 ^ level * (4 * blockY + 1))))
+        outerLevel outerBlockX outerBlockY family ∧
+      Signals.horizontalInterior?
+        (componentAt grid column
+          (quarterSouth (2 ^ level * (4 * blockY + 1))))
+        (quadrantAt column
+          (quarterSouth (2 ^ level * (4 * blockY + 1)))) ≠ none := by
+  rcases columnWest.eq_or_lt with columnEq | columnInside
+  · subst column
+    exact horizontalSouthwest xWithin yWithin inFamily cycle
+  · rcases columnEast.eq_or_lt with columnEq | columnInsideEast
+    · subst column
+      exact horizontalSoutheast xWithin yWithin inFamily cycle
+    · have present := CycleOn.south_path cycle columnInside columnInsideEast
+      have onCycle := horizontalPort_on_south (grid := grid)
+        (south := 2 ^ level * (4 * blockY + 1))
+        (north := 2 ^ level * (4 * blockY + 3))
+        columnInside columnInsideEast
+      exact ⟨⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+        cycle, _, onCycle, Path.refl _⟩,
+        horizontalInterior_of_hasHorizontal present⟩
+
 end PairCoverSeamResidualDirectPathCornerTargets
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104
