@@ -1232,6 +1232,12 @@ side directly into `RowFamilyTarget` or `ColumnFamilyTarget`.  The remaining
 created-boundary proof can therefore work entirely with hierarchy addresses,
 family parity, and inequalities; it no longer needs to inspect red-graph ports.
 
+The created-boundary recurrence now has a concrete seed.
+`PairCoverSeamCreatedBoundaryBase.evenBase` reuses the cached even depth-one
+path audit to prove `CreatedBoundaryPathsAt .even 0` directly.  No new native
+search is introduced: the theorem only adapts the already checked global seam
+paths to the narrower created-boundary interface.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
