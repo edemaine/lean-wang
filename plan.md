@@ -1256,6 +1256,13 @@ independent 32-pair certificates. A single chunk takes roughly two minutes to
 rebuild on the current machine, while Lake can build changed chunks in
 parallel.
 
+`PairCoverSeamCreatedAdjacentFullAudit` lifts those Boolean certificates to
+ordinary propositions. For every realizable vertical or horizontal pair, it
+provides a bounded seam path from each live created boundary to every query
+coordinate in the opposite macrocell. The finite computation is therefore
+fully separated from the remaining coordinate transport and hierarchy
+arithmetic.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
