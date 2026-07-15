@@ -1268,6 +1268,13 @@ certificates into an arbitrary global refined grid. Unlike the earlier
 edge-only transport, these theorems preserve the actual opposite-macrocell
 query coordinate, which is what the created-boundary obligation requires.
 
+The exact neighboring-macrocell cases are now reduced to those transported
+certificates. `PairCoverSeamCreatedBoundaryAdjacent` classifies every actual
+positive-depth adjacent pair into the 792 audited states, normalizes global
+coordinates into its 8-by-16 or 16-by-8 window, and widens the result to the
+hierarchy collar. Together with the same-block theorem, only queries separated
+from their created boundary by at least one whole intervening macrocell remain.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with

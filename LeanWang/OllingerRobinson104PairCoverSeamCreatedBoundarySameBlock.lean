@@ -58,7 +58,9 @@ theorem HorizontalSeamPath.widen
       targetNorth.trans_le north, interior, targetPath⟩
   · exact Or.inr path
 
-private theorem localBlock_within_collar
+/-- The depth-two macrocell containing an interior coordinate lies within its
+enclosing hierarchy collar. -/
+theorem localBlock_within_collar
     (phase : Phase) (depth parent coordinate : Nat)
     (lower : quarterWest (successorWest phase depth parent) < coordinate)
     (upper : coordinate < quarterEast (successorEast phase depth parent)) :
