@@ -1214,6 +1214,15 @@ selected boundary: retained boundaries recurse, while created boundaries use
 these adapters; only the separately packaged exceptional query shapes bypass
 that split.
 
+Canonical-cycle targets now include the geometrically valid corner ports.
+`PairCoverSeamResidualDirectPathCornerTargets` proves that the southwest and
+northwest vertical ports and the southwest and southeast horizontal ports have
+the required nonempty signal interiors.  Each corner connects by an even red
+path to a strict south-side `OnCycle` entry, so it defines a
+`CanonicalCycleAncestorWithinFamily` without weakening or changing the
+selected hierarchy family.  This removes the artificial loss caused by the
+strict-side-only `OnCycle` syntax at exact cycle-corner coordinates.
+
 ### 1. Obtain arbitrarily large free squares
 
 The shade decoration already selects a noncrossing family of red borders with
