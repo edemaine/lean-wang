@@ -23,11 +23,14 @@ variable {T : TileSet} {seed : WangTile}
   {x : Int × Int → TileIn
     (combineWithRoutedScaffold ShadedSignals.routedScaffold T seed)}
 
+set_option linter.style.nativeDecide false in
 set_option maxHeartbeats 2000000 in
 -- The two light-cycle cases use different phase representations of one grid.
 theorem unboundedMarkedFreeGrid_with_light
     (decoded : ShadedRoutedPlaneDecode.Decoded x)
-    (size : Nat) (coarseOrigin : Int × Int) :
+    (size : Nat) (coarseOrigin : Int × Int)
+    (root : (ShadedPlaneShadeGrid.coarseGrid decoded
+      (2 * (1 + size) + 2) coarseOrigin) 0 0 = 0) :
     let level := 2 * (1 + size)
     let coarse := ShadedPlaneShadeGrid.coarseGrid decoded (level + 2) coarseOrigin
     let state := ShadedPlaneShadeGrid.stateGrid decoded
@@ -52,6 +55,8 @@ theorem unboundedMarkedFreeGrid_with_light
   let coarse := ShadedPlaneShadeGrid.coarseGrid decoded (level + 2) coarseOrigin
   let state := ShadedPlaneShadeGrid.stateGrid decoded
     (ShadedPlaneShadeGrid.fineParentOrigin decoded (level + 2) coarseOrigin)
+  have coarseRoot : coarse 0 0 = 0 := by
+    simpa only [coarse, level] using root
   have hlevel : 1 ≤ level := by simp [level]; omega
   have valid : ValidShadeGrid (iterateRefine (level + 2) coarse) state :=
     ShadedPlaneShadeGrid.refined_stateGrid_valid decoded
@@ -91,9 +96,14 @@ theorem unboundedMarkedFreeGrid_with_light
       simpa only [hwestEven, heastEven] using largeLight
     exact ⟨cycle, largeLight, ⟨by
       simpa only [refinedGrid, hdepthEven, hwestEven, heastEven] using
-        evenMarkedWitness size coarse validEven cycleEven lightEven⟩⟩
+        evenMarkedWitness size coarse coarseRoot validEven cycleEven lightEven⟩⟩
   · right
     let shifted := iterateRefine 1 coarse
+    have shiftedRoot : shifted 0 0 = 0 := by
+      dsimp only [shifted, iterateRefine]
+      rw [show 0 = 2 * 0 by omega, show 0 = 2 * 0 by omega,
+        refineIndexGrid_even_even, coarseRoot]
+      native_decide
     have cycle := RedShadeCrossingBoards.smallCycle coarse hlevel
     have hgridSmall : refinedGrid .odd size shifted =
         iterateRefine (level + 2) coarse := by
@@ -116,13 +126,15 @@ theorem unboundedMarkedFreeGrid_with_light
       simpa only [hwestOdd, heastOdd] using smallLight
     exact ⟨cycle, smallLight, ⟨by
       simpa only [hgridSmall, hwestOdd, heastOdd] using
-        oddMarkedWitness size shifted validOdd cycleOdd lightOdd⟩⟩
+        oddMarkedWitness size shifted shiftedRoot validOdd cycleOdd lightOdd⟩⟩
 
 set_option maxHeartbeats 2000000 in
 -- Compatibility wrapper retaining the original grid-only interface.
 theorem unboundedMarkedFreeGrid
     (decoded : ShadedRoutedPlaneDecode.Decoded x)
-    (size : Nat) (coarseOrigin : Int × Int) :
+    (size : Nat) (coarseOrigin : Int × Int)
+    (root : (ShadedPlaneShadeGrid.coarseGrid decoded
+      (2 * (1 + size) + 2) coarseOrigin) 0 0 = 0) :
     let level := 2 * (1 + size)
     let coarse := ShadedPlaneShadeGrid.coarseGrid decoded (level + 2) coarseOrigin
     let state := ShadedPlaneShadeGrid.stateGrid decoded
@@ -133,7 +145,7 @@ theorem unboundedMarkedFreeGrid
       Nonempty (MarkedFreeGrid (iterateRefine (level + 2) coarse) state
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 1)) := by
-  rcases unboundedMarkedFreeGrid_with_light decoded size coarseOrigin with
+  rcases unboundedMarkedFreeGrid_with_light decoded size coarseOrigin root with
     ⟨_, _, grid⟩ | ⟨_, _, grid⟩
   · exact Or.inl grid
   · exact Or.inr grid

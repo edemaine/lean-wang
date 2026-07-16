@@ -168,6 +168,7 @@ theorem oddMarkedFreeGrid_lowerLeft
 
 theorem evenMarkedFreeGrid_lowerLeft_marker
     (size : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0)
     {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid (refinedGrid .even (1 + size) grid) stateGrid)
     (cycle : CycleOn (refinedGrid .even (1 + size) grid)
@@ -185,10 +186,11 @@ theorem evenMarkedFreeGrid_lowerLeft_marker
   rw [(evenMarkedFreeGrid_lowerLeft size grid valid cycle shaded).1,
     (evenMarkedFreeGrid_lowerLeft size grid valid cycle shaded).2]
   simpa [Nat.add_comm] using
-    SparseFreeLinePivotMarker.evenPivotMarkerQuarter size grid
+    SparseFreeLinePivotMarker.evenPivotMarkerQuarter size grid root
 
 theorem oddMarkedFreeGrid_lowerLeft_marker
     (size : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0)
     {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid (refinedGrid .odd size grid) stateGrid)
     (cycle : CycleOn (refinedGrid .odd size grid)
@@ -204,10 +206,11 @@ theorem oddMarkedFreeGrid_lowerLeft_marker
   dsimp only
   rw [(oddMarkedFreeGrid_lowerLeft size grid valid cycle shaded).1,
     (oddMarkedFreeGrid_lowerLeft size grid valid cycle shaded).2]
-  exact SparseFreeLinePivotMarker.oddPivotMarkerQuarter size grid
+  exact SparseFreeLinePivotMarker.oddPivotMarkerQuarter size grid root
 
 def evenMarkedWitness
     (size : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0)
     {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid (refinedGrid .even (1 + size) grid) stateGrid)
     (cycle : CycleOn (refinedGrid .even (1 + size) grid)
@@ -222,10 +225,11 @@ def evenMarkedWitness
   grid := evenMarkedFreeGrid size grid valid cycle shaded
   positive := by omega
   lowerLeftMarker := evenMarkedFreeGrid_lowerLeft_marker
-    size grid valid cycle shaded
+    size grid root valid cycle shaded
 
 def oddMarkedWitness
     (size : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0)
     {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid (refinedGrid .odd size grid) stateGrid)
     (cycle : CycleOn (refinedGrid .odd size grid)
@@ -239,7 +243,7 @@ def oddMarkedWitness
   grid := oddMarkedFreeGrid size grid valid cycle shaded
   positive := by omega
   lowerLeftMarker := oddMarkedFreeGrid_lowerLeft_marker
-    size grid valid cycle shaded
+    size grid root valid cycle shaded
 
 end SparseFreeLinePlaneMarkedGrid
 end Closed104

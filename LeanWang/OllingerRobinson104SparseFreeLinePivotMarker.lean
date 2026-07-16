@@ -9,11 +9,11 @@ import LeanWang.OllingerRobinson104SparseFreeLinePlaneLocalStep
 /-!
 # The retained sparse-pivot marker
 
-The first retained free row and column meet in a northeast quarter.  At the
-even base its corrected index is one of `0, 1, 2, 3`; the same finite set is
-closed under the two southwest-child refinements used at later depths.  The
-odd base has the identical local property.  This gives both light-cycle
-branches one honest marker without prepending an additional free line.
+The first retained free row and column meet in a northeast quarter.  Choosing
+a coarse occurrence of corrected index `0` makes both finite bases index `0`,
+and index `0` is fixed by the southwest-child refinements used at later depths.
+This gives both light-cycle branches one canonical marker without prepending
+an additional free line.
 -/
 
 namespace LeanWang
@@ -43,13 +43,13 @@ theorem markerNortheast_refines (index : Index)
   native_decide
 
 set_option linter.style.nativeDecide false in
-theorem evenBaseMarkerQuarter_constant (parent : Index) :
-    (ShadedFreeLineGraphBase.localGrid parent 8 8, Quadrant.northeast) ∈
+theorem evenBaseMarkerQuarter_constant :
+    (ShadedFreeLineGraphBase.localGrid 0 8 8, Quadrant.northeast) ∈
       ShadedSignals.markerQuarters := by
-  revert parent
   native_decide
 
-theorem evenBaseMarkerQuarter (grid : Nat → Nat → Index) :
+theorem evenBaseMarkerQuarter (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0) :
     (refinedGrid .even 1 grid 8 8, Quadrant.northeast) ∈
       ShadedSignals.markerQuarters := by
   have hlocal := iterateRefine_shift_eq_constant 4 grid 0 0 8 8
@@ -57,16 +57,16 @@ theorem evenBaseMarkerQuarter (grid : Nat → Nat → Index) :
   rw [SparseFreeLinePlaneBase.shiftGrid_zero] at hlocal
   unfold refinedGrid
   simp only [refinementDepth, Phase.extra]
-  rw [hlocal]
-  simpa [ShadedFreeLineGraphBase.localGrid] using
-    evenBaseMarkerQuarter_constant (grid 0 0)
+  rw [hlocal, root]
+  exact evenBaseMarkerQuarter_constant
 
-theorem evenPivotMarkerIndex (extra : Nat) (grid : Nat → Nat → Index) :
+theorem evenPivotMarkerIndex (extra : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0) :
     (refinedGrid .even (extra + 1) grid
         (2 * 4 ^ (extra + 1)) (2 * 4 ^ (extra + 1)),
       Quadrant.northeast) ∈ ShadedSignals.markerQuarters := by
   induction extra with
-  | zero => simpa using evenBaseMarkerQuarter grid
+  | zero => simpa using evenBaseMarkerQuarter grid root
   | succ extra ih =>
       rw [show extra + 1 + 1 = (extra + 1) + 1 by omega,
         SparseFreeLinePlaneLocalStep.refinedGrid_succ]
@@ -81,7 +81,8 @@ theorem evenPivotMarkerIndex (extra : Nat) (grid : Nat → Nat → Index) :
       simp only [refineIndexGrid_even_even]
       exact markerNortheast_refines _ ih
 
-theorem evenPivotMarkerQuarter (extra : Nat) (grid : Nat → Nat → Index) :
+theorem evenPivotMarkerQuarter (extra : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0) :
     let coordinate := lineCoordinate .even (extra + 1) (pivot (extra + 1))
     (refinedGrid .even (extra + 1) grid
         (coordinate / 2) (coordinate / 2),
@@ -96,16 +97,16 @@ theorem evenPivotMarkerQuarter (extra : Nat) (grid : Nat → Nat → Index) :
         2 * (2 * 4 ^ (extra + 1)) + 1 by omega]
     simp [quadrantAt, Quadrant.ofBits]
   rw [hhalf, hquadrant]
-  exact evenPivotMarkerIndex extra grid
+  exact evenPivotMarkerIndex extra grid root
 
 set_option linter.style.nativeDecide false in
-theorem oddBaseMarkerQuarter_constant (parent : Index) :
-    (ShadedFreeLineOddBase.localGrid parent 4 4, Quadrant.northeast) ∈
+theorem oddBaseMarkerQuarter_constant :
+    (ShadedFreeLineOddBase.localGrid 0 4 4, Quadrant.northeast) ∈
       ShadedSignals.markerQuarters := by
-  revert parent
   native_decide
 
-theorem oddBaseMarkerQuarter (grid : Nat → Nat → Index) :
+theorem oddBaseMarkerQuarter (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0) :
     (refinedGrid .odd 0 grid 4 4, Quadrant.northeast) ∈
       ShadedSignals.markerQuarters := by
   have hlocal := iterateRefine_shift_eq_constant 3 grid 0 0 4 4
@@ -113,16 +114,16 @@ theorem oddBaseMarkerQuarter (grid : Nat → Nat → Index) :
   rw [SparseFreeLinePlaneBase.shiftGrid_zero] at hlocal
   unfold refinedGrid
   simp only [refinementDepth, Phase.extra]
-  rw [hlocal]
-  simpa [ShadedFreeLineOddBase.localGrid] using
-    oddBaseMarkerQuarter_constant (grid 0 0)
+  rw [hlocal, root]
+  exact oddBaseMarkerQuarter_constant
 
-theorem oddPivotMarkerIndex (depth : Nat) (grid : Nat → Nat → Index) :
+theorem oddPivotMarkerIndex (depth : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0) :
     (refinedGrid .odd depth grid
         (4 * 4 ^ depth) (4 * 4 ^ depth), Quadrant.northeast) ∈
       ShadedSignals.markerQuarters := by
   induction depth with
-  | zero => simpa using oddBaseMarkerQuarter grid
+  | zero => simpa using oddBaseMarkerQuarter grid root
   | succ depth ih =>
       rw [SparseFreeLinePlaneLocalStep.refinedGrid_succ]
       change
@@ -136,7 +137,8 @@ theorem oddPivotMarkerIndex (depth : Nat) (grid : Nat → Nat → Index) :
       simp only [refineIndexGrid_even_even]
       exact markerNortheast_refines _ ih
 
-theorem oddPivotMarkerQuarter (depth : Nat) (grid : Nat → Nat → Index) :
+theorem oddPivotMarkerQuarter (depth : Nat) (grid : Nat → Nat → Index)
+    (root : grid 0 0 = 0) :
     let coordinate := lineCoordinate .odd depth (pivot depth)
     (refinedGrid .odd depth grid (coordinate / 2) (coordinate / 2),
       quadrantAt coordinate coordinate) ∈ ShadedSignals.markerQuarters := by
@@ -148,7 +150,7 @@ theorem oddPivotMarkerQuarter (depth : Nat) (grid : Nat → Nat → Index) :
     rw [show 8 * 4 ^ depth + 1 = 2 * (4 * 4 ^ depth) + 1 by omega]
     simp [quadrantAt, Quadrant.ofBits]
   rw [hhalf, hquadrant]
-  exact oddPivotMarkerIndex depth grid
+  exact oddPivotMarkerIndex depth grid root
 
 end SparseFreeLinePivotMarker
 end Closed104

@@ -1357,17 +1357,21 @@ before reaching its next active crossing.
 
 The concrete corner role has been revised after an executable audit exposed
 that the old prepended southwest marker recurred at additional diagonal
-crossings. The retained sparse pivot supplies the forward marker: its first
-crossing is a northeast quarter with corrected index `0`, `1`, `2`, or `3`.
-Every later even-branch sparse crossing is southwest, while the later
-odd-branch northeast crossings have corrected index `4` or `7` in the finite
-base and its recurrence. `SparseFreeLinePivotMarker` proves the two base cases
-and closes the marker under the two southwest-child refinements. The marked
-grids now start directly at the pivot, the obsolete prepended-marker audit and
-recurrence have been removed, and the full forward routed-scaffold theorem
-builds with the revised role. The backward construction must still certify the
-role's behavior at every constrained site of its chosen finite supertiles; the
-selected sparse-grid audit alone is not a global uniqueness theorem.
+crossings. A second audit showed that marking all four candidate corrected
+indices can likewise create repeated markers in a larger signal component.
+The retained sparse pivot therefore uses only the northeast quarter of
+corrected index `0`. Hierarchy recurrence chooses an index-`0` coarse origin
+at every required depth; both finite pivot bases are then index `0`, and the
+southwest-child refinement fixes index `0` at all later depths.
+`SparseFreeLinePivotMarker` proves these two base cases and the refinement
+closure. The marked grids now start directly at the pivot, the obsolete
+prepended-marker audit and recurrence have been removed, and the full forward
+routed-scaffold theorem builds with the revised role. Pointed payload labels
+use `Int × Int`, so locating the marker inside its signal component no longer
+imposes the impossible one-sided-coordinate condition. The backward
+construction must still certify global marker uniqueness in its chosen finite
+supertiles; the selected sparse-grid proof alone establishes only the forward
+witness.
 
 Backward shade construction is also reduced to its actual finite invariant.
 `RedShadeGraphColoring.ValidParityColoringOn` records a Boolean XOR coloring

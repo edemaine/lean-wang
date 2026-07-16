@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedConsecutiveFreeGrid
+import LeanWang.OllingerRobinson104HierarchyRecurrence
 import LeanWang.OllingerRobinson104ShadedObstructionGeometryCover
 
 /-!
@@ -63,10 +64,16 @@ theorem forcesRoutedFixedCornerSquares
   intro T seed htiles size hsize
   rcases htiles with ⟨x, hx⟩
   let decoded := ShadedRoutedPlaneDecode.decode hx
-  let coarseOrigin : Int × Int := (0, 0)
   let level := 2 * (1 + size)
+  obtain ⟨coarseOrigin, coarseOrigin_zero⟩ :=
+    HierarchyRecurrence.every_type_occurs decoded.tower
+      (level + 2) (0, 0) 0
   let coarse := ShadedPlaneShadeGrid.coarseGrid decoded
     (level + 2) coarseOrigin
+  have coarseRoot : coarse 0 0 = 0 := by
+    simpa [coarse, ShadedPlaneShadeGrid.coarseGrid,
+      HierarchyEmbedding.natGridAt, Desubstitution.shift] using
+        coarseOrigin_zero
   let parentOrigin := ShadedPlaneShadeGrid.fineParentOrigin decoded
     (level + 2) coarseOrigin
   have parentGrid :
@@ -76,7 +83,7 @@ theorem forcesRoutedFixedCornerSquares
       decoded (level + 2) coarseOrigin
   have pairCovers := covers decoded size coarseOrigin
   rcases unboundedConsecutiveMarkedFreeGrid_with_light
-      decoded size coarseOrigin with
+      decoded size coarseOrigin coarseRoot with
     ⟨cycle, shaded, ⟨grid⟩⟩ | ⟨cycle, shaded, ⟨grid⟩⟩
   · have pairCover := pairCovers.1 shaded
     rw [← parentGrid] at cycle grid pairCover

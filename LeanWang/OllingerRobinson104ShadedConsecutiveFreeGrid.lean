@@ -256,7 +256,9 @@ variable {T : TileSet} {seed : WangTile}
 /-- Arbitrarily large complete consecutive free grids, retaining their light board. -/
 theorem unboundedConsecutiveMarkedFreeGrid_with_light
     (decoded : ShadedRoutedPlaneDecode.Decoded x)
-    (size : Nat) (coarseOrigin : Int × Int) :
+    (size : Nat) (coarseOrigin : Int × Int)
+    (root : (ShadedPlaneShadeGrid.coarseGrid decoded
+      (2 * (1 + size) + 2) coarseOrigin) 0 0 = 0) :
     let level := 2 * (1 + size)
     let coarse := ShadedPlaneShadeGrid.coarseGrid decoded (level + 2) coarseOrigin
     let state := ShadedPlaneShadeGrid.stateGrid decoded
@@ -280,7 +282,7 @@ theorem unboundedConsecutiveMarkedFreeGrid_with_light
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
           (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 1))) := by
   rcases SparseFreeLineDecodedMarkedGrid.unboundedMarkedFreeGrid_with_light
-      decoded size coarseOrigin with
+      decoded size coarseOrigin root with
     ⟨cycle, shaded, marked⟩ | ⟨cycle, shaded, marked⟩
   · rcases marked with ⟨marked⟩
     exact Or.inl ⟨cycle, shaded, ⟨ConsecutiveMarkedFreeGrid.ofMarked marked⟩⟩
@@ -290,7 +292,9 @@ theorem unboundedConsecutiveMarkedFreeGrid_with_light
 /-- Arbitrarily large complete consecutive free grids in a decoded plane. -/
 theorem unboundedConsecutiveMarkedFreeGrid
     (decoded : ShadedRoutedPlaneDecode.Decoded x)
-    (size : Nat) (coarseOrigin : Int × Int) :
+    (size : Nat) (coarseOrigin : Int × Int)
+    (root : (ShadedPlaneShadeGrid.coarseGrid decoded
+      (2 * (1 + size) + 2) coarseOrigin) 0 0 = 0) :
     let level := 2 * (1 + size)
     let coarse := ShadedPlaneShadeGrid.coarseGrid decoded (level + 2) coarseOrigin
     let state := ShadedPlaneShadeGrid.stateGrid decoded
@@ -302,7 +306,7 @@ theorem unboundedConsecutiveMarkedFreeGrid
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1))
         (2 ^ (level - 1)) (3 * 2 ^ (level - 1)) (size + 1)) := by
   rcases unboundedConsecutiveMarkedFreeGrid_with_light
-      decoded size coarseOrigin with
+      decoded size coarseOrigin root with
     ⟨_, _, grid⟩ | ⟨_, _, grid⟩
   · exact Or.inl grid
   · exact Or.inr grid
