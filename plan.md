@@ -1479,6 +1479,17 @@ horizontal and vertical successor equations.  The concrete backward target
 is therefore a recursive addressed-grid decomposition of the canonical
 supertile squares.
 
+The arithmetic addressing part of that decomposition is now complete.
+`OllingerRobinson104ShadedCarrierHierarchyAddressing` counts only coordinates
+owned by the current frame depth, so an entire nested frame becomes one
+constant-address channel gap.  It proves all horizontal and vertical local
+successor cases, handles boundary rows and columns with no crossings, centers
+each component at its frame center, and constructs `SquareAddressing` from two
+substitution-specific facts: erased-role recognition and centered corner
+markers.  Thus the remaining scaffold work is the finite-state hierarchy
+induction proving exactly those two facts for every canonical supertile level;
+no payload or edge-label reasoning remains in that induction.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply
