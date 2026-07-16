@@ -14,6 +14,14 @@ The public unconditional versions are proved in `LeanWang.Final` by
 instantiating the generic channel-aware reduction with the corrected concrete
 104-tile routed scaffold.
 
+This file also records the development history. Some module names in later
+progress notes refer to abandoned experimental branches removed after the final
+proof was completed; they are historical descriptions, not current imports.
+
+The primary human transcriptions are retained as
+[figures/fig13-human.tsv](figures/fig13-human.tsv) and
+[figures/fig16-human.txt](figures/fig16-human.txt).
+
 ## Chosen reduction
 
 Use the Berger/Robinson fixed-corner construction from `cirm.pdf`, with the
