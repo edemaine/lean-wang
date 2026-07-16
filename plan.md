@@ -1499,6 +1499,16 @@ patch and every child class.  The canonical seed is class 15.  The next proof
 can therefore identify this small automaton with the recursive frame formula
 without unfolding shade choices, expansion searches, or decorated states.
 
+The arithmetic side no longer depends on the recursive nearest-border signal
+search.  `OllingerRobinson104ShadedCarrierHierarchySignals` defines the exact
+selected-border formula and an explicit row/column flow: forward before the
+outer opening, clear inside each completed owner frame, and backward
+elsewhere.  It proves every local signal rule, packages any shade rectangle
+with those borders as a valid signal rectangle, and proves that adjacent clear
+edges are exactly the horizontal and vertical carrier predicates.  Therefore
+the finite-factor identification immediately yields the erased routed roles
+required by hierarchy addressing.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply
