@@ -45,6 +45,9 @@ proof task.
   seeded quarter-plane tilings.
 - `LeanWang.MachineInputTiles` supplies the reusable position and row colors
   used to force a finite bottom row.
+- `LeanWang.MachineHistory` is the small input-independent kernel of finite
+  local history blocks. The obsolete table-program and blank-input backends
+  have been removed.
 - `LeanWang.UniversalCode` defines the universal partial function, and
   `LeanWang.UniversalTM0Semantic` uses Mathlib's completeness theorem to choose
   one evaluator code directly, carries its finite supports through TM2, TM1,

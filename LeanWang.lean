@@ -2,10 +2,10 @@ import LeanWang.Basic
 import LeanWang.TileSubdivision
 import LeanWang.Compactness
 import LeanWang.Machine
+import LeanWang.MachineHistory
 import LeanWang.MachineInput
 import LeanWang.MachineInputHistory
 import LeanWang.MachineInputTiles
-import LeanWang.MachineTiles
 import LeanWang.PartrecToTM2Support
 import LeanWang.UniversalCode
 import LeanWang.UniversalTM0Semantic

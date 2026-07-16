@@ -4,38 +4,19 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Compactness
-import LeanWang.Machine
-import LeanWang.MachineTiles
 
 /-!
 Main theorem surface for the Wang-tile undecidability proof.
 
-This file collects the generic tiling theorems used by the reduction:
-machine-tile correctness, fixed-corner-square compactness, and the abstract
-scaffold construction. The fixed universal-machine specialization is kept in
-`UniversalTM0Reduction`.
+This file collects fixed-corner-square compactness and the abstract scaffold
+construction. The fixed universal-machine specialization and its generic
+finite-input history theorem are kept in `UniversalTM0Reduction` and
+`MachineInputTiles`, respectively.
 -/
 
 noncomputable section
 
 namespace LeanWang
-
-/-- Correctness of the machine-to-Wang-tile fixed domino construction. -/
-theorem machineTiles_correct (M : Machine) :
-    TilesQuarterWithSeed (machineTiles M) (machineSeed M) ↔ ¬ Machine.HaltsEmpty M := by
-  constructor
-  · intro htiles hhalts
-    rcases hhalts with ⟨n, hhalt⟩
-    exact not_tilesQuarterWithSeed_machineTiles_of_halts_at n hhalt htiles
-  · intro hnonhalts
-    exact tilesQuarterWithSeed_machineTiles_of_not_halts hnonhalts
-
-/-- Correctness of the table-program fixed-domino construction. -/
-theorem tableProgramFixedDomino_correct (P : TableProgram) :
-    TilesQuarterWithSeed (tableProgramFixedDomino P).1 (tableProgramFixedDomino P).2 ↔
-      ¬ Machine.HaltsEmpty P.toMachine := by
-  unfold tableProgramFixedDomino tableProgramTiles tableProgramSeed
-  exact machineTiles_correct P.toMachine
 
 /-- Data for a scaffold tileset used to force arbitrarily large free squares. -/
 structure Scaffold where

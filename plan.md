@@ -68,11 +68,13 @@ occurs in the retained reduction.
 
 There is no remaining source-uniform compiler, descriptor decoder, generated
 position-row obligation, code-parametric support-list construction, or
-input-specific machine control in the final reduction. More than one hundred
-thousand lines of the obsolete route have been deleted. The retained fixed-TM0
-route consists only of native finite supports, folded tape geometry, the fixed
-one-sided simulator and its halting proof, and the generic finite-input
-machine-to-Wang construction.
+input-specific machine control in the final reduction. The abandoned
+`TableProgram`, empty-input machine semantics, and duplicate `MachineTiles`
+correctness route have also been removed. More than one hundred thousand lines
+of obsolete machine work have been deleted. The retained fixed-TM0 route
+consists only of native finite supports, folded tape geometry, the fixed
+one-sided simulator and its halting proof, the local `MachineHistory` kernel,
+and the generic finite-input machine-to-Wang construction.
 
 ## Completed general tiling infrastructure
 

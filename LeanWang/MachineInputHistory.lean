@@ -4,14 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.MachineInput
-import LeanWang.MachineTiles
+import LeanWang.MachineHistory
 
 /-!
 # Space-time histories from finite machine inputs
 
-This is the input-parameterized counterpart of the blank-tape history used in
-`MachineTiles`.  It deliberately reuses the same finite set of legal local
-history blocks; only the bottom row will depend on the input word.
+The finite local-history language is independent of the input. Only the bottom
+row of the eventual Wang construction depends on the input word.
 -/
 
 namespace LeanWang
