@@ -3,31 +3,20 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinsonFigure16Recognizability
+import LeanWang.OllingerRobinson104Data
 
 /-!
 The corrected 104-tile component alphabet underlying the Ollinger substitution.
 
-The original Figure 13 page contains 104 tiles: an eight-tile first row followed
-by eight rows of twelve. The earlier indexed crop and human TSV stopped after
-92 tiles. Independently, closing those 92 component triples under the Figure 16
-substitution produces exactly the missing twelve triples and a closed alphabet
-of size 104. This module starts the corrected route without changing the older
-`Fin 92` diagnostic interfaces.
+The alphabet is transcribed directly in `OllingerRobinson104Data`. This module
+audits its size and duplicate freedom, then proves that every parent/quadrant
+pair has a unique substitution child in the same alphabet.
 -/
 
 namespace LeanWang
 namespace OllingerRobinson
 namespace Figure13Layers
 namespace Closed104
-
-open LayeredFigure18ScaffoldData ConcreteData
-
-abbrev Components := ComponentTriple
-
-/-- The 92 transcribed triples closed under one Figure 16 substitution step. -/
-def alphabet : List Components :=
-  oneStepClosedComponentTriples
 
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
@@ -46,20 +35,6 @@ abbrev Index := Fin 104
 /-- Component triple at a corrected Figure 13 tile index. -/
 def components (index : Index) : Components :=
   alphabet[index.val]'(by simp [index.isLt])
-
-/-- The twelve Figure 13 rows omitted by the earlier 92-tile crop. -/
-def missingRows : List Components :=
-  alphabet.filter fun row => decide (row ∉ currentComponentTriples)
-
-set_option linter.style.nativeDecide false in
-set_option maxRecDepth 20000 in
-theorem missingRows_eq :
-    missingRows =
-      [(.a, .o, .d), (.a, .o, .e), (.a, .k, .d),
-        (.a, .n, .d), (.a, .n, .e), (.a, .q, .e),
-        (.a, .p, .d), (.a, .p, .e), (.a, .s, .d),
-        (.a, .m, .d), (.a, .m, .e), (.a, .i, .e)] := by
-  native_decide
 
 /-- Corrected child indices matching one parent/quadrant substitution cell. -/
 def childCandidates (parent : Index) (quadrant : Quadrant) : List Index :=

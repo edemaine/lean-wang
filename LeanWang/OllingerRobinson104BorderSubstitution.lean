@@ -20,7 +20,7 @@ namespace Figure13Layers
 namespace Closed104
 namespace BorderSubstitution
 
-open RedCycles LayeredFigure18ScaffoldData ConcreteData
+open RedCycles
 
 set_option maxRecDepth 20000
 
