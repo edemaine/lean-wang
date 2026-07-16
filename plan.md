@@ -1458,6 +1458,17 @@ grid center.  This exposes the recursive invariant suggested by Figure 18:
 one refinement retains sixteen copies of every old component and introduces
 four grids of the next size (`6, 14, 30, ...`).
 
+The audited carrier roles have a compact one-dimensional description.  A
+depth-`d` frame has period `4^(d+1)` and occupies residues `4^d + 1` through
+`3 * 4^d`.  Each coordinate is owned by its smallest containing frame.  A row
+owned at depth `d` carries horizontally at precisely the nonboundary columns
+inside a depth-`d` frame, and the vertical statement is symmetric.  This
+formula agrees with every site of the canonical depth-two and depth-three
+supertile squares.  The stronger attempted formula for every selected red
+border is false at finite supertile boundaries and has been discarded: the
+proof will induct only on the induced carrier predicates, which are exactly
+the data needed by the addressing construction.
+
 `OllingerRobinson104ShadedCarrierSquareGeometry` now exposes the supertile row
 and column border sequences, identifies horizontal and vertical carriers with
 adjacent clear canonical edges, and proves that their physical interval
