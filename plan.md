@@ -513,6 +513,13 @@ and the generic finite-input machine-to-Wang construction.
   shade and signal edges gives genuine `ShadedSignals.tileSet` squares at
   cofinal side lengths; square compactness therefore proves an unconditional
   plane tiling of the concrete scaffold tileset.
+- The recursive selected-border formula is now characterized exactly as the
+  outer opening together with the depth-`1` through depth-`level` frame
+  boundaries. Distinct frame depths have disjoint boundaries, and no enclosing
+  boundary enters the strict interior of the smallest owner frame. Hence every
+  arithmetic horizontal carrier cell has two clear canonical signal edges in
+  the actual substitution supertile. The converse recognition direction is
+  the next backward-realization lemma.
 
 ## Remaining scaffold proof
 
