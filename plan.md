@@ -1527,6 +1527,12 @@ in-bounds block at every level.  Consequently each visible arithmetic patch is
 the generated class-15 factor output, and the actual seed-supertile row and
 column interiors equal the corrected border formula at every coordinate.
 
+`OllingerRobinson104ShadedCarrierBorderGeometry` now proves the exact
+arithmetic scaling step for that formula.  Ceiling division by four preserves
+frame membership, an opening boundary lifts exactly at fine residue `1`, a
+closing boundary lifts exactly at fine residue `0`, and the resulting oriented
+`frameBorder` at depth `d + 1` is precisely the lift of depth `d`.
+
 The next step is to identify the canonical nearest-border path with the
 smallest-owner carrier predicates.  A finite-context shortcut was tested and
 rejected: canonical path context grows from 129 states at level two to 428 at
