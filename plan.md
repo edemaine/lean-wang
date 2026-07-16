@@ -10,9 +10,9 @@ unencoded plane-tiling predicates for finite Wang tilesets are undecidable:
 ¬ ComputablePred (fun T : TileSet => TilesPlane T)
 ```
 
-The public conditional versions are already proved in `LeanWang.Final`. The
-only remaining hypothesis for the final channel-aware construction is a
-concrete proof of `IsRoutedScaffold`.
+The public unconditional versions are proved in `LeanWang.Final` by
+instantiating the generic channel-aware reduction with the corrected concrete
+104-tile routed scaffold.
 
 ## Chosen reduction
 
@@ -1570,3 +1570,26 @@ git diff --check
 
 The final theorem should have no hypotheses and no source-dependent machine
 infrastructure.
+
+### Completion
+
+`OllingerRobinson104ShadedCarrierBorderIntervals` identifies adjacent clear
+canonical signal edges exactly with the smallest-owner carrier predicates,
+and `OllingerRobinson104ShadedCarrierConcreteRoles` transports this arithmetic
+description to every concrete seed supertile.
+
+`OllingerRobinson104ShadedCarrierCornerAddressing` proves the remaining marker
+invariant. An index-zero northeast crossing is either inherited from index
+zero, inherited from index four, or newly created at local position `(2, 2)`.
+The first case lifts a centered crossing recursively, the second creates the
+depth-one center, and the third lies on a frame boundary and therefore cannot
+be active. Consequently every concrete corner has logical address `(0, 0)`.
+The canonical supertiles are cofinally large `SquareAddressing`s, so the
+concrete routed scaffold realizes every pointed payload plane.
+
+Together with
+`PairCoverSeamRequiredForward.closed104_forcesRoutedFixedCornerSquares`, this
+discharges both concrete scaffold hypotheses. `LeanWang.Final` exposes the
+hypothesis-free theorems
+`closed104_encoded_domino_problem_undecidable` and
+`closed104_domino_problem_undecidable`.

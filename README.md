@@ -29,13 +29,13 @@ uses the generic machine-to-Wang theorem directly.
 The public theorem surface is [`LeanWang.Final`](LeanWang/Final.lean):
 
 ```lean
-LeanWang.encoded_domino_problem_undecidable
-LeanWang.domino_problem_undecidable
+LeanWang.closed104_encoded_domino_problem_undecidable
+LeanWang.closed104_domino_problem_undecidable
 ```
 
-Both theorems take a `Scaffold` and a proof of `IsScaffold`. Instantiating this
-last hypothesis with the concrete Ollinger/Robinson tiles is the remaining
-proof task.
+Both theorems have no hypotheses. The generic scaffold-parameterized versions
+remain available as `encoded_domino_problem_undecidable_of_routed` and
+`domino_problem_undecidable_of_routed`.
 
 ## Main modules
 
@@ -62,7 +62,10 @@ proof task.
 - `LeanWang.OllingerRobinsonScaffold` defines the abstract scaffold certificate.
 - `LeanWang.OllingerRobinson104*` contains the corrected 104-component
   Figure 13/Figure 16 transcription, substitution boundary certificates, and
-  the successful finite Proposition 8 recognizability check.
+  the successful finite Proposition 8 recognizability check. In particular,
+  `OllingerRobinson104PairCoverSeamRequiredForward` proves forward square
+  forcing, while `OllingerRobinson104ShadedCarrierCornerAddressing` constructs
+  cofinally large addressed squares and proves pointed-plane realization.
 
 ## Build
 
@@ -70,5 +73,9 @@ proof task.
 lake build
 ```
 
-All Lean source files are nonexecutable (`100644`). The checked proof contains
-no `sorry`, `admit`, or declared axioms.
+All Lean source files are nonexecutable (`100644`). The source contains no
+`sorry`, `admit`, or explicit `axiom` declarations. The large finite
+certificates intentionally use `native_decide`, so Lean's axiom report includes
+the corresponding generated code-evaluation axioms in addition to `propext`,
+`Classical.choice`, and `Quot.sound`; it contains no `sorryAx` or other custom
+project axiom.
