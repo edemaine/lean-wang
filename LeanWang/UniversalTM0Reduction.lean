@@ -31,6 +31,21 @@ namespace UniversalTM0Reduction
 
 open Nat.Partrec (Code)
 
+private theorem target_undecidable_of_nonhalting_reduction
+    {α : Type*} [Primcodable α] (target : α → Prop)
+    (reduction : Code → α) (reductionComputable : Computable reduction)
+    (correct : ∀ c, target (reduction c) ↔ ¬ (Nat.Partrec.Code.eval c 0).Dom) :
+    ¬ ComputablePred target := by
+  intro targetComputable
+  have reducedComputable : ComputablePred (fun c : Code => target (reduction c)) :=
+    ComputablePred.computable_of_manyOneReducible
+      (ManyOneReducible.mk target reductionComputable) targetComputable
+  have nonhaltingComputable : ComputablePred
+      (fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom) :=
+    reducedComputable.of_eq correct
+  exact ComputablePred.halting_problem 0
+    ((nonhaltingComputable.not).of_eq fun _ => not_not)
+
 /-- Fixed-corner Wang instance with the source input forced on its bottom row. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
   UniversalTM0Machine.fixedDominoData (UniversalTM0Semantic.input c)
@@ -93,33 +108,19 @@ theorem dominoReductionCode_correct
 theorem encoded_domino_problem_undecidable
     (S : Scaffold) (hS : IsScaffold S) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  intro hdec
-  have hencoded : ComputablePred
-      (fun c : Code => TilesPlane (decodeTileSet (dominoReductionCode S c))) :=
-    ComputablePred.computable_of_manyOneReducible
-      (ManyOneReducible.mk (fun n : Nat => TilesPlane (decodeTileSet n))
-        (dominoReductionCode_computable S)) hdec
-  have hnonhalting : ComputablePred
-      (fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom) :=
-    hencoded.of_eq fun c => dominoReductionCode_correct hS c
-  exact ComputablePred.halting_problem 0
-    ((hnonhalting.not).of_eq fun _ => not_not)
+  exact target_undecidable_of_nonhalting_reduction
+    (fun n : Nat => TilesPlane (decodeTileSet n))
+    (dominoReductionCode S) (dominoReductionCode_computable S)
+    (dominoReductionCode_correct hS)
 
 /-- Unencoded domino undecidability from the fixed-universal-machine route. -/
 theorem domino_problem_undecidable
     (S : Scaffold) (hS : IsScaffold S) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  intro hdec
-  have hdomino : ComputablePred
-      (fun c : Code => TilesPlane (dominoReduction S c)) :=
-    ComputablePred.computable_of_manyOneReducible
-      (ManyOneReducible.mk (fun T : TileSet => TilesPlane T)
-        (dominoReduction_computable S)) hdec
-  have hnonhalting : ComputablePred
-      (fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom) :=
-    hdomino.of_eq fun c => dominoReduction_correct hS c
-  exact ComputablePred.halting_problem 0
-    ((hnonhalting.not).of_eq fun _ => not_not)
+  exact target_undecidable_of_nonhalting_reduction
+    (fun T : TileSet => TilesPlane T)
+    (dominoReduction S) (dominoReduction_computable S)
+    (dominoReduction_correct hS)
 
 /-- Pointed full-plane form of the fixed universal TM0 instance. -/
 def pointedFixedDominoReduction (c : Code) : TileSet × WangTile :=
@@ -174,19 +175,10 @@ theorem encoded_domino_problem_undecidable_of_routed
     (realizes : RealizesRoutedPointedPlanes S)
     (forces : ForcesRoutedFixedCornerSquares S) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
-  intro hdec
-  have hencoded : ComputablePred
-      (fun c : Code =>
-        TilesPlane (decodeTileSet (routedDominoReductionCode S c))) :=
-    ComputablePred.computable_of_manyOneReducible
-      (ManyOneReducible.mk (fun n : Nat => TilesPlane (decodeTileSet n))
-        (routedDominoReductionCode_computable S)) hdec
-  have hnonhalting : ComputablePred
-      (fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom) :=
-    hencoded.of_eq fun c =>
-      routedDominoReductionCode_correct realizes forces c
-  exact ComputablePred.halting_problem 0
-    ((hnonhalting.not).of_eq fun _ => not_not)
+  exact target_undecidable_of_nonhalting_reduction
+    (fun n : Nat => TilesPlane (decodeTileSet n))
+    (routedDominoReductionCode S) (routedDominoReductionCode_computable S)
+    (routedDominoReductionCode_correct realizes forces)
 
 /-- Unencoded domino undecidability from a channel-aware routed scaffold. -/
 theorem domino_problem_undecidable_of_routed
@@ -194,17 +186,10 @@ theorem domino_problem_undecidable_of_routed
     (realizes : RealizesRoutedPointedPlanes S)
     (forces : ForcesRoutedFixedCornerSquares S) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
-  intro hdec
-  have hdomino : ComputablePred
-      (fun c : Code => TilesPlane (routedDominoReduction S c)) :=
-    ComputablePred.computable_of_manyOneReducible
-      (ManyOneReducible.mk (fun T : TileSet => TilesPlane T)
-        (routedDominoReduction_computable S)) hdec
-  have hnonhalting : ComputablePred
-      (fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom) :=
-    hdomino.of_eq fun c => routedDominoReduction_correct realizes forces c
-  exact ComputablePred.halting_problem 0
-    ((hnonhalting.not).of_eq fun _ => not_not)
+  exact target_undecidable_of_nonhalting_reduction
+    (fun T : TileSet => TilesPlane T)
+    (routedDominoReduction S) (routedDominoReduction_computable S)
+    (routedDominoReduction_correct realizes forces)
 
 end UniversalTM0Reduction
 
