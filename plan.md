@@ -1443,6 +1443,13 @@ form satisfies the local signal rules and makes the clear-rectangle geometry
 available to the carrier-coordinate proof without a `Classical.choice` or an
 opaque recursive path witness.
 
+The nearest-border form now carries an explicit signed interval coordinate.
+The origin is the cell immediately after the previous selected border.  Two
+consecutive clear edges force the intervening border to be absent, so the
+origin stays fixed and the coordinate increases by exactly one.  This is the
+one-dimensional compatibility fact needed to label horizontal and vertical
+carrier runs in the concrete square potentials.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply

@@ -223,6 +223,30 @@ def previousInterior (interior : Nat → Option Bool) : Nat → Option Bool
       | some positive => some positive
       | none => previousInterior interior position
 
+/-- Position of the last selected border strictly before an edge. -/
+def previousInteriorPosition (interior : Nat → Option Bool) : Nat → Option Nat
+  | 0 => none
+  | position + 1 =>
+      match interior position with
+      | some _ => some position
+      | none => previousInteriorPosition interior position
+
+/-- First cell coordinate after the last selected border before an edge. -/
+def intervalStart (interior : Nat → Option Bool) (position : Nat) : Nat :=
+  match previousInteriorPosition interior position with
+  | none => 0
+  | some previous => previous + 1
+
+@[simp] theorem intervalStart_succ_of_none
+    (interior : Nat → Option Bool) (position : Nat)
+    (hnone : interior position = none) :
+    intervalStart interior (position + 1) = intervalStart interior position := by
+  simp [intervalStart, previousInteriorPosition, hnone]
+
+/-- Signed coordinate of an edge inside its current selected-border interval. -/
+def intervalCoordinate (interior : Nat → Option Bool) (position : Nat) : Int :=
+  (position : Int) - intervalStart interior position
+
 /-- Orientation of the first selected border in a bounded suffix. -/
 def nextInterior (interior : Nat → Option Bool) : Nat → Nat → Option Bool
   | _, 0 => none
@@ -320,6 +344,45 @@ def intervalPath (interior : Nat → Option Bool) (length : Nat) :
                   | some next => cases next <;>
                       simp [flowAllowed, intervalEdge, hcurrent,
                         hprevious, hnext, hlength, previousInterior, nextInterior]
+
+/-- A selected border cannot have clear canonical signal edges on both sides. -/
+theorem interior_eq_none_of_adjacent_clear
+    (interior : Nat → Option Bool) {length position : Nat}
+    (hposition : position < length)
+    (hleft : intervalEdge interior length position = .none)
+    (hright : intervalEdge interior length (position + 1) = .none) :
+    interior position = none := by
+  have allowed := (intervalPath interior length).allowed position hposition
+  change flowAllowed (interior position)
+    (intervalEdge interior length position)
+    (intervalEdge interior length (position + 1)) = true at allowed
+  rw [hleft, hright] at allowed
+  cases hcurrent : interior position with
+  | none => rfl
+  | some current =>
+      cases current <;> simp [flowAllowed, hcurrent] at allowed
+
+/-- The selected-border interval origin is constant across a clear cell. -/
+theorem intervalStart_succ_of_adjacent_clear
+    (interior : Nat → Option Bool) {length position : Nat}
+    (hposition : position < length)
+    (hleft : intervalEdge interior length position = .none)
+    (hright : intervalEdge interior length (position + 1) = .none) :
+    intervalStart interior (position + 1) = intervalStart interior position := by
+  apply intervalStart_succ_of_none
+  exact interior_eq_none_of_adjacent_clear interior hposition hleft hright
+
+/-- Interval coordinates increase by one along a clear canonical signal run. -/
+theorem intervalCoordinate_succ_of_adjacent_clear
+    (interior : Nat → Option Bool) {length position : Nat}
+    (hposition : position < length)
+    (hleft : intervalEdge interior length position = .none)
+    (hright : intervalEdge interior length (position + 1) = .none) :
+    intervalCoordinate interior (position + 1) =
+      intervalCoordinate interior position + 1 := by
+  rw [intervalCoordinate, intervalCoordinate,
+    intervalStart_succ_of_adjacent_clear interior hposition hleft hright]
+  omega
 
 /-- Canonical obstruction path selected by the dynamic program. -/
 def canonicalPath (interior : Nat → Option Bool) (length : Nat) :
