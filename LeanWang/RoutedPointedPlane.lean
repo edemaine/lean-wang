@@ -51,6 +51,22 @@ def HasRoutedCombinedBoxLayerPatchesOfPointedPlanes
     ValidPlaneTiling T plane → (plane (0, 0)).1 = seed →
       ∀ r : Nat, Nonempty (RoutedCombinedBoxLayerPatch S T seed r)
 
+/-- Core-patch form of pointed full-plane realization. -/
+def HasRoutedCoreBoxLayerPatchesOfPointedPlanes
+    (S : RoutedScaffold) : Prop :=
+  ∀ (T : TileSet) (seed : WangTile)
+    (plane : Int × Int → TileIn T),
+    ValidPlaneTiling T plane → (plane (0, 0)).1 = seed →
+      ∀ r : Nat, Nonempty (RoutedCoreBoxLayerPatch S T seed r)
+
+theorem hasRoutedCombinedBoxLayerPatchesOfPointedPlanes_of_core
+    {S : RoutedScaffold}
+    (cores : HasRoutedCoreBoxLayerPatchesOfPointedPlanes S) :
+    HasRoutedCombinedBoxLayerPatchesOfPointedPlanes S := by
+  intro T seed plane valid seeded radius
+  rcases cores T seed plane valid seeded radius with ⟨core⟩
+  exact ⟨core.toRoutedCombinedBoxLayerPatch⟩
+
 /-- Pointed finite patches produce a combined plane by ordinary Wang
 compactness. -/
 theorem realizesRoutedPointedPlanes_of_combinedBoxLayerPatches
