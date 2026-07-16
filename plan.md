@@ -521,8 +521,11 @@ and the generic finite-input machine-to-Wang construction.
   Conversely, the ordering of owner and enclosing boundaries proves that two
   clear canonical edges can occur only in that owner's strict frame interior.
   Thus canonical adjacent-clear edges are exactly arithmetic carriers. The
-  next backward-realization lemma transports this equivalence to the actual
-  substitution rows and columns.
+  bounded-prefix congruence for nearest-border scans now transports this
+  equivalence to the actual substitution rows and columns, proving that every
+  concrete seed-supertiling role, with its corner bit erased, is exactly the
+  arithmetic hierarchy role. It remains to prove that concrete corner markers
+  have centered arithmetic address `(0, 0)`.
 
 ## Remaining scaffold proof
 
