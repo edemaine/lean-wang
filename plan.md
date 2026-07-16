@@ -1367,6 +1367,14 @@ and proves all mixed horizontal/vertical channel matches by reflexivity.  Its
 compactness endpoint directly.  Thus the remaining concrete theorem is
 `HasRoutedPointedCarrierPotentials ShadedSignals.routedScaffold`.
 
+The concrete construction can now remain in the substitution's natural finite
+square coordinates.  `RoutedPointedCarrierSquareLabeling.SquarePotential`
+mirrors the carrier obligation on `Fin n × Fin n`, is closed under southwest
+cropping, and converts a square of side `2 * r + 1` to the centered box of
+radius `r`.  Consequently it is enough to construct carrier-potential squares
+of cofinal side lengths; `realizesRoutedPointedPlanes_of_cofinalSquares` handles
+cropping, centered reindexing, and the generic compactness pipeline.
+
 The concrete corner role has been revised after an executable audit exposed
 that the old prepended southwest marker recurred at additional diagonal
 crossings. A second audit showed that marking all four candidate corrected
