@@ -1436,9 +1436,12 @@ square, and feed that data to the routed-core patch constructor.
 The three-endpoint induction is now also the executable path constructor.
 `ShadedSignalRectangle.pathFamily` maintains paths ending backward, not
 backward, and nonempty, and extends the appropriate witness at each selected
-border.  The supertile signal grid uses its canonical backward-ending path
-directly, so later carrier-coordinate proofs can unfold one fixed linear
-algorithm instead of reasoning about a `Classical.choice` of signal paths.
+border.  For the canonical supertile, `intervalPath` gives the equivalent
+nearest-border form directly: an edge is clear exactly when the next selected
+border closes an interval and the previous selected border does not.  This
+form satisfies the local signal rules and makes the clear-rectangle geometry
+available to the carrier-coordinate proof without a `Classical.choice` or an
+opaque recursive path witness.
 
 ### 3. Package and finish
 

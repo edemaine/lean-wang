@@ -215,10 +215,116 @@ def pathFamily (interior : Nat → Option Bool) :
             nonempty := previous.nonempty.snoc .backward allowedBackward
             nonempty_end := by simp }
 
+/-- Orientation of the last selected border strictly before an edge. -/
+def previousInterior (interior : Nat → Option Bool) : Nat → Option Bool
+  | 0 => none
+  | position + 1 =>
+      match interior position with
+      | some positive => some positive
+      | none => previousInterior interior position
+
+/-- Orientation of the first selected border in a bounded suffix. -/
+def nextInterior (interior : Nat → Option Bool) : Nat → Nat → Option Bool
+  | _, 0 => none
+  | position, fuel + 1 =>
+      match interior position with
+      | some positive => some positive
+      | none => nextInterior interior (position + 1) fuel
+
+/-- Canonical edge flow determined by the nearest selected borders.  The
+clear case is the interval after an opening border and before a closing one. -/
+def intervalEdge (interior : Nat → Option Bool) (length position : Nat) :
+    Signals.Flow :=
+  match nextInterior interior position (length - position) with
+  | none => .backward
+  | some false =>
+      if previousInterior interior position = some false then .forward else .none
+  | some true =>
+      if previousInterior interior position = some true then .backward else .forward
+
+@[simp] theorem intervalEdge_eq_none_iff
+    (interior : Nat → Option Bool) (length position : Nat) :
+    intervalEdge interior length position = .none ↔
+      nextInterior interior position (length - position) = some false ∧
+        previousInterior interior position ≠ some false := by
+  unfold intervalEdge
+  cases hnext : nextInterior interior position (length - position) with
+  | none => simp
+  | some next =>
+      cases next with
+      | false =>
+          cases hprevious : previousInterior interior position with
+          | none => simp
+          | some previous => cases previous <;> simp
+      | true =>
+          cases hprevious : previousInterior interior position with
+          | none => simp
+          | some previous => cases previous <;> simp
+
+/-- The nearest-border formula satisfies every one-dimensional local signal
+rule. -/
+def intervalPath (interior : Nat → Option Bool) (length : Nat) :
+    FlowPath interior length where
+  edge := intervalEdge interior length
+  allowed := by
+    intro position hposition
+    have hlength : length - position = (length - (position + 1)) + 1 := by
+      omega
+    cases hcurrent : interior position with
+    | none =>
+        have hprevious : previousInterior interior (position + 1) =
+            previousInterior interior position := by
+          simp [previousInterior, hcurrent]
+        have hnext : nextInterior interior position (length - position) =
+            nextInterior interior (position + 1) (length - (position + 1)) := by
+          rw [hlength]
+          simp [nextInterior, hcurrent]
+        simp [flowAllowed, intervalEdge, hprevious, hnext]
+    | some current =>
+        cases current with
+        | false =>
+            cases hprevious : previousInterior interior position with
+            | none =>
+                cases hnext : nextInterior interior (position + 1)
+                    (length - (position + 1)) with
+                | none => simp [flowAllowed, intervalEdge, hcurrent,
+                    hprevious, hnext, hlength, nextInterior]
+                | some next => cases next <;>
+                    simp [flowAllowed, intervalEdge, hcurrent,
+                      hprevious, hnext, hlength, previousInterior, nextInterior]
+            | some previous =>
+                cases previous <;>
+                  cases hnext : nextInterior interior (position + 1)
+                    (length - (position + 1)) with
+                  | none => simp [flowAllowed, intervalEdge, hcurrent,
+                      hprevious, hnext, hlength, nextInterior]
+                  | some next => cases next <;>
+                      simp [flowAllowed, intervalEdge, hcurrent,
+                        hprevious, hnext, hlength, previousInterior, nextInterior]
+        | true =>
+            cases hprevious : previousInterior interior position with
+            | none =>
+                cases hnext : nextInterior interior (position + 1)
+                    (length - (position + 1)) with
+                | none => simp [flowAllowed, intervalEdge, hcurrent,
+                    hprevious, hnext, hlength, nextInterior]
+                | some next => cases next <;>
+                    simp [flowAllowed, intervalEdge, hcurrent,
+                      hprevious, hnext, hlength, previousInterior, nextInterior]
+            | some previous =>
+                cases previous <;>
+                  cases hnext : nextInterior interior (position + 1)
+                    (length - (position + 1)) with
+                  | none => simp [flowAllowed, intervalEdge, hcurrent,
+                      hprevious, hnext, hlength, nextInterior]
+                  | some next => cases next <;>
+                      simp [flowAllowed, intervalEdge, hcurrent,
+                        hprevious, hnext, hlength, previousInterior, nextInterior]
+
 /-- Canonical obstruction path selected by the dynamic program. -/
 def canonicalPath (interior : Nat → Option Bool) (length : Nat) :
     FlowPath interior length :=
-  (pathFamily interior length).backward
+  intervalPath interior length
 
 /-- Every finite orientation sequence has paths ending in each of the three
 endpoint classes needed to extend across another selected border. -/
