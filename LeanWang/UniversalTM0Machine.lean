@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.MachineInputTiles
-import LeanWang.UniversalTM0TableauSemantics
+import LeanWang.UniversalTM0Folded
 
 /-!
 # A fixed one-sided machine for the universal TM0 evaluator
@@ -26,9 +26,9 @@ namespace UniversalTM0Machine
 
 open UniversalTM0Semantic
 
-abbrev Symbol := UniversalTM0Tableau.Symbol
-abbrev Label := UniversalTM0Tableau.Label
-abbrev Side := UniversalTM0Tableau.Side
+abbrev Symbol := UniversalTM0Folded.Symbol
+abbrev Label := UniversalTM0Folded.Label
+abbrev Side := UniversalTM0Folded.Side
 
 local instance : DecidableEq Symbol := Classical.decEq Symbol
 local instance : DecidableEq Label := Classical.decEq Label
@@ -63,13 +63,13 @@ end TapeSymbol
 
 def tapeSymbols : List TapeSymbol := do
   let atOrigin ← [false, true]
-  let left ← UniversalTM0Tableau.symbols
-  let right ← UniversalTM0Tableau.symbols
+  let left ← UniversalTM0Folded.symbols
+  let right ← UniversalTM0Folded.symbols
   pure ⟨atOrigin, left, right⟩
 
 theorem mem_tapeSymbols (symbol : TapeSymbol) : symbol ∈ tapeSymbols := by
   rcases symbol with ⟨atOrigin, left, right⟩
-  simp [tapeSymbols, UniversalTM0Tableau.mem_symbols]
+  simp [tapeSymbols, UniversalTM0Folded.mem_symbols]
 
 local instance : Encodable TapeSymbol :=
   Encodable.encodableOfList tapeSymbols mem_tapeSymbols
@@ -91,7 +91,7 @@ theorem mem_supportedLabels (q : SupportedLabel) : q ∈ supportedLabels := by
   simp [supportedLabels]
 
 def stateValues : List State :=
-  [.halt] ++ UniversalTM0Tableau.sides.flatMap fun side =>
+  [.halt] ++ UniversalTM0Folded.sides.flatMap fun side =>
     supportedLabels.flatMap fun q =>
       [.run side q, .returnBoundary side q, .returnRight side q]
 
@@ -99,7 +99,7 @@ theorem mem_stateValues (state : State) : state ∈ stateValues := by
   cases state with
   | halt => simp [stateValues]
   | run side q | returnBoundary side q | returnRight side q =>
-      simp [stateValues, UniversalTM0Tableau.mem_sides, mem_supportedLabels]
+      simp [stateValues, UniversalTM0Folded.mem_sides, mem_supportedLabels]
 
 local instance : Encodable State :=
   Encodable.encodableOfList stateValues mem_stateValues
@@ -149,7 +149,7 @@ def typedStep : State → TapeSymbol → TapeSymbol × State × Move
             (cell.write side symbol, .returnRight side next, .left)
       | some (q', .move dir) =>
           let next := supportedLabel q'
-          (cell, .run (UniversalTM0Tableau.nextSide side cell.atOrigin dir) next,
+          (cell, .run (UniversalTM0Folded.nextSide side cell.atOrigin dir) next,
             physicalMove side cell.atOrigin dir)
 
 def symbols : List Nat := tapeSymbols.map symbolCode
@@ -212,76 +212,77 @@ def sourceAt (source : List Symbol) (position : Nat) : Symbol :=
   source.getI position
 
 theorem symbolsAt_initial (source : List Symbol) (position : Nat) :
-    UniversalTM0Tableau.symbolsAt
-        (UniversalTM0Tableau.Config.initial source).source.Tape .right 0 position =
+    UniversalTM0Folded.symbolsAt
+        (UniversalTM0Folded.Config.initial source).source.Tape .right 0 position =
       (default, sourceAt source position) := by
   cases position with
   | zero =>
-      have hleft : UniversalTM0Tableau.sourceOffset .right 0
-          (UniversalTM0Tableau.leftAbs 0) = Int.negSucc 0 := by
-        simp [UniversalTM0Tableau.sourceOffset, UniversalTM0Tableau.activeAbs,
-          UniversalTM0Tableau.leftAbs, UniversalTM0Tableau.rightAbs]
-      have hright : UniversalTM0Tableau.sourceOffset .right 0
-          (UniversalTM0Tableau.rightAbs 0) = 0 := by
-        simp [UniversalTM0Tableau.sourceOffset, UniversalTM0Tableau.activeAbs,
-          UniversalTM0Tableau.rightAbs]
-      rw [UniversalTM0Tableau.symbolsAt, hleft, hright]
+      have hleft : UniversalTM0Folded.sourceOffset .right 0
+          (UniversalTM0Folded.leftAbs 0) = Int.negSucc 0 := by
+        simp [UniversalTM0Folded.sourceOffset, UniversalTM0Folded.activeAbs,
+          UniversalTM0Folded.leftAbs, UniversalTM0Folded.rightAbs]
+      have hright : UniversalTM0Folded.sourceOffset .right 0
+          (UniversalTM0Folded.rightAbs 0) = 0 := by
+        simp [UniversalTM0Folded.sourceOffset, UniversalTM0Folded.activeAbs,
+          UniversalTM0Folded.rightAbs]
+      rw [UniversalTM0Folded.symbolsAt, hleft, hright]
       have hget : source.headI = source.getI 0 :=
         (List.getI_zero_eq_headI (l := source)).symm
-      simp [UniversalTM0Tableau.Config.initial, Turing.TM0.init,
+      simp [UniversalTM0Folded.Config.initial, Turing.TM0.init,
         Turing.Tape.mk₁, Turing.Tape.mk₂, Turing.Tape.mk', Turing.Tape.nth,
         sourceAt, hget]
   | succ position =>
-      have hleft : UniversalTM0Tableau.sourceOffset .right 0
-          (UniversalTM0Tableau.leftAbs (position + 1)) =
+      have hleft : UniversalTM0Folded.sourceOffset .right 0
+          (UniversalTM0Folded.leftAbs (position + 1)) =
             Int.negSucc (position + 1) := by
-        simp [UniversalTM0Tableau.sourceOffset, UniversalTM0Tableau.activeAbs,
-          UniversalTM0Tableau.leftAbs, UniversalTM0Tableau.rightAbs]
+        simp [UniversalTM0Folded.sourceOffset, UniversalTM0Folded.activeAbs,
+          UniversalTM0Folded.leftAbs, UniversalTM0Folded.rightAbs]
         omega
-      have hright : UniversalTM0Tableau.sourceOffset .right 0
-          (UniversalTM0Tableau.rightAbs (position + 1)) =
+      have hright : UniversalTM0Folded.sourceOffset .right 0
+          (UniversalTM0Folded.rightAbs (position + 1)) =
             Int.ofNat (position + 1) := by
-        simp [UniversalTM0Tableau.sourceOffset, UniversalTM0Tableau.activeAbs,
-          UniversalTM0Tableau.rightAbs]
-      rw [UniversalTM0Tableau.symbolsAt, hleft, hright]
+        simp [UniversalTM0Folded.sourceOffset, UniversalTM0Folded.activeAbs,
+          UniversalTM0Folded.rightAbs]
+      rw [UniversalTM0Folded.symbolsAt, hleft, hright]
       have hget : source.tail.getI position = source.getI (position + 1) := by
         cases source <;> rfl
-      simp [UniversalTM0Tableau.Config.initial, Turing.TM0.init,
+      simp [UniversalTM0Folded.Config.initial, Turing.TM0.init,
         Turing.Tape.mk₁, Turing.Tape.mk₂, Turing.Tape.mk', Turing.Tape.nth,
         sourceAt, hget]
 
 /-- The folded target symbol represented by a semantic TM0 configuration. -/
-def foldedSymbol (config : UniversalTM0Tableau.Config) (position : Nat) : TapeSymbol :=
-  let cell := config.cellAt position
-  ⟨decide (position = 0), cell.left, cell.right⟩
+def foldedSymbol (config : UniversalTM0Folded.Config) (position : Nat) : TapeSymbol :=
+  let symbols := UniversalTM0Folded.symbolsAt
+    config.source.Tape config.side config.head position
+  ⟨decide (position = 0), symbols.1, symbols.2⟩
 
-abbrev ConfigSupported (config : UniversalTM0Tableau.Config) : Prop :=
+abbrev ConfigSupported (config : UniversalTM0Folded.Config) : Prop :=
   config.source.q ∈ tm0Support
 
 theorem foldedSymbol_initial (source : List Symbol) (position : Nat) :
-    foldedSymbol (UniversalTM0Tableau.Config.initial source) position =
+    foldedSymbol (UniversalTM0Folded.Config.initial source) position =
       ⟨decide (position = 0), default, sourceAt source position⟩ := by
   change TapeSymbol.mk (decide (position = 0))
-    (UniversalTM0Tableau.symbolsAt
-      (UniversalTM0Tableau.Config.initial source).source.Tape .right 0 position).1
-    (UniversalTM0Tableau.symbolsAt
-      (UniversalTM0Tableau.Config.initial source).source.Tape .right 0 position).2 = _
+    (UniversalTM0Folded.symbolsAt
+      (UniversalTM0Folded.Config.initial source).source.Tape .right 0 position).1
+    (UniversalTM0Folded.symbolsAt
+      (UniversalTM0Folded.Config.initial source).source.Tape .right 0 position).2 = _
   rw [symbolsAt_initial]
 
 /-- Encode a supported semantic TM0 configuration as a target machine ID. -/
-def toID (config : UniversalTM0Tableau.Config) (supported : ConfigSupported config) : ID where
+def toID (config : UniversalTM0Folded.Config) (supported : ConfigSupported config) : ID where
   tape := fun position => symbolCode (foldedSymbol config position)
   head := config.head
   state := stateCode (.run config.side ⟨config.source.q, supported⟩)
 
 theorem initialID_eq_toID (source : List Symbol) :
     MachineInput.initialID machine (input source) =
-      toID (UniversalTM0Tableau.Config.initial source) tm0_supports.1 := by
+      toID (UniversalTM0Folded.Config.initial source) tm0_supports.1 := by
   apply ID.ext
   · funext position
     change MachineInput.tape machine.blank (input source) position =
       symbolCode (foldedSymbol
-        (UniversalTM0Tableau.Config.initial source) position)
+        (UniversalTM0Folded.Config.initial source) position)
     rw [foldedSymbol_initial]
     cases position with
     | zero =>
@@ -293,59 +294,52 @@ theorem initialID_eq_toID (source : List Symbol) :
   · rfl
   · rfl
 
-@[simp] theorem toID_head (config : UniversalTM0Tableau.Config)
+@[simp] theorem toID_head (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) :
     (toID config supported).head = config.head := rfl
 
-@[simp] theorem toID_state (config : UniversalTM0Tableau.Config)
+@[simp] theorem toID_state (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) :
     (toID config supported).state =
       stateCode (.run config.side ⟨config.source.q, supported⟩) := rfl
 
-theorem foldedSymbol_active_head (config : UniversalTM0Tableau.Config) :
+theorem foldedSymbol_active_head (config : UniversalTM0Folded.Config) :
     (foldedSymbol config config.head).active config.side =
       config.source.Tape.head := by
-  have hactive :
-      (foldedSymbol config config.head).active config.side =
-        (config.cellAt config.head).activeSymbol config.side := by
-    cases hside : config.side <;>
-      simp [foldedSymbol, TapeSymbol.active,
-        UniversalTM0Tableau.Cell.activeSymbol]
-  exact hactive.trans (UniversalTM0Tableau.cellAt_activeSymbol config)
+  rcases config with ⟨source, side, head⟩
+  cases side <;>
+    simp [foldedSymbol, TapeSymbol.active, UniversalTM0Folded.symbolsAt]
 
-theorem foldedSymbol_afterMove (config : UniversalTM0Tableau.Config)
+theorem foldedSymbol_afterMove (config : UniversalTM0Folded.Config)
     (q' : Label) (dir : Turing.Dir) (position : Nat) :
     foldedSymbol (config.afterMove q' dir) position =
       foldedSymbol config position := by
-  rw [foldedSymbol, foldedSymbol,
-    UniversalTM0Tableau.Config.cellAt_afterMove]
-  cases hcell : config.cellAt position
-  simp [UniversalTM0Tableau.Cell.withHead]
+  simp only [foldedSymbol, UniversalTM0Folded.Config.afterMove]
+  rw [UniversalTM0Folded.symbolsAt_move]
 
-theorem foldedSymbol_afterWrite (config : UniversalTM0Tableau.Config)
+theorem foldedSymbol_afterWrite (config : UniversalTM0Folded.Config)
     (q' : Label) (symbol : Symbol) (position : Nat) :
     foldedSymbol (config.afterWrite q' symbol) position =
       if position = config.head then
         (foldedSymbol config position).write config.side symbol
       else foldedSymbol config position := by
-  rw [foldedSymbol, foldedSymbol,
-    UniversalTM0Tableau.Config.cellAt_afterWrite]
   by_cases hposition : position = config.head
-  · rw [if_pos hposition, if_pos hposition]
-    cases hcell : config.cellAt position
-    cases config.side <;>
-      simp [TapeSymbol.write, UniversalTM0Tableau.Cell.writeActive,
-        UniversalTM0Tableau.Cell.withHead]
-  · rw [if_neg hposition, if_neg hposition]
+  · subst position
+    simp only [foldedSymbol, UniversalTM0Folded.Config.afterWrite, if_pos]
+    rw [UniversalTM0Folded.symbolsAt_write_active]
+    cases config.side <;> rfl
+  · simp only [foldedSymbol, UniversalTM0Folded.Config.afterWrite,
+      if_neg hposition]
+    rw [UniversalTM0Folded.symbolsAt_write_inactive _ _ _ hposition]
 
 theorem physicalMove_apply (side : Side) (head : Nat) (dir : Turing.Dir) :
     (physicalMove side (decide (head = 0)) dir).apply head =
-      UniversalTM0Tableau.moveHead side (decide (head = 0)) head dir := by
+      UniversalTM0Folded.moveHead side (decide (head = 0)) head dir := by
   cases side <;> cases dir <;> by_cases hhead : head = 0 <;>
     subst_vars <;>
-    simp_all [physicalMove, UniversalTM0Tableau.moveHead,
-      UniversalTM0Tableau.Side.isInward,
-      UniversalTM0Tableau.Side.isOutward, Move.apply]
+    simp_all [physicalMove, UniversalTM0Folded.moveHead,
+      UniversalTM0Folded.Side.isInward,
+      UniversalTM0Folded.Side.isOutward, Move.apply]
 
 theorem stateCode_run_ne_halt (side : Side) (q : SupportedLabel) :
     stateCode (.run side q) ≠ stateCode .halt := by
@@ -353,7 +347,7 @@ theorem stateCode_run_ne_halt (side : Side) (q : SupportedLabel) :
   have := Encodable.encode_injective h
   cases this
 
-theorem toID_state_ne_halt (config : UniversalTM0Tableau.Config)
+theorem toID_state_ne_halt (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) :
     (toID config supported).state ≠ machine.halt := by
   exact stateCode_run_ne_halt _ _
@@ -375,12 +369,12 @@ theorem typedStep_run_move (side : Side) (q : SupportedLabel)
     (hstep : tm0 q.1 (cell.active side) = some (q', .move dir)) :
     typedStep (.run side q) cell =
       (cell,
-        .run (UniversalTM0Tableau.nextSide side cell.atOrigin dir)
+        .run (UniversalTM0Folded.nextSide side cell.atOrigin dir)
           (supportedLabel q'),
         physicalMove side cell.atOrigin dir) := by
   simp [typedStep, hstep]
 
-theorem typedStep_folded_move (config : UniversalTM0Tableau.Config)
+theorem typedStep_folded_move (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) (q' : Label) (dir : Turing.Dir)
     (hstep : tm0 config.source.q config.source.Tape.head =
       some (q', .move dir))
@@ -388,7 +382,7 @@ theorem typedStep_folded_move (config : UniversalTM0Tableau.Config)
     typedStep (.run config.side ⟨config.source.q, supported⟩)
         (foldedSymbol config config.head) =
       (foldedSymbol config config.head,
-        .run (UniversalTM0Tableau.nextSide config.side
+        .run (UniversalTM0Folded.nextSide config.side
           (decide (config.head = 0)) dir) ⟨q', nextSupported⟩,
         physicalMove config.side (decide (config.head = 0)) dir) := by
   have hstep' : tm0 config.source.q
@@ -403,7 +397,7 @@ theorem typedStep_folded_move (config : UniversalTM0Tableau.Config)
       (tm0_supports.2 (by rw [hstep]; rfl) supported)
   simp [foldedSymbol, hsupported]
 
-theorem nextID_toID_move (config : UniversalTM0Tableau.Config)
+theorem nextID_toID_move (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) (q' : Label) (dir : Turing.Dir)
     (hstep : tm0 config.source.q config.source.Tape.head =
       some (q', .move dir))
@@ -420,9 +414,9 @@ theorem nextID_toID_move (config : UniversalTM0Tableau.Config)
       simp [foldedSymbol_afterMove]
     · simp [foldedSymbol_afterMove, hposition]
   · simp [toID, machine_step_code, htyped, physicalMove_apply,
-      UniversalTM0Tableau.Config.afterMove]
+      UniversalTM0Folded.Config.afterMove]
   · simp [toID, machine_step_code, htyped,
-      UniversalTM0Tableau.Config.afterMove]
+      UniversalTM0Folded.Config.afterMove]
 
 theorem typedStep_run_write (side : Side) (q : SupportedLabel)
     (cell : TapeSymbol) (q' : Label) (symbol : Symbol)
@@ -437,7 +431,7 @@ theorem typedStep_run_write (side : Side) (q : SupportedLabel)
   simp [typedStep, hstep]
 
 /-- The intermediate target configuration used to simulate a TM0 write. -/
-def writeReturnID (config : UniversalTM0Tableau.Config)
+def writeReturnID (config : UniversalTM0Folded.Config)
     (q' : Label) (symbol : Symbol) : ID where
   tape := fun position =>
     symbolCode (foldedSymbol (config.afterWrite q' symbol) position)
@@ -446,7 +440,7 @@ def writeReturnID (config : UniversalTM0Tableau.Config)
     .returnBoundary config.side (supportedLabel q')
   else .returnRight config.side (supportedLabel q'))
 
-theorem nextID_toID_write_first (config : UniversalTM0Tableau.Config)
+theorem nextID_toID_write_first (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) (q' : Label) (symbol : Symbol)
     (hstep : tm0 config.source.q config.source.Tape.head =
       some (q', .write symbol)) :
@@ -481,7 +475,7 @@ theorem nextID_toID_write_first (config : UniversalTM0Tableau.Config)
     by_cases hhead : config.head = 0 <;>
       simp [writeReturnID, foldedSymbol, hhead]
 
-theorem writeReturnID_state_ne_halt (config : UniversalTM0Tableau.Config)
+theorem writeReturnID_state_ne_halt (config : UniversalTM0Folded.Config)
     (q' : Label) (symbol : Symbol) :
     (writeReturnID config q' symbol).state ≠ machine.halt := by
   by_cases hhead : config.head = 0
@@ -490,7 +484,7 @@ theorem writeReturnID_state_ne_halt (config : UniversalTM0Tableau.Config)
   · simpa [writeReturnID, hhead] using
       stateCode_returnRight_ne_halt config.side (supportedLabel q')
 
-theorem nextID_writeReturnID (config : UniversalTM0Tableau.Config)
+theorem nextID_writeReturnID (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) (q' : Label) (symbol : Symbol)
     (hstep : tm0 config.source.q config.source.Tape.head =
       some (q', .write symbol))
@@ -513,15 +507,15 @@ theorem nextID_writeReturnID (config : UniversalTM0Tableau.Config)
       rfl
   · by_cases hhead : config.head = 0
     · simp [writeReturnID, toID, machine_step_code, typedStep, hhead,
-        Move.apply, UniversalTM0Tableau.Config.afterWrite]
+        Move.apply, UniversalTM0Folded.Config.afterWrite]
     · simp [writeReturnID, toID, machine_step_code, typedStep, hhead,
-        Move.apply, UniversalTM0Tableau.Config.afterWrite]
+        Move.apply, UniversalTM0Folded.Config.afterWrite]
       omega
   · by_cases hhead : config.head = 0 <;>
       simp [writeReturnID, toID, machine_step_code, typedStep, hhead, hsupported,
-        UniversalTM0Tableau.Config.afterWrite]
+        UniversalTM0Folded.Config.afterWrite]
 
-theorem nextID_nextID_toID_write (config : UniversalTM0Tableau.Config)
+theorem nextID_nextID_toID_write (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) (q' : Label) (symbol : Symbol)
     (hstep : tm0 config.source.q config.source.Tape.head =
       some (q', .write symbol))
@@ -536,7 +530,7 @@ theorem typedStep_run_none (side : Side) (q : SupportedLabel)
     typedStep (.run side q) cell = (cell, .halt, .left) := by
   simp [typedStep, hstep]
 
-theorem nextID_toID_state_halt (config : UniversalTM0Tableau.Config)
+theorem nextID_toID_state_halt (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config)
     (hstep : tm0 config.source.q config.source.Tape.head = none) :
     (machine.nextID (toID config supported)).state = machine.halt := by
@@ -555,17 +549,17 @@ theorem nextID_toID_state_halt (config : UniversalTM0Tableau.Config)
   rfl
 
 /-- A source configuration corresponds to its folded target configuration. -/
-def Corresponds (config : UniversalTM0Tableau.Config) (id : ID) : Prop :=
+def Corresponds (config : UniversalTM0Folded.Config) (id : ID) : Prop :=
   ∃ supported : ConfigSupported config, toID config supported = id
 
 theorem configStep_respects_transition :
-    StateTransition.Respects UniversalTM0Tableau.Config.step
+    StateTransition.Respects UniversalTM0Folded.Config.step
       (MachineInput.transition machine) Corresponds := by
   intro config id hcorresponds
   rcases hcorresponds with ⟨supported, rfl⟩
   cases hstep : tm0 config.source.q config.source.Tape.head with
   | none =>
-      simp only [UniversalTM0Tableau.Config.step, hstep]
+      simp only [UniversalTM0Folded.Config.step, hstep]
       apply (MachineInput.transition_eq_none_iff machine _).2
       exact nextID_toID_state_halt config supported hstep
   | some result =>
@@ -574,7 +568,7 @@ theorem configStep_respects_transition :
         tm0_supports.2 (by rw [hstep]; rfl) supported
       cases stmt with
       | move dir =>
-          simp only [UniversalTM0Tableau.Config.step, hstep]
+          simp only [UniversalTM0Folded.Config.step, hstep]
           refine ⟨toID (config.afterMove q' dir) nextSupported,
             ⟨nextSupported, rfl⟩, ?_⟩
           apply Relation.TransGen.single
@@ -585,7 +579,7 @@ theorem configStep_respects_transition :
           rw [hnext, if_neg hne]
           rfl
       | write symbol =>
-          simp only [UniversalTM0Tableau.Config.step, hstep]
+          simp only [UniversalTM0Folded.Config.step, hstep]
           refine ⟨toID (config.afterWrite q' symbol) nextSupported,
             ⟨nextSupported, rfl⟩, ?_⟩
           apply Relation.TransGen.tail
@@ -606,18 +600,18 @@ theorem configStep_respects_transition :
             rfl
 
 /-- Forget the folding coordinates and retain the underlying TM0 configuration. -/
-def Projects (config : UniversalTM0Tableau.Config)
+def Projects (config : UniversalTM0Folded.Config)
     (source : Turing.TM0.Cfg Symbol Label) : Prop :=
   config.source = source
 
 theorem configStep_respects_tm0Step :
-    StateTransition.Respects UniversalTM0Tableau.Config.step
+    StateTransition.Respects UniversalTM0Folded.Config.step
       (Turing.TM0.step tm0) Projects := by
   intro config source hprojects
   subst source
   cases hstep : tm0 config.source.q config.source.Tape.head with
   | none =>
-      simp only [UniversalTM0Tableau.Config.step, hstep]
+      simp only [UniversalTM0Folded.Config.step, hstep]
       simp [Turing.TM0.step, hstep]
   | some result =>
       rcases result with ⟨q', stmt⟩
@@ -625,31 +619,31 @@ theorem configStep_respects_tm0Step :
       | move dir =>
           let next := config.afterMove q' dir
           have hconfig : config.step = some next := by
-            simp [UniversalTM0Tableau.Config.step, hstep, next]
+            simp [UniversalTM0Folded.Config.step, hstep, next]
           simp only [hconfig]
           refine ⟨next.source, rfl, Relation.TransGen.single ?_⟩
-          exact UniversalTM0Tableau.Config.step_source hconfig
+          exact UniversalTM0Folded.Config.step_source hconfig
       | write symbol =>
           let next := config.afterWrite q' symbol
           have hconfig : config.step = some next := by
-            simp [UniversalTM0Tableau.Config.step, hstep, next]
+            simp [UniversalTM0Folded.Config.step, hstep, next]
           simp only [hconfig]
           refine ⟨next.source, rfl, Relation.TransGen.single ?_⟩
-          exact UniversalTM0Tableau.Config.step_source hconfig
+          exact UniversalTM0Folded.Config.step_source hconfig
 
 theorem tm0Step_eval_dom_iff_configStep_eval_dom (source : List Symbol) :
     (StateTransition.eval (Turing.TM0.step tm0)
       (Turing.TM0.init source)).Dom ↔
-    (StateTransition.eval UniversalTM0Tableau.Config.step
-      (UniversalTM0Tableau.Config.initial source)).Dom := by
+    (StateTransition.eval UniversalTM0Folded.Config.step
+      (UniversalTM0Folded.Config.initial source)).Dom := by
   apply StateTransition.tr_eval_dom configStep_respects_tm0Step
   rfl
 
 theorem transition_eval_dom_iff_configStep_eval_dom (source : List Symbol) :
     (StateTransition.eval (MachineInput.transition machine)
       (MachineInput.initialID machine (input source))).Dom ↔
-    (StateTransition.eval UniversalTM0Tableau.Config.step
-      (UniversalTM0Tableau.Config.initial source)).Dom := by
+    (StateTransition.eval UniversalTM0Folded.Config.step
+      (UniversalTM0Folded.Config.initial source)).Dom := by
   apply StateTransition.tr_eval_dom configStep_respects_transition
   exact ⟨tm0_supports.1, (initialID_eq_toID source).symm⟩
 
@@ -669,8 +663,8 @@ theorem halts_iff_tm0_eval_dom (source : List Symbol) :
         (StateTransition.eval (MachineInput.transition machine)
           (MachineInput.initialID machine (input source))).Dom :=
       (MachineInput.transition_eval_dom_iff_halts machine (input source)).symm
-    _ ↔ (StateTransition.eval UniversalTM0Tableau.Config.step
-          (UniversalTM0Tableau.Config.initial source)).Dom :=
+    _ ↔ (StateTransition.eval UniversalTM0Folded.Config.step
+          (UniversalTM0Folded.Config.initial source)).Dom :=
       transition_eval_dom_iff_configStep_eval_dom source
     _ ↔ (StateTransition.eval (Turing.TM0.step tm0)
           (Turing.TM0.init source)).Dom :=

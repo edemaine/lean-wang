@@ -378,8 +378,8 @@ A finite transition-table presentation of the concrete machine model.
 
 This finite transition-table presentation is retained as generic infrastructure
 for the Wang history-tile construction. The final undecidability reduction does
-not compile into this model: it gives one fixed Mathlib TM0 machine directly to
-the folded tableau in `UniversalTM0Tableau`.
+not compile into this model: `UniversalTM0Machine` defines one fixed `Machine`
+directly and gives it to the input-parameterized Wang construction.
 -/
 structure TableMachine where
   symbols : List Nat

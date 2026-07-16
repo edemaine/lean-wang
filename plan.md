@@ -37,10 +37,11 @@ argument.
 `UniversalTM0Semantic` applies Mathlib's `ToPartrec.Code.exists_code` directly
 to the universal partial function, relabels that one fixed evaluator, carries
 Mathlib's native finite supports through TM2, TM1, and TM0, and proves the
-varying binary input primitive recursive. The direct tableau folds the
-two-sided tape into paired cells and applies the fixed TM0 instruction set as a
-radius-one local rule. No extra Post machine, table program, source compiler,
-or descriptor decoder occurs in the retained reduction.
+varying binary input primitive recursive. `UniversalTM0Machine` folds the
+two-sided tape into paired symbols of one fixed one-sided `Machine`, which is
+then passed to the generic `MachineInputTiles` theorem. No extra Post machine,
+table program, source compiler, descriptor decoder, or bespoke Wang decoder
+occurs in the retained reduction.
 
 1. `UniversalCode.universalEval` evaluates a supplied encoded
    `Nat.Partrec.Code` and input.
@@ -49,16 +50,15 @@ or descriptor decoder occurs in the retained reduction.
    finite-support TM2-to-TM1-to-TM0 transformations.
 3. `UniversalTM0Semantic.input c` writes `Nat.pair (encode c) 0` as the varying
    initial tape. Its construction is computable.
-4. `UniversalTM0TableauCells` and `UniversalTM0TableauDynamics` define the
-   finite paired-cell alphabet and its deterministic radius-one update.
-5. `UniversalTM0TableauInitial` forces the input in a position-tagged bottom
-   Wang row followed by one self-looping blank-tail tile.
-6. `UniversalTM0TableauDecode` proves that every seeded tiling is the unique
-   nonhalting TM0 history; together with the forward history construction this
-   gives the exact seeded quarter-plane equivalence.
-7. `UniversalTM0TableauData` computes the finite tile list and seed, so the
-   resulting Wang instance tiles exactly when
-   `Nat.Partrec.Code.eval c 0` is undefined.
+4. `UniversalTM0Folded` defines the paired coordinates `-(i + 1), i` and the
+   source configuration bookkeeping.
+5. `UniversalTM0Machine` defines one fixed one-sided machine. A TM0 move takes
+   one target step; a TM0 write takes two. Refinement in both directions proves
+   exact halting equivalence.
+6. `MachineInputTiles.tilesQuarterWithSeed_iff_not_halts` supplies the complete
+   Wang-history construction and decoder for this fixed machine and input.
+7. `UniversalTM0MachineData` computes the finite bottom-row tile list and seed;
+   normal history tiles are constant because the machine is fixed.
 8. `UniversalTM0Reduction` exposes that construction to the existing
    scaffold reductions.
 9. The direct `IsRoutedScaffold` reduction preserves the horizontal and
@@ -70,8 +70,9 @@ There is no remaining source-uniform compiler, descriptor decoder, generated
 position-row obligation, code-parametric support-list construction, or
 input-specific machine control in the final reduction. More than one hundred
 thousand lines of the obsolete route have been deleted. The retained fixed-TM0
-tableau consists only of native finite supports, the folded alphabet and tape
-geometry, direct semantic transition rows, and their step/halting simulation.
+route consists only of native finite supports, folded tape geometry, the fixed
+one-sided simulator and its halting proof, and the generic finite-input
+machine-to-Wang construction.
 
 ## Completed general tiling infrastructure
 

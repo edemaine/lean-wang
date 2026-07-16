@@ -15,8 +15,8 @@ The machine side is complete. It uses one fixed universal Mathlib TM0 machine:
 ```text
 Nat.Partrec.Code c
   -> encode c on the initial tape of one fixed universal TM0 machine
-  -> fold the TM0 tape into paired one-sided tableau cells
-  -> force the finite input directly on the bottom Wang row
+  -> simulate it by one fixed folded one-sided machine
+  -> apply the generic finite-input Wang history construction
   -> combine with any certified Robinson scaffold
 ```
 
@@ -24,7 +24,7 @@ Only the finite initial tape depends on `c`; the machine control and simulation
 rows are fixed. This avoids the obsolete source-dependent compiler/decoder
 route entirely. The generated initializer, position-code compiler, and their
 correctness modules have been removed from the repository; the retained proof
-constructs the fixed semantic transition rows directly.
+uses the generic machine-to-Wang theorem directly.
 
 The public theorem surface is [`LeanWang.Final`](LeanWang/Final.lean):
 
@@ -49,9 +49,11 @@ proof task.
   `LeanWang.UniversalTM0Semantic` uses Mathlib's completeness theorem to choose
   one evaluator code directly, carries its finite supports through TM2, TM1,
   and TM0, and places the source code on its initial tape.
-- `LeanWang.UniversalTM0Tableau*` folds the two-sided TM0 tape into paired
-  cells, proves the radius-one Wang history construction in both directions,
-  and computes the finite bottom-row tile list and seed.
+- `LeanWang.UniversalTM0Folded` defines the paired coordinates for the
+  two-sided TM0 tape. `LeanWang.UniversalTM0Machine` simulates each TM0 move in
+  one target step and each write in two, and proves exact halting equivalence.
+- `LeanWang.UniversalTM0MachineData` computes the input-dependent bottom-row
+  tiles and seed; all normal history tiles are fixed constants.
 - `LeanWang.UniversalTM0Reduction` proves the fixed-corner and plane-tiling
   reductions and derives undecidability from Mathlib's halting problem.
 - `LeanWang.OllingerRobinsonScaffold` defines the abstract scaffold certificate.

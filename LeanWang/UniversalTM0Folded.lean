@@ -3,22 +3,58 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.UniversalTM0TableauDynamics
+import LeanWang.UniversalTM0Semantic
 
 /-!
-# Semantic folded rows for the direct TM0 tableau
+# Folded coordinates for the fixed universal TM0 machine
+
+A two-sided TM0 tape is represented on a one-sided tape by pairing source
+positions `-(i + 1)` and `i` at target position `i`.  This module contains only
+the coordinate bookkeeping and source semantics used by the fixed-machine
+simulation.
 -/
 
 noncomputable section
 
 namespace LeanWang
-namespace UniversalTM0Tableau
+namespace UniversalTM0Folded
 
 open UniversalTM0Semantic
 
-def rightAbs (i : Nat) : Int := i
+abbrev Symbol := Turing.TM2to1.Γ' Stack StackSymbol
+abbrev Label := Turing.TM1to0.Λ' tm1
 
-def leftAbs (i : Nat) : Int := -((i : Int) + 1)
+private instance : DecidableEq Symbol := Classical.decEq Symbol
+
+def symbols : List Symbol := Finset.univ.toList
+
+theorem mem_symbols (symbol : Symbol) : symbol ∈ symbols := by
+  simp [symbols]
+
+inductive Side where
+  | left
+  | right
+deriving DecidableEq, Repr
+
+def sides : List Side := [.left, .right]
+
+theorem mem_sides (side : Side) : side ∈ sides := by
+  cases side <;> simp [sides]
+
+def Side.opposite : Side → Side
+  | .left => .right
+  | .right => .left
+
+def Side.isOutward : Side → Turing.Dir → Bool
+  | .left, .left | .right, .right => true
+  | _, _ => false
+
+def Side.isInward (side : Side) (dir : Turing.Dir) : Bool :=
+  !(side.isOutward dir)
+
+def rightAbs (position : Nat) : Int := position
+
+def leftAbs (position : Nat) : Int := -((position : Int) + 1)
 
 def activeAbs : Side → Nat → Int
   | .right, head => rightAbs head
@@ -35,24 +71,6 @@ def moveHead (side : Side) (atOrigin : Bool) (head : Nat)
   if atOrigin && side.isInward dir then head
   else if side.isOutward dir then head + 1
   else head.pred
-
-theorem nextSide_of_head_ne_zero (side : Side) {head : Nat}
-    (hhead : head ≠ 0) (dir : Turing.Dir) :
-    nextSide side (decide (head = 0)) dir = side := by
-  simp [nextSide, hhead]
-
-theorem moveHead_eq_zero_iff_of_head_ne_zero (side : Side) {head : Nat}
-    (hhead : head ≠ 0) (dir : Turing.Dir) :
-    moveHead side (decide (head = 0)) head dir = 0 ↔
-      side.isInward dir ∧ head = 1 := by
-  cases side <;> cases dir <;>
-    simp [moveHead, Side.isInward, Side.isOutward, hhead] <;> omega
-
-theorem zero_eq_moveHead_iff_of_head_ne_zero (side : Side) {head : Nat}
-    (hhead : head ≠ 0) (dir : Turing.Dir) :
-    0 = moveHead side (decide (head = 0)) head dir ↔
-      side.isInward dir ∧ head = 1 := by
-  rw [eq_comm, moveHead_eq_zero_iff_of_head_ne_zero side hhead dir]
 
 structure Config where
   source : Turing.TM0.Cfg Symbol Label
@@ -85,17 +103,6 @@ def symbolsAt (tape : Turing.Tape Symbol) (side : Side)
   (tape.nth (sourceOffset side head (leftAbs position)),
     tape.nth (sourceOffset side head (rightAbs position)))
 
-def Config.cellAt (config : Config) (position : Nat) : Cell :=
-  let symbols := symbolsAt config.source.Tape config.side config.head position
-  { left := symbols.1
-    right := symbols.2
-    head := if position = config.head then some (config.side, config.source.q) else none }
-
-def Config.cellAtLeft (config : Config) (position : Nat) : Cell :=
-  match position with
-  | 0 => blankCell
-  | position + 1 => config.cellAt position
-
 @[simp] theorem sourceOffset_right_head (head : Nat) :
     sourceOffset .right head (rightAbs head) = 0 := by
   simp [sourceOffset, activeAbs, rightAbs]
@@ -103,29 +110,6 @@ def Config.cellAtLeft (config : Config) (position : Nat) : Cell :=
 @[simp] theorem sourceOffset_left_head (head : Nat) :
     sourceOffset .left head (leftAbs head) = 0 := by
   simp [sourceOffset, activeAbs, leftAbs]
-
-theorem cellAt_activeSymbol (config : Config) :
-    (config.cellAt config.head).activeSymbol config.side = config.source.Tape.head := by
-  rcases config with ⟨source, side, head⟩
-  cases side <;> simp [Config.cellAt, symbolsAt, Cell.activeSymbol]
-
-@[simp] theorem cellAt_head (config : Config) :
-    (config.cellAt config.head).head = some (config.side, config.source.q) := by
-  simp [Config.cellAt]
-
-theorem cellAt_head_eq_none {config : Config} {position : Nat}
-    (h : position ≠ config.head) : (config.cellAt position).head = none := by
-  simp [Config.cellAt, h]
-
-theorem cellAt_withHead_none_of_ne {config : Config} {position : Nat}
-    (h : position ≠ config.head) :
-    (config.cellAt position).withHead none = config.cellAt position := by
-  cases hcell : config.cellAt position with
-  | mk left right head =>
-      have hhead : head = none := by
-        simpa [hcell] using cellAt_head_eq_none h
-      subst head
-      rfl
 
 theorem activeAbs_moveHead (side : Side) (head : Nat) (dir : Turing.Dir) :
     activeAbs (nextSide side (decide (head = 0)) dir)
@@ -201,32 +185,6 @@ theorem symbolsAt_write_active (tape : Turing.Tape Symbol) (side : Side)
         if_pos, Prod.mk.injEq, and_true]
       rw [if_neg (sourceOffset_right_left_head_ne_zero head)]
 
-theorem Config.cellAt_afterWrite (config : Config) (q' : Label)
-    (symbol : Symbol) (position : Nat) :
-    (config.afterWrite q' symbol).cellAt position =
-      if position = config.head then
-        ((config.cellAt position).writeActive config.side symbol).withHead
-          (some (config.side, q'))
-      else config.cellAt position := by
-  by_cases hposition : position = config.head
-  · subst position
-    simp only [if_pos, Config.cellAt, Config.afterWrite]
-    rw [symbolsAt_write_active]
-    cases config.side <;> rfl
-  · simp only [if_neg hposition, Config.cellAt, Config.afterWrite]
-    rw [symbolsAt_write_inactive _ _ _ hposition]
-
-theorem Config.cellAt_afterMove (config : Config) (q' : Label)
-    (dir : Turing.Dir) (position : Nat) :
-    (config.afterMove q' dir).cellAt position =
-      (config.cellAt position).withHead
-        (if position = moveHead config.side (decide (config.head = 0)) config.head dir then
-          some (nextSide config.side (decide (config.head = 0)) dir, q')
-        else none) := by
-  unfold Config.cellAt Config.afterMove
-  rw [symbolsAt_move]
-  rfl
-
 theorem Config.step_source {config next : Config}
     (hstep : config.step = some next) :
     Turing.TM0.step tm0 config.source = some next.source := by
@@ -238,5 +196,5 @@ theorem Config.step_source {config next : Config}
       cases stmt <;> simp [hm] at hstep <;> cases hstep <;>
         simp [Turing.TM0.step, Config.afterWrite, Config.afterMove, hm]
 
-end UniversalTM0Tableau
+end UniversalTM0Folded
 end LeanWang

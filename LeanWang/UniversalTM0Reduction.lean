@@ -6,15 +6,16 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinsonScaffold
 import LeanWang.RoutedPointedPlane
 import LeanWang.Theorems
-import LeanWang.UniversalTM0TableauData
+import LeanWang.UniversalTM0MachineData
 import Mathlib.Computability.Reduce
 
 /-!
-# Direct-input fixed-universal-machine Wang reduction
+# Fixed-universal-machine Wang reduction
 
-The simulation control and all normal simulation rows are constants. A source
-code changes only the finite input word forced directly along the bottom Wang
-row; no machine initializer writes or rewinds that input.
+The two-sided universal TM0 evaluator is simulated by one fixed one-sided
+machine.  The generic `MachineInputTiles` construction then turns that machine
+and a finite input into Wang tiles.  The simulation control and all normal
+rows are constants; a source code changes only the bottom-row input data.
 
 Compared with the old source-program route, no theorem here needs to decode a
 dependent `Turing.ToPartrec.Code` statement or prove that such a decoder is
@@ -32,19 +33,27 @@ open Nat.Partrec (Code)
 
 /-- Fixed-corner Wang instance with the source input forced on its bottom row. -/
 def fixedDominoReduction (c : Code) : TileSet × WangTile :=
-  UniversalTM0Tableau.fixedDominoData (UniversalTM0Semantic.input c)
+  UniversalTM0Machine.fixedDominoData (UniversalTM0Semantic.input c)
 
 theorem fixedDominoReduction_computable : Computable fixedDominoReduction := by
-  exact UniversalTM0Tableau.fixedDominoData_computable.comp
+  exact UniversalTM0Machine.fixedDominoData_computable.comp
     UniversalTM0Semantic.input_computable
 
 theorem fixedDominoReduction_correct (c : Code) :
     TilesQuarterWithSeed (fixedDominoReduction c).1
         (fixedDominoReduction c).2 ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  exact (UniversalTM0Tableau.tilesQuarterWithSeed_iff_not_dom
-    (UniversalTM0Semantic.input c)).trans
-      (not_congr (UniversalTM0Semantic.tm0_eval_dom_iff c))
+  change TilesQuarterWithSeed
+      (MachineInputTiles.tiles UniversalTM0Machine.machine
+        (UniversalTM0Machine.input (UniversalTM0Semantic.input c)))
+      (MachineInputTiles.seed UniversalTM0Machine.machine
+        (UniversalTM0Machine.input (UniversalTM0Semantic.input c))) ↔ _
+  exact (MachineInputTiles.tilesQuarterWithSeed_iff_not_halts
+    (UniversalTM0Machine.input_supported
+      (UniversalTM0Semantic.input c))).trans
+    (not_congr ((UniversalTM0Machine.halts_iff_tm0_eval_dom
+      (UniversalTM0Semantic.input c)).trans
+        (UniversalTM0Semantic.tm0_eval_dom_iff c)))
 
 /-- Plane-tiling instance after applying any proved scaffold. -/
 def dominoReduction (S : Scaffold) (c : Code) : TileSet :=
