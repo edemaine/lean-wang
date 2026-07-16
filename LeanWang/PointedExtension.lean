@@ -33,6 +33,25 @@ deriving DecidableEq, Repr
 
 namespace AxisClass
 
+def toCode : AxisClass → Option Bool
+  | .negative => none
+  | .origin => some false
+  | .positive => some true
+
+def ofCode : Option Bool → AxisClass
+  | none => .negative
+  | some false => .origin
+  | some true => .positive
+
+def equivCode : AxisClass ≃ Option Bool where
+  toFun := toCode
+  invFun := ofCode
+  left_inv := by intro axis; cases axis <;> rfl
+  right_inv := by intro code; rcases code with _ | value <;> cases value <;> rfl
+
+instance instPrimcodable : Primcodable AxisClass :=
+  Primcodable.ofEquiv (Option Bool) equivCode
+
 /-- Color immediately before a class along its coordinate axis. -/
 def before : AxisClass → Nat
   | .negative | .origin => 0
@@ -81,6 +100,27 @@ theorem code_injective : Function.Injective code := by
     Step previous .negative ↔ previous = .negative := by
   cases previous <;> simp [Step, before, after]
 
+theorem before_primrec : Primrec before := by
+  have positive : PrimrecPred (fun axis : AxisClass => axis = .positive) :=
+    Primrec.eq.comp Primrec.id (Primrec.const .positive)
+  exact (Primrec.ite positive (Primrec.const 1) (Primrec.const 0)).of_eq
+    fun axis => by cases axis <;> rfl
+
+theorem after_primrec : Primrec after := by
+  have negative : PrimrecPred (fun axis : AxisClass => axis = .negative) :=
+    Primrec.eq.comp Primrec.id (Primrec.const .negative)
+  exact (Primrec.ite negative (Primrec.const 0) (Primrec.const 1)).of_eq
+    fun axis => by cases axis <;> rfl
+
+theorem code_primrec : Primrec code := by
+  have negative : PrimrecPred (fun axis : AxisClass => axis = .negative) :=
+    Primrec.eq.comp Primrec.id (Primrec.const .negative)
+  have origin : PrimrecPred (fun axis : AxisClass => axis = .origin) :=
+    Primrec.eq.comp Primrec.id (Primrec.const .origin)
+  exact (Primrec.ite negative (Primrec.const 0)
+    (Primrec.ite origin (Primrec.const 1) (Primrec.const 2))).of_eq
+      fun axis => by cases axis <;> rfl
+
 end AxisClass
 
 /-- The finite Wang layer that records both coordinate-axis classes. -/
@@ -119,6 +159,26 @@ theorem positionTile_injective :
     simpa [positionTile] using
       congrArg (fun tile : WangTile => tile.w.unpair.2) equal
 
+theorem positionTile_primrec :
+    Primrec (fun classes : AxisClass × AxisClass =>
+      positionTile classes.1 classes.2) := by
+  apply WangTile.ofTuple_primrec.comp
+  exact Primrec.pair
+    (Primrec₂.natPair.comp
+      (AxisClass.after_primrec.comp Primrec.snd)
+      (AxisClass.code_primrec.comp Primrec.fst))
+    (Primrec.pair
+      (Primrec₂.natPair.comp
+        (AxisClass.before_primrec.comp Primrec.snd)
+        (AxisClass.code_primrec.comp Primrec.fst))
+      (Primrec.pair
+        (Primrec₂.natPair.comp
+          (AxisClass.after_primrec.comp Primrec.fst)
+          (AxisClass.code_primrec.comp Primrec.snd))
+        (Primrec₂.natPair.comp
+          (AxisClass.before_primrec.comp Primrec.fst)
+          (AxisClass.code_primrec.comp Primrec.snd))))
+
 /-- Payload used strictly southwest of the distinguished axes. -/
 def zeroTile : WangTile :=
   { n := 0, s := 0, e := 0, w := 0 }
@@ -131,6 +191,18 @@ def horizontalWire (tile : WangTile) : WangTile :=
 def verticalWire (tile : WangTile) : WangTile :=
   { n := tile.s, s := tile.s, e := 0, w := 0 }
 
+theorem horizontalWire_primrec : Primrec horizontalWire := by
+  apply WangTile.ofTuple_primrec.comp
+  exact Primrec.pair (Primrec.const 0)
+    (Primrec.pair (Primrec.const 0)
+      (Primrec.pair WangTile.w_primrec WangTile.w_primrec))
+
+theorem verticalWire_primrec : Primrec verticalWire := by
+  apply WangTile.ofTuple_primrec.comp
+  exact Primrec.pair WangTile.s_primrec
+    (Primrec.pair WangTile.s_primrec
+      (Primrec.pair (Primrec.const 0) (Primrec.const 0)))
+
 /-- Payloads allowed in one of the nine position regions. -/
 def regionPayloads (T : TileSet) (seed : WangTile) :
     AxisClass → AxisClass → TileSet
@@ -139,6 +211,53 @@ def regionPayloads (T : TileSet) (seed : WangTile) :
   | .origin, .negative | .positive, .negative => T.map verticalWire
   | .origin, .origin => T.filter fun tile => tile = seed
   | .origin, .positive | .positive, .origin | .positive, .positive => T
+
+theorem regionPayloads_primrec :
+    Primrec (fun input : (TileSet × WangTile) × (AxisClass × AxisClass) =>
+      regionPayloads input.1.1 input.1.2 input.2.1 input.2.2) := by
+  let horizontal : (TileSet × WangTile) × (AxisClass × AxisClass) → AxisClass :=
+    fun input => input.2.1
+  let vertical : (TileSet × WangTile) × (AxisClass × AxisClass) → AxisClass :=
+    fun input => input.2.2
+  have hhorizontal : Primrec horizontal := Primrec.fst.comp Primrec.snd
+  have hvertical : Primrec vertical := Primrec.snd.comp Primrec.snd
+  have horizontalNegative : PrimrecPred (fun input => horizontal input = .negative) :=
+    Primrec.eq.comp hhorizontal (Primrec.const .negative)
+  have verticalNegative : PrimrecPred (fun input => vertical input = .negative) :=
+    Primrec.eq.comp hvertical (Primrec.const .negative)
+  have horizontalOrigin : PrimrecPred (fun input => horizontal input = .origin) :=
+    Primrec.eq.comp hhorizontal (Primrec.const .origin)
+  have verticalOrigin : PrimrecPred (fun input => vertical input = .origin) :=
+    Primrec.eq.comp hvertical (Primrec.const .origin)
+  have source : Primrec (fun input :
+      (TileSet × WangTile) × (AxisClass × AxisClass) => input.1.1) :=
+    Primrec.fst.comp Primrec.fst
+  have horizontalWires : Primrec (fun input :
+      (TileSet × WangTile) × (AxisClass × AxisClass) =>
+        input.1.1.map horizontalWire) := by
+    refine Primrec.list_map source ?_
+    apply Primrec₂.mk
+    exact horizontalWire_primrec.comp Primrec.snd
+  have verticalWires : Primrec (fun input :
+      (TileSet × WangTile) × (AxisClass × AxisClass) =>
+        input.1.1.map verticalWire) := by
+    refine Primrec.list_map source ?_
+    apply Primrec₂.mk
+    exact verticalWire_primrec.comp Primrec.snd
+  have seedOnly : Primrec (fun input :
+      (TileSet × WangTile) × (AxisClass × AxisClass) =>
+        input.1.1.filter fun tile => tile = input.1.2) :=
+    (PrimrecRel.listFilter
+      (R := fun tile seed : WangTile => tile = seed) Primrec.eq).comp
+        (Primrec.fst.comp Primrec.fst) (Primrec.snd.comp Primrec.fst)
+  have origin : PrimrecPred (fun input =>
+      horizontal input = .origin ∧ vertical input = .origin) :=
+    Primrec.and.comp horizontalOrigin verticalOrigin
+  exact (Primrec.ite horizontalNegative
+    (Primrec.ite verticalNegative (Primrec.const [zeroTile]) horizontalWires)
+    (Primrec.ite verticalNegative verticalWires
+      (Primrec.ite origin seedOnly source))).of_eq fun input => by
+        cases input.2.1 <;> cases input.2.2 <;> rfl
 
 /-- All three axis classes, used to enumerate the finite extension. -/
 def axisClasses : List AxisClass :=
@@ -157,6 +276,44 @@ def tiles (T : TileSet) (seed : WangTile) : TileSet :=
 /-- The original seed at the crossing of the two distinguished axes. -/
 def pointedSeed (seed : WangTile) : WangTile :=
   WangTile.product (positionTile .origin .origin) seed
+
+theorem tiles_primrec :
+    Primrec (fun input : TileSet × WangTile => tiles input.1 input.2) := by
+  unfold tiles
+  refine Primrec.list_flatMap (Primrec.const axisClasses) ?_
+  apply Primrec₂.mk
+  refine Primrec.list_flatMap (Primrec.const axisClasses) ?_
+  apply Primrec₂.mk
+  have regions : Primrec (fun input :
+      ((TileSet × WangTile) × AxisClass) × AxisClass =>
+        regionPayloads input.1.1.1 input.1.1.2 input.1.2 input.2) :=
+    regionPayloads_primrec.comp
+      (Primrec.pair (Primrec.fst.comp Primrec.fst)
+        (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+  refine Primrec.list_map regions ?_
+  apply Primrec₂.mk
+  have position : Primrec (fun input :
+      (((TileSet × WangTile) × AxisClass) × AxisClass) × WangTile =>
+        positionTile input.1.1.2 input.1.2) :=
+    positionTile_primrec.comp
+      (Primrec.pair
+        (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
+        (Primrec.snd.comp Primrec.fst))
+  exact WangTile.product_primrec.comp (Primrec.pair position Primrec.snd)
+
+theorem pointedSeed_primrec : Primrec pointedSeed := by
+  exact WangTile.product_primrec.comp
+    (Primrec.pair (Primrec.const (positionTile .origin .origin)) Primrec.id)
+
+/-- Computable pointed extension of a finite seeded tileset. -/
+def data (input : TileSet × WangTile) : TileSet × WangTile :=
+  (tiles input.1 input.2, pointedSeed input.2)
+
+theorem data_primrec : Primrec data := by
+  exact Primrec.pair tiles_primrec (pointedSeed_primrec.comp Primrec.snd)
+
+theorem data_computable : Computable data :=
+  data_primrec.to_comp
 
 theorem mem_tiles_iff {T : TileSet} {seed tile : WangTile} :
     tile ∈ tiles T seed ↔
@@ -633,6 +790,34 @@ theorem tilesPlane_of_tilesQuarterWithSeed
   rcases exists_pointed_plane_of_tilesQuarterWithSeed quarter with
     ⟨plane, valid, _pointed⟩
   exact ⟨plane, valid⟩
+
+/-- Restrict the explicit pointed plane back to its northeast quadrant. -/
+theorem extension_tilesQuarterWithSeed_of_tilesQuarterWithSeed
+    {T : TileSet} {seed : WangTile} :
+    TilesQuarterWithSeed T seed →
+      TilesQuarterWithSeed (tiles T seed) (pointedSeed seed) := by
+  intro source
+  rcases exists_pointed_plane_of_tilesQuarterWithSeed source with
+    ⟨plane, valid, pointed⟩
+  let quarter : Nat × Nat → TileIn (tiles T seed) := fun point =>
+    plane (point.1, point.2)
+  refine ⟨quarter, ?_, ?_⟩
+  · constructor
+    · intro point
+      simpa [quarter] using valid.1 ((point.1 : Int), (point.2 : Int))
+    · intro point
+      simpa [quarter] using valid.2 ((point.1 : Int), (point.2 : Int))
+  · simpa [quarter] using pointed
+
+/-- A seeded source quarter-plane supplies pointed extension squares of every
+positive size. -/
+theorem extension_fixedCornerSquares_of_tilesQuarterWithSeed
+    {T : TileSet} {seed : WangTile}
+    (source : TilesQuarterWithSeed T seed) :
+    ∀ n : Nat, 0 < n →
+      TileableFixedCornerSquare (tiles T seed) (pointedSeed seed) n :=
+  fixedCornerSquare_of_tilesQuarterWithSeed
+    (extension_tilesQuarterWithSeed_of_tilesQuarterWithSeed source)
 
 end PointedExtension
 end LeanWang
