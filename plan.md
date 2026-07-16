@@ -1355,6 +1355,17 @@ longer require the next logical crossing to lie in the supplied square. This
 is necessary when a finite centered box cuts a horizontal or vertical corridor
 before reaching its next active crossing.
 
+The pointed labeling obligation is further reduced by
+`RoutedPointedCarrierLabeling.Potential`.  A concrete finite scaffold box now
+supplies only an integer coordinate at each active crossing, one label on each
+horizontal carrier, one label on each vertical carrier, and compatibility
+between adjacent carriers of the same orientation.  The adapter copies
+orthogonal labels across channel cells, fills cut boundary sides with zero,
+and proves all mixed horizontal/vertical channel matches by reflexivity.  Its
+`realizesRoutedPointedPlanes_of_carrierPotentials` theorem reaches the backward
+compactness endpoint directly.  Thus the remaining concrete theorem is
+`HasRoutedPointedCarrierPotentials ShadedSignals.routedScaffold`.
+
 The concrete corner role has been revised after an executable audit exposed
 that the old prepended southwest marker recurred at additional diagonal
 crossings. A second audit showed that marking all four candidate corrected
