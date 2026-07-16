@@ -1506,15 +1506,25 @@ vertical selected borders of the corresponding `2 x 2` quarter block.  Thus
 the remaining bridge is purely arithmetic: identify the generated class-15
 automaton with the explicit recursive frame formula below.
 
-The arithmetic side no longer depends on the recursive nearest-border signal
-search.  `OllingerRobinson104ShadedCarrierHierarchySignals` defines the exact
-selected-border formula and an explicit row/column flow: forward before the
-outer opening, clear inside each completed owner frame, and backward
-elsewhere.  It proves every local signal rule, packages any shade rectangle
-with those borders as a valid signal rectangle, and proves that adjacent clear
-edges are exactly the horizontal and vertical carrier predicates.  Therefore
-the finite-factor identification immediately yields the erased routed roles
-required by hierarchy addressing.
+An executable comparison with the sixteen-state factor exposed an important
+correction to the arithmetic model.  From level three onward, the selected
+borders are the union of the boundaries contributed by every frame containing
+the transverse coordinate, not only the smallest owner frame.  The canonical
+nearest-border signal path remains the right flow construction: its adjacent
+clear edges still follow the smallest-owner carrier predicates used by
+hierarchy addressing.
+
+`OllingerRobinson104ShadedCarrierBorderHierarchyData` now defines the corrected
+recursive union-of-frame border formula.  A `3 x 3` row-and-column patch with a
+one-cell halo makes refinement local; the 25 states appearing at level two are
+closed under all sixteen child positions, as checked in a separate native
+certificate.  `OllingerRobinson104ShadedCarrierBorderHierarchy` proves that
+the arithmetic patch of every successor block is exactly its finite-state
+refinement.  The next step is to promote the closure certificate to all levels
+and identify each visible patch with the generated class-15 factor output.
+That yields the concrete substitution borders, after which the canonical
+nearest-border path can be identified with the carrier predicates and supplied
+to hierarchy addressing.
 
 ### 3. Package and finish
 
