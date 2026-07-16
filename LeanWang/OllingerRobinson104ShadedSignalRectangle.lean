@@ -149,6 +149,77 @@ def snoc {interior : Nat → Option Bool} {length : Nat}
 
 end FlowPath
 
+/-- Three path endpoint classes sufficient to extend through any next border
+orientation.  Keeping all three makes the signal construction executable
+without backtracking or classical choice. -/
+structure PathFamily (interior : Nat → Option Bool) (length : Nat) where
+  backward : FlowPath interior length
+  backward_end : backward.edge length = .backward
+  notBackward : FlowPath interior length
+  notBackward_end : notBackward.edge length ≠ .backward
+  nonempty : FlowPath interior length
+  nonempty_end : nonempty.edge length ≠ .none
+
+/-- Linear dynamic program constructing the three extendable path classes. -/
+def pathFamily (interior : Nat → Option Bool) :
+    (length : Nat) → PathFamily interior length
+  | 0 =>
+      { backward := { edge := fun _ => .backward, allowed := by omega }
+        backward_end := rfl
+        notBackward := { edge := fun _ => .none, allowed := by omega }
+        notBackward_end := by simp
+        nonempty := { edge := fun _ => .forward, allowed := by omega }
+        nonempty_end := by simp }
+  | length + 1 =>
+      let previous := pathFamily interior length
+      match hlast : interior length with
+      | none =>
+          let backwardNext := previous.backward.snoc
+            (previous.backward.edge length) (by simp [flowAllowed, hlast])
+          let notBackwardNext := previous.notBackward.snoc
+            (previous.notBackward.edge length) (by simp [flowAllowed, hlast])
+          let nonemptyNext := previous.nonempty.snoc
+            (previous.nonempty.edge length) (by simp [flowAllowed, hlast])
+          { backward := backwardNext
+            backward_end := by simp [backwardNext, previous.backward_end]
+            notBackward := notBackwardNext
+            notBackward_end := by
+              simpa [notBackwardNext] using previous.notBackward_end
+            nonempty := nonemptyNext
+            nonempty_end := by
+              simpa [nonemptyNext] using previous.nonempty_end }
+      | some false =>
+          let allowedBackward : flowAllowed (interior length)
+              (previous.notBackward.edge length) .backward = true := by
+            simp [flowAllowed, hlast, previous.notBackward_end]
+          let allowedForward : flowAllowed (interior length)
+              (previous.notBackward.edge length) .forward = true := by
+            simp [flowAllowed, hlast, previous.notBackward_end]
+          { backward := previous.notBackward.snoc .backward allowedBackward
+            backward_end := by simp
+            notBackward := previous.notBackward.snoc .forward allowedForward
+            notBackward_end := by simp
+            nonempty := previous.notBackward.snoc .forward allowedForward
+            nonempty_end := by simp }
+      | some true =>
+          let allowedBackward : flowAllowed (interior length)
+              (previous.nonempty.edge length) .backward = true := by
+            simp [flowAllowed, hlast, previous.nonempty_end]
+          let allowedNone : flowAllowed (interior length)
+              (previous.nonempty.edge length) .none = true := by
+            simp [flowAllowed, hlast, previous.nonempty_end]
+          { backward := previous.nonempty.snoc .backward allowedBackward
+            backward_end := by simp
+            notBackward := previous.nonempty.snoc .none allowedNone
+            notBackward_end := by simp
+            nonempty := previous.nonempty.snoc .backward allowedBackward
+            nonempty_end := by simp }
+
+/-- Canonical obstruction path selected by the dynamic program. -/
+def canonicalPath (interior : Nat → Option Bool) (length : Nat) :
+    FlowPath interior length :=
+  (pathFamily interior length).backward
+
 /-- Every finite orientation sequence has paths ending in each of the three
 endpoint classes needed to extend across another selected border. -/
 theorem exists_flowPaths (interior : Nat → Option Bool) (length : Nat) :
@@ -158,50 +229,10 @@ theorem exists_flowPaths (interior : Nat → Option Bool) (length : Nat) :
         path.edge length ≠ .backward) ∧
       (∃ path : FlowPath interior length,
         path.edge length ≠ .none) := by
-  induction length with
-  | zero =>
-      refine ⟨⟨{ edge := fun _ => .backward, allowed := by omega }, rfl⟩,
-        ⟨{ edge := fun _ => .none, allowed := by omega }, by simp⟩,
-        ⟨{ edge := fun _ => .forward, allowed := by omega }, by simp⟩⟩
-  | succ length ih =>
-      rcases ih with ⟨⟨backwardPath, hbackward⟩,
-        ⟨notBackwardPath, hnotBackward⟩,
-        ⟨nonemptyPath, hnonempty⟩⟩
-      cases hlast : interior length with
-      | none =>
-          let backwardNext := backwardPath.snoc (backwardPath.edge length) (by
-            simp [flowAllowed, hlast])
-          let notBackwardNext := notBackwardPath.snoc (notBackwardPath.edge length) (by
-            simp [flowAllowed, hlast])
-          let nonemptyNext := nonemptyPath.snoc (nonemptyPath.edge length) (by
-            simp [flowAllowed, hlast])
-          refine ⟨⟨backwardNext, ?_⟩,
-            ⟨notBackwardNext, ?_⟩, ⟨nonemptyNext, ?_⟩⟩
-          · simp [backwardNext, hbackward]
-          · simpa [notBackwardNext] using hnotBackward
-          · simpa [nonemptyNext] using hnonempty
-      | some positive =>
-          cases positive with
-          | false =>
-              have hallowedBackward : flowAllowed (interior length)
-                  (notBackwardPath.edge length) .backward = true := by
-                simp [flowAllowed, hlast, hnotBackward]
-              have hallowedForward : flowAllowed (interior length)
-                  (notBackwardPath.edge length) .forward = true := by
-                simp [flowAllowed, hlast, hnotBackward]
-              refine ⟨⟨notBackwardPath.snoc .backward hallowedBackward, by simp⟩,
-                ⟨notBackwardPath.snoc .forward hallowedForward, by simp⟩,
-                ⟨notBackwardPath.snoc .forward hallowedForward, by simp⟩⟩
-          | true =>
-              have hallowedBackward : flowAllowed (interior length)
-                  (nonemptyPath.edge length) .backward = true := by
-                simp [flowAllowed, hlast, hnonempty]
-              have hallowedNone : flowAllowed (interior length)
-                  (nonemptyPath.edge length) .none = true := by
-                simp [flowAllowed, hlast, hnonempty]
-              refine ⟨⟨nonemptyPath.snoc .backward hallowedBackward, by simp⟩,
-                ⟨nonemptyPath.snoc .none hallowedNone, by simp⟩,
-                ⟨nonemptyPath.snoc .backward hallowedBackward, by simp⟩⟩
+  let paths := pathFamily interior length
+  exact ⟨⟨paths.backward, paths.backward_end⟩,
+    ⟨paths.notBackward, paths.notBackward_end⟩,
+    ⟨paths.nonempty, paths.nonempty_end⟩⟩
 
 theorem exists_flowPath (interior : Nat → Option Bool) (length : Nat) :
     Nonempty (FlowPath interior length) := by
@@ -236,18 +267,16 @@ def verticalInterior (x y : Nat) : Option Bool :=
     (ShadedSignals.selectedHorizontalFor
       (componentAt indexGrid x y) (quadrantAt x y) (shadeGrid x y))
 
-noncomputable def horizontalPath (y : Nat) :
+def horizontalPath (y : Nat) :
     FlowPath (fun x => horizontalInterior indexGrid shadeGrid x y) width :=
-  Classical.choice (exists_flowPath
-    (fun x => horizontalInterior indexGrid shadeGrid x y) width)
+  canonicalPath (fun x => horizontalInterior indexGrid shadeGrid x y) width
 
-noncomputable def verticalPath (x : Nat) :
+def verticalPath (x : Nat) :
     FlowPath (fun y => verticalInterior indexGrid shadeGrid x y) height :=
-  Classical.choice (exists_flowPath
-    (fun y => verticalInterior indexGrid shadeGrid x y) height)
+  canonicalPath (fun y => verticalInterior indexGrid shadeGrid x y) height
 
 /-- Combine the independent row and column edge paths into signal states. -/
-noncomputable def signalGrid : Nat → Nat → Signals.State := fun x y =>
+def signalGrid : Nat → Nat → Signals.State := fun x y =>
   { west := (horizontalPath indexGrid shadeGrid width y).edge x
     east := (horizontalPath indexGrid shadeGrid width y).edge (x + 1)
     south := (verticalPath indexGrid shadeGrid height x).edge y
