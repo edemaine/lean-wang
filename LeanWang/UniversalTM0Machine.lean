@@ -208,7 +208,7 @@ theorem input_supported (source : List Symbol) :
   · exact List.mem_map.2 ⟨_, mem_tapeSymbols _, rfl⟩
   · exact List.mem_map.2 ⟨_, mem_tapeSymbols _, rfl⟩
 
-private def sourceAt (source : List Symbol) (position : Nat) : Symbol :=
+def sourceAt (source : List Symbol) (position : Nat) : Symbol :=
   source.getI position
 
 theorem symbolsAt_initial (source : List Symbol) (position : Nat) :
