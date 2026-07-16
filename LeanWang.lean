@@ -12,6 +12,7 @@ import LeanWang.UniversalTM0Semantic
 import LeanWang.UniversalTM0TableauCells
 import LeanWang.UniversalTM0TableauDynamics
 import LeanWang.UniversalTM0TableauSemantics
+import LeanWang.UniversalTM0Machine
 import LeanWang.UniversalTM0TableauLocalCorrect
 import LeanWang.UniversalTM0TableauTiles
 import LeanWang.UniversalTM0TableauHistory
