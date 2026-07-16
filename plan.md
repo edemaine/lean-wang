@@ -1520,11 +1520,20 @@ one-cell halo makes refinement local; the 25 states appearing at level two are
 closed under all sixteen child positions, as checked in a separate native
 certificate.  `OllingerRobinson104ShadedCarrierBorderHierarchy` proves that
 the arithmetic patch of every successor block is exactly its finite-state
-refinement.  The next step is to promote the closure certificate to all levels
-and identify each visible patch with the generated class-15 factor output.
-That yields the concrete substitution borders, after which the canonical
-nearest-border path can be identified with the carrier predicates and supplied
-to hierarchy addressing.
+refinement.  The closure certificate is now promoted by induction to every
+in-bounds block at every level.  Consequently each visible arithmetic patch is
+the generated class-15 factor output, and the actual seed-supertile row and
+column interiors equal the corrected border formula at every coordinate.
+
+The next step is to identify the canonical nearest-border path with the
+smallest-owner carrier predicates.  A finite-context shortcut was tested and
+rejected: canonical path context grows from 129 states at level two to 428 at
+level three and does not refine deterministically.  The retained proof should
+instead establish the frame-nesting fact directly: inside a smallest-owner
+frame, no enclosing-frame boundary occurs before that owner's closing border,
+while outside it an owner-frame closing or opening prevents two adjacent clear
+edges.  This arithmetic characterization can then be supplied to hierarchy
+addressing.
 
 ### 3. Package and finish
 
