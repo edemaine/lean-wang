@@ -402,5 +402,237 @@ theorem source_fixedCornerSquare_of_extension
         (valid.2.2 column row next)).2.2
   · exact cornerPayload
 
+/-- Axis class of an integer coordinate relative to zero. -/
+def classOfInt (coordinate : Int) : AxisClass :=
+  if coordinate < 0 then .negative
+  else if coordinate = 0 then .origin
+  else .positive
+
+@[simp] theorem classOfInt_zero : classOfInt 0 = .origin := by
+  simp [classOfInt]
+
+theorem classOfInt_of_negative {coordinate : Int} (negative : coordinate < 0) :
+    classOfInt coordinate = .negative := by
+  simp [classOfInt, negative]
+
+theorem classOfInt_of_positive {coordinate : Int} (positive : 0 < coordinate) :
+    classOfInt coordinate = .positive := by
+  simp [classOfInt, not_lt_of_ge positive.le, ne_of_gt positive]
+
+theorem classOfInt_step (coordinate : Int) :
+    AxisClass.Step (classOfInt coordinate) (classOfInt (coordinate + 1)) := by
+  by_cases negative : coordinate < 0
+  · by_cases nextNegative : coordinate + 1 < 0
+    · rw [classOfInt_of_negative negative,
+        classOfInt_of_negative nextNegative]
+      rfl
+    · have boundary : coordinate = -1 := by omega
+      subst coordinate
+      rfl
+  · by_cases zero : coordinate = 0
+    · subst coordinate
+      rfl
+    · have positive : 0 < coordinate := by omega
+      have nextPositive : 0 < coordinate + 1 := by omega
+      rw [classOfInt_of_positive positive,
+        classOfInt_of_positive nextPositive]
+      rfl
+
+/-- Payload of the explicit extension of a quarter-plane tiling. -/
+def planePayload {T : TileSet} (quarter : Nat × Nat → TileIn T)
+    (point : Int × Int) : WangTile :=
+  if 0 ≤ point.1 then
+    if 0 ≤ point.2 then
+      (quarter (point.1.toNat, point.2.toNat)).1
+    else
+      verticalWire (quarter (point.1.toNat, 0)).1
+  else if 0 ≤ point.2 then
+    horizontalWire (quarter (0, point.2.toNat)).1
+  else
+    zeroTile
+
+/-- Raw extension tile, before attaching its list-membership proof. -/
+def planeTile {T : TileSet} (quarter : Nat × Nat → TileIn T)
+    (point : Int × Int) : WangTile :=
+  WangTile.product (positionTile (classOfInt point.1) (classOfInt point.2))
+    (planePayload quarter point)
+
+theorem planePayload_mem_regionPayloads
+    {T : TileSet} {seed : WangTile}
+    (quarter : Nat × Nat → TileIn T)
+    (seeded : (quarter (0, 0)).1 = seed) (point : Int × Int) :
+    planePayload quarter point ∈
+      regionPayloads T seed (classOfInt point.1) (classOfInt point.2) := by
+  by_cases horizontalNonnegative : 0 ≤ point.1
+  · by_cases verticalNonnegative : 0 ≤ point.2
+    · by_cases horizontalZero : point.1 = 0
+      · by_cases verticalZero : point.2 = 0
+        · have pointEq : point = (0, 0) := Prod.ext horizontalZero verticalZero
+          subst point
+          simpa [planePayload, regionPayloads] using
+            And.intro (quarter (0, 0)).2 seeded
+        · have verticalPositive : 0 < point.2 := lt_of_le_of_ne
+            verticalNonnegative (Ne.symm verticalZero)
+          simp [planePayload, verticalNonnegative,
+            horizontalZero, classOfInt_of_positive verticalPositive,
+            regionPayloads, (quarter (0, point.2.toNat)).2]
+      · have horizontalPositive : 0 < point.1 := lt_of_le_of_ne
+          horizontalNonnegative (Ne.symm horizontalZero)
+        by_cases verticalZero : point.2 = 0
+        · simp [planePayload, horizontalNonnegative,
+            verticalZero, classOfInt_of_positive horizontalPositive,
+            regionPayloads, (quarter (point.1.toNat, 0)).2]
+        · have verticalPositive : 0 < point.2 := lt_of_le_of_ne
+            verticalNonnegative (Ne.symm verticalZero)
+          simp [planePayload, horizontalNonnegative, verticalNonnegative,
+            classOfInt_of_positive horizontalPositive,
+            classOfInt_of_positive verticalPositive, regionPayloads,
+            (quarter (point.1.toNat, point.2.toNat)).2]
+    · have verticalNegative : point.2 < 0 := lt_of_not_ge verticalNonnegative
+      by_cases horizontalZero : point.1 = 0
+      · have payloadEq : planePayload quarter point =
+            verticalWire (quarter (0, 0)).1 := by
+          simp [planePayload, horizontalZero, verticalNonnegative]
+        rw [payloadEq, horizontalZero, classOfInt_zero,
+          classOfInt_of_negative verticalNegative]
+        exact List.mem_map.mpr
+          ⟨(quarter (0, 0)).1, (quarter (0, 0)).2, rfl⟩
+      · have horizontalPositive : 0 < point.1 := lt_of_le_of_ne
+            horizontalNonnegative (Ne.symm horizontalZero)
+        simp only [planePayload, horizontalNonnegative, if_pos,
+          verticalNonnegative,
+          classOfInt_of_positive horizontalPositive,
+          classOfInt_of_negative verticalNegative, regionPayloads]
+        exact List.mem_map.mpr
+          ⟨(quarter (point.1.toNat, 0)).1,
+            (quarter (point.1.toNat, 0)).2, rfl⟩
+  · have horizontalNegative : point.1 < 0 := lt_of_not_ge horizontalNonnegative
+    by_cases verticalNonnegative : 0 ≤ point.2
+    · by_cases verticalZero : point.2 = 0
+      · have payloadEq : planePayload quarter point =
+            horizontalWire (quarter (0, 0)).1 := by
+          simp [planePayload, horizontalNonnegative, verticalZero]
+        rw [payloadEq, verticalZero,
+          classOfInt_of_negative horizontalNegative, classOfInt_zero]
+        exact List.mem_map.mpr
+          ⟨(quarter (0, 0)).1, (quarter (0, 0)).2, rfl⟩
+      · have verticalPositive : 0 < point.2 := lt_of_le_of_ne
+            verticalNonnegative (Ne.symm verticalZero)
+        simp only [planePayload, horizontalNonnegative,
+          verticalNonnegative, if_pos,
+          classOfInt_of_negative horizontalNegative,
+          classOfInt_of_positive verticalPositive, regionPayloads]
+        exact List.mem_map.mpr
+          ⟨(quarter (0, point.2.toNat)).1,
+            (quarter (0, point.2.toNat)).2, rfl⟩
+    · have verticalNegative : point.2 < 0 := lt_of_not_ge verticalNonnegative
+      simp [planePayload, horizontalNonnegative, verticalNonnegative,
+        classOfInt_of_negative horizontalNegative,
+        classOfInt_of_negative verticalNegative, regionPayloads]
+
+theorem planeTile_mem_tiles
+    {T : TileSet} {seed : WangTile}
+    (quarter : Nat × Nat → TileIn T)
+    (seeded : (quarter (0, 0)).1 = seed) (point : Int × Int) :
+    planeTile quarter point ∈ tiles T seed := by
+  apply mem_tiles_iff.2
+  exact ⟨classOfInt point.1, classOfInt point.2, planePayload quarter point,
+    planePayload_mem_regionPayloads quarter seeded point, rfl⟩
+
+private theorem toNat_add_one {coordinate : Int} (nonnegative : 0 ≤ coordinate) :
+    (coordinate + 1).toNat = coordinate.toNat + 1 := by
+  omega
+
+theorem planePayload_hMatches
+    {T : TileSet} (quarter : Nat × Nat → TileIn T)
+    (valid : ValidQuarterTiling T quarter) (point : Int × Int) :
+    WangTile.HMatches (planePayload quarter point)
+      (planePayload quarter (point.1 + 1, point.2)) := by
+  by_cases verticalNonnegative : 0 ≤ point.2
+  · by_cases horizontalNonnegative : 0 ≤ point.1
+    · have nextNonnegative : 0 ≤ point.1 + 1 := by omega
+      simpa [planePayload, horizontalNonnegative, nextNonnegative,
+        verticalNonnegative, toNat_add_one horizontalNonnegative] using
+          valid.1 (point.1.toNat, point.2.toNat)
+    · by_cases nextNonnegative : 0 ≤ point.1 + 1
+      · have boundary : point.1 + 1 = 0 := by omega
+        simp [planePayload, horizontalNonnegative,
+          verticalNonnegative, boundary, horizontalWire, WangTile.HMatches]
+      · simp [planePayload, horizontalNonnegative, nextNonnegative,
+          verticalNonnegative, horizontalWire, WangTile.HMatches]
+  · by_cases horizontalNonnegative : 0 ≤ point.1
+    · have nextNonnegative : 0 ≤ point.1 + 1 := by omega
+      simp [planePayload, horizontalNonnegative, nextNonnegative,
+        verticalNonnegative, verticalWire, WangTile.HMatches]
+    · by_cases nextNonnegative : 0 ≤ point.1 + 1 <;>
+        simp [planePayload, horizontalNonnegative, nextNonnegative,
+          verticalNonnegative, zeroTile, verticalWire, WangTile.HMatches]
+
+theorem planePayload_vMatches
+    {T : TileSet} (quarter : Nat × Nat → TileIn T)
+    (valid : ValidQuarterTiling T quarter) (point : Int × Int) :
+    WangTile.VMatches (planePayload quarter point)
+      (planePayload quarter (point.1, point.2 + 1)) := by
+  by_cases horizontalNonnegative : 0 ≤ point.1
+  · by_cases verticalNonnegative : 0 ≤ point.2
+    · have nextNonnegative : 0 ≤ point.2 + 1 := by omega
+      simpa [planePayload, horizontalNonnegative, verticalNonnegative,
+        nextNonnegative, toNat_add_one verticalNonnegative] using
+          valid.2 (point.1.toNat, point.2.toNat)
+    · by_cases nextNonnegative : 0 ≤ point.2 + 1
+      · have boundary : point.2 + 1 = 0 := by omega
+        simp [planePayload, horizontalNonnegative, verticalNonnegative,
+          boundary, verticalWire, WangTile.VMatches]
+      · simp [planePayload, horizontalNonnegative, verticalNonnegative,
+          nextNonnegative, verticalWire, WangTile.VMatches]
+  · by_cases verticalNonnegative : 0 ≤ point.2
+    · have nextNonnegative : 0 ≤ point.2 + 1 := by omega
+      simp [planePayload, horizontalNonnegative, verticalNonnegative,
+        nextNonnegative, horizontalWire, WangTile.VMatches]
+    · by_cases nextNonnegative : 0 ≤ point.2 + 1 <;>
+        simp [planePayload, horizontalNonnegative, verticalNonnegative,
+          nextNonnegative, zeroTile, horizontalWire, WangTile.VMatches]
+
+/-- A seeded source quarter-plane extends to a valid pointed full plane. -/
+theorem exists_pointed_plane_of_tilesQuarterWithSeed
+    {T : TileSet} {seed : WangTile} :
+    TilesQuarterWithSeed T seed →
+      ∃ plane : Int × Int → TileIn (tiles T seed),
+        ValidPlaneTiling (tiles T seed) plane ∧
+          (plane (0, 0)).1 = pointedSeed seed := by
+  rintro ⟨quarter, valid, seeded⟩
+  let plane : Int × Int → TileIn (tiles T seed) := fun point =>
+    ⟨planeTile quarter point, planeTile_mem_tiles quarter seeded point⟩
+  refine ⟨plane, ?_, ?_⟩
+  · constructor
+    · intro point
+      change WangTile.HMatches (planeTile quarter point)
+        (planeTile quarter (point.1 + 1, point.2))
+      simp only [planeTile]
+      rw [WangTile.HMatches_product_iff]
+      exact ⟨positionTile_hMatches_iff.2
+          ⟨classOfInt_step point.1, rfl⟩,
+        planePayload_hMatches quarter valid point⟩
+    · intro point
+      change WangTile.VMatches (planeTile quarter point)
+        (planeTile quarter (point.1, point.2 + 1))
+      simp only [planeTile]
+      rw [WangTile.VMatches_product_iff]
+      exact ⟨positionTile_vMatches_iff.2
+          ⟨classOfInt_step point.2, rfl⟩,
+        planePayload_vMatches quarter valid point⟩
+  · change WangTile.product (positionTile .origin .origin)
+      (quarter (0, 0)).1 = pointedSeed seed
+    rw [seeded]
+    rfl
+
+theorem tilesPlane_of_tilesQuarterWithSeed
+    {T : TileSet} {seed : WangTile} :
+    TilesQuarterWithSeed T seed → TilesPlane (tiles T seed) := by
+  intro quarter
+  rcases exists_pointed_plane_of_tilesQuarterWithSeed quarter with
+    ⟨plane, valid, _pointed⟩
+  exact ⟨plane, valid⟩
+
 end PointedExtension
 end LeanWang
