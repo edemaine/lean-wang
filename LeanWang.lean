@@ -24,6 +24,7 @@ import LeanWang.RoutedScaffold
 import LeanWang.RoutedCoreLabeling
 import LeanWang.RoutedPlaneDecode
 import LeanWang.PointedExtension
+import LeanWang.RoutedPointedPlane
 import LeanWang.OllingerRobinsonScaffold
 import LeanWang.OllingerRobinsonFigure13
 import LeanWang.OllingerRobinsonFigure16
