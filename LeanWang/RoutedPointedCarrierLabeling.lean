@@ -17,20 +17,6 @@ compatibility conditions.
 
 namespace LeanWang
 
-namespace RouteRole
-
-/-- Roles that carry the horizontal payload coordinate or channel label. -/
-def isHorizontalCarrier : RouteRole → Bool
-  | .horizontal | .active | .corner => true
-  | .inactive | .vertical => false
-
-/-- Roles that carry the vertical payload coordinate or channel label. -/
-def isVerticalCarrier : RouteRole → Bool
-  | .vertical | .active | .corner => true
-  | .inactive | .horizontal => false
-
-end RouteRole
-
 namespace RoutedPointedCarrierLabeling
 
 open RoutedPointedCoreLabeling

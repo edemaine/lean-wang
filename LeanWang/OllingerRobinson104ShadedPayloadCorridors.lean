@@ -26,30 +26,6 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths ShadedPlaneShadeGr
 
 set_option maxRecDepth 20000
 
-theorem ShadedSignals.routeRole_tile_eq_horizontal_iff (site : ShadedSignals.Site) :
-    ShadedSignals.routeRole (ShadedSignals.tile site) = .horizontal ↔
-      site.2.west = .none ∧ site.2.east = .none ∧
-        ¬(site.2.south = .none ∧ site.2.north = .none) := by
-  rcases site with ⟨base, ⟨west, east, south, north⟩⟩
-  cases west <;> cases east <;> cases south <;> cases north <;>
-  simp [ShadedSignals.routeRole, ShadedSignals.isCornerMarker, Signals.routeRole,
-    Signals.isClear, Signals.horizontalClear, Signals.verticalClear,
-    ShadedSignals.tile, Signals.State.tile, Signals.edgeFlowCode,
-    Signals.Flow.code, WangTile.product]
-  all_goals split <;> simp_all
-
-theorem ShadedSignals.routeRole_tile_eq_vertical_iff (site : ShadedSignals.Site) :
-    ShadedSignals.routeRole (ShadedSignals.tile site) = .vertical ↔
-      ¬(site.2.west = .none ∧ site.2.east = .none) ∧
-        site.2.south = .none ∧ site.2.north = .none := by
-  rcases site with ⟨base, ⟨west, east, south, north⟩⟩
-  cases west <;> cases east <;> cases south <;> cases north <;>
-  simp [ShadedSignals.routeRole, ShadedSignals.isCornerMarker, Signals.routeRole,
-    Signals.isClear, Signals.horizontalClear, Signals.verticalClear,
-    ShadedSignals.tile, Signals.State.tile, Signals.edgeFlowCode,
-    Signals.Flow.code, WangTile.product]
-  all_goals split <;> simp_all
-
 structure CrossingObstruction
     (indexGrid : Nat -> Nat -> Index)
     (shadeGrid : Nat -> Nat -> RedShades.State)

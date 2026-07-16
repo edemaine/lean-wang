@@ -77,6 +77,16 @@ def isConstrained : RouteRole → Bool
   | .inactive => false
   | _ => true
 
+/-- Roles that carry the horizontal payload coordinate or channel label. -/
+def isHorizontalCarrier : RouteRole → Bool
+  | .horizontal | .active | .corner => true
+  | .inactive | .vertical => false
+
+/-- Roles that carry the vertical payload coordinate or channel label. -/
+def isVerticalCarrier : RouteRole → Bool
+  | .vertical | .active | .corner => true
+  | .inactive | .horizontal => false
+
 @[simp] theorem isConstrained_eq_false_iff {role : RouteRole} :
     role.isConstrained = false ↔ role = .inactive := by
   cases role <;> simp [isConstrained]

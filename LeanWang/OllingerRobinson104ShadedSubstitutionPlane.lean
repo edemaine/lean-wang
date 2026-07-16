@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Compactness
+import LeanWang.OllingerRobinson104ShadedSignalRoutingScaffold
 import LeanWang.OllingerRobinson104ShadedSubstitutionSupertiles
 import LeanWang.OllingerRobinson104ShadedSignalRectangle
 
@@ -127,7 +128,8 @@ theorem quarter_vmatch (level : Nat) (root : Node) (x y : Nat)
           (tile (components
             (supertileIndexGrid level root (x / 2) (y / 2))))
 
-private def side (level : Nat) : Nat := 2 * 4 ^ level
+/-- Side length, in quarter tiles, of a level-`level` shaded supertile. -/
+def side (level : Nat) : Nat := 2 * 4 ^ level
 
 private noncomputable def signals (level : Nat) (root : Node) :
     Nat → Nat → Signals.State :=
@@ -150,13 +152,14 @@ private theorem validSignals (level : Nat) (root : Node) :
     (side level) (side level)
     (supertile_validShadeRectangle level root)
 
-/-- Every certified shaded substitution supertile, with its obstruction-signal
-decoration, is a valid finite Wang square. -/
-theorem tileableSquare (level : Nat) (root : Node) :
-    TileableSquare ShadedSignals.tileSet (side level) := by
-  let rect : Rectangle (side level) (side level) := fun i j =>
-    ShadedSignals.tile (site level root i j)
-  refine ⟨rect, ?_⟩
+/-- The concrete Wang rectangle underlying a decorated shaded supertile. -/
+def tileRectangle (level : Nat) (root : Node) :
+    Rectangle (side level) (side level) :=
+  fun i j => ShadedSignals.tile (site level root i j)
+
+/-- Every concrete decorated shaded supertile is a valid Wang rectangle. -/
+theorem validTileRectangle (level : Nat) (root : Node) :
+    ValidRectangle ShadedSignals.tileSet (tileRectangle level root) := by
   have valid := validSignals level root
   constructor
   · intro i j
@@ -192,6 +195,24 @@ theorem tileableSquare (level : Nat) (root : Node) :
           (valid.shadeValid.vmatch i j i.isLt hj)
     · simpa [Signals.State.tile, WangTile.VMatches, site] using
         congrArg Signals.Flow.code (valid.vmatch i j i.isLt hj)
+
+/-- The concrete rectangle viewed directly as a routed-scaffold tiling. -/
+theorem validRoutedTileRectangle (level : Nat) (root : Node) :
+    ValidRectangle ShadedSignals.routedScaffold.tiles
+      (tileRectangle level root) := by
+  simpa using validTileRectangle level root
+
+@[simp] theorem routedRole_tileRectangle (level : Nat) (root : Node)
+    (i j : Fin (side level)) :
+    ShadedSignals.routedScaffold.role (tileRectangle level root i j) =
+      ShadedSignals.routeRole (ShadedSignals.tile (site level root i j)) := by
+  simp [tileRectangle]
+
+/-- Every certified shaded substitution supertile, with its obstruction-signal
+decoration, is a valid finite Wang square. -/
+theorem tileableSquare (level : Nat) (root : Node) :
+    TileableSquare ShadedSignals.tileSet (side level) :=
+  ⟨tileRectangle level root, validTileRectangle level root⟩
 
 theorem level_le_side (level : Nat) : level ≤ side level := by
   induction level with

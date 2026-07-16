@@ -140,6 +140,70 @@ theorem routeRole_tile_eq_active_iff (site : Site) :
     · exact False.elim (hnotCorner
         ((routeRole_tile_eq_corner_iff site).1 hcorner).2)
 
+theorem routeRole_tile_eq_horizontal_iff (site : Site) :
+    routeRole (tile site) = .horizontal ↔
+      site.2.west = .none ∧ site.2.east = .none ∧
+        ¬(site.2.south = .none ∧ site.2.north = .none) := by
+  rcases site with ⟨base, ⟨west, east, south, north⟩⟩
+  cases west <;> cases east <;> cases south <;> cases north <;>
+    simp [routeRole, isCornerMarker, Signals.routeRole,
+      Signals.isClear, Signals.horizontalClear, Signals.verticalClear,
+      tile, Signals.State.tile, Signals.edgeFlowCode,
+      Signals.Flow.code, WangTile.product]
+  all_goals split <;> simp_all
+
+theorem routeRole_tile_eq_vertical_iff (site : Site) :
+    routeRole (tile site) = .vertical ↔
+      ¬(site.2.west = .none ∧ site.2.east = .none) ∧
+        site.2.south = .none ∧ site.2.north = .none := by
+  rcases site with ⟨base, ⟨west, east, south, north⟩⟩
+  cases west <;> cases east <;> cases south <;> cases north <;>
+    simp [routeRole, isCornerMarker, Signals.routeRole,
+      Signals.isClear, Signals.horizontalClear, Signals.verticalClear,
+      tile, Signals.State.tile, Signals.edgeFlowCode,
+      Signals.Flow.code, WangTile.product]
+  all_goals split <;> simp_all
+
+theorem routeRole_tile_eq_inactive_iff (site : Site) :
+    routeRole (tile site) = .inactive ↔
+      ¬(site.2.west = .none ∧ site.2.east = .none) ∧
+        ¬(site.2.south = .none ∧ site.2.north = .none) := by
+  rcases site with ⟨base, ⟨west, east, south, north⟩⟩
+  cases west <;> cases east <;> cases south <;> cases north <;>
+    simp [routeRole, isCornerMarker, Signals.routeRole,
+      Signals.isClear, Signals.horizontalClear, Signals.verticalClear,
+      tile, Signals.State.tile, Signals.edgeFlowCode,
+      Signals.Flow.code, WangTile.product]
+  all_goals split <;> simp_all
+
+/-- A site carries horizontal payload data exactly when both horizontal signal
+edges are clear. -/
+theorem isHorizontalCarrier_routeRole_tile_iff (site : Site) :
+    (routeRole (tile site)).isHorizontalCarrier = true ↔
+      site.2.west = .none ∧ site.2.east = .none := by
+  rcases site with ⟨base, ⟨west, east, south, north⟩⟩
+  cases west <;> cases east <;> cases south <;> cases north <;>
+    simp [routeRole, isCornerMarker, Signals.routeRole,
+      Signals.isClear, Signals.horizontalClear, Signals.verticalClear,
+      RouteRole.isHorizontalCarrier, tile, Signals.State.tile,
+      Signals.edgeFlowCode, Signals.Flow.code, WangTile.product]
+  all_goals split <;> simp_all
+  all_goals split at * <;> simp_all
+
+/-- A site carries vertical payload data exactly when both vertical signal
+edges are clear. -/
+theorem isVerticalCarrier_routeRole_tile_iff (site : Site) :
+    (routeRole (tile site)).isVerticalCarrier = true ↔
+      site.2.south = .none ∧ site.2.north = .none := by
+  rcases site with ⟨base, ⟨west, east, south, north⟩⟩
+  cases west <;> cases east <;> cases south <;> cases north <;>
+    simp [routeRole, isCornerMarker, Signals.routeRole,
+      Signals.isClear, Signals.horizontalClear, Signals.verticalClear,
+      RouteRole.isVerticalCarrier, tile, Signals.State.tile,
+      Signals.edgeFlowCode, Signals.Flow.code, WangTile.product]
+  all_goals split <;> simp_all
+  all_goals split at * <;> simp_all
+
 theorem routeRole_tile_clear (site : Site) (hclear : site.2 = clearState) :
     routeRole (tile site) = .active ∨ routeRole (tile site) = .corner :=
   (routeRole_eq_active_or_corner_iff _).2
