@@ -106,6 +106,19 @@ def positionTile (horizontal vertical : AxisClass) : WangTile where
   simp [WangTile.VMatches, positionTile, AxisClass.Step,
     Nat.pair_eq_pair]
 
+theorem positionTile_injective :
+    Function.Injective
+      (fun classes : AxisClass × AxisClass =>
+        positionTile classes.1 classes.2) := by
+  intro first second equal
+  apply Prod.ext
+  · apply AxisClass.code_injective
+    simpa [positionTile] using
+      congrArg (fun tile : WangTile => tile.s.unpair.2) equal
+  · apply AxisClass.code_injective
+    simpa [positionTile] using
+      congrArg (fun tile : WangTile => tile.w.unpair.2) equal
+
 /-- Payload used strictly southwest of the distinguished axes. -/
 def zeroTile : WangTile :=
   { n := 0, s := 0, e := 0, w := 0 }
@@ -229,6 +242,165 @@ theorem eq_seed_of_mem_originPayloads
     (member : payload ∈ regionPayloads T seed .origin .origin) :
     payload = seed := by
   exact (by simpa [regionPayloads] using member : payload ∈ T ∧ payload = seed).2
+
+/-- Every square rooted at the pointed tile decodes to a square rooted at the
+source seed. -/
+theorem source_fixedCornerSquare_of_extension
+    {T : TileSet} {seed : WangTile} {n : Nat} :
+    TileableFixedCornerSquare (tiles T seed) (pointedSeed seed) n →
+      TileableFixedCornerSquare T seed n := by
+  classical
+  rintro ⟨positive, rectangle, valid, corner⟩
+  let decoded (column row : Fin n) : Decoded T seed (rectangle column row) :=
+    Classical.choice (nonempty_decoded_of_mem (valid.1 column row))
+  let zero : Fin n := ⟨0, positive⟩
+  have cornerPair :
+      (positionTile (decoded zero zero).horizontal (decoded zero zero).vertical,
+          (decoded zero zero).payload) =
+        (positionTile .origin .origin, seed) := by
+    apply WangTile.product_injective
+    exact (decoded zero zero).product_eq.trans corner
+  have cornerClasses :
+      ((decoded zero zero).horizontal, (decoded zero zero).vertical) =
+        (.origin, .origin) := by
+    apply positionTile_injective
+    exact congrArg Prod.fst cornerPair
+  have cornerHorizontal : (decoded zero zero).horizontal = .origin :=
+    congrArg (fun classes => classes.1) cornerClasses
+  have cornerVertical : (decoded zero zero).vertical = .origin :=
+    congrArg (fun classes => classes.2) cornerClasses
+  have cornerPayload : (decoded zero zero).payload = seed :=
+    congrArg Prod.snd cornerPair
+
+  have horizontalBottom : ∀ k : Nat, ∀ hk : k < n,
+      (decoded ⟨k, hk⟩ zero).horizontal =
+        if k = 0 then .origin else .positive := by
+    intro k
+    induction k with
+    | zero =>
+        intro hk
+        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
+        simpa [indexEq] using cornerHorizontal
+    | succ k inductionHypothesis =>
+        intro hk
+        have previousBound : k < n :=
+          Nat.lt_trans (Nat.lt_succ_self k) hk
+        have step := (Decoded.hMatches
+          (decoded ⟨k, previousBound⟩ zero)
+          (decoded ⟨k + 1, hk⟩ zero)
+          (valid.2.1 ⟨k, previousBound⟩ zero hk)).1
+        by_cases kZero : k = 0
+        · have previousClass :
+              (decoded ⟨k, previousBound⟩ zero).horizontal = .origin := by
+            simpa [kZero] using inductionHypothesis previousBound
+          rw [previousClass] at step
+          simpa using step
+        · have previousClass :
+              (decoded ⟨k, previousBound⟩ zero).horizontal = .positive := by
+            simpa [kZero] using inductionHypothesis previousBound
+          rw [previousClass] at step
+          simpa using step
+
+  have horizontalColumn : ∀ column : Fin n, ∀ k : Nat, ∀ hk : k < n,
+      (decoded column ⟨k, hk⟩).horizontal =
+        (decoded column zero).horizontal := by
+    intro column k
+    induction k with
+    | zero =>
+        intro hk
+        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
+        rw [indexEq]
+    | succ k inductionHypothesis =>
+        intro hk
+        have previousBound : k < n :=
+          Nat.lt_trans (Nat.lt_succ_self k) hk
+        have sameColumn := (Decoded.vMatches
+          (decoded column ⟨k, previousBound⟩)
+          (decoded column ⟨k + 1, hk⟩)
+          (valid.2.2 column ⟨k, previousBound⟩ hk)).2.1
+        exact sameColumn.symm.trans (inductionHypothesis previousBound)
+
+  have horizontalNonnegative (column row : Fin n) :
+      (decoded column row).horizontal ≠ .negative := by
+    have columnEq := horizontalColumn column row.val row.isLt
+    have bottomClass := horizontalBottom column.val column.isLt
+    rw [columnEq, bottomClass]
+    split <;> simp
+
+  have verticalLeft : ∀ k : Nat, ∀ hk : k < n,
+      (decoded zero ⟨k, hk⟩).vertical =
+        if k = 0 then .origin else .positive := by
+    intro k
+    induction k with
+    | zero =>
+        intro hk
+        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
+        simpa [indexEq] using cornerVertical
+    | succ k inductionHypothesis =>
+        intro hk
+        have previousBound : k < n :=
+          Nat.lt_trans (Nat.lt_succ_self k) hk
+        have step := (Decoded.vMatches
+          (decoded zero ⟨k, previousBound⟩)
+          (decoded zero ⟨k + 1, hk⟩)
+          (valid.2.2 zero ⟨k, previousBound⟩ hk)).1
+        by_cases kZero : k = 0
+        · have previousClass :
+              (decoded zero ⟨k, previousBound⟩).vertical = .origin := by
+            simpa [kZero] using inductionHypothesis previousBound
+          rw [previousClass] at step
+          simpa using step
+        · have previousClass :
+              (decoded zero ⟨k, previousBound⟩).vertical = .positive := by
+            simpa [kZero] using inductionHypothesis previousBound
+          rw [previousClass] at step
+          simpa using step
+
+  have verticalRow : ∀ row : Fin n, ∀ k : Nat, ∀ hk : k < n,
+      (decoded ⟨k, hk⟩ row).vertical =
+        (decoded zero row).vertical := by
+    intro row k
+    induction k with
+    | zero =>
+        intro hk
+        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
+        rw [indexEq]
+    | succ k inductionHypothesis =>
+        intro hk
+        have previousBound : k < n :=
+          Nat.lt_trans (Nat.lt_succ_self k) hk
+        have sameRow := (Decoded.hMatches
+          (decoded ⟨k, previousBound⟩ row)
+          (decoded ⟨k + 1, hk⟩ row)
+          (valid.2.1 ⟨k, previousBound⟩ row hk)).2.1
+        exact sameRow.symm.trans (inductionHypothesis previousBound)
+
+  have verticalNonnegative (column row : Fin n) :
+      (decoded column row).vertical ≠ .negative := by
+    have rowEq := verticalRow row column.val column.isLt
+    have leftClass := verticalLeft row.val row.isLt
+    rw [rowEq, leftClass]
+    split <;> simp
+
+  let payloadRectangle : Rectangle n n :=
+    fun column row => (decoded column row).payload
+  refine ⟨positive, payloadRectangle, ?_, ?_⟩
+  · constructor
+    · intro column row
+      exact mem_source_of_mem_regionPayloads
+        (horizontalNonnegative column row)
+        (verticalNonnegative column row)
+        (decoded column row).payload_mem
+    constructor
+    · intro column row next
+      exact (Decoded.hMatches (decoded column row)
+        (decoded ⟨column.val + 1, next⟩ row)
+        (valid.2.1 column row next)).2.2
+    · intro column row next
+      exact (Decoded.vMatches (decoded column row)
+        (decoded column ⟨row.val + 1, next⟩)
+        (valid.2.2 column row next)).2.2
+  · exact cornerPayload
 
 end PointedExtension
 end LeanWang
