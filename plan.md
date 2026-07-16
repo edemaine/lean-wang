@@ -1490,6 +1490,15 @@ markers.  Thus the remaining scaffold work is the finite-state hierarchy
 induction proving exactly those two facts for every canonical supertile level;
 no payload or edge-label reasoning remains in that induction.
 
+The decorated shaded substitution has now been minimized to the finite object
+needed for that induction.  The selected borders visible in each `2 x 2`
+quarter block give only nine patches.  Moore refinement by the sixteen child
+positions stabilizes at sixteen classes, and a native certificate proves for
+all 312 reachable decorated nodes that the class determines both its visible
+patch and every child class.  The canonical seed is class 15.  The next proof
+can therefore identify this small automaton with the recursive frame formula
+without unfolding shade choices, expansion searches, or decorated states.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply
