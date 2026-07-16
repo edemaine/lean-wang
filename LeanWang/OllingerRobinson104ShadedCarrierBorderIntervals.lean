@@ -408,6 +408,41 @@ theorem frameBase_add_mod (depth coordinate : Nat) :
   have decomposition := Nat.mod_add_div coordinate (period depth)
   omega
 
+theorem frameBase_le (depth coordinate : Nat) :
+    frameBase depth coordinate ≤ coordinate := by
+  have decomposition := frameBase_add_mod depth coordinate
+  omega
+
+theorem coordinate_lt_frameBase_add_period (depth coordinate : Nat) :
+    coordinate < frameBase depth coordinate + period depth := by
+  have decomposition := frameBase_add_mod depth coordinate
+  have periodPositive : 0 < period depth := by
+    rw [period_eq_four_mul_scale]
+    exact Nat.mul_pos (by decide) (scale_pos depth)
+  have residueLt := Nat.mod_lt coordinate periodPositive
+  omega
+
+theorem mod_eq_sub_frameBase_of_mem_block
+    {depth reference coordinate : Nat}
+    (lower : frameBase depth reference ≤ coordinate)
+    (upper : coordinate < frameBase depth reference + period depth) :
+    coordinate % period depth = coordinate - frameBase depth reference := by
+  let base := frameBase depth reference
+  have offsetLt : coordinate - base < period depth := by
+    omega
+  have baseMod : base % period depth = 0 := by
+    simp [base, frameBase]
+  calc
+    coordinate % period depth =
+        (base + (coordinate - base)) % period depth := by
+      rw [Nat.add_sub_of_le lower]
+    _ = (base % period depth +
+        (coordinate - base) % period depth) % period depth := by
+      rw [Nat.add_mod]
+    _ = coordinate - base := by
+      rw [baseMod, Nat.mod_eq_of_lt offsetLt]
+      simp [Nat.mod_eq_of_lt offsetLt]
+
 theorem frameOpening_mod (depth coordinate : Nat) :
     frameOpening depth coordinate % period depth = frameStartResidue depth := by
   have startLt : frameStartResidue depth < period depth :=
@@ -419,6 +454,12 @@ theorem frameClosing_mod (depth coordinate : Nat) :
     frameClosing depth coordinate % period depth = frameEndResidue depth := by
   simp [frameClosing, frameBase, Nat.add_mod,
     Nat.mod_eq_of_lt (frameEndResidue_lt_period depth)]
+
+theorem frameOpening_lt_frameClosing (depth coordinate : Nat) :
+    frameOpening depth coordinate < frameClosing depth coordinate := by
+  simp only [frameOpening, frameClosing]
+  exact Nat.add_lt_add_left
+    (frameStartResidue_lt_frameEndResidue depth) _
 
 theorem between_frameBounds
     {depth coordinate position : Nat}
@@ -509,6 +550,26 @@ theorem previousInterior_eq_opening
       simp [ShadedSignalRectangle.previousInterior,
         between position positionBetween.1 positionBetween.2, previous]
 
+theorem previousInterior_eq_closing
+    {interior : Nat → Option Bool} {closing position : Nat}
+    (closingBorder : interior closing = some false)
+    (between : ∀ candidate, closing < candidate → candidate < position →
+      interior candidate = none)
+    (afterClosing : closing < position) :
+    ShadedSignalRectangle.previousInterior interior position = some false := by
+  have startLe : closing + 1 ≤ position := by omega
+  induction position, startLe using Nat.le_induction with
+  | base =>
+      simp [ShadedSignalRectangle.previousInterior, closingBorder]
+  | succ position _ inductionHypothesis =>
+      have positionBetween : closing < position ∧ position < position + 1 := by
+        omega
+      have previous := inductionHypothesis
+        (fun candidate lower upper => between candidate lower (by omega))
+        positionBetween.1
+      simp [ShadedSignalRectangle.previousInterior,
+        between position positionBetween.1 positionBetween.2, previous]
+
 theorem nextInterior_eq_closing
     {interior : Nat → Option Bool} {position closing length : Nat}
     (closingBorder : interior closing = some false)
@@ -536,6 +597,201 @@ theorem nextInterior_eq_closing
         exact between candidate (by omega) upper
       · omega
       · omega
+
+theorem nextInterior_eq_true_of_no_false_before
+    {interior : Nat → Option Bool} {position opening length : Nat}
+    (openingBorder : interior opening = some true)
+    (noClosing : ∀ candidate, position ≤ candidate → candidate < opening →
+      interior candidate ≠ some false)
+    (atMostOpening : position ≤ opening)
+    (openingBeforeEnd : opening < length) :
+    ShadedSignalRectangle.nextInterior interior position (length - position) =
+      some true := by
+  induction distance : opening - position generalizing position with
+  | zero =>
+      have positionEq : position = opening := by omega
+      subst position
+      have fuelPositive : 0 < length - opening := by omega
+      obtain ⟨fuel, fuelEq⟩ := Nat.exists_eq_succ_of_ne_zero fuelPositive.ne'
+      rw [fuelEq]
+      simp [ShadedSignalRectangle.nextInterior, openingBorder]
+  | succ distance inductionHypothesis =>
+      have positionBefore : position < opening := by omega
+      have fuelEq : length - position = length - (position + 1) + 1 := by omega
+      rw [fuelEq]
+      cases current : interior position with
+      | none =>
+          simp only [ShadedSignalRectangle.nextInterior, current]
+          apply inductionHypothesis (position := position + 1)
+          · intro candidate lower upper
+            exact noClosing candidate (by omega) upper
+          · omega
+          · omega
+      | some orientation =>
+          cases orientation with
+          | false => exact (noClosing position le_rfl positionBefore current).elim
+          | true => simp [ShadedSignalRectangle.nextInterior, current]
+
+theorem exists_interior_of_nextInterior_eq_some
+    {interior : Nat → Option Bool} {position fuel : Nat}
+    {orientation : Bool}
+    (next : ShadedSignalRectangle.nextInterior interior position fuel =
+      some orientation) :
+    ∃ candidate, position ≤ candidate ∧ candidate < position + fuel ∧
+      interior candidate = some orientation := by
+  induction fuel generalizing position with
+  | zero => simp [ShadedSignalRectangle.nextInterior] at next
+  | succ fuel inductionHypothesis =>
+      cases current : interior position with
+      | none =>
+          simp only [ShadedSignalRectangle.nextInterior, current] at next
+          obtain ⟨candidate, lower, upper, selected⟩ := inductionHypothesis next
+          exact ⟨candidate, by omega, by omega, selected⟩
+      | some currentOrientation =>
+          simp only [ShadedSignalRectangle.nextInterior, current] at next
+          cases next
+          exact ⟨position, le_rfl, by omega, current⟩
+
+theorem selectedBorder_ne_some_false_before_frameOpening
+    {level depth coordinate transverse candidate : Nat}
+    (owner : depthAt (level - 1) transverse = some depth)
+    (coordinateClear : selectedBorder level coordinate transverse = none)
+    (lower : coordinate ≤ candidate)
+    (beforeOpening : candidate < frameOpening depth coordinate) :
+    selectedBorder level candidate transverse ≠ some false := by
+  intro selected
+  rcases (selectedBorder_eq_some_iff level candidate transverse false).1 selected with
+    outer | frame
+  · unfold outerBorder at outer
+    split at outer <;> simp_all
+  · rcases frame with ⟨frameDepth, framePositive, frameBounded, border⟩
+    have frameData := (frameBorder_eq_some_false_iff
+      frameDepth candidate transverse).1 border
+    have baseLe : frameBase depth coordinate ≤ candidate :=
+      (frameBase_le depth coordinate).trans lower
+    have openingBeforeBlockEnd : frameOpening depth coordinate <
+        frameBase depth coordinate + period depth := by
+      simp only [frameOpening]
+      exact Nat.add_lt_add_left
+        ((frameStartResidue_lt_frameEndResidue depth).trans
+          (frameEndResidue_lt_period depth)) _
+    have candidateMod : candidate % period depth =
+        candidate - frameBase depth coordinate :=
+      mod_eq_sub_frameBase_of_mem_block baseLe
+        (beforeOpening.trans openingBeforeBlockEnd)
+    rcases Nat.lt_trichotomy frameDepth depth with smaller | equal | larger
+    · have frameWithinSearch : frameDepth ≤ level - 1 := by
+        have ownerBound := depthAt_le owner
+        omega
+      have ownerLe := depthAt_le_of_inFrame owner framePositive
+        frameWithinSearch frameData.1
+      omega
+    · subst frameDepth
+      have startBeforeEnd := frameStartResidue_lt_frameEndResidue depth
+      simp only [frameOpening] at beforeOpening
+      omega
+    · have largeResidue : candidate % period depth = 0 :=
+        largeClosing_mod_small larger frameData.2
+      have coordinateBaseLe := frameBase_le depth coordinate
+      have candidateEq : candidate = frameBase depth coordinate := by omega
+      have coordinateEq : coordinate = candidate := by omega
+      rw [← coordinateEq, coordinateClear] at selected
+      simp at selected
+
+theorem selectedBorder_eq_none_after_frameClosing
+    {level depth coordinate transverse candidate : Nat}
+    (owner : depthAt (level - 1) transverse = some depth)
+    (afterClosing : frameClosing depth coordinate < candidate)
+    (beforeCoordinate : candidate < coordinate) :
+    selectedBorder level candidate transverse = none := by
+  cases selected : selectedBorder level candidate transverse with
+  | none => rfl
+  | some orientation =>
+      rcases (selectedBorder_eq_some_iff level candidate transverse
+        orientation).1 selected with outer | frame
+      · have candidateOne : candidate = 1 := by
+          unfold outerBorder at outer
+          split at outer
+          · exact ‹candidate = 1 ∧ 1 ≤ transverse›.1
+          · simp at outer
+        have closingLarge : 1 < frameClosing depth coordinate := by
+          simp only [frameClosing, frameEndResidue]
+          have := scale_pos depth
+          omega
+        omega
+      · rcases frame with ⟨frameDepth, framePositive, frameBounded, border⟩
+        have frameInside : inFrame frameDepth transverse = true := by
+          cases orientation with
+          | false =>
+              exact ((frameBorder_eq_some_false_iff _ _ _).1 border).1
+          | true =>
+              exact ((frameBorder_eq_some_true_iff _ _ _).1 border).1
+        have frameResidue : candidate % period frameDepth =
+              frameStartResidue frameDepth ∨
+            candidate % period frameDepth = frameEndResidue frameDepth := by
+          cases orientation with
+          | false =>
+              exact Or.inr ((frameBorder_eq_some_false_iff _ _ _).1 border).2
+          | true =>
+              exact Or.inl ((frameBorder_eq_some_true_iff _ _ _).1 border).2
+        have baseLe : frameBase depth coordinate ≤ candidate := by
+          simp only [frameClosing] at afterClosing
+          omega
+        have candidateUpper : candidate <
+            frameBase depth coordinate + period depth :=
+          beforeCoordinate.trans
+            (coordinate_lt_frameBase_add_period depth coordinate)
+        have candidateMod : candidate % period depth =
+            candidate - frameBase depth coordinate :=
+          mod_eq_sub_frameBase_of_mem_block baseLe candidateUpper
+        have afterEnd : frameEndResidue depth < candidate % period depth := by
+          simp only [frameClosing] at afterClosing
+          omega
+        rcases Nat.lt_trichotomy frameDepth depth with smaller | equal | larger
+        · have frameWithinSearch : frameDepth ≤ level - 1 := by
+            have ownerBound := depthAt_le owner
+            omega
+          have ownerLe := depthAt_le_of_inFrame owner framePositive
+            frameWithinSearch frameInside
+          omega
+        · subst frameDepth
+          have startBeforeEnd := frameStartResidue_lt_frameEndResidue depth
+          rcases frameResidue with opening | closing <;> omega
+        · have largeResidue : candidate % period depth = 0 ∨
+              candidate % period depth = 1 := by
+            rcases frameResidue with opening | closing
+            · exact Or.inr (largeOpening_mod_small larger opening)
+            · exact Or.inl (largeClosing_mod_small larger closing)
+          have endLarge : 1 < frameEndResidue depth := by
+            simp only [frameEndResidue]
+            have := scale_pos depth
+            omega
+          rcases largeResidue with zero | one <;> omega
+
+theorem selectedBorder_ne_some_false_of_no_owner
+    {level coordinate transverse : Nat}
+    (owner : depthAt (level - 1) transverse = none)
+    (coordinate_lt : coordinate < 2 * scale level) :
+    selectedBorder level coordinate transverse ≠ some false := by
+  intro selected
+  rcases (selectedBorder_eq_some_iff level coordinate transverse false).1 selected with
+    outer | frame
+  · unfold outerBorder at outer
+    split at outer <;> simp_all
+  · rcases frame with ⟨depth, positive, bounded, border⟩
+    have frameData := (frameBorder_eq_some_false_iff
+      depth coordinate transverse).1 border
+    by_cases withinSearch : depth ≤ level - 1
+    · have outside := inFrame_eq_false_of_depthAt_eq_none owner
+        positive withinSearch
+      simp [frameData.1] at outside
+    · have depthEq : depth = level := by omega
+      subst depth
+      have residueLe := Nat.mod_le coordinate (period level)
+      rw [frameData.2] at residueLe
+      simp only [frameEndResidue] at residueLe
+      have := scale_pos level
+      omega
 
 theorem period_dvd_two_mul_scale {depth level : Nat} (hdepth : depth < level) :
     period depth ∣ 2 * scale level :=
@@ -652,6 +908,141 @@ theorem intervalEdge_pair_of_horizontalCarrier
         exact ⟨next (coordinate + 1) (by omega) successorAtMostClosing, by
           rw [previous (coordinate + 1) (by omega) successorAtMostClosing]
           simp⟩
+
+/-- Conversely, the canonical signal can be clear on both sides of a cell only
+inside the smallest frame owning its row. -/
+theorem horizontalCarrier_of_intervalEdge_pair
+    {level coordinate transverse : Nat}
+    (coordinate_lt : coordinate < 2 * scale level)
+    (clear :
+      ShadedSignalRectangle.intervalEdge
+            (fun x => selectedBorder level x transverse)
+            (2 * scale level) coordinate = .none ∧
+        ShadedSignalRectangle.intervalEdge
+            (fun x => selectedBorder level x transverse)
+            (2 * scale level) (coordinate + 1) = .none) :
+    isHorizontalCarrier level coordinate transverse = true := by
+  let interior := fun x => selectedBorder level x transverse
+  have coordinateClear : interior coordinate = none :=
+    ShadedSignalRectangle.interior_eq_none_of_adjacent_clear
+      interior coordinate_lt clear.1 clear.2
+  have coordinateClear' : selectedBorder level coordinate transverse = none := by
+    simpa [interior] using coordinateClear
+  have edgeData := (ShadedSignalRectangle.intervalEdge_eq_none_iff
+    interior (2 * scale level) coordinate).1 clear.1
+  cases owner : depthAt (level - 1) transverse with
+  | none =>
+      obtain ⟨candidate, lower, upper, selected⟩ :=
+        exists_interior_of_nextInterior_eq_some edgeData.1
+      have candidate_lt : candidate < 2 * scale level := by
+        have coordinateLe : coordinate ≤ 2 * scale level := coordinate_lt.le
+        simpa [Nat.add_sub_of_le coordinateLe] using upper
+      exact (selectedBorder_ne_some_false_of_no_owner owner candidate_lt
+        selected).elim
+  | some depth =>
+      have depth_lt_level : depth < level := by
+        have depthBound := depthAt_le owner
+        have levelPositive : 0 < level := by
+          by_contra levelZero
+          have : level = 0 := Nat.eq_zero_of_not_pos levelZero
+          subst level
+          simp at owner
+        exact depthBound.trans_lt (Nat.sub_lt levelPositive (by decide))
+      have closingBeforeEnd := frameClosing_lt_two_mul_scale
+        depth_lt_level coordinate_lt
+      by_cases afterOpening :
+          frameStartResidue depth < coordinate % period depth
+      · by_cases beforeClosing :
+            coordinate % period depth < frameEndResidue depth
+        · have geometry : inFrame depth coordinate = true ∧
+              onFrameBoundary depth coordinate = false := by
+            constructor
+            · simp [inFrame]
+              omega
+            · simp [onFrameBoundary]
+              omega
+          simpa [isHorizontalCarrier, owner] using geometry
+        · have endLe : frameEndResidue depth ≤
+              coordinate % period depth := by omega
+          rcases endLe.eq_or_lt with equal | afterClosing
+          · have closingEq : frameClosing depth coordinate = coordinate := by
+              have decomposition := frameBase_add_mod depth coordinate
+              simp only [frameClosing]
+              omega
+            have closingBorder := selectedBorder_frameClosing
+              (level := level) (coordinate := coordinate) owner
+            rw [closingEq] at closingBorder
+            rw [coordinateClear'] at closingBorder
+            simp at closingBorder
+          · have closingBefore : frameClosing depth coordinate < coordinate := by
+              have decomposition := frameBase_add_mod depth coordinate
+              simp only [frameClosing]
+              omega
+            have closingBorder := selectedBorder_frameClosing
+              (level := level) (coordinate := coordinate) owner
+            have previousFalse :
+                ShadedSignalRectangle.previousInterior interior coordinate =
+                  some false := by
+              apply previousInterior_eq_closing
+                  (interior := interior)
+                  (closing := frameClosing depth coordinate)
+                  (position := coordinate)
+                  (closingBorder := by simpa [interior] using closingBorder)
+                  (afterClosing := closingBefore)
+              intro candidate candidateAfter candidateBefore
+              exact selectedBorder_eq_none_after_frameClosing owner
+                candidateAfter candidateBefore
+            exact (edgeData.2 previousFalse).elim
+      · have coordinateLeStart : coordinate % period depth ≤
+            frameStartResidue depth := by omega
+        rcases coordinateLeStart.eq_or_lt with equal | beforeOpening
+        · have openingEq : frameOpening depth coordinate = coordinate := by
+            have decomposition := frameBase_add_mod depth coordinate
+            simp only [frameOpening]
+            omega
+          have openingBorder := selectedBorder_frameOpening
+            (level := level) (coordinate := coordinate) owner
+          rw [openingEq] at openingBorder
+          rw [coordinateClear'] at openingBorder
+          simp at openingBorder
+        · have coordinateBefore : coordinate < frameOpening depth coordinate := by
+            have decomposition := frameBase_add_mod depth coordinate
+            simp only [frameOpening]
+            omega
+          have openingBorder := selectedBorder_frameOpening
+            (level := level) (coordinate := coordinate) owner
+          have openingBeforeEnd : frameOpening depth coordinate <
+              2 * scale level :=
+            (frameOpening_lt_frameClosing depth coordinate).trans closingBeforeEnd
+          have nextTrue : ShadedSignalRectangle.nextInterior interior coordinate
+                (2 * scale level - coordinate) = some true := by
+            apply nextInterior_eq_true_of_no_false_before
+                (interior := interior)
+                (position := coordinate)
+                (opening := frameOpening depth coordinate)
+                (length := 2 * scale level)
+                (openingBorder := by simpa [interior] using openingBorder)
+                (atMostOpening := coordinateBefore.le)
+                (openingBeforeEnd := openingBeforeEnd)
+            intro candidate lower before
+            exact selectedBorder_ne_some_false_before_frameOpening owner
+              coordinateClear' lower before
+          rw [nextTrue] at edgeData
+          simp at edgeData
+
+theorem intervalEdge_pair_iff_horizontalCarrier
+    {level coordinate transverse : Nat}
+    (coordinate_lt : coordinate < 2 * scale level) :
+    (ShadedSignalRectangle.intervalEdge
+          (fun x => selectedBorder level x transverse)
+          (2 * scale level) coordinate = .none ∧
+      ShadedSignalRectangle.intervalEdge
+          (fun x => selectedBorder level x transverse)
+          (2 * scale level) (coordinate + 1) = .none) ↔
+      isHorizontalCarrier level coordinate transverse = true := by
+  constructor
+  · exact horizontalCarrier_of_intervalEdge_pair coordinate_lt
+  · exact intervalEdge_pair_of_horizontalCarrier coordinate_lt
 
 end ShadedCarrierBorderGeometry
 end Closed104

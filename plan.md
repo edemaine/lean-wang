@@ -517,9 +517,12 @@ and the generic finite-input machine-to-Wang construction.
   outer opening together with the depth-`1` through depth-`level` frame
   boundaries. Distinct frame depths have disjoint boundaries, and no enclosing
   boundary enters the strict interior of the smallest owner frame. Hence every
-  arithmetic horizontal carrier cell has two clear canonical signal edges in
-  the actual substitution supertile. The converse recognition direction is
-  the next backward-realization lemma.
+  arithmetic horizontal carrier cell has two clear canonical signal edges.
+  Conversely, the ordering of owner and enclosing boundaries proves that two
+  clear canonical edges can occur only in that owner's strict frame interior.
+  Thus canonical adjacent-clear edges are exactly arithmetic carriers. The
+  next backward-realization lemma transports this equivalence to the actual
+  substitution rows and columns.
 
 ## Remaining scaffold proof
 
