@@ -1499,6 +1499,13 @@ patch and every child class.  The canonical seed is class 15.  The next proof
 can therefore identify this small automaton with the recursive frame formula
 without unfolding shade choices, expansion searches, or decorated states.
 
+The finite factor is also connected back to concrete substitution supertiles.
+Its generated class follows the base-four child address of each decorated
+node, and the eight outputs of that class are exactly the horizontal and
+vertical selected borders of the corresponding `2 x 2` quarter block.  Thus
+the remaining bridge is purely arithmetic: identify the generated class-15
+automaton with the explicit recursive frame formula below.
+
 The arithmetic side no longer depends on the recursive nearest-border signal
 search.  `OllingerRobinson104ShadedCarrierHierarchySignals` defines the exact
 selected-border formula and an explicit row/column flow: forward before the
