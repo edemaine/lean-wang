@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinsonScaffold
-import LeanWang.RoutedScaffold
+import LeanWang.RoutedPointedPlane
 import LeanWang.Theorems
 import LeanWang.UniversalTM0TableauData
 import Mathlib.Computability.Reduce
@@ -112,26 +112,36 @@ theorem domino_problem_undecidable
   exact ComputablePred.halting_problem 0
     ((hnonhalting.not).of_eq fun _ => not_not)
 
-/-- Plane-tiling instance after applying a channel-aware routed scaffold. -/
+/-- Pointed full-plane form of the fixed universal TM0 instance. -/
+def pointedFixedDominoReduction (c : Code) : TileSet × WangTile :=
+  PointedExtension.data (fixedDominoReduction c)
+
+theorem pointedFixedDominoReduction_computable :
+    Computable pointedFixedDominoReduction := by
+  exact PointedExtension.data_computable.comp fixedDominoReduction_computable
+
+/-- Plane-tiling instance after applying a channel-aware routed scaffold to
+the pointed full-plane payload. -/
 def routedDominoReduction (S : RoutedScaffold) (c : Code) : TileSet :=
-  combineWithRoutedScaffold S (fixedDominoReduction c).1
-    (fixedDominoReduction c).2
+  combineWithRoutedScaffold S (pointedFixedDominoReduction c).1
+    (pointedFixedDominoReduction c).2
 
 theorem routedDominoReduction_computable (S : RoutedScaffold) :
     Computable (routedDominoReduction S) := by
   exact (combineWithRoutedScaffold_computable S).comp
-    fixedDominoReduction_computable
+    pointedFixedDominoReduction_computable
 
 theorem routedDominoReduction_correct
-    {S : RoutedScaffold} (hS : IsRoutedScaffold S) (c : Code) :
+    {S : RoutedScaffold}
+    (realizes : RealizesRoutedPointedPlanes S)
+    (forces : ForcesRoutedFixedCornerSquares S) (c : Code) :
     TilesPlane (routedDominoReduction S c) ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  rw [routedDominoReduction]
-  exact (routedScaffold_reduction_correct hS
+  rw [routedDominoReduction, pointedFixedDominoReduction,
+    PointedExtension.data]
+  exact (routedPointedExtension_reduction_correct realizes forces
     (fixedDominoReduction c).1 (fixedDominoReduction c).2).trans
-      ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
-        (fixedDominoReduction c).1 (fixedDominoReduction c).2).symm.trans
-          (fixedDominoReduction_correct c))
+      (fixedDominoReduction_correct c)
 
 def routedDominoReductionCode (S : RoutedScaffold) (c : Code) : Nat :=
   encodeTileSet (routedDominoReduction S c)
@@ -141,15 +151,19 @@ theorem routedDominoReductionCode_computable (S : RoutedScaffold) :
   exact encodeTileSet_computable.comp (routedDominoReduction_computable S)
 
 theorem routedDominoReductionCode_correct
-    {S : RoutedScaffold} (hS : IsRoutedScaffold S) (c : Code) :
+    {S : RoutedScaffold}
+    (realizes : RealizesRoutedPointedPlanes S)
+    (forces : ForcesRoutedFixedCornerSquares S) (c : Code) :
     TilesPlane (decodeTileSet (routedDominoReductionCode S c)) ↔
       ¬ (Nat.Partrec.Code.eval c 0).Dom := by
   rw [routedDominoReductionCode, decodeTileSet_encodeTileSet]
-  exact routedDominoReduction_correct hS c
+  exact routedDominoReduction_correct realizes forces c
 
 /-- Encoded domino undecidability from a channel-aware routed scaffold. -/
 theorem encoded_domino_problem_undecidable_of_routed
-    (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
+    (S : RoutedScaffold)
+    (realizes : RealizesRoutedPointedPlanes S)
+    (forces : ForcesRoutedFixedCornerSquares S) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) := by
   intro hdec
   have hencoded : ComputablePred
@@ -160,13 +174,16 @@ theorem encoded_domino_problem_undecidable_of_routed
         (routedDominoReductionCode_computable S)) hdec
   have hnonhalting : ComputablePred
       (fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom) :=
-    hencoded.of_eq fun c => routedDominoReductionCode_correct hS c
+    hencoded.of_eq fun c =>
+      routedDominoReductionCode_correct realizes forces c
   exact ComputablePred.halting_problem 0
     ((hnonhalting.not).of_eq fun _ => not_not)
 
 /-- Unencoded domino undecidability from a channel-aware routed scaffold. -/
 theorem domino_problem_undecidable_of_routed
-    (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
+    (S : RoutedScaffold)
+    (realizes : RealizesRoutedPointedPlanes S)
+    (forces : ForcesRoutedFixedCornerSquares S) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) := by
   intro hdec
   have hdomino : ComputablePred
@@ -176,7 +193,7 @@ theorem domino_problem_undecidable_of_routed
         (routedDominoReduction_computable S)) hdec
   have hnonhalting : ComputablePred
       (fun c : Code => ¬ (Nat.Partrec.Code.eval c 0).Dom) :=
-    hdomino.of_eq fun c => routedDominoReduction_correct hS c
+    hdomino.of_eq fun c => routedDominoReduction_correct realizes forces c
   exact ComputablePred.halting_problem 0
     ((hnonhalting.not).of_eq fun _ => not_not)
 

@@ -30,17 +30,25 @@ theorem domino_problem_undecidable
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
   UniversalTM0Reduction.domino_problem_undecidable S hS
 
-/-- Encoded Wang domino undecidability from a channel-aware routed scaffold. -/
+/-- Encoded Wang domino undecidability from a channel-aware routed scaffold
+that realizes pointed planes and forces rooted finite squares. -/
 theorem encoded_domino_problem_undecidable_of_routed
-    (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
+    (S : RoutedScaffold)
+    (realizes : RealizesRoutedPointedPlanes S)
+    (forces : ForcesRoutedFixedCornerSquares S) :
     ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  UniversalTM0Reduction.encoded_domino_problem_undecidable_of_routed S hS
+  UniversalTM0Reduction.encoded_domino_problem_undecidable_of_routed
+    S realizes forces
 
-/-- Wang domino undecidability from a channel-aware routed scaffold. -/
+/-- Wang domino undecidability from a channel-aware routed scaffold that
+realizes pointed planes and forces rooted finite squares. -/
 theorem domino_problem_undecidable_of_routed
-    (S : RoutedScaffold) (hS : IsRoutedScaffold S) :
+    (S : RoutedScaffold)
+    (realizes : RealizesRoutedPointedPlanes S)
+    (forces : ForcesRoutedFixedCornerSquares S) :
     ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  UniversalTM0Reduction.domino_problem_undecidable_of_routed S hS
+  UniversalTM0Reduction.domino_problem_undecidable_of_routed
+    S realizes forces
 
 end LeanWang
 
