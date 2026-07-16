@@ -131,6 +131,16 @@ theorem quarter_vmatch (level : Nat) (root : Node) (x y : Nat)
 /-- Side length, in quarter tiles, of a level-`level` shaded supertile. -/
 def side (level : Nat) : Nat := 2 * 4 ^ level
 
+/-- Selected vertical-border orientation seen along one quarter-tile row. -/
+def rowInterior (level : Nat) (root : Node) (x y : Nat) : Option Bool :=
+  ShadedSignalRectangle.horizontalInterior
+    (supertileIndexGrid level root) (supertileShadeGrid level root) x y
+
+/-- Selected horizontal-border orientation seen along one quarter-tile column. -/
+def columnInterior (level : Nat) (root : Node) (x y : Nat) : Option Bool :=
+  ShadedSignalRectangle.verticalInterior
+    (supertileIndexGrid level root) (supertileShadeGrid level root) x y
+
 private noncomputable def signals (level : Nat) (root : Node) :
     Nat → Nat → Signals.State :=
   ShadedSignalRectangle.signalGrid
@@ -142,6 +152,30 @@ def site (level : Nat) (root : Node) (x y : Nat) : ShadedSignals.Site :=
   (((supertileIndexGrid level root (x / 2) (y / 2), quadrantAt x y),
       supertileShadeGrid level root x y),
     signals level root x y)
+
+@[simp] theorem site_signal_west (level : Nat) (root : Node) (x y : Nat) :
+    (site level root x y).2.west =
+      ShadedSignalRectangle.intervalEdge
+        (fun x => rowInterior level root x y) (side level) x := by
+  rfl
+
+@[simp] theorem site_signal_east (level : Nat) (root : Node) (x y : Nat) :
+    (site level root x y).2.east =
+      ShadedSignalRectangle.intervalEdge
+        (fun x => rowInterior level root x y) (side level) (x + 1) := by
+  rfl
+
+@[simp] theorem site_signal_south (level : Nat) (root : Node) (x y : Nat) :
+    (site level root x y).2.south =
+      ShadedSignalRectangle.intervalEdge
+        (fun y => columnInterior level root x y) (side level) y := by
+  rfl
+
+@[simp] theorem site_signal_north (level : Nat) (root : Node) (x y : Nat) :
+    (site level root x y).2.north =
+      ShadedSignalRectangle.intervalEdge
+        (fun y => columnInterior level root x y) (side level) (y + 1) := by
+  rfl
 
 private theorem validSignals (level : Nat) (root : Node) :
     ShadedSignalRectangle.ValidSignalRectangle

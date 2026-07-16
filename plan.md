@@ -1450,6 +1450,24 @@ origin stays fixed and the coordinate increases by exactly one.  This is the
 one-dimensional compatibility fact needed to label horizontal and vertical
 carrier runs in the concrete square potentials.
 
+The canonical depth-three square has now been audited at the logical-carrier
+level.  Its 68 active components are 64 exact `6 x 6` Cartesian grids and four
+exact `14 x 14` Cartesian grids.  Every coordinate cycle is consistent, and
+each of the 17 components containing a corner contains exactly one, at its
+grid center.  This exposes the recursive invariant suggested by Figure 18:
+one refinement retains sixteen copies of every old component and introduces
+four grids of the next size (`6, 14, 30, ...`).
+
+`OllingerRobinson104ShadedCarrierSquareGeometry` now exposes the supertile row
+and column border sequences, identifies horizontal and vertical carriers with
+adjacent clear canonical edges, and proves that their physical interval
+coordinates advance locally.  `RoutedPointedCarrierAddressing` removes the
+remaining symbolic-label bookkeeping: a crossing coordinate and one integer
+source address per channel determine a `SquarePotential` from elementary
+horizontal and vertical successor equations.  The concrete backward target
+is therefore a recursive addressed-grid decomposition of the canonical
+supertile squares.
+
 ### 3. Package and finish
 
 Bundle the forward and backward results as `IsRoutedScaffold S`, apply
