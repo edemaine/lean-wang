@@ -47,7 +47,11 @@ def equivCode : AxisClass ≃ Option Bool where
   toFun := toCode
   invFun := ofCode
   left_inv := by intro axis; cases axis <;> rfl
-  right_inv := by intro code; rcases code with _ | value <;> cases value <;> rfl
+  right_inv := by
+    intro code
+    cases code with
+    | none => rfl
+    | some value => cases value <;> rfl
 
 instance instPrimcodable : Primcodable AxisClass :=
   Primcodable.ofEquiv (Option Bool) equivCode
@@ -102,21 +106,21 @@ theorem code_injective : Function.Injective code := by
 
 theorem before_primrec : Primrec before := by
   have positive : PrimrecPred (fun axis : AxisClass => axis = .positive) :=
-    Primrec.eq.comp Primrec.id (Primrec.const .positive)
+    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.positive)
   exact (Primrec.ite positive (Primrec.const 1) (Primrec.const 0)).of_eq
     fun axis => by cases axis <;> rfl
 
 theorem after_primrec : Primrec after := by
   have negative : PrimrecPred (fun axis : AxisClass => axis = .negative) :=
-    Primrec.eq.comp Primrec.id (Primrec.const .negative)
+    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.negative)
   exact (Primrec.ite negative (Primrec.const 0) (Primrec.const 1)).of_eq
     fun axis => by cases axis <;> rfl
 
 theorem code_primrec : Primrec code := by
   have negative : PrimrecPred (fun axis : AxisClass => axis = .negative) :=
-    Primrec.eq.comp Primrec.id (Primrec.const .negative)
+    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.negative)
   have origin : PrimrecPred (fun axis : AxisClass => axis = .origin) :=
-    Primrec.eq.comp Primrec.id (Primrec.const .origin)
+    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.origin)
   exact (Primrec.ite negative (Primrec.const 0)
     (Primrec.ite origin (Primrec.const 1) (Primrec.const 2))).of_eq
       fun axis => by cases axis <;> rfl
@@ -162,8 +166,12 @@ theorem positionTile_injective :
 theorem positionTile_primrec :
     Primrec (fun classes : AxisClass × AxisClass =>
       positionTile classes.1 classes.2) := by
-  apply WangTile.ofTuple_primrec.comp
-  exact Primrec.pair
+  have tuple : Primrec (fun classes : AxisClass × AxisClass =>
+      (Nat.pair classes.2.after classes.1.code,
+        Nat.pair classes.2.before classes.1.code,
+        Nat.pair classes.1.after classes.2.code,
+        Nat.pair classes.1.before classes.2.code)) :=
+    Primrec.pair
     (Primrec₂.natPair.comp
       (AxisClass.after_primrec.comp Primrec.snd)
       (AxisClass.code_primrec.comp Primrec.fst))
@@ -178,6 +186,7 @@ theorem positionTile_primrec :
         (Primrec₂.natPair.comp
           (AxisClass.before_primrec.comp Primrec.fst)
           (AxisClass.code_primrec.comp Primrec.snd))))
+  exact (WangTile.ofTuple_primrec.comp tuple).of_eq fun _ => rfl
 
 /-- Payload used strictly southwest of the distinguished axes. -/
 def zeroTile : WangTile :=
@@ -192,16 +201,20 @@ def verticalWire (tile : WangTile) : WangTile :=
   { n := tile.s, s := tile.s, e := 0, w := 0 }
 
 theorem horizontalWire_primrec : Primrec horizontalWire := by
-  apply WangTile.ofTuple_primrec.comp
-  exact Primrec.pair (Primrec.const 0)
+  have tuple : Primrec (fun tile : WangTile =>
+      (0, 0, tile.w, tile.w)) :=
+    Primrec.pair (Primrec.const 0)
     (Primrec.pair (Primrec.const 0)
       (Primrec.pair WangTile.w_primrec WangTile.w_primrec))
+  exact (WangTile.ofTuple_primrec.comp tuple).of_eq fun _ => rfl
 
 theorem verticalWire_primrec : Primrec verticalWire := by
-  apply WangTile.ofTuple_primrec.comp
-  exact Primrec.pair WangTile.s_primrec
+  have tuple : Primrec (fun tile : WangTile =>
+      (tile.s, tile.s, 0, 0)) :=
+    Primrec.pair WangTile.s_primrec
     (Primrec.pair WangTile.s_primrec
       (Primrec.pair (Primrec.const 0) (Primrec.const 0)))
+  exact (WangTile.ofTuple_primrec.comp tuple).of_eq fun _ => rfl
 
 /-- Payloads allowed in one of the nine position regions. -/
 def regionPayloads (T : TileSet) (seed : WangTile) :
@@ -222,13 +235,13 @@ theorem regionPayloads_primrec :
   have hhorizontal : Primrec horizontal := Primrec.fst.comp Primrec.snd
   have hvertical : Primrec vertical := Primrec.snd.comp Primrec.snd
   have horizontalNegative : PrimrecPred (fun input => horizontal input = .negative) :=
-    Primrec.eq.comp hhorizontal (Primrec.const .negative)
+    Primrec.eq.comp hhorizontal (Primrec.const AxisClass.negative)
   have verticalNegative : PrimrecPred (fun input => vertical input = .negative) :=
-    Primrec.eq.comp hvertical (Primrec.const .negative)
+    Primrec.eq.comp hvertical (Primrec.const AxisClass.negative)
   have horizontalOrigin : PrimrecPred (fun input => horizontal input = .origin) :=
-    Primrec.eq.comp hhorizontal (Primrec.const .origin)
+    Primrec.eq.comp hhorizontal (Primrec.const AxisClass.origin)
   have verticalOrigin : PrimrecPred (fun input => vertical input = .origin) :=
-    Primrec.eq.comp hvertical (Primrec.const .origin)
+    Primrec.eq.comp hvertical (Primrec.const AxisClass.origin)
   have source : Primrec (fun input :
       (TileSet × WangTile) × (AxisClass × AxisClass) => input.1.1) :=
     Primrec.fst.comp Primrec.fst
@@ -252,12 +265,14 @@ theorem regionPayloads_primrec :
         (Primrec.fst.comp Primrec.fst) (Primrec.snd.comp Primrec.fst)
   have origin : PrimrecPred (fun input =>
       horizontal input = .origin ∧ vertical input = .origin) :=
-    Primrec.and.comp horizontalOrigin verticalOrigin
+    horizontalOrigin.and verticalOrigin
   exact (Primrec.ite horizontalNegative
     (Primrec.ite verticalNegative (Primrec.const [zeroTile]) horizontalWires)
     (Primrec.ite verticalNegative verticalWires
       (Primrec.ite origin seedOnly source))).of_eq fun input => by
-        cases input.2.1 <;> cases input.2.2 <;> rfl
+        rcases input with ⟨⟨T, seed⟩, horizontalClass, verticalClass⟩
+        cases horizontalClass <;> cases verticalClass <;>
+          simp [horizontal, vertical, regionPayloads]
 
 /-- All three axis classes, used to enumerate the finite extension. -/
 def axisClasses : List AxisClass :=
@@ -266,12 +281,42 @@ def axisClasses : List AxisClass :=
 theorem mem_axisClasses (axis : AxisClass) : axis ∈ axisClasses := by
   cases axis <;> simp [axisClasses]
 
+/-- Add the position layer to every payload allowed in one region. -/
+def tilesForRegion
+    (input : (TileSet × WangTile) × (AxisClass × AxisClass)) : TileSet :=
+  (regionPayloads input.1.1 input.1.2 input.2.1 input.2.2).map fun payload =>
+    WangTile.product (positionTile input.2.1 input.2.2) payload
+
+theorem tilesForRegion_primrec : Primrec tilesForRegion := by
+  refine Primrec.list_map regionPayloads_primrec ?_
+  apply Primrec₂.mk
+  have position : Primrec (fun input :
+      ((TileSet × WangTile) × (AxisClass × AxisClass)) × WangTile =>
+        positionTile input.1.2.1 input.1.2.2) :=
+    positionTile_primrec.comp
+      (Primrec.pair
+        (Primrec.fst.comp (Primrec.snd.comp Primrec.fst))
+        (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
+  exact WangTile.product_primrec.comp (Primrec.pair position Primrec.snd)
+
+/-- Enumerate all vertical regions for one horizontal axis class. -/
+def tilesForHorizontal
+    (input : (TileSet × WangTile) × AxisClass) : TileSet :=
+  axisClasses.flatMap fun vertical =>
+    tilesForRegion (input.1, input.2, vertical)
+
+theorem tilesForHorizontal_primrec : Primrec tilesForHorizontal := by
+  refine Primrec.list_flatMap (Primrec.const axisClasses) ?_
+  apply Primrec₂.mk
+  exact tilesForRegion_primrec.comp
+    (Primrec.pair
+      (Primrec.fst.comp Primrec.fst)
+      (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+
 /-- Extend every allowed region payload by its finite position layer. -/
 def tiles (T : TileSet) (seed : WangTile) : TileSet :=
   axisClasses.flatMap fun horizontal =>
-    axisClasses.flatMap fun vertical =>
-      (regionPayloads T seed horizontal vertical).map fun payload =>
-        WangTile.product (positionTile horizontal vertical) payload
+    tilesForHorizontal ((T, seed), horizontal)
 
 /-- The original seed at the crossing of the two distinguished axes. -/
 def pointedSeed (seed : WangTile) : WangTile :=
@@ -282,24 +327,7 @@ theorem tiles_primrec :
   unfold tiles
   refine Primrec.list_flatMap (Primrec.const axisClasses) ?_
   apply Primrec₂.mk
-  refine Primrec.list_flatMap (Primrec.const axisClasses) ?_
-  apply Primrec₂.mk
-  have regions : Primrec (fun input :
-      ((TileSet × WangTile) × AxisClass) × AxisClass =>
-        regionPayloads input.1.1.1 input.1.1.2 input.1.2 input.2) :=
-    regionPayloads_primrec.comp
-      (Primrec.pair (Primrec.fst.comp Primrec.fst)
-        (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
-  refine Primrec.list_map regions ?_
-  apply Primrec₂.mk
-  have position : Primrec (fun input :
-      (((TileSet × WangTile) × AxisClass) × AxisClass) × WangTile =>
-        positionTile input.1.1.2 input.1.2) :=
-    positionTile_primrec.comp
-      (Primrec.pair
-        (Primrec.snd.comp (Primrec.fst.comp Primrec.fst))
-        (Primrec.snd.comp Primrec.fst))
-  exact WangTile.product_primrec.comp (Primrec.pair position Primrec.snd)
+  exact tilesForHorizontal_primrec
 
 theorem pointedSeed_primrec : Primrec pointedSeed := by
   exact WangTile.product_primrec.comp
@@ -321,12 +349,14 @@ theorem mem_tiles_iff {T : TileSet} {seed tile : WangTile} :
         payload ∈ regionPayloads T seed horizontal vertical ∧
           WangTile.product (positionTile horizontal vertical) payload = tile := by
   constructor
-  · simp only [tiles, List.mem_flatMap, List.mem_map]
+  · simp only [tiles, tilesForHorizontal, tilesForRegion,
+      List.mem_flatMap, List.mem_map]
     rintro ⟨horizontal, _horizontalMem, vertical, _verticalMem,
       payload, payloadMem, rfl⟩
     exact ⟨horizontal, vertical, payload, payloadMem, rfl⟩
   · rintro ⟨horizontal, vertical, payload, payloadMem, rfl⟩
-    simp only [tiles, List.mem_flatMap, List.mem_map]
+    simp only [tiles, tilesForHorizontal, tilesForRegion,
+      List.mem_flatMap, List.mem_map]
     exact ⟨horizontal, mem_axisClasses horizontal,
       vertical, mem_axisClasses vertical, payload, payloadMem, rfl⟩
 
