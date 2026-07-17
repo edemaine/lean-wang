@@ -8,6 +8,7 @@ import LeanWang.Kari.Dynamics
 import LeanWang.Kari.HalfPlane
 import LeanWang.Kari.Affine
 import LeanWang.Kari.Beatty
+import LeanWang.Kari.AffineSystem
 import LeanWang.Kari.TransducerHalfPlane
 import LeanWang.Kari.Hooper
 
