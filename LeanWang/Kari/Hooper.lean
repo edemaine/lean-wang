@@ -16,6 +16,7 @@ import LeanWang.Kari.Hooper.RegisterLayout
 import LeanWang.Kari.Hooper.MarkerTape
 import LeanWang.Kari.Hooper.MarkerShift
 import LeanWang.Kari.Hooper.MarkerMachine
+import LeanWang.Kari.Hooper.FiniteTM0Program
 import LeanWang.Kari.Hooper.BasicLemma
 
 /-!
@@ -30,8 +31,8 @@ The current modules provide unrestricted full-tape semantics, explicit finite
 transition tables, arithmetic stack encodings for the fixed source tape, a
 four-register counter-program layer, its exact finite five-boundary marker
 tape, collision-free suffix shifts for every counter operation, a concrete
-finite-table marker-move primitive, relocatable arithmetic blocks, and the
-abstract strong-induction core of Hooper's nested bounded-search construction.
-The remaining files will compile the whole source program and instantiate the
-nesting laws.
+finite-table marker-move primitive, relocatable arithmetic blocks, a verified
+finite-table linker, and the abstract strong-induction core of Hooper's nested
+bounded-search construction.  The remaining files will compile the whole
+source program and instantiate the nesting laws.
 -/
