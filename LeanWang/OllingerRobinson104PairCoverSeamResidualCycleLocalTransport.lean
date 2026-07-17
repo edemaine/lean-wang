@@ -5,7 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamCreatedRouteParityAudit
 import LeanWang.OllingerRobinson104PairCoverSeamResidualCyclePredecessorTransport
-import LeanWang.OllingerRobinson104SparseFreeLineEvenExtraCreatedWindowBacking
+import LeanWang.OllingerRobinson104SparseFreeLinePlaneEvenExtraCreatedWindowBacking
 
 /-!
 # Transport created residual sources to local hierarchy cycles
@@ -25,7 +25,7 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph
   RedShadeGraphBoards RedShadeGraphRefinement RedShadeGraphTranslation
   PairCoverSeamShadePaths PairCoverSeamCreatedLocalTransport
   PairCoverSeamCreatedRouteParityAudit
-  SparseFreeLineEvenExtraCreatedWindowBacking
+  SparseFreeLinePlaneEvenExtraCreatedWindowBacking
   RefinedCoordinateProjection ShadedFreeLineProjectionSourceLists
   Signals.FreeCellLocal
 
