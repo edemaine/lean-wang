@@ -28,6 +28,30 @@ theorem fixedNonhalting_manyOneReducible_encodedDominoProblem :
     DominoProblem.FixedNonhalting ≤₀ DominoProblem.EncodedHolds :=
   Robinson.fixedNonhalting_manyOneReducible_encodedDominoProblem
 
+/-- Plane Wang tilability is co-r.e. by finite obstruction search. -/
+theorem domino_problem_coRE : CoREPred DominoProblem.Holds :=
+  DominoProblem.coRE
+
+/-- The encoded Wang domino problem is likewise co-r.e. -/
+theorem encoded_domino_problem_coRE : CoREPred DominoProblem.EncodedHolds :=
+  DominoProblem.encodedCoRE
+
+/-- The Wang domino problem is co-r.e.-hard. -/
+theorem domino_problem_coRE_hard : DominoProblem.CoREHard :=
+  Robinson.reduction.coREHard
+
+/-- The encoded Wang domino problem is co-r.e.-hard. -/
+theorem encoded_domino_problem_coRE_hard : DominoProblem.EncodedCoREHard :=
+  Robinson.reduction.encodedCoREHard
+
+/-- The Wang domino problem is co-r.e.-complete. -/
+theorem domino_problem_coRE_complete : DominoProblem.CoREComplete :=
+  Robinson.reduction.coREComplete
+
+/-- The encoded Wang domino problem is co-r.e.-complete. -/
+theorem encoded_domino_problem_coRE_complete : DominoProblem.EncodedCoREComplete :=
+  Robinson.reduction.encodedCoREComplete
+
 /-- The encoded Wang domino problem is undecidable. -/
 theorem encoded_domino_problem_undecidable :
     DominoProblem.EncodedUndecidable :=

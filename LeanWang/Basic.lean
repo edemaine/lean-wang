@@ -8,6 +8,7 @@ import Mathlib.Computability.Primrec.List
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Int.Basic
 import Mathlib.Data.List.Basic
+import Mathlib.Data.List.GetD
 import Mathlib.Data.Nat.Pairing
 
 /-!
@@ -470,6 +471,32 @@ def rectIndex (w : Nat) (i j : Nat) : Nat :=
 def getRectCell? (xs : List WangTile) (w i j : Nat) : Option WangTile :=
   xs[rectIndex w i j]?
 
+/-- The one-color tile used as an irrelevant default outside a flat rectangle. -/
+def monochromeTile : WangTile where
+  n := 0
+  s := 0
+  e := 0
+  w := 0
+
+/-- Read cell `(i, j)` from a row-major rectangle, using an irrelevant default out of range. -/
+def flatTile (xs : List WangTile) (w i j : Nat) : WangTile :=
+  xs.getD (rectIndex w i j) monochromeTile
+
+/-- Semantic specification of a valid row-major `w × h` rectangle list. -/
+def FlatValidRectangle (T : TileSet) (w h : Nat) (xs : List WangTile) : Prop :=
+  xs.length = w * h ∧
+    ∀ i : Nat, i < w → ∀ j : Nat, j < h →
+      flatTile xs w i j ∈ T ∧
+        (∀ _hi : i + 1 < w,
+          WangTile.HMatches (flatTile xs w i j) (flatTile xs w (i + 1) j)) ∧
+        (∀ _hj : j + 1 < h,
+          WangTile.VMatches (flatTile xs w i j) (flatTile xs w i (j + 1)))
+
+instance (T : TileSet) (w h : Nat) (xs : List WangTile) :
+    Decidable (FlatValidRectangle T w h xs) := by
+  unfold FlatValidRectangle
+  infer_instance
+
 /-- All words of length `n` over a finite alphabet. -/
 def words (alphabet : List α) : Nat → List (List α)
   | 0 => [[]]
@@ -478,29 +505,10 @@ def words (alphabet : List α) : Nat → List (List α)
     ) (words alphabet n)
 
 /--
-Executable checker for a row-major `w × h` rectangle pattern.
-
-The pattern must have exactly `w * h` cells, every cell must belong to `T`, and
-all east/north adjacencies inside the rectangle must match.
+Executable checker for the semantic row-major rectangle specification.
 -/
 def validRectListBool (T : TileSet) (w h : Nat) (xs : List WangTile) : Bool :=
-  xs.length == w * h &&
-    (List.range w).all fun i =>
-      (List.range h).all fun j =>
-        match getRectCell? xs w i j with
-        | none => false
-        | some tile =>
-            decide (tile ∈ T) &&
-              (if _hi : i + 1 < w then
-                match getRectCell? xs w (i + 1) j with
-                | none => false
-                | some east => decide (WangTile.HMatches tile east)
-              else true) &&
-                (if _hj : j + 1 < h then
-                  match getRectCell? xs w i (j + 1) with
-                  | none => false
-                  | some north => decide (WangTile.VMatches tile north)
-                else true)
+  decide (FlatValidRectangle T w h xs)
 
 /-- Exhaustive finite search for a valid `w × h` rectangle over `T`. -/
 def tileableRectangleBool (T : TileSet) (w h : Nat) : Bool :=
@@ -509,13 +517,6 @@ def tileableRectangleBool (T : TileSet) (w h : Nat) : Bool :=
 /-- Exhaustive finite search for a valid `n × n` square over `T`. -/
 def tileableSquareBool (T : TileSet) (n : Nat) : Bool :=
   tileableRectangleBool T n n
-
-/-- The one-color tile used for executable sanity checks. -/
-def monochromeTile : WangTile where
-  n := 0
-  s := 0
-  e := 0
-  w := 0
 
 example : tileableSquareBool [monochromeTile] 2 = true := by
   decide

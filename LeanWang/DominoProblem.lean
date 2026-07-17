@@ -3,8 +3,9 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Basic
-import Mathlib.Computability.Reduce
+import LeanWang.CoRE
+import LeanWang.Compactness
+import LeanWang.FiniteSearch
 
 /-!
 # Proof-neutral Wang domino problem interface
@@ -15,11 +16,11 @@ many-one reduction from the complement of Mathlib's fixed-input halting problem.
 Concrete proof techniques, currently the Robinson construction, provide values
 of this structure in their own module trees.
 
-Mathlib provides `REPred` and computable many-one reducibility, but does not
-currently provide definitions of co-r.e. hardness or completeness.  The
-many-one reductions exposed here are intended to be the hardness component of
-that later result; co-r.e. membership of plane tiling additionally needs the
-independent finite-obstruction argument.
+The shared reduction certificate supplies co-r.e. hardness via universality of
+Mathlib's partial-recursive evaluator.  Independently, exhaustive finite-square
+search and compactness supply co-r.e. membership.  Thus co-r.e. completeness,
+as well as undecidability, is a generic consequence of any concrete reduction
+certificate.
 -/
 
 noncomputable section
@@ -49,6 +50,22 @@ def Undecidable : Prop :=
 def EncodedUndecidable : Prop :=
   ¬ ComputablePred EncodedHolds
 
+/-- The proof-neutral statement that the Wang domino problem is co-r.e.-hard. -/
+def CoREHard : Prop :=
+  LeanWang.CoREHard Holds
+
+/-- The proof-neutral statement that the Wang domino problem is co-r.e.-complete. -/
+def CoREComplete : Prop :=
+  LeanWang.CoREComplete Holds
+
+/-- Co-r.e. hardness of the natural-number-coded Wang domino problem. -/
+def EncodedCoREHard : Prop :=
+  LeanWang.CoREHard EncodedHolds
+
+/-- Co-r.e. completeness of the natural-number-coded Wang domino problem. -/
+def EncodedCoREComplete : Prop :=
+  LeanWang.CoREComplete EncodedHolds
+
 /--
 A computable translation from universal-program codes to Wang tilesets, with
 plane tilability equivalent to nonhalting.  Different undecidability proofs can
@@ -58,6 +75,24 @@ structure Reduction where
   tiles : Code → TileSet
   tiles_computable : Computable tiles
   correct : ∀ c, Holds (tiles c) ↔ FixedNonhalting c
+
+/-- Non-tilability is r.e., witnessed by a finite square obstruction. -/
+theorem coRE : LeanWang.CoREPred Holds := by
+  unfold LeanWang.CoREPred
+  have hnotSquare : ComputablePred fun p : TileSet × Nat =>
+      ¬ TileableSquare p.1 p.2 :=
+    tileableSquare_computablePred.not
+  have hexists : REPred fun T : TileSet => ∃ n, ¬ TileableSquare T n :=
+    REPred.exists_nat hnotSquare
+  exact hexists.of_eq fun T => by
+    simpa only [Holds, not_forall] using
+      (not_congr (tilesPlane_iff_all_tileableSquares T)).symm
+
+/-- Encoded plane tilability is co-r.e. by computable decoding. -/
+theorem encodedCoRE : LeanWang.CoREPred EncodedHolds := by
+  unfold LeanWang.CoREPred
+  exact (coRE.comp decodeTileSet_computable).of_eq fun n => by
+    simp only [EncodedHolds]
 
 namespace Reduction
 
@@ -84,6 +119,30 @@ theorem encodedManyOneReducible (r : Reduction) :
     FixedNonhalting ≤₀ EncodedHolds :=
   ⟨r.encodedTiles, r.encodedTiles_computable,
     fun c => (r.encodedTiles_correct c).symm⟩
+
+/-- Any shared reduction certificate proves co-r.e. hardness. -/
+theorem coREHard (r : Reduction) : DominoProblem.CoREHard := by
+  intro alpha _ p hp
+  have hfixed : p ≤₀ FixedNonhalting := by
+    change p ≤₀ fun c : Code => ¬ (Code.eval c 0).Dom
+    exact coRE_manyOneReducible_fixedNonhalting p hp
+  exact hfixed.trans r.manyOneReducible
+
+/-- The encoded target is co-r.e.-hard by the same reduction certificate. -/
+theorem encodedCoREHard (r : Reduction) : DominoProblem.EncodedCoREHard := by
+  intro alpha _ p hp
+  have hfixed : p ≤₀ FixedNonhalting := by
+    change p ≤₀ fun c : Code => ¬ (Code.eval c 0).Dom
+    exact coRE_manyOneReducible_fixedNonhalting p hp
+  exact hfixed.trans r.encodedManyOneReducible
+
+/-- Co-r.e. completeness is a generic corollary of a reduction certificate. -/
+theorem coREComplete (r : Reduction) : DominoProblem.CoREComplete :=
+  ⟨DominoProblem.coRE, r.coREHard⟩
+
+/-- Encoded co-r.e. completeness is a generic corollary as well. -/
+theorem encodedCoREComplete (r : Reduction) : DominoProblem.EncodedCoREComplete :=
+  ⟨DominoProblem.encodedCoRE, r.encodedCoREHard⟩
 
 private theorem fixedNonhalting_not_computable :
     ¬ ComputablePred FixedNonhalting := by
