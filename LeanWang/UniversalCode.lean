@@ -10,7 +10,7 @@ import Mathlib.Computability.Halting
 
 The machine reduction compiles one universal partial function and varies only
 its input.  Mathlib's Turing completeness theorem chooses the fixed machine
-code later, directly in `UniversalTM0Semantic`.
+code later, directly in `LeanWang.Robinson.Machine.UniversalTM0.Semantic`.
 -/
 
 noncomputable section

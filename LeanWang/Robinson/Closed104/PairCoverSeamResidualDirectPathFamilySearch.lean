@@ -1,0 +1,306 @@
+/-
+Copyright (c) 2026 lean-wang contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Erik Demaine, Stefan Langerman, GPT 5.5
+-/
+import LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathBridges
+import LeanWang.Robinson.Closed104.RedShadeGraphWeightedReachBounded
+
+/-!
+# Sound finite search from a localized hierarchy family
+
+The executable search starts on every canonical descendant cycle of one parity
+family inside the outer block at the origin.  Reaching a port with even parity
+therefore certifies a `CanonicalCycleAncestorWithinFamily` for that port.  This
+is the trusted bridge from the finite endpoint audits to the abstract direct
+residual-path interface.
+-/
+
+namespace LeanWang.OllingerRobinson.Figure13Layers.Closed104
+namespace PairCoverSeamResidualDirectPathFamilySearch
+
+open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
+  RedShadeGraphRefinement RedShadeGraphSearch RedShadeGraphSearchSoundness
+  RedShadeGraphWeightedSearch
+  ShadedFreeLineProjectionSourceLists
+  PairCoverSeamResidualCanonicalAncestors
+  PairCoverSeamResidualDirectPathBridges
+  RedShadeGraphWeightedReachBounded
+
+set_option maxRecDepth 20000
+
+/-- Levels in one parity family below an outer hierarchy level. -/
+def familyLevels (outerLevel : Nat) (family : HierarchyFamily) : List Nat :=
+  (List.range (outerLevel + 1)).filter fun level =>
+    match family with
+    | .even => decide ((outerLevel - level) % 2 = 0)
+    | .odd => decide ((outerLevel - level) % 2 = 1)
+
+theorem mem_familyLevels
+    {outerLevel level : Nat} {family : HierarchyFamily}
+    (member : level ∈ familyLevels outerLevel family) :
+    level ≤ outerLevel ∧ InHierarchyFamily outerLevel level family := by
+  simp only [familyLevels, List.mem_filter, List.mem_range] at member
+  have levelLe : level ≤ outerLevel := by omega
+  refine ⟨levelLe, ?_⟩
+  have decompose := Nat.mod_add_div (outerLevel - level) 2
+  cases family with
+  | even =>
+      simp only [decide_eq_true_eq] at member
+      exact ⟨(outerLevel - level) / 2, by omega⟩
+  | odd =>
+      simp only [decide_eq_true_eq] at member
+      exact ⟨(outerLevel - level) / 2, by omega⟩
+
+/-- Descendant block coordinates inside the outer block at the origin. -/
+def levelBlocks (outerLevel level : Nat) : List Nat :=
+  List.range (2 ^ (outerLevel - level))
+
+theorem hierarchyAddress_of_mem_levelBlocks
+    {outerLevel level block : Nat} (levelLe : level ≤ outerLevel)
+    (member : block ∈ levelBlocks outerLevel level) :
+    HierarchyAddressWithin outerLevel 0 level block := by
+  simp only [levelBlocks, List.mem_range] at member
+  exact ⟨levelLe, Nat.div_eq_of_lt member⟩
+
+/-- One canonical entry on every descendant cycle at one level, with even
+initial path parity.  A single entry suffices because the flood traverses the
+cycle; seeding every perimeter port made the finite base checks quadratic. -/
+def levelStarts (outerLevel level : Nat) : List WeightedStart :=
+  let blocks := levelBlocks outerLevel level
+  blocks.flatMap fun blockX =>
+    blocks.flatMap fun blockY =>
+      [⟨⟨quarterWest (2 ^ level * (4 * blockX + 1)) + 1,
+          quarterSouth (2 ^ level * (4 * blockY + 1)), .west⟩, false⟩]
+
+/-- All even starts on one localized hierarchy family. -/
+def familyStarts (outerLevel : Nat) (family : HierarchyFamily) :
+    List WeightedStart :=
+  (familyLevels outerLevel family).flatMap (levelStarts outerLevel)
+
+private theorem familyStart_data
+    {outerLevel : Nat} {family : HierarchyFamily} {start : WeightedStart}
+    (member : start ∈ familyStarts outerLevel family) :
+    ∃ level blockX blockY,
+      HierarchyAddressWithin outerLevel 0 level blockX ∧
+      HierarchyAddressWithin outerLevel 0 level blockY ∧
+      InHierarchyFamily outerLevel level family ∧
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) start.port ∧
+      start.parity = false := by
+  simp only [familyStarts, List.mem_flatMap] at member
+  rcases member with ⟨level, levelMember, startMember⟩
+  obtain ⟨levelLe, inFamily⟩ := mem_familyLevels levelMember
+  simp only [levelStarts, List.mem_flatMap] at startMember
+  rcases startMember with ⟨blockX, blockXMember, startMember⟩
+  rcases startMember with ⟨blockY, blockYMember, startMember⟩
+  simp only [List.mem_singleton] at startMember
+  subst start
+  refine ⟨level, blockX, blockY,
+    hierarchyAddress_of_mem_levelBlocks levelLe blockXMember,
+    hierarchyAddress_of_mem_levelBlocks levelLe blockYMember,
+    inFamily, ?_, rfl⟩
+  apply OnCycle.southWest
+  · omega
+  · have powerPos : 0 < 2 ^ level := pow_pos (by decide) _
+    have westSuccEast :
+        2 ^ level * (4 * blockX + 1) + 1 <
+          2 ^ level * (4 * blockX + 3) :=
+      by nlinarith
+    simp only [quarterWest, quarterEast]
+    omega
+
+/-- Width of the quarter-coordinate block generated by `outerLevel + 2`
+substitutions from one coarse parent. -/
+def familyWidth (outerLevel : Nat) : Nat := 2 ^ (outerLevel + 3)
+
+private theorem familyCyclePort_inBounds
+    {outerLevel level blockX blockY : Nat} {port : Port}
+    (levelLe : level ≤ outerLevel)
+    (xWithin : HierarchyAddressWithin outerLevel 0 level blockX)
+    (yWithin : HierarchyAddressWithin outerLevel 0 level blockY)
+    (onCycle : OnCycle
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) port) :
+    PortInBounds port (familyWidth outerLevel) (familyWidth outerLevel) := by
+  have blockXLt : blockX < 2 ^ (outerLevel - level) := by
+    rcases (Nat.div_eq_zero_iff).1 xWithin.2 with denominatorZero | blockLt
+    · exact (by simp at denominatorZero)
+    · exact blockLt
+  have blockYLt : blockY < 2 ^ (outerLevel - level) := by
+    rcases (Nat.div_eq_zero_iff).1 yWithin.2 with denominatorZero | blockLt
+    · exact (by simp at denominatorZero)
+    · exact blockLt
+  have powerProduct : 2 ^ level * 2 ^ (outerLevel - level) =
+      2 ^ outerLevel := by
+    rw [← pow_add]
+    congr 1
+    omega
+  have eastXBound :
+      2 ^ level * (4 * blockX + 3) < 4 * 2 ^ outerLevel := by
+    calc
+      2 ^ level * (4 * blockX + 3) <
+          2 ^ level * (4 * 2 ^ (outerLevel - level)) :=
+        Nat.mul_lt_mul_of_pos_left (by omega) (pow_pos (by decide) _)
+      _ = 4 * (2 ^ level * 2 ^ (outerLevel - level)) := by ring
+      _ = 4 * 2 ^ outerLevel := by rw [powerProduct]
+  have northYBound :
+      2 ^ level * (4 * blockY + 3) < 4 * 2 ^ outerLevel := by
+    calc
+      2 ^ level * (4 * blockY + 3) <
+          2 ^ level * (4 * 2 ^ (outerLevel - level)) :=
+        Nat.mul_lt_mul_of_pos_left (by omega) (pow_pos (by decide) _)
+      _ = 4 * (2 ^ level * 2 ^ (outerLevel - level)) := by ring
+      _ = 4 * 2 ^ outerLevel := by rw [powerProduct]
+  have westXBound :
+      2 ^ level * (4 * blockX + 1) < 4 * 2 ^ outerLevel := by
+    exact lt_trans
+      (Nat.mul_lt_mul_of_pos_left (by omega) (pow_pos (by decide) _))
+      eastXBound
+  have southYBound :
+      2 ^ level * (4 * blockY + 1) < 4 * 2 ^ outerLevel := by
+    exact lt_trans
+      (Nat.mul_lt_mul_of_pos_left (by omega) (pow_pos (by decide) _))
+      northYBound
+  have widthEq : familyWidth outerLevel = 8 * 2 ^ outerLevel := by
+    simp [familyWidth, pow_add, mul_comm]
+  cases onCycle <;>
+    simp_all [PortInBounds, quarterWest, quarterEast,
+      quarterSouth, quarterNorth] <;>
+    omega
+
+/-- Every family start lies in the full refined parent block. -/
+theorem familyStarts_inBounds
+    (outerLevel : Nat) (family : HierarchyFamily) :
+    ∀ start ∈ familyStarts outerLevel family,
+      PortInBounds start.port (familyWidth outerLevel)
+        (familyWidth outerLevel) := by
+  intro start member
+  rcases familyStart_data member with
+    ⟨level, blockX, blockY, xWithin, yWithin, _inFamily,
+      onCycle, _startEven⟩
+  exact familyCyclePort_inBounds xWithin.1 xWithin yWithin onCycle
+
+/-- A bounded family endpoint retains the named hierarchy cycle and the
+search-box path needed for block translation. -/
+def BoundedCanonicalCycleReachWithinFamily
+    (root : Nat → Nat → Index) (target : Port)
+    (outerLevel width : Nat) (family : HierarchyFamily) : Prop :=
+  ∃ level blockX blockY,
+    HierarchyAddressWithin outerLevel 0 level blockX ∧
+    HierarchyAddressWithin outerLevel 0 level blockY ∧
+    InHierarchyFamily outerLevel level family ∧
+    CycleOn (iterateRefine (outerLevel + 2) root)
+      (2 ^ level * (4 * blockX + 1))
+      (2 ^ level * (4 * blockX + 3))
+      (2 ^ level * (4 * blockY + 1))
+      (2 ^ level * (4 * blockY + 3)) ∧
+    ∃ entry,
+      OnCycle
+        (2 ^ level * (4 * blockX + 1))
+        (2 ^ level * (4 * blockX + 3))
+        (2 ^ level * (4 * blockY + 1))
+        (2 ^ level * (4 * blockY + 3)) entry ∧
+      BoundedPath (iterateRefine (outerLevel + 2) root)
+        width width entry target false
+
+/-- Lightweight family flood used by the finite target audits. -/
+def nodes (root : Nat → Nat → Index) (outerLevel width fuel : Nat)
+    (family : HierarchyFamily) : List ReachNode :=
+  exploreFastWeightedReach (iterateRefine (outerLevel + 2) root)
+    width width fuel (familyStarts outerLevel family)
+
+/-- Boolean membership in the even-parity part of a family flood. -/
+def reaches (root : Nat → Nat → Index) (outerLevel : Nat)
+    (found : List ReachNode) (target : Port) : Bool :=
+  portPresent (iterateRefine (outerLevel + 2) root) target &&
+    found.any fun node => !node.parity && decide (node.current = target)
+
+/-- Every accepted family-flood endpoint has the advertised localized family
+ancestor. -/
+theorem reaches_sound
+    {root : Nat → Nat → Index} {outerLevel width fuel : Nat}
+    {family : HierarchyFamily} {target : Port}
+    (checked : reaches root outerLevel
+      (nodes root outerLevel width fuel family) target = true) :
+    CanonicalCycleAncestorWithinFamily
+      (iterateRefine (outerLevel + 2) root) target outerLevel 0 0 family := by
+  simp only [reaches, Bool.and_eq_true, List.any_eq_true,
+    decide_eq_true_eq] at checked
+  rcases checked.2 with ⟨node, nodeMember, nodeEven, nodeTarget⟩
+  have sound := exploreFastWeightedReach_sound (show node ∈
+    nodes root outerLevel width fuel family from nodeMember)
+  rcases sound with ⟨start, startMember, path⟩
+  rcases familyStart_data startMember with
+    ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+      entryOnCycle, startEven⟩
+  have levelLe := xWithin.1
+  have cycle := cycleAtLevelWithin root (blockX := blockX) (blockY := blockY)
+    levelLe
+  have nodeParity : node.parity = false :=
+    Bool.eq_false_of_not_eq_true' nodeEven
+  have targetPath : Path (iterateRefine (outerLevel + 2) root)
+      target start.port false := by
+    rw [nodeTarget] at path
+    have forward : Path (iterateRefine (outerLevel + 2) root)
+        start.port target false := by
+      simpa [startEven, nodeParity] using path
+    exact path_symm forward
+  exact ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+    cycle, start.port, entryOnCycle, targetPath⟩
+
+/-- Bounded soundness of `reaches` when the search box contains the complete
+refined parent block. -/
+theorem reaches_bounded_sound
+    {root : Nat → Nat → Index} {outerLevel width fuel : Nat}
+    {family : HierarchyFamily} {target : Port}
+    (widthEnough : familyWidth outerLevel ≤ width)
+    (checked : reaches root outerLevel
+      (nodes root outerLevel width fuel family) target = true) :
+    BoundedCanonicalCycleReachWithinFamily root target
+      outerLevel width family := by
+  simp only [reaches, Bool.and_eq_true, List.any_eq_true,
+    decide_eq_true_eq] at checked
+  rcases checked.2 with ⟨node, nodeMember, nodeEven, nodeTarget⟩
+  have startsBounded : ∀ start ∈ familyStarts outerLevel family,
+      PortInBounds start.port width width := by
+    intro start member
+    have bounded := familyStarts_inBounds outerLevel family start member
+    exact ⟨lt_of_lt_of_le bounded.1 widthEnough,
+      lt_of_lt_of_le bounded.2 widthEnough⟩
+  have sound := exploreFastWeightedReach_bounded_sound startsBounded
+    (show node ∈ nodes root outerLevel width fuel family from nodeMember)
+  rcases sound with ⟨start, startMember, path⟩
+  rcases familyStart_data startMember with
+    ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+      entryOnCycle, startEven⟩
+  have levelLe := xWithin.1
+  have cycle := cycleAtLevelWithin root (blockX := blockX) (blockY := blockY)
+    levelLe
+  have nodeParity : node.parity = false :=
+    Bool.eq_false_of_not_eq_true' nodeEven
+  have targetPath : BoundedPath (iterateRefine (outerLevel + 2) root)
+      width width start.port target false := by
+    rw [nodeTarget] at path
+    simpa [startEven, nodeParity] using path
+  exact ⟨level, blockX, blockY, xWithin, yWithin, inFamily,
+    cycle, start.port, entryOnCycle, targetPath⟩
+
+/-- Exact-block specialization used when transporting a family flood into an
+arbitrary coarse parent. -/
+theorem reaches_familyWidth_bounded_sound
+    {root : Nat → Nat → Index} {outerLevel fuel : Nat}
+    {family : HierarchyFamily} {target : Port}
+    (checked : reaches root outerLevel
+      (nodes root outerLevel (familyWidth outerLevel) fuel family) target = true) :
+    BoundedCanonicalCycleReachWithinFamily root target outerLevel
+      (familyWidth outerLevel) family :=
+  reaches_bounded_sound le_rfl checked
+
+end PairCoverSeamResidualDirectPathFamilySearch
+end LeanWang.OllingerRobinson.Figure13Layers.Closed104

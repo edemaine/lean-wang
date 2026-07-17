@@ -3,73 +3,48 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.UniversalTM0Reduction
-import LeanWang.OllingerRobinson104ShadedCarrierCornerAddressing
-import LeanWang.OllingerRobinson104PairCoverSeamRequiredForward
+import LeanWang.DominoProblem
+import LeanWang.Robinson.Final
 
 /-!
-# Final Wang-tile undecidability theorem
+# Main Wang domino problem results
 
-The machine side uses one fixed universal TM0 machine.  A source code changes
-only the finite initial tape written before the fixed simulation starts.  Thus
-the final theorem needs no source-dependent machine compiler or decoder
-obligation; its sole remaining input is a concrete scaffold certificate.
+The statements in this module mention only the proof-neutral domino problem
+interface.  The current proofs are supplied by the Robinson construction; a
+second construction can prove the same statements in its own namespace.
 -/
 
 noncomputable section
 
 namespace LeanWang
 
-open OllingerRobinson.Figure13Layers.Closed104
+/-- Fixed nonhalting many-one reduces to the Wang domino problem. -/
+theorem fixedNonhalting_manyOneReducible_dominoProblem :
+    DominoProblem.FixedNonhalting ≤₀ DominoProblem.Holds :=
+  Robinson.fixedNonhalting_manyOneReducible
 
-/-- Encoded Wang domino undecidability from any certified scaffold. -/
-theorem encoded_domino_problem_undecidable
-    (S : Scaffold) (hS : IsScaffold S) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  UniversalTM0Reduction.encoded_domino_problem_undecidable S hS
+/-- Fixed nonhalting many-one reduces to the encoded Wang domino problem. -/
+theorem fixedNonhalting_manyOneReducible_encodedDominoProblem :
+    DominoProblem.FixedNonhalting ≤₀ DominoProblem.EncodedHolds :=
+  Robinson.fixedNonhalting_manyOneReducible_encodedDominoProblem
 
-/-- Wang domino undecidability from any certified scaffold. -/
-theorem domino_problem_undecidable
-    (S : Scaffold) (hS : IsScaffold S) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  UniversalTM0Reduction.domino_problem_undecidable S hS
-
-/-- Encoded Wang domino undecidability from a channel-aware routed scaffold
-that realizes pointed planes and forces rooted finite squares. -/
-theorem encoded_domino_problem_undecidable_of_routed
-    (S : RoutedScaffold)
-    (realizes : RealizesRoutedPointedPlanes S)
-    (forces : ForcesRoutedFixedCornerSquares S) :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  UniversalTM0Reduction.encoded_domino_problem_undecidable_of_routed
-    S realizes forces
-
-/-- Wang domino undecidability from a channel-aware routed scaffold that
-realizes pointed planes and forces rooted finite squares. -/
-theorem domino_problem_undecidable_of_routed
-    (S : RoutedScaffold)
-    (realizes : RealizesRoutedPointedPlanes S)
-    (forces : ForcesRoutedFixedCornerSquares S) :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  UniversalTM0Reduction.domino_problem_undecidable_of_routed
-    S realizes forces
-
-/-- Encoded Wang domino undecidability, instantiated with the corrected
-Ollinger--Robinson 104-tile routed scaffold. -/
-theorem closed104_encoded_domino_problem_undecidable :
-    ¬ ComputablePred (fun n : Nat => TilesPlane (decodeTileSet n)) :=
-  encoded_domino_problem_undecidable_of_routed
-    ShadedSignals.routedScaffold
-    ShadedCarrierCornerAddressing.realizesRoutedPointedPlanes
-    PairCoverSeamRequiredForward.closed104_forcesRoutedFixedCornerSquares
+/-- The encoded Wang domino problem is undecidable. -/
+theorem encoded_domino_problem_undecidable :
+    DominoProblem.EncodedUndecidable :=
+  Robinson.encoded_domino_problem_undecidable
 
 /-- The Wang domino problem is undecidable. -/
-theorem closed104_domino_problem_undecidable :
-    ¬ ComputablePred (fun T : TileSet => TilesPlane T) :=
-  domino_problem_undecidable_of_routed
-    ShadedSignals.routedScaffold
-    ShadedCarrierCornerAddressing.realizesRoutedPointedPlanes
-    PairCoverSeamRequiredForward.closed104_forcesRoutedFixedCornerSquares
+theorem domino_problem_undecidable : DominoProblem.Undecidable :=
+  Robinson.domino_problem_undecidable
+
+/-- Compatibility name recording the concrete construction currently used. -/
+theorem closed104_encoded_domino_problem_undecidable :
+    DominoProblem.EncodedUndecidable :=
+  encoded_domino_problem_undecidable
+
+/-- Compatibility name recording the concrete construction currently used. -/
+theorem closed104_domino_problem_undecidable : DominoProblem.Undecidable :=
+  domino_problem_undecidable
 
 end LeanWang
 

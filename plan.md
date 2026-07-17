@@ -42,12 +42,12 @@ The reduction has three independent parts:
 The source-dependent machine compiler has been replaced by a fixed universal
 argument.
 
-`UniversalTM0Semantic` applies Mathlib's `ToPartrec.Code.exists_code` directly
+`LeanWang.Robinson.Machine.UniversalTM0.Semantic` applies Mathlib's `ToPartrec.Code.exists_code` directly
 to the universal partial function, relabels that one fixed evaluator, carries
 Mathlib's native finite supports through TM2, TM1, and TM0, and proves the
-varying binary input primitive recursive. `UniversalTM0Machine` folds the
+varying binary input primitive recursive. `LeanWang.Robinson.Machine.UniversalTM0.Machine` folds the
 two-sided tape into paired symbols of one fixed one-sided `Machine`, which is
-then passed to the generic `MachineInputTiles` theorem. No extra Post machine,
+then passed to the generic `LeanWang.Robinson.Machine.InputTiles` theorem. No extra Post machine,
 table program, source compiler, descriptor decoder, or bespoke Wang decoder
 occurs in the retained reduction.
 
@@ -58,16 +58,16 @@ occurs in the retained reduction.
    finite-support TM2-to-TM1-to-TM0 transformations.
 3. `UniversalTM0Semantic.input c` writes `Nat.pair (encode c) 0` as the varying
    initial tape. Its construction is computable.
-4. `UniversalTM0Folded` defines the paired coordinates `-(i + 1), i` and the
+4. `LeanWang.Robinson.Machine.UniversalTM0.Folded` defines the paired coordinates `-(i + 1), i` and the
    source configuration bookkeeping.
-5. `UniversalTM0Machine` defines one fixed one-sided machine. A TM0 move takes
+5. `LeanWang.Robinson.Machine.UniversalTM0.Machine` defines one fixed one-sided machine. A TM0 move takes
    one target step; a TM0 write takes two. Refinement in both directions proves
    exact halting equivalence.
 6. `MachineInputTiles.tilesQuarterWithSeed_iff_not_halts` supplies the complete
    Wang-history construction and decoder for this fixed machine and input.
-7. `UniversalTM0MachineData` computes the finite bottom-row tile list and seed;
+7. `LeanWang.Robinson.Machine.UniversalTM0.MachineData` computes the finite bottom-row tile list and seed;
    normal history tiles are constant because the machine is fixed.
-8. `UniversalTM0Reduction` exposes that construction to the existing
+8. `LeanWang.Robinson.Reduction` exposes that construction to the existing
    scaffold reductions.
 9. The direct `IsRoutedScaffold` reduction preserves the horizontal and
    vertical channel constraints used by the Robinson board construction.
@@ -81,7 +81,7 @@ input-specific machine control in the final reduction. The abandoned
 correctness route have also been removed. More than one hundred thousand lines
 of obsolete machine work have been deleted. The retained fixed-TM0 route
 consists only of native finite supports, folded tape geometry, the fixed
-one-sided simulator and its halting proof, the local `MachineHistory` kernel,
+one-sided simulator and its halting proof, the local `LeanWang.Robinson.Machine.History` kernel,
 and the generic finite-input machine-to-Wang construction.
 
 ## Completed general tiling infrastructure
@@ -629,7 +629,7 @@ coordinates, using the existing refined-coordinate projection and local
 connector lemmas.
 
 The coordinate part of that recurrence is now closed in
-`OllingerRobinson104PairCoverSeamRefinementCoordinates`.  Successor boards and
+`LeanWang.Robinson.Closed104.PairCoverSeamRefinementCoordinates`.  Successor boards and
 each recursive child interval scale by exactly four, `coarseCoordinate` is
 monotone, strict coarse child membership lifts to strict fine membership, and
 a fine query that does not fit one recursive child projects to a coarse query
@@ -641,7 +641,7 @@ intervals, then discharge that explicit lower-interval case by the local
 connector audit.
 
 The inherited semantic case is also available in
-`OllingerRobinson104PairCoverSeamProjection`.  On literal sparse coordinates,
+`LeanWang.Robinson.Closed104.PairCoverSeamProjection`.  On literal sparse coordinates,
 the projected shade state has exactly the same selected horizontal and
 vertical boundary values as the fine state.  Therefore sparse fine free rows
 and columns project to coarse free rows and columns, and absence of a selected
@@ -658,7 +658,7 @@ invariants reassemble into the existing all-depth public face structures.
 This makes a one-step semantic induction expressible without strengthening the
 hypothesis to bounded paths at every scale.
 
-`OllingerRobinson104PairCoverSeamFaceRefinement` now proves the complete
+`LeanWang.Robinson.Closed104.PairCoverSeamFaceRefinement` now proves the complete
 inherited part of the one-step recurrence.  For all four orientations, when
 the query, free line, and nearest selected boundary lie on literal sparse
 coordinates, the fine hypotheses project to depth `d`; the depth-`d` face
@@ -667,7 +667,7 @@ that orientation back to depth `d + 1`.  Noncontainment is preserved by the
 coordinate theorem above.  Thus only genuinely newly created coordinate
 intervals remain in the face step.
 
-`OllingerRobinson104PairCoverSeamFaceStep` makes that last statement exact.
+`LeanWang.Robinson.Closed104.PairCoverSeamFaceStep` makes that last statement exact.
 A coordinate is now classified as either the literal sparse representative of
 its coarse interval or a strictly created point inside that interval.  The
 four next-depth face theorems split on the three queried coordinates: the
@@ -678,14 +678,14 @@ Consequently a proof of those two local created-coordinate structures gives
 the complete one-depth recurrence without any additional global arithmetic or
 lower-edge exception.
 
-`OllingerRobinson104PairCoverSeamCreatedPaths` removes shade semantics from
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedPaths` removes shade semantics from
 the cases actually covered by ordinary red-graph seam paths.  Those paths
 discharge most of the remaining recurrence, but not the
 sparse-boundary/created-free-line family described below; that family genuinely
 retains the shade grid and nearest-selected-boundary semantics.
 
 A first finite split of that geometric problem is now certified by
-`OllingerRobinson104PairCoverSeamCreatedLocalAuditCheck`.  In every one of the
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedLocalAuditCheck`.  In every one of the
 104 two-substitution macrocells, an even seam path exists if the selected
 boundary coordinate is created.  It also exists when the boundary and queried
 free-line coordinate are sparse but the transverse coordinate is created.
@@ -696,12 +696,12 @@ not merely a missing neighboring-cell template: the language stabilizes at
 204 adjacent pairs and 400 triples by depth three, and the path property still
 fails on exact depth-four triples.  This family therefore needs Robinson's
 semantic free-line/obstruction argument rather than another even-path audit.
-`OllingerRobinson104PairCoverSeamCreatedLocalAudit` proves soundness of this
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedLocalAudit` proves soundness of this
 check as bounded red-graph paths.  Every intermediate port remains in the
 audited 8-by-8 macrocell, providing exactly the hypothesis needed by the
 existing component-congruence and block-translation lemmas.
 
-`OllingerRobinson104PairCoverSeamCreatedLocalTransport` now performs that
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedLocalTransport` now performs that
 translation at the exact depth-two scale used by the created-coordinate split.
 It identifies local and global selected ports and interior predicates, moves
 every bounded path by the `(8 * blockX, 8 * blockY)` quarter offset, and exposes
@@ -716,33 +716,33 @@ need to reconstruct Boolean query-list membership.
 The first cross-macrocell family is also finitely certified.  The final
 substitution address bit reduces adjacent cells to 72 canonical sibling pairs
 plus 720 canonical cross-parent pairs, for 792 states in each orientation.
-`OllingerRobinson104PairCoverSeamCreatedAdjacentAuditDefs` checks the two-cell
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedAdjacentAuditDefs` checks the two-cell
 8-by-16 and 16-by-8 windows for a created boundary facing across their common
 edge.  Twenty-five independent cached modules cover 32 pair states each, and
 `OllingerRobinson104PairCoverSeamCreatedAdjacentAuditChunks` assembles all
 vertical and horizontal results without rerunning graph search.
-`OllingerRobinson104PairCoverSeamCreatedAdjacentAudit` proves soundness of
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedAdjacentAudit` proves soundness of
 those assembled checks as bounded red-graph paths in the corresponding
 rectangular windows.  Thus every one of the 792 vertical and 792 horizontal
 canonical adjacent states now has a proposition-level path certificate; the
 remaining step is to classify actual neighboring refined cells by those
 canonical states and transport the certified paths into the global grid.
-`OllingerRobinson104PairCoverSeamCreatedAdjacentClassification` proves the
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedAdjacentClassification` proves the
 classification uniformly at every positive refinement depth.  Neighbors with
 an even lower/left coordinate are siblings under one parent; neighbors with an
 odd lower/left coordinate lie in the opposite row/column child classes.  In
 both cases their canonical component pair belongs to the corresponding finite
 audit list.  It remains only to transport the rectangular certificates from
 that canonical pair window to the actual neighboring macrocells.
-`OllingerRobinson104PairCoverSeamCreatedAdjacentComponents` proves that the
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedAdjacentComponents` proves that the
 canonical audit window and the corresponding shifted arbitrary-grid window
 have identical refined red components.  The proof works through the
 thin/thick quotient state rather than evaluating canonical representatives.
-`OllingerRobinson104PairCoverSeamCreatedAdjacentTransport` then moves bounded
+`LeanWang.Robinson.Closed104.PairCoverSeamCreatedAdjacentTransport` then moves bounded
 paths, ports, and interior predicates into global quarter coordinates.  Its
 `verticalLower`, `verticalUpper`, `horizontalLeft`, and `horizontalRight`
 theorems expose all four boundary-created paths crossing one neighboring
-macrocell edge.  `OllingerRobinson104PairCoverSeamCreatedPaths` now records the
+macrocell edge.  `LeanWang.Robinson.Closed104.PairCoverSeamCreatedPaths` now records the
 correct logical split: `CoveredCreatedPathsAt` asks only for a created boundary,
 or a sparse free line with a created transverse coordinate;
 `ResidualVerticalBoundaryFacesAt` and
@@ -794,7 +794,7 @@ classification, the nearest-boundary hypothesis, and the failed
 contained-child test.
 
 The hierarchy composition part is now isolated in
-`OllingerRobinson104PairCoverSeamResidualCycleBridges`.  An even route from the
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualCycleBridges`.  An even route from the
 selected source to an enclosing cycle composes with any `EvenCycleBridge` to a
 descendant cycle, and branch-specific row and column constructors package that
 descendant directly as a separation witness.  Thus the residual proof no
@@ -856,7 +856,7 @@ and their enclosing hierarchy block through the induction; descendant
 selection can then use the existing certified hierarchy bridges from that
 specific ancestor.
 
-`OllingerRobinson104PairCoverSeamResidualCanonicalAncestors` now makes that
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualCanonicalAncestors` now makes that
 refinement concrete.  `CanonicalCycleAncestor` records the scale and block of
 the reached Robinson cycle as well as the even source path.  The created-source
 audit's arbitrary parity is normalized explicitly: an even route stays on the
@@ -866,7 +866,7 @@ preserved by a two-substitution sparse lift, so it is ready for the exhaustive
 sparse/created hierarchy induction.
 
 That induction step is now proved in
-`OllingerRobinson104PairCoverSeamResidualCanonicalAncestorRecurrence`.
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualCanonicalAncestorRecurrence`.
 The predecessor witness records that its transverse coordinate stays in the
 same two-cell macro-block, which proves that the collar
 `[quarterWest west - 1, quarterEast east)` projects into itself.  Every live
@@ -960,7 +960,7 @@ red graph nevertheless has a 57-edge even route to a vertical segment on the
 query row.  Thus the square-cycle factorization is stronger than the semantic
 argument and is no longer the intended proof endpoint.
 
-`OllingerRobinson104PairCoverSeamResidualDirectPaths` now states the exact
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPaths` now states the exact
 replacement.  `DirectResidualPathsAt` asks directly for the two
 shade-independent seam paths used by the contradiction: a wrong-facing
 horizontal source must reach either a vertical segment on the free row or a
@@ -971,7 +971,7 @@ sufficient certificates, but the remaining recurrence and finite audits
 should target direct paths and need not choose a canonical descendant square.
 
 The hierarchy contribution to those direct paths is now isolated as well.
-`OllingerRobinson104PairCoverSeamResidualDirectPathBridges` refines every
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathBridges` refines every
 localized canonical ancestor into one of two parity families.  Two source
 ports whose ancestors lie in the same family are connected evenly through
 their common outer hierarchy cycle.  Four constructors then turn a
@@ -981,7 +981,7 @@ remaining invariant is only target recognizability: for the source's actual
 family, find a live target on the query line or strictly between it and the
 source.  All graph connectivity is supplied generically.
 
-`OllingerRobinson104PairCoverSeamResidualDirectPathTargets` now states that
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathTargets` now states that
 recognizability invariant as `FamilyTargetsAt`.  `RowFamilyTarget` and
 `ColumnFamilyTarget` allow exactly the crossing and between-line alternatives
 from the seam definitions.  Each `FamilyTargetsAt` field jointly chooses a
@@ -1012,12 +1012,12 @@ The stronger possibility that every wrong-facing query has targets in both
 families is false: the earlier `(34, 48, 34)` query has only the odd-family
 target required by its source.  The joint-family formulation is therefore
 necessary, not just a proof convenience.  The new
-`OllingerRobinson104PairCoverSeamResidualDirectPathFamilySearch` module turns an
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathFamilySearch` module turns an
 accepted lightweight finite flood from either localized family into a proved
 `CanonicalCycleAncestorWithinFamily`.  Its soundness proof reconstructs the
 descendant level and block addresses, proves the cycle exists in the common
 outer refinement, and reverses the certified even path to the endpoint.  The
-`OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetSearch` module
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathFamilyTargetSearch` module
 now reuses this trusted primitive for both source and target witnesses.  Its
 row and column checks search the two cached family floods, require the source
 and target to occur in one common family, and prove the resulting
@@ -1032,7 +1032,7 @@ constant-parent refinement.  Every family start is proved to lie inside the
 exact quarter-coordinate parent width, and bounded weighted-search soundness
 produces the named descendant cycle, its hierarchy family, and a confined
 path to the accepted endpoint.  The generic `OnCycleTranslation` adapter and
-`OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTransport` then move
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathFamilyTransport` then move
 that certificate into any parent block of any coarse grid.  The transport
 reconstructs the absolute descendant address, obtains its canonical cycle in
 the global refinement, and translates and reverses the even path.  Thus the
@@ -1043,7 +1043,7 @@ Boundedness is now retained through the joint endpoint checks as well.
 `BoundedRowFamilyTarget` and `BoundedColumnFamilyTarget` keep each accepted
 target route inside the exact parent block, and the corresponding joint
 soundness theorems retain bounded routes for both the source and target in one
-chosen family.  `OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetTransport`
+chosen family.  `LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathFamilyTargetTransport`
 translates the target inequalities, strict-between relation, live interior,
 selected port, and family ancestor together.  Its final row and column
 wrappers turn an accepted constant-parent Boolean check directly into the
@@ -1053,7 +1053,7 @@ arithmetic normalization from successor-board coordinates to these translated
 local coordinates.
 
 That arithmetic normalization is now complete in
-`OllingerRobinson104PairCoverSeamResidualDirectPathFamilyBase`.
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathFamilyBase`.
 `BoundedFamilyTargetsAt` is the exact finite certificate boundary: for each of
 the 104 constant parent tiles it checks every wrong-facing, non-contained
 residual row and column query, retaining the sparse-boundary and created-line
@@ -1143,7 +1143,7 @@ projected source has exactly the fine source's directional interior, so the
 recursive argument retains the wrong-facing orientation required by the
 created-path seed theorem.
 
-`OllingerRobinson104PairCoverSeamResidualDirectPathExactPredecessorHierarchy`
+`LeanWang.Robinson.Closed104.PairCoverSeamResidualDirectPathExactPredecessorHierarchy`
 packages that exact predecessor with the all-depth source-family hierarchy.
 Its horizontal and vertical records carry the projected coordinate, collar
 bounds, preserved orientation, coarse family ancestor, and refined family
@@ -1492,7 +1492,7 @@ border is false at finite supertile boundaries and has been discarded: the
 proof will induct only on the induced carrier predicates, which are exactly
 the data needed by the addressing construction.
 
-`OllingerRobinson104ShadedCarrierSquareGeometry` now exposes the supertile row
+`LeanWang.Robinson.Closed104.ShadedCarrierSquareGeometry` now exposes the supertile row
 and column border sequences, identifies horizontal and vertical carriers with
 adjacent clear canonical edges, and proves that their physical interval
 coordinates advance locally.  `RoutedPointedCarrierAddressing` removes the
@@ -1503,7 +1503,7 @@ is therefore a recursive addressed-grid decomposition of the canonical
 supertile squares.
 
 The arithmetic addressing part of that decomposition is now complete.
-`OllingerRobinson104ShadedCarrierHierarchyAddressing` counts only coordinates
+`LeanWang.Robinson.Closed104.ShadedCarrierHierarchyAddressing` counts only coordinates
 owned by the current frame depth, so an entire nested frame becomes one
 constant-address channel gap.  It proves all horizontal and vertical local
 successor cases, handles boundary rows and columns with no crossings, centers
@@ -1537,18 +1537,18 @@ nearest-border signal path remains the right flow construction: its adjacent
 clear edges still follow the smallest-owner carrier predicates used by
 hierarchy addressing.
 
-`OllingerRobinson104ShadedCarrierBorderHierarchyData` now defines the corrected
+`LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchyData` now defines the corrected
 recursive union-of-frame border formula.  A `3 x 3` row-and-column patch with a
 one-cell halo makes refinement local; the 25 states appearing at level two are
 closed under all sixteen child positions, as checked in a separate native
-certificate.  `OllingerRobinson104ShadedCarrierBorderHierarchy` proves that
+certificate.  `LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchy` proves that
 the arithmetic patch of every successor block is exactly its finite-state
 refinement.  The closure certificate is now promoted by induction to every
 in-bounds block at every level.  Consequently each visible arithmetic patch is
 the generated class-15 factor output, and the actual seed-supertile row and
 column interiors equal the corrected border formula at every coordinate.
 
-`OllingerRobinson104ShadedCarrierBorderGeometry` now proves the exact
+`LeanWang.Robinson.Closed104.ShadedCarrierBorderGeometry` now proves the exact
 arithmetic scaling step for that formula.  Ceiling division by four preserves
 frame membership, an opening boundary lifts exactly at fine residue `1`, a
 closing boundary lifts exactly at fine residue `0`, and the resulting oriented
@@ -1566,9 +1566,10 @@ addressing.
 
 ### 3. Package and finish
 
-Bundle the forward and backward results as `IsRoutedScaffold S`, apply
-`LeanWang.encoded_domino_problem_undecidable_of_routed` and
-`LeanWang.domino_problem_undecidable_of_routed`, then run:
+Bundle the forward and backward results through
+`LeanWang.UniversalTM0Reduction.routedReduction` as the concrete certificate
+`LeanWang.Robinson.reduction : LeanWang.DominoProblem.Reduction`. Its generic
+many-one and undecidability corollaries then supply the public results. Run:
 
 ```bash
 lake build
@@ -1581,12 +1582,12 @@ infrastructure.
 
 ### Completion
 
-`OllingerRobinson104ShadedCarrierBorderIntervals` identifies adjacent clear
+`LeanWang.Robinson.Closed104.ShadedCarrierBorderIntervals` identifies adjacent clear
 canonical signal edges exactly with the smallest-owner carrier predicates,
-and `OllingerRobinson104ShadedCarrierConcreteRoles` transports this arithmetic
+and `LeanWang.Robinson.Closed104.ShadedCarrierConcreteRoles` transports this arithmetic
 description to every concrete seed supertile.
 
-`OllingerRobinson104ShadedCarrierCornerAddressing` proves the remaining marker
+`LeanWang.Robinson.Closed104.ShadedCarrierCornerAddressing` proves the remaining marker
 invariant. An index-zero northeast crossing is either inherited from index
 zero, inherited from index four, or newly created at local position `(2, 2)`.
 The first case lifts a centered crossing recursively, the second creates the
@@ -1598,6 +1599,8 @@ concrete routed scaffold realizes every pointed payload plane.
 Together with
 `PairCoverSeamRequiredForward.closed104_forcesRoutedFixedCornerSquares`, this
 discharges both concrete scaffold hypotheses. `LeanWang.Final` exposes the
-hypothesis-free theorems
-`closed104_encoded_domino_problem_undecidable` and
-`closed104_domino_problem_undecidable`.
+proof-neutral, hypothesis-free reduction theorems
+`fixedNonhalting_manyOneReducible_dominoProblem` and
+`fixedNonhalting_manyOneReducible_encodedDominoProblem`, together with
+`encoded_domino_problem_undecidable` and `domino_problem_undecidable`. The old
+`closed104_*` names remain as compatibility aliases.
