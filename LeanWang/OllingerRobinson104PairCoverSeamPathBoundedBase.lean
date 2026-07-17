@@ -59,7 +59,7 @@ def BoundedHorizontalSeamPath (grid : Nat → Nat → Index) (size : Nat)
     BoundedPath grid size size (verticalPort grid boundary row)
       (verticalPort grid targetX row) false)
 
-private theorem boundedVerticalSeamPath_of_target
+theorem boundedVerticalSeamPath_of_target
     {grid : Nat → Nat → Index} {size west east column row boundary : Nat}
     {finish : Port}
     (path : BoundedPath grid size size
@@ -83,7 +83,7 @@ private theorem boundedVerticalSeamPath_of_target
     rw [← hbetween.1.2]
     exact path
 
-private theorem boundedHorizontalSeamPath_of_target
+theorem boundedHorizontalSeamPath_of_target
     {grid : Nat → Nat → Index} {size south north row column boundary : Nat}
     {finish : Port}
     (path : BoundedPath grid size size

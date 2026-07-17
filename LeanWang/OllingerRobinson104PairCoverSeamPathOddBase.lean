@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import Mathlib.Tactic.FinCases
-import LeanWang.OllingerRobinson104PairCoverSeamPathBoundedBase
+import LeanWang.OllingerRobinson104PairCoverSeamPathComponentCertificate
 import LeanWang.OllingerRobinson104PairCoverSeamPathOddBaseChunk00
 import LeanWang.OllingerRobinson104PairCoverSeamPathOddBaseChunk01
 import LeanWang.OllingerRobinson104PairCoverSeamPathOddBaseChunk02
@@ -29,9 +29,10 @@ namespace Closed104
 namespace PairCoverSeamPathOddBase
 
 open ShadedFreeLineRecurrence PairCoverSeamPathBaseAudit
-  PairCoverSeamPathBoundedBase
+  PairCoverSeamPathBoundedBase PairCoverSeamPathComponentCertificate
 
-theorem chunkChecks : ChunkChecks .odd 0 := by
+theorem chunkChecks :
+    PairCoverSeamPathComponentCertificate.ChunkChecks .odd 0 oddRoots := by
   intro chunk
   fin_cases chunk
   · exact PairCoverSeamPathOddBaseChunk00.complete
@@ -49,11 +50,12 @@ theorem chunkChecks : ChunkChecks .odd 0 := by
   · exact PairCoverSeamPathOddBaseChunk12.complete
   · exact PairCoverSeamPathOddBaseChunk13.complete
 
-theorem paths : Paths .odd 0 :=
-  chunkChecks.paths
-
 theorem boundedPaths : BoundedPaths .odd 0 :=
-  PairCoverSeamPathBoundedBase.ChunkChecks.boundedPaths chunkChecks
+  PairCoverSeamPathComponentCertificate.ChunkChecks.boundedPaths
+    oddRoots_inBounds chunkChecks
+
+theorem paths : Paths .odd 0 :=
+  PairCoverSeamPathComponentCertificate.BoundedPaths.paths boundedPaths
 
 end PairCoverSeamPathOddBase
 end Closed104

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import Mathlib.Tactic.FinCases
-import LeanWang.OllingerRobinson104PairCoverSeamPathBoundedBase
+import LeanWang.OllingerRobinson104PairCoverSeamPathComponentCertificate
 import LeanWang.OllingerRobinson104PairCoverSeamPathEvenBaseChunk00
 import LeanWang.OllingerRobinson104PairCoverSeamPathEvenBaseChunk01
 import LeanWang.OllingerRobinson104PairCoverSeamPathEvenBaseChunk02
@@ -29,9 +29,10 @@ namespace Closed104
 namespace PairCoverSeamPathEvenBase
 
 open ShadedFreeLineRecurrence PairCoverSeamPathBaseAudit
-  PairCoverSeamPathBoundedBase
+  PairCoverSeamPathBoundedBase PairCoverSeamPathComponentCertificate
 
-theorem chunkChecks : ChunkChecks .even 1 := by
+theorem chunkChecks :
+    PairCoverSeamPathComponentCertificate.ChunkChecks .even 1 evenRoots := by
   intro chunk
   fin_cases chunk
   · exact PairCoverSeamPathEvenBaseChunk00.complete
@@ -49,11 +50,12 @@ theorem chunkChecks : ChunkChecks .even 1 := by
   · exact PairCoverSeamPathEvenBaseChunk12.complete
   · exact PairCoverSeamPathEvenBaseChunk13.complete
 
-theorem paths : Paths .even 1 :=
-  chunkChecks.paths
-
 theorem boundedPaths : BoundedPaths .even 1 :=
-  PairCoverSeamPathBoundedBase.ChunkChecks.boundedPaths chunkChecks
+  PairCoverSeamPathComponentCertificate.ChunkChecks.boundedPaths
+    evenRoots_inBounds chunkChecks
+
+theorem paths : Paths .even 1 :=
+  PairCoverSeamPathComponentCertificate.BoundedPaths.paths boundedPaths
 
 end PairCoverSeamPathEvenBase
 end Closed104
