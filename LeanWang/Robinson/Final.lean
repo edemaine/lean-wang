@@ -5,7 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Reduction
 import LeanWang.Robinson.Closed104.ShadedCarrierCornerAddressing
-import LeanWang.Robinson.Closed104.PairCoverSeamRequiredForward
+import LeanWang.Robinson.Closed104.OrientedLightForward
 
 /-!
 # Robinson proof of Wang-tile undecidability
@@ -28,7 +28,7 @@ def reduction : DominoProblem.Reduction :=
   UniversalTM0Reduction.routedReduction
     ShadedSignals.routedScaffold
     ShadedCarrierCornerAddressing.realizesRoutedPointedPlanes
-    PairCoverSeamRequiredForward.closed104_forcesRoutedFixedCornerSquares
+    OrientedLightForward.closed104_forcesRoutedFixedCornerSquares
 
 /-- Fixed nonhalting many-one reduces to the Wang domino problem. -/
 theorem fixedNonhalting_manyOneReducible :
