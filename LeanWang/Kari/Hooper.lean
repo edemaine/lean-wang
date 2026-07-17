@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Kari.Hooper.FullTM0
 import LeanWang.Kari.Hooper.FiniteControl
 import LeanWang.Kari.Hooper.FiniteTM0
+import LeanWang.Kari.Hooper.CounterMachine
 import LeanWang.Kari.Hooper.SourceMachine
 import LeanWang.Kari.Hooper.SearchGeometry
 import LeanWang.Kari.Hooper.CounterLayout
@@ -19,9 +20,10 @@ starting from one designated nonhalting computation, construct a finite Turing
 machine that has an immortal arbitrary configuration exactly when that
 computation is nonhalting.
 
-The current modules provide unrestricted full-tape semantics, an explicit
-finite transition-table representation, the sparse counter-layout geometry,
-and the abstract strong-induction core of Hooper's nested bounded-search
-construction.  The remaining files will compile counter operations to a
-guarded finite-control machine and instantiate the nesting laws.
+The current modules provide unrestricted full-tape semantics, explicit finite
+transition tables, a four-register counter-program layer, the sparse
+counter-layout geometry, and the abstract strong-induction core of Hooper's
+nested bounded-search construction.  The remaining files will compile counter
+operations to a guarded finite-control machine and instantiate the nesting
+laws.
 -/
