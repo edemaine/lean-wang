@@ -359,6 +359,79 @@ theorem nextNodes_boundedSoundFromSome
   rcases hnext with ⟨move, _, hadvance⟩
   exact advance_boundedSoundFromSome sound hadvance
 
+private theorem searchAux_bounded_sound
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {accept : Port → Bool → Bool} {start : Port} :
+    ∀ (fuel : Nat) {queue : List Node} {visited : List (Port × Bool)}
+      {result : Node},
+      (∀ node ∈ queue,
+        BoundedSoundFromSome indexGrid width height [start] node) →
+      searchAux indexGrid width height accept fuel queue visited = some result →
+      BoundedSoundFromSome indexGrid width height [start] result := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro queue visited result _ searched
+      simp [searchAux] at searched
+  | succ fuel ih =>
+      intro queue visited result queueSound searched
+      cases queue with
+      | nil => simp [searchAux] at searched
+      | cons node queue =>
+          rw [searchAux] at searched
+          split at searched
+          · simp only [Option.some.injEq] at searched
+            subst result
+            exact queueSound node (by simp)
+          · apply ih
+              (queue := queue ++ freshNodes visited
+                (nextNodes indexGrid width height node))
+              (visited := visited ++ (freshNodes visited
+                (nextNodes indexGrid width height node)).map Node.state)
+              ?_ searched
+            intro candidate candidateMem
+            rw [List.mem_append] at candidateMem
+            rcases candidateMem with candidateMem | candidateMem
+            · exact queueSound candidate (by simp [candidateMem])
+            · exact nextNodes_boundedSoundFromSome
+                (queueSound node (by simp))
+                (List.mem_of_mem_filter candidateMem)
+
+/-- Every successful bounded search returns a path whose ports remain inside
+the search box. -/
+theorem search_bounded_sound
+    {indexGrid : Nat → Nat → Index} {width height fuel : Nat}
+    {start finish : Port} {parity : Bool}
+    {accept : Port → Bool → Bool} {moves : List CertificateMove}
+    (hsearch : search indexGrid width height fuel start accept =
+      some (finish, parity, moves)) :
+    BoundedPath indexGrid width height start finish parity := by
+  unfold search at hsearch
+  split at hsearch
+  · rename_i startInBounds
+    cases resultEq : searchAux indexGrid width height accept fuel
+        [⟨start, start, false, []⟩] [(start, false)] with
+    | none => simp [resultEq] at hsearch
+    | some result =>
+        rw [resultEq] at hsearch
+        simp only [Option.map, Option.some.injEq, Prod.mk.injEq] at hsearch
+        rcases hsearch with ⟨rfl, rfl, rfl⟩
+        have startBounds : PortInBounds start width height := by
+          simpa [PortInBounds, inBounds, Bool.and_eq_true] using startInBounds
+        have sound := searchAux_bounded_sound (indexGrid := indexGrid)
+          (width := width) (height := height) (accept := accept)
+          (start := start) fuel (by
+          intro node nodeMem
+          simp only [List.mem_singleton] at nodeMem
+          subst node
+          exact ⟨by simp, BoundedPath.refl (indexGrid := indexGrid)
+            (width := width) (height := height) start startBounds⟩) resultEq
+        have originEq : result.origin = start := by
+          simpa only [List.mem_singleton] using sound.1
+        rw [← originEq]
+        exact sound.2
+  · contradiction
+
 theorem foldl_markFresh_boundedSoundFromSome
     {indexGrid : Nat → Nat → Index} {width height : Nat}
     {starts : List Port} :
