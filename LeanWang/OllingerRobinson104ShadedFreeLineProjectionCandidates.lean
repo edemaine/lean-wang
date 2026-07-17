@@ -35,11 +35,6 @@ def Candidate.weightedStart (candidate : Candidate) : WeightedStart where
   port := sparsePort candidate.port
   parity := candidate.parity
 
-/-- The sparse copy of an executable source candidate after two substitutions. -/
-def Candidate.refine (candidate : Candidate) : Candidate where
-  port := sparsePort candidate.port
-  parity := candidate.parity
-
 def Candidate.BackedBy
     {grid : Nat → Nat → Index} {west east south north : Nat}
     (candidate : Candidate) : Prop :=
@@ -47,24 +42,6 @@ def Candidate.BackedBy
     source.parity = candidate.parity ∧
       Path (iterateRefine 2 grid) (sparsePort source.port)
         (sparsePort candidate.port) false
-
-/-- Backing paths persist when both the pattern and candidate are refined. -/
-theorem Candidate.BackedBy.refine
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    {candidate : Candidate}
-    (backed : candidate.BackedBy (grid := grid) (west := west) (east := east)
-      (south := south) (north := north))
-    (candidateLive : portPresent grid candidate.port = true) :
-    candidate.refine.BackedBy (grid := iterateRefine 2 grid)
-      (west := 4 * west) (east := 4 * east)
-      (south := 4 * south) (north := 4 * north) := by
-  rcases backed with ⟨source, sourceParity, path⟩
-  refine ⟨source.refine, sourceParity, ?_⟩
-  have targetLive :
-      portPresent (iterateRefine 2 grid) (sparsePort candidate.port) = true := by
-    simpa [portPresent_sparse] using candidateLive
-  simpa [Candidate.refine, WeightedSource.refine] using
-    path_refine_sparse path source.refine.portLive targetLive
 
 theorem hasVertical_of_interior_of_live_ports
     {grid : Nat → Nat → Index} {x y : Nat}
@@ -195,62 +172,6 @@ structure Family (grid : Nat → Nat → Index)
     Candidate.BackedBy (grid := grid) (west := west) (east := east)
       (south := south) (north := north) candidate
 
-def Family.empty
-    {grid : Nat → Nat → Index} {west east south north : Nat} :
-    Family grid west east south north where
-  candidates := []
-  backed := by simp
-
-def Family.append
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (first second : Family grid west east south north) :
-    Family grid west east south north where
-  candidates := first.candidates ++ second.candidates
-  backed := by
-    intro candidate hcandidate
-    rcases List.mem_append.1 hcandidate with hcandidate | hcandidate
-    · exact first.backed candidate hcandidate
-    · exact second.backed candidate hcandidate
-
-def Family.concat
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (families : List (Family grid west east south north)) :
-    Family grid west east south north :=
-  families.foldr Family.append Family.empty
-
-/-- Refine every live candidate and its backing path together. -/
-def Family.refine
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (family : Family grid west east south north)
-    (live : ∀ candidate ∈ family.candidates,
-      portPresent grid candidate.port = true) :
-    Family (iterateRefine 2 grid)
-      (4 * west) (4 * east) (4 * south) (4 * north) where
-  candidates := family.candidates.map Candidate.refine
-  backed := by
-    intro candidate hcandidate
-    rcases List.mem_map.1 hcandidate with ⟨oldCandidate, hold, rfl⟩
-    exact (family.backed oldCandidate hold).refine (live oldCandidate hold)
-
-@[simp] theorem Family.refine_candidates
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (family : Family grid west east south north)
-    (live : ∀ candidate ∈ family.candidates,
-      portPresent grid candidate.port = true) :
-    (family.refine live).candidates = family.candidates.map Candidate.refine := rfl
-
-@[simp] theorem Family.concat_candidates
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (families : List (Family grid west east south north)) :
-    (Family.concat families).candidates =
-      families.flatMap Family.candidates := by
-  induction families with
-  | nil => rfl
-  | cons family families ih =>
-      change family.candidates ++ (Family.concat families).candidates = _
-      rw [ih]
-      rfl
-
 def Family.cycle
     {grid : Nat → Nat → Index} {west east south north : Nat}
     (cycle : CycleOn grid west east south north) (ports : List Port)
@@ -299,152 +220,6 @@ def Family.column
     rcases valid port hport with
       ⟨y, hsouth, hnorth, interior, endpoint, live⟩
     exact backedBy_column certificate hsouth hnorth interior endpoint live
-
-/-- A total-odd node reached from backed executable candidates projects. -/
-theorem projectsTo_of_candidateNode
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (candidates : List Candidate)
-    (backed : ∀ candidate ∈ candidates,
-      Candidate.BackedBy (grid := grid) (west := west) (east := east)
-        (south := south) (north := north) candidate)
-    {width height fuel : Nat} {node : Node} {target : Port}
-    (hnode : node ∈ exploreFastWeighted (iterateRefine 2 grid)
-      width height fuel (candidates.map Candidate.weightedStart))
-    (hparity : node.parity = true) (hcurrent : node.current = target)
-    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
-    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
-      (south := south) (north := north) target) := by
-  rcases exploreFastWeighted_sound hnode with
-    ⟨start, hstart, _horigin, tail⟩
-  rcases List.mem_map.1 hstart with ⟨candidate, hcandidates, rfl⟩
-  rcases backed candidate hcandidates with ⟨source, sourceParity, head⟩
-  refine ⟨{
-    source := source
-    path := ?_
-    targetLive := targetLive
-  }⟩
-  rw [hcurrent] at tail
-  have path := Path.trans head tail
-  simpa [Candidate.weightedStart, sourceParity, hparity] using path
-
-theorem projectsTo_of_familyNode
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (family : Family grid west east south north)
-    {width height fuel : Nat} {node : Node} {target : Port}
-    (hnode : node ∈ exploreFastWeighted (iterateRefine 2 grid)
-      width height fuel (family.candidates.map Candidate.weightedStart))
-    (hparity : node.parity = true) (hcurrent : node.current = target)
-    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
-    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
-      (south := south) (north := north) target) :=
-  projectsTo_of_candidateNode family.candidates family.backed hnode
-    hparity hcurrent targetLive
-
-theorem projectsTo_of_candidateReachNode
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (candidates : List Candidate)
-    (backed : ∀ candidate ∈ candidates,
-      Candidate.BackedBy (grid := grid) (west := west) (east := east)
-        (south := south) (north := north) candidate)
-    {width height fuel : Nat} {node : ReachNode} {target : Port}
-    (hnode : node ∈ exploreFastWeightedReach (iterateRefine 2 grid)
-      width height fuel (candidates.map Candidate.weightedStart))
-    (hparity : node.parity = true) (hcurrent : node.current = target)
-    (targetLive : portPresent (iterateRefine 2 grid) target = true) :
-    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
-      (south := south) (north := north) target) := by
-  rcases exploreFastWeightedReach_sound hnode with
-    ⟨start, hstart, tail⟩
-  rcases List.mem_map.1 hstart with ⟨candidate, hcandidates, rfl⟩
-  rcases backed candidate hcandidates with ⟨source, sourceParity, head⟩
-  refine ⟨{
-    source := source
-    path := ?_
-    targetLive := targetLive
-  }⟩
-  rw [hcurrent] at tail
-  have path := Path.trans head tail
-  simpa [Candidate.weightedStart, sourceParity, hparity] using path
-
-def Family.Reached
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (family : Family grid west east south north)
-    (width height fuel : Nat) (target : Port) : Prop :=
-  ∃ node ∈ exploreFastWeightedReach (iterateRefine 2 grid)
-      width height fuel (family.candidates.map Candidate.weightedStart),
-    node.parity = true ∧ node.current = target ∧
-      portPresent (iterateRefine 2 grid) target = true
-
-theorem Family.Reached.projectsTo
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    {family : Family grid west east south north}
-    {width height fuel : Nat} {target : Port}
-    (reached : family.Reached width height fuel target) :
-    Nonempty (ProjectsTo (grid := grid) (west := west) (east := east)
-      (south := south) (north := north) target) := by
-  rcases reached with ⟨node, hnode, hparity, hcurrent, targetLive⟩
-  exact projectsTo_of_candidateReachNode family.candidates family.backed
-    hnode hparity hcurrent targetLive
-
-/-- Weighted coverage of every requested target supplies a pattern projection. -/
-theorem patternProjection_of_familyCoverage
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    {fineOffsets : List Nat} {fineCoordinate : Nat → Nat}
-    (family : Family grid west east south north) (width height fuel : Nat)
-    (vertical : ∀ offset ∈ fineOffsets, ∀ x,
-      quarterWest (4 * west) < x → x < quarterEast (4 * east) →
-      Signals.verticalInterior?
-        (componentAt (iterateRefine 2 grid) x (fineCoordinate offset))
-        (quadrantAt x (fineCoordinate offset)) ≠ none →
-      family.Reached width height fuel ⟨x, fineCoordinate offset, .south⟩ ∨
-      family.Reached width height fuel ⟨x, fineCoordinate offset, .north⟩)
-    (horizontal : ∀ offset ∈ fineOffsets, ∀ y,
-      quarterSouth (4 * south) < y → y < quarterNorth (4 * north) →
-      Signals.horizontalInterior?
-        (componentAt (iterateRefine 2 grid) (fineCoordinate offset) y)
-        (quadrantAt (fineCoordinate offset) y) ≠ none →
-      family.Reached width height fuel ⟨fineCoordinate offset, y, .west⟩ ∨
-      family.Reached width height fuel ⟨fineCoordinate offset, y, .east⟩) :
-    PatternProjection grid west east south north fineOffsets fineCoordinate := by
-  constructor
-  · intro offset hoffset x hwest heast interior
-    rcases vertical offset hoffset x hwest heast interior with reached | reached
-    · exact Or.inl reached.projectsTo
-    · exact Or.inr reached.projectsTo
-  · intro offset hoffset y hsouth hnorth interior
-    rcases horizontal offset hoffset y hsouth hnorth interior with reached | reached
-    · exact Or.inl reached.projectsTo
-    · exact Or.inr reached.projectsTo
-
-def Family.CoversPattern
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    (family : Family grid west east south north)
-    (fineOffsets : List Nat) (fineCoordinate : Nat → Nat) : Prop :=
-  ∃ width height fuel,
-    (∀ offset ∈ fineOffsets, ∀ x,
-      quarterWest (4 * west) < x → x < quarterEast (4 * east) →
-      Signals.verticalInterior?
-        (componentAt (iterateRefine 2 grid) x (fineCoordinate offset))
-        (quadrantAt x (fineCoordinate offset)) ≠ none →
-      family.Reached width height fuel ⟨x, fineCoordinate offset, .south⟩ ∨
-      family.Reached width height fuel ⟨x, fineCoordinate offset, .north⟩) ∧
-    (∀ offset ∈ fineOffsets, ∀ y,
-      quarterSouth (4 * south) < y → y < quarterNorth (4 * north) →
-      Signals.horizontalInterior?
-        (componentAt (iterateRefine 2 grid) (fineCoordinate offset) y)
-        (quadrantAt (fineCoordinate offset) y) ≠ none →
-      family.Reached width height fuel ⟨fineCoordinate offset, y, .west⟩ ∨
-      family.Reached width height fuel ⟨fineCoordinate offset, y, .east⟩)
-
-theorem Family.CoversPattern.toPatternProjection
-    {grid : Nat → Nat → Index} {west east south north : Nat}
-    {family : Family grid west east south north}
-    {fineOffsets : List Nat} {fineCoordinate : Nat → Nat}
-    (coverage : family.CoversPattern fineOffsets fineCoordinate) :
-    PatternProjection grid west east south north fineOffsets fineCoordinate := by
-  rcases coverage with ⟨width, height, fuel, vertical, horizontal⟩
-  exact patternProjection_of_familyCoverage family width height fuel
-    vertical horizontal
 
 end ShadedFreeLineProjectionCandidates
 end Closed104
