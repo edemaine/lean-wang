@@ -8,6 +8,7 @@ import LeanWang.Kari.Hooper.FiniteControl
 import LeanWang.Kari.Hooper.FiniteTM0
 import LeanWang.Kari.Hooper.CounterMachine
 import LeanWang.Kari.Hooper.SourceMachine
+import LeanWang.Kari.Hooper.StackEncoding
 import LeanWang.Kari.Hooper.SearchGeometry
 import LeanWang.Kari.Hooper.CounterLayout
 import LeanWang.Kari.Hooper.RegisterLayout
@@ -24,9 +25,10 @@ machine that has an immortal arbitrary configuration exactly when that
 computation is nonhalting.
 
 The current modules provide unrestricted full-tape semantics, explicit finite
-transition tables, a four-register counter-program layer, its exact finite
-five-boundary marker tape, exact collision-free suffix shifts for every counter
-operation, and the abstract strong-induction core of Hooper's nested
-bounded-search construction.  The remaining files will realize those shifts
-as finite TM tables and instantiate the nesting laws.
+transition tables, arithmetic stack encodings for the fixed source tape, a
+four-register counter-program layer, its exact finite five-boundary marker
+tape, collision-free suffix shifts for every counter operation, and the
+abstract strong-induction core of Hooper's nested bounded-search construction.
+The remaining files will realize those shifts as finite TM tables and
+instantiate the nesting laws.
 -/
