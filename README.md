@@ -78,20 +78,20 @@ of the finite-square search and an r.e. packaging of finite obstructions.
 - `LeanWang.Robinson.Closed104.*` contains the corrected 104-component Figure
   13/Figure 16 transcription, substitution boundary certificates, and the
   successful finite Proposition 8 recognizability check. In particular,
-  `PairCoverSeamRequiredForward` proves forward square forcing, while
+  `OrientedLightHeight` proves a minimum principle for the light-wire height,
+  and `OrientedLightForward` derives forward square forcing directly from its
+  outward-facing nearest boundaries. Meanwhile,
   `ShadedCarrierCornerAddressing` constructs cofinally large addressed squares
   and proves pointed-plane realization.
 
-The original exhaustive base-search route is retained as optional provenance in
-[`PairCoverSeamPathSearch`](LeanWang/Robinson/Closed104/PairCoverSeamPathSearch.lean),
-[`PairCoverSeamPathBaseAudit`](LeanWang/Robinson/Closed104/PairCoverSeamPathBaseAudit.lean),
-and [`PairCoverSeamPathBoundedBase`](LeanWang/Robinson/Closed104/PairCoverSeamPathBoundedBase.lean).
-The two base-audit modules are not imported by the main `LeanWang` library;
-they provide an executable reference for the exhaustive searches that led to
-the committed roots in
-[`PairCoverSeamPathComponentCertificate`](LeanWang/Robinson/Closed104/PairCoverSeamPathComponentCertificate.lean).
-The generic search engine remains mainline because independent local-coordinate
-certificates reuse it.
+The superseded exhaustive PairCover seam proof remains available as provenance
+in the [last pre-cleanup commit](https://github.com/edemaine/lean-wang/tree/a8bcfd206a9816868d0a77bda96c46227313dad3).
+Its main executable entry point was
+[`PairCoverSeamPathSearch`](https://github.com/edemaine/lean-wang/blob/a8bcfd206a9816868d0a77bda96c46227313dad3/LeanWang/Robinson/Closed104/PairCoverSeamPathSearch.lean),
+with finite audits in
+[`PairCoverSeamPathBaseAudit`](https://github.com/edemaine/lean-wang/blob/a8bcfd206a9816868d0a77bda96c46227313dad3/LeanWang/Robinson/Closed104/PairCoverSeamPathBaseAudit.lean)
+and committed component roots in
+[`PairCoverSeamPathComponentCertificate`](https://github.com/edemaine/lean-wang/blob/a8bcfd206a9816868d0a77bda96c46227313dad3/LeanWang/Robinson/Closed104/PairCoverSeamPathComponentCertificate.lean).
 
 ## Build
 

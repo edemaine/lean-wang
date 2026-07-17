@@ -1596,11 +1596,21 @@ be active. Consequently every concrete corner has logical address `(0, 0)`.
 The canonical supertiles are cofinally large `SquareAddressing`s, so the
 concrete routed scaffold realizes every pointed payload plane.
 
-Together with
-`PairCoverSeamRequiredForward.closed104_forcesRoutedFixedCornerSquares`, this
+The forward half is now supplied by
+`OrientedLightForward.closed104_forcesRoutedFixedCornerSquares`. A discrete
+face height changes by the signed light-wire crossings, has zero local
+divergence, and cannot attain zero in the board interior. Free rows and
+columns have height one, so the nearest selected boundaries must face outward;
+`ShadedObstructionGeometry.Geometry.crossingObstruction` then gives the routed
+payload obstruction directly. Together with the addressing result, this
 discharges both concrete scaffold hypotheses. `LeanWang.Final` exposes the
 proof-neutral, hypothesis-free reduction theorems
 `fixedNonhalting_manyOneReducible_dominoProblem` and
 `fixedNonhalting_manyOneReducible_encodedDominoProblem`, together with
 `encoded_domino_problem_undecidable` and `domino_problem_undecidable`. The old
 `closed104_*` names remain as compatibility aliases.
+
+The superseded PairCover seam certificates, finite seam audits, and abandoned
+cycle-orbit proof comprised 287 modules and 36,199 lines. They have been
+removed from the working tree; the complete executable search route remains
+available at pre-cleanup commit `a8bcfd206a9816868d0a77bda96c46227313dad3`.
