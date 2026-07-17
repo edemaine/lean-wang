@@ -1,5 +1,5 @@
 import Mathlib.Tactic.FinCases
-import LeanWang.OllingerRobinson104PairCoverSeamPathBoundedBase
+import LeanWang.OllingerRobinson104PairCoverSeamPathSemantics
 
 /-!
 # Connected-component certificates for the seam-path bases

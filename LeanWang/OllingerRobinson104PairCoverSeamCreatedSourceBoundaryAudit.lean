@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamCreatedSourceBoundaryAuditCheck
-import LeanWang.OllingerRobinson104PairCoverSeamPathBoundedBase
+import LeanWang.OllingerRobinson104PairCoverSeamPathQuerySearch
 
 /-! Proposition-level soundness for the created source-boundary audit. -/
 

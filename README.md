@@ -67,6 +67,17 @@ remain available as `encoded_domino_problem_undecidable_of_routed` and
   forcing, while `OllingerRobinson104ShadedCarrierCornerAddressing` constructs
   cofinally large addressed squares and proves pointed-plane realization.
 
+The original exhaustive base-search route is retained as optional provenance in
+[`OllingerRobinson104PairCoverSeamPathSearch`](LeanWang/OllingerRobinson104PairCoverSeamPathSearch.lean),
+[`OllingerRobinson104PairCoverSeamPathBaseAudit`](LeanWang/OllingerRobinson104PairCoverSeamPathBaseAudit.lean),
+and [`OllingerRobinson104PairCoverSeamPathBoundedBase`](LeanWang/OllingerRobinson104PairCoverSeamPathBoundedBase.lean).
+The two base-audit modules are not imported by the main `LeanWang` library;
+they provide an executable reference for the exhaustive searches that led to
+the committed roots in
+[`OllingerRobinson104PairCoverSeamPathComponentCertificate`](LeanWang/OllingerRobinson104PairCoverSeamPathComponentCertificate.lean).
+The generic search engine remains mainline because independent local-coordinate
+certificates reuse it.
+
 ## Build
 
 ```bash
