@@ -59,7 +59,7 @@ remain available as `encoded_domino_problem_undecidable_of_routed` and
   tiles and seed; all normal history tiles are fixed constants.
 - `LeanWang.UniversalTM0Reduction` proves the fixed-corner and plane-tiling
   reductions and derives undecidability from Mathlib's halting problem.
-- `LeanWang.OllingerRobinsonScaffold` defines the abstract scaffold certificate.
+- `LeanWang.Theorems` defines the abstract scaffold certificate.
 - `LeanWang.OllingerRobinson104*` contains the corrected 104-component
   Figure 13/Figure 16 transcription, substitution boundary certificates, and
   the successful finite Proposition 8 recognizability check. In particular,

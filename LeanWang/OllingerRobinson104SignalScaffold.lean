@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104SignalCorridors
-import LeanWang.OllingerRobinsonScaffold
+import LeanWang.Theorems
 
 /-!
 The concrete scaffold carried by the corrected quarter tiles and Robinson

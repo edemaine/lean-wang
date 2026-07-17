@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamRefinementCoordinates
-import LeanWang.OllingerRobinson104SelectedBoundaryProjection
 import LeanWang.OllingerRobinson104ShadedLightBoardFreeLines
 
 /-!
