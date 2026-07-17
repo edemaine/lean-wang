@@ -60,15 +60,6 @@ theorem redCycleOn_of_redCycle_eq_true
     simpa only [indexThick_eq, thickAt, Bool.and_eq_true] using
       (betweenAll_eq_true_iff.1 hcycle.2 y hySouth hyNorth)
 
-/-- Proposition-level form of the universal finite depth-two certificate. -/
-theorem depthTwo_supertile_has_redCycleOn (parent : Index) :
-    ∃ west east south north : Fin 4,
-      RedCycleOn (fun x y => gridAt (supertile 2 parent) x y)
-        west.val east.val south.val north.val := by
-  rcases depthTwo_supertile_has_redCycle parent with
-    ⟨west, east, south, north, hwest, hsouth, hcycle⟩
-  exact ⟨west, east, south, north,
-    redCycleOn_of_redCycle_eq_true hwest hsouth hcycle⟩
 
 theorem depthTwo_supertile_has_fixed_redCycleOn (parent : Index) :
     RedCycleOn (fun x y => gridAt (supertile 2 parent) x y) 1 3 1 3 :=
@@ -112,18 +103,6 @@ theorem RedCycleOn.iterateRefine {grid : Nat → Nat → Index}
         (2 * doubleN level south) (2 * doubleN level north)
       exact ih.refine
 
-/-- Every parent generates red cycles at every scale above depth two. -/
-theorem supertile_generates_unbounded_redCycles (parent : Index) (level : Nat) :
-    ∃ west east south north : Fin 4,
-      RedCycleOn
-        (iterateRefine level
-          (fun x y => gridAt (supertile 2 parent) x y))
-        (2 ^ level * west.val) (2 ^ level * east.val)
-        (2 ^ level * south.val) (2 ^ level * north.val) := by
-  rcases depthTwo_supertile_has_redCycleOn parent with
-    ⟨west, east, south, north, cycle⟩
-  refine ⟨west, east, south, north, ?_⟩
-  simpa only [doubleN_eq] using cycle.iterateRefine level
 
 end RedCycles
 end Closed104

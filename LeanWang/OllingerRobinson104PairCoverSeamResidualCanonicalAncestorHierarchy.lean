@@ -5,7 +5,6 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamResidualCanonicalAncestorBaseTransport
 import LeanWang.OllingerRobinson104PairCoverSeamRefinementCoordinates
-import LeanWang.OllingerRobinson104SparseFreeLinePlaneLocalStep
 
 /-!
 # Canonical residual-source ancestors at every hierarchy depth
@@ -135,60 +134,6 @@ theorem sourceAncestorsAt (phase : Phase) (depth : Nat)
       (successorWest phase depth blockY)
       (successorEast phase depth blockY) :=
   (sourceAncestorsWithinAt phase depth grid blockX blockY).toSourceAncestorsIn
-
-/-- Compatibility with the original factorized residual-source interface.
-The named hierarchy theorem is stronger: it also handles created boundaries. -/
-theorem residualSourceAncestorsAt (phase : Phase) (depth : Nat) :
-    PairCoverSeamResidualCycleBridges.ResidualSourceAncestorsAt phase depth := by
-  constructor
-  · intro grid parentX parentY column boundary
-      columnWest columnEast boundarySouth boundaryNorth interior _
-    have hierarchy := sourceAncestorsAt phase (depth + 1)
-      grid parentX parentY
-    have interior' : Signals.horizontalInterior?
-        (componentAt (refinedGrid phase (depth + 2) grid) column boundary)
-        (quadrantAt column boundary) ≠ none := by
-      rw [SparseFreeLinePlaneLocalStep.refinedGrid_succ]
-      exact interior
-    have named := hierarchy.horizontal
-      (by
-        constructor
-        · unfold quarterWest at columnWest ⊢
-          omega
-        · exact columnEast)
-      (by
-        constructor
-        · unfold quarterSouth at boundarySouth
-          unfold quarterWest
-          omega
-        · simpa [quarterNorth, quarterEast] using boundaryNorth)
-      interior'
-    have result := named.toCycleAncestor
-    simpa only [SparseFreeLinePlaneLocalStep.refinedGrid_succ] using result
-  · intro grid parentX parentY boundary row
-      boundaryWest boundaryEast rowSouth rowNorth interior _
-    have hierarchy := sourceAncestorsAt phase (depth + 1)
-      grid parentX parentY
-    have interior' : Signals.verticalInterior?
-        (componentAt (refinedGrid phase (depth + 2) grid) boundary row)
-        (quadrantAt boundary row) ≠ none := by
-      rw [SparseFreeLinePlaneLocalStep.refinedGrid_succ]
-      exact interior
-    have named := hierarchy.vertical
-      (by
-        constructor
-        · unfold quarterWest at boundaryWest ⊢
-          omega
-        · exact boundaryEast)
-      (by
-        constructor
-        · unfold quarterSouth at rowSouth
-          unfold quarterWest
-          omega
-        · simpa [quarterNorth, quarterEast] using rowNorth)
-      interior'
-    have result := named.toCycleAncestor
-    simpa only [SparseFreeLinePlaneLocalStep.refinedGrid_succ] using result
 
 end PairCoverSeamResidualCanonicalAncestorHierarchy
 end LeanWang.OllingerRobinson.Figure13Layers.Closed104

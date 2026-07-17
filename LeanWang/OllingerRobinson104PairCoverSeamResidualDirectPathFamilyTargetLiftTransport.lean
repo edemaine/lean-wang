@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetLiftAudit
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetRecurrence
+import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathBridges
 import LeanWang.OllingerRobinson104PairCoverSeamCreatedLocalTransport
 import LeanWang.OllingerRobinson104SparseFreeLineLocalTransport
 

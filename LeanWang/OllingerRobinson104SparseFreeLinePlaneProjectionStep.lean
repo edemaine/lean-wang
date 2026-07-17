@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104SparseFreeLinePlaneOddExtraStep
 import LeanWang.OllingerRobinson104SparseFreeLinePlaneEvenExtraCreatedStep
+import LeanWang.OllingerRobinson104SparseFreeLineEvenOddLocalStep
 
 /-! Assembly of the sparse free-line recurrence in arbitrary coarse grids. -/
 
@@ -16,8 +17,8 @@ namespace SparseFreeLinePlaneProjectionStep
 
 open RedCycles RedShadeGraphRefinement ShadedFreeLinePatternRefinement
   ShadedFreeLineRecurrence BorderCoverageOffsets SparseFreeLineOffsets
-  SparseFreeLineRecurrence SparseFreeLineLocalStates
-  SparseFreeLineLocalProjection SparseFreeLineLocalRecurrence
+  SparseFreeLineLocalStates
+  SparseFreeLineLocalProjection
   SparseFreeLinePlaneBase
 
 set_option maxRecDepth 20000

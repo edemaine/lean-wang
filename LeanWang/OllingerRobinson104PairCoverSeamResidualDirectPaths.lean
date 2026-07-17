@@ -3,7 +3,8 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104PairCoverSeamComposition
+import LeanWang.OllingerRobinson104PairCoverSeamCreatedPaths
+import LeanWang.OllingerRobinson104PairCoverSeamPathContradictions
 
 /-!
 # Direct path certificates for residual seams
@@ -20,7 +21,6 @@ namespace PairCoverSeamResidualDirectPaths
 
 open RedCycles RedShadeCycles RedShadeGraph
   PairCoverSeamArithmetic PairCoverSeamPathSearch PairCoverSeamShadePaths
-  PairCoverSeamResidualCycles
   RefinedCoordinateProjection ShadedFreeLineRecurrence
   ShadedObstructionPairCoverRecurrence ShadedPlaneSignalGrid
   Signals.FreeCellLocal SparseFreeLinePlaneBase

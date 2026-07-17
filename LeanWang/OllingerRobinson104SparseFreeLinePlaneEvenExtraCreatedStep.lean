@@ -25,7 +25,7 @@ open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
   RedShadeGraphTranslation Signals.FreeCellLocal Signals.FreeCellEmbedding
   BorderCoverageOffsets
   ShadedFreeLinePatternRefinement ShadedFreeLineRecurrence
-  SparseFreeLineOffsets SparseFreeLineLocalProjection SparseFreeLineLocalRecurrence
+  SparseFreeLineOffsets SparseFreeLineLocalProjection
   SparseFreeLineLocalStates SparseFreeLineLocalTransport
   SparseFreeLineEvenExtraCreatedPositions
   SparseFreeLineEvenExtraCreatedWindowAudit

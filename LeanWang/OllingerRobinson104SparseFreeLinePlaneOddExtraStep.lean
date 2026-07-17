@@ -25,8 +25,8 @@ open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement
   Signals.FreeCellLocal BorderGeometry BorderCoverage
   ShadedFreeLinePatternRefinement ShadedFreeLineProjectionCandidates
   ShadedFreeLineProjectionSourceLists ShadedFreeLineRecurrence
-  SparseFreeLineOffsets SparseFreeLineRecurrence SparseFreeLineLocalProjection
-  SparseFreeLineLocalRecurrence SparseFreeLineOddExtraBaseAudit
+  SparseFreeLineOffsets SparseFreeLineLocalProjection
+  SparseFreeLineOddExtraBaseAudit
   SparseFreeLinePlaneBase
 
 set_option maxRecDepth 20000

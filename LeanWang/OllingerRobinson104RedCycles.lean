@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.OllingerRobinson104PlaneDecode
+import LeanWang.OllingerRobinson104
 
 /-!
 Red-border topology in finite corrected-Ollinger supertiles.
@@ -85,23 +85,6 @@ def redCycle (grid : Grid) (west east south north : Nat) : Bool :=
       hasRedVertical (thickAt grid west y) &&
         hasRedVertical (thickAt grid east y))
 
-/- Every depth-two supertile contains a red rectangular cycle. -/
-set_option linter.style.nativeDecide false in
-set_option maxRecDepth 20000 in
-theorem every_depthTwo_supertile_has_redCycle :
-    ∀ parent : Index,
-      ∃ west east south north : Fin 4,
-        west.val < east.val ∧ south.val < north.val ∧
-          redCycle (supertile 2 parent)
-            west.val east.val south.val north.val = true := by
-  native_decide
-
-theorem depthTwo_supertile_has_redCycle (parent : Index) :
-    ∃ west east south north : Fin 4,
-      west.val < east.val ∧ south.val < north.val ∧
-        redCycle (supertile 2 parent)
-          west.val east.val south.val north.val = true :=
-  every_depthTwo_supertile_has_redCycle parent
 
 /- In fact, the depth-two cycle has the same coordinates below every parent. -/
 set_option linter.style.nativeDecide false in

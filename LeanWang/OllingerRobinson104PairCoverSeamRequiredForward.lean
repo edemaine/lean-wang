@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.OllingerRobinson104PairCoverSeamFaceRequired
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathAllFamilyTargetsAllDepth
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyExceptionalAllDepth
+import LeanWang.OllingerRobinson104ShadedObstructionPairCoverForward
 
 /-!
 # Required-depth seam faces imply forward square forcing

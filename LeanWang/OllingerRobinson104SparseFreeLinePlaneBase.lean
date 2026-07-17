@@ -5,7 +5,8 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104ShadedFreeLineGraphBase
 import LeanWang.OllingerRobinson104ShadedFreeLineOddBase
-import LeanWang.OllingerRobinson104SparseFreeLineRecurrence
+import LeanWang.OllingerRobinson104ShadedFreeLineRecurrence
+import LeanWang.OllingerRobinson104SparseFreeLineOffsets
 
 /-!
 # Sparse free-line bases in arbitrary coarse grids

@@ -17,7 +17,7 @@ namespace SparseFreeLinePlaneFreeGrid
 open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths RedShadeCrossingBoards
   ShadedFreeGrid ShadedFreeLineGraph ShadedFreeLinePatternRefinement
   ShadedFreeLineRecurrence ShadedPlaneSignalGrid SparseFreeLineOffsets
-  SparseFreeLineRecurrence SparseFreeLinePlaneBase
+  SparseFreeLinePlaneBase
 
 set_option maxRecDepth 20000
 

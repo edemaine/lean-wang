@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathFamilyTargetLiftTransport
+import LeanWang.OllingerRobinson104PairCoverSeamResidualDirectPathTargets
 
 /-!
 # Semantic recurrence from transported family-target lifts
