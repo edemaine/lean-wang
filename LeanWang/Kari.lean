@@ -10,6 +10,7 @@ import LeanWang.Kari.Affine
 import LeanWang.Kari.Beatty
 import LeanWang.Kari.AffineBeatty
 import LeanWang.Kari.AffineSystem
+import LeanWang.Kari.AffineTM
 import LeanWang.Kari.TransducerHalfPlane
 import LeanWang.Kari.Hooper
 
