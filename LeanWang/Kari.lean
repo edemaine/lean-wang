@@ -8,6 +8,7 @@ import LeanWang.Kari.Dynamics
 import LeanWang.Kari.HalfPlane
 import LeanWang.Kari.Affine
 import LeanWang.Kari.TransducerHalfPlane
+import LeanWang.Kari.Hooper.FullTM0
 
 /-!
 # Kari's proof of Wang domino undecidability
