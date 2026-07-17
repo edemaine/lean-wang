@@ -297,6 +297,82 @@ theorem selectedVertical_eq_east_of_exit_south
   revert component quadrant state segment
   native_decide
 
+theorem segment_eq_east_of_horizontal_edges
+    {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
+    (allowed : RedShades.allowedFor component quadrant state = true)
+    (hwest : state.west = some .light) (heast : state.east = some .light)
+    (hbit : quadrant.yBit = true) :
+    segment? component quadrant state = some .east := by
+  have hin : Enters quadrant state .east = true := by
+    simp [Enters, hwest, hbit]
+  have hout : Exits quadrant state .east = true := by
+    simp [Exits, heast, hbit]
+  rcases (enters_iff_segment _ _ _ _ allowed).1 hin with
+    ⟨segment, hsegment, hentry⟩
+  rcases (exits_iff_segment _ _ _ _ allowed).1 hout with
+    ⟨segmentPrime, hsegmentPrime, hexit⟩
+  have heq : segment = segmentPrime :=
+    Option.some.inj (hsegment.symm.trans hsegmentPrime)
+  subst segmentPrime
+  cases segment <;> simp_all [Segment.entry, Segment.exit]
+
+theorem segment_eq_west_of_horizontal_edges
+    {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
+    (allowed : RedShades.allowedFor component quadrant state = true)
+    (hwest : state.west = some .light) (heast : state.east = some .light)
+    (hbit : quadrant.yBit = false) :
+    segment? component quadrant state = some .west := by
+  have hin : Enters quadrant state .west = true := by
+    simp [Enters, heast, hbit]
+  have hout : Exits quadrant state .west = true := by
+    simp [Exits, hwest, hbit]
+  rcases (enters_iff_segment _ _ _ _ allowed).1 hin with
+    ⟨segment, hsegment, hentry⟩
+  rcases (exits_iff_segment _ _ _ _ allowed).1 hout with
+    ⟨segmentPrime, hsegmentPrime, hexit⟩
+  have heq : segment = segmentPrime :=
+    Option.some.inj (hsegment.symm.trans hsegmentPrime)
+  subst segmentPrime
+  cases segment <;> simp_all [Segment.entry, Segment.exit]
+
+theorem segment_eq_north_of_vertical_edges
+    {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
+    (allowed : RedShades.allowedFor component quadrant state = true)
+    (hsouth : state.south = some .light) (hnorth : state.north = some .light)
+    (hbit : quadrant.xBit = false) :
+    segment? component quadrant state = some .north := by
+  have hin : Enters quadrant state .north = true := by
+    simp [Enters, hsouth, hbit]
+  have hout : Exits quadrant state .north = true := by
+    simp [Exits, hnorth, hbit]
+  rcases (enters_iff_segment _ _ _ _ allowed).1 hin with
+    ⟨segment, hsegment, hentry⟩
+  rcases (exits_iff_segment _ _ _ _ allowed).1 hout with
+    ⟨segmentPrime, hsegmentPrime, hexit⟩
+  have heq : segment = segmentPrime :=
+    Option.some.inj (hsegment.symm.trans hsegmentPrime)
+  subst segmentPrime
+  cases segment <;> simp_all [Segment.entry, Segment.exit]
+
+theorem segment_eq_south_of_vertical_edges
+    {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
+    (allowed : RedShades.allowedFor component quadrant state = true)
+    (hsouth : state.south = some .light) (hnorth : state.north = some .light)
+    (hbit : quadrant.xBit = true) :
+    segment? component quadrant state = some .south := by
+  have hin : Enters quadrant state .south = true := by
+    simp [Enters, hnorth, hbit]
+  have hout : Exits quadrant state .south = true := by
+    simp [Exits, hsouth, hbit]
+  rcases (enters_iff_segment _ _ _ _ allowed).1 hin with
+    ⟨segment, hsegment, hentry⟩
+  rcases (exits_iff_segment _ _ _ _ allowed).1 hout with
+    ⟨segmentPrime, hsegmentPrime, hexit⟩
+  have heq : segment = segmentPrime :=
+    Option.some.inj (hsegment.symm.trans hsegmentPrime)
+  subst segmentPrime
+  cases segment <;> simp_all [Segment.entry, Segment.exit]
+
 @[simp] theorem quadrantAt_xBit (x y : Nat) :
     (quadrantAt x y).xBit = (x % 2 == 1) := by
   cases hx : (x % 2 == 1) <;> cases hy : (y % 2 == 1) <;>
@@ -399,6 +475,98 @@ theorem ValidShadeGrid.segmentAt_south
     · exact hmatch.trans hexits.1
     · simpa only [quadrantAt_xBit] using hexits.2
   exact (enters_iff_segment _ _ _ _ (valid.allowed x (y - 1))).1 henters
+
+theorem ValidShadeGrid.segmentAt_predecessor_east
+    {indexGrid : Nat -> Nat -> Index}
+    {stateGrid : Nat -> Nat -> RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid)
+    {x y : Nat} {segment : Segment}
+    (hx : 0 < x)
+    (hsegment : segmentAt indexGrid stateGrid x y = some segment)
+    (hentry : segment.entry = .east) :
+    Exists fun previous => And
+      (segmentAt indexGrid stateGrid (x - 1) y = some previous)
+      (previous.exit = .east) := by
+  have henters : Enters (quadrantAt x y) (stateGrid x y) .east = true :=
+    (enters_iff_segment _ _ _ _ (valid.allowed x y)).2
+      ⟨segment, hsegment, hentry⟩
+  simp only [Enters, Bool.and_eq_true, decide_eq_true_eq] at henters
+  have hmatch := valid.hmatch (x - 1) y
+  have hxPoint : x - 1 + 1 = x := by omega
+  rw [hxPoint] at hmatch
+  have hexits : Exits (quadrantAt (x - 1) y)
+      (stateGrid (x - 1) y) .east = true := by
+    simp only [Exits, Bool.and_eq_true, decide_eq_true_eq]
+    exact ⟨hmatch.trans henters.1, by
+      simpa only [quadrantAt_yBit] using henters.2⟩
+  exact (exits_iff_segment _ _ _ _ (valid.allowed (x - 1) y)).1 hexits
+
+theorem ValidShadeGrid.segmentAt_predecessor_north
+    {indexGrid : Nat -> Nat -> Index}
+    {stateGrid : Nat -> Nat -> RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid)
+    {x y : Nat} {segment : Segment}
+    (hy : 0 < y)
+    (hsegment : segmentAt indexGrid stateGrid x y = some segment)
+    (hentry : segment.entry = .north) :
+    Exists fun previous => And
+      (segmentAt indexGrid stateGrid x (y - 1) = some previous)
+      (previous.exit = .north) := by
+  have henters : Enters (quadrantAt x y) (stateGrid x y) .north = true :=
+    (enters_iff_segment _ _ _ _ (valid.allowed x y)).2
+      ⟨segment, hsegment, hentry⟩
+  simp only [Enters, Bool.and_eq_true, decide_eq_true_eq] at henters
+  have hmatch := valid.vmatch x (y - 1)
+  have hyPoint : y - 1 + 1 = y := by omega
+  rw [hyPoint] at hmatch
+  have hexits : Exits (quadrantAt x (y - 1))
+      (stateGrid x (y - 1)) .north = true := by
+    simp only [Exits, Bool.and_eq_true, decide_eq_true_eq]
+    exact ⟨hmatch.trans henters.1, by
+      simpa only [quadrantAt_xBit] using henters.2⟩
+  exact (exits_iff_segment _ _ _ _ (valid.allowed x (y - 1))).1 hexits
+
+theorem ValidShadeGrid.segmentAt_predecessor_west
+    {indexGrid : Nat -> Nat -> Index}
+    {stateGrid : Nat -> Nat -> RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid)
+    {x y : Nat} {segment : Segment}
+    (hsegment : segmentAt indexGrid stateGrid x y = some segment)
+    (hentry : segment.entry = .west) :
+    Exists fun previous => And
+      (segmentAt indexGrid stateGrid (x + 1) y = some previous)
+      (previous.exit = .west) := by
+  have henters : Enters (quadrantAt x y) (stateGrid x y) .west = true :=
+    (enters_iff_segment _ _ _ _ (valid.allowed x y)).2
+      ⟨segment, hsegment, hentry⟩
+  simp only [Enters, Bool.and_eq_true, decide_eq_true_eq] at henters
+  have hexits : Exits (quadrantAt (x + 1) y)
+      (stateGrid (x + 1) y) .west = true := by
+    simp only [Exits, Bool.and_eq_true, decide_eq_true_eq]
+    exact ⟨(valid.hmatch x y).symm.trans henters.1, by
+      simpa only [quadrantAt_yBit] using henters.2⟩
+  exact (exits_iff_segment _ _ _ _ (valid.allowed (x + 1) y)).1 hexits
+
+theorem ValidShadeGrid.segmentAt_predecessor_south
+    {indexGrid : Nat -> Nat -> Index}
+    {stateGrid : Nat -> Nat -> RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid)
+    {x y : Nat} {segment : Segment}
+    (hsegment : segmentAt indexGrid stateGrid x y = some segment)
+    (hentry : segment.entry = .south) :
+    Exists fun previous => And
+      (segmentAt indexGrid stateGrid x (y + 1) = some previous)
+      (previous.exit = .south) := by
+  have henters : Enters (quadrantAt x y) (stateGrid x y) .south = true :=
+    (enters_iff_segment _ _ _ _ (valid.allowed x y)).2
+      ⟨segment, hsegment, hentry⟩
+  simp only [Enters, Bool.and_eq_true, decide_eq_true_eq] at henters
+  have hexits : Exits (quadrantAt x (y + 1))
+      (stateGrid x (y + 1)) .south = true := by
+    simp only [Exits, Bool.and_eq_true, decide_eq_true_eq]
+    exact ⟨(valid.vmatch x y).symm.trans henters.1, by
+      simpa only [quadrantAt_xBit] using henters.2⟩
+  exact (exits_iff_segment _ _ _ _ (valid.allowed x (y + 1))).1 hexits
 
 end OrientedLightSegments
 end Closed104
