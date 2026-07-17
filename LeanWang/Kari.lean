@@ -6,6 +6,8 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Kari.Transducer
 import LeanWang.Kari.Dynamics
 import LeanWang.Kari.HalfPlane
+import LeanWang.Kari.Affine
+import LeanWang.Kari.TransducerHalfPlane
 
 /-!
 # Kari's proof of Wang domino undecidability
