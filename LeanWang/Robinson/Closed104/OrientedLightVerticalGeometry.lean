@@ -289,7 +289,7 @@ theorem CycleShade.nearest_below_selected_south
                 rw [hcolumn, hzero.2] at hshared
                 exact hshared) hmatch)
 
-private theorem exists_first_after
+theorem exists_first_after
     {P : Nat -> Prop} {start finish : Nat}
     (hstart : start < finish) (hfinish : P finish) :
     exists first, start < first /\ first <= finish /\ P first /\
@@ -315,7 +315,7 @@ private theorem exists_first_after
   dsimp [distance] at hvalueFirst
   omega
 
-private theorem exists_last_before
+theorem exists_last_before
     {P : Nat -> Prop} {first finish : Nat}
     (hfirst : first < finish) (hfirstP : P first) :
     exists last, first <= last /\ last < finish /\ P last /\
