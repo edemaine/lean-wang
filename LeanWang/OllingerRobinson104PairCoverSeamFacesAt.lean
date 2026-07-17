@@ -11,7 +11,7 @@ import LeanWang.OllingerRobinson104PairCoverSeamComposition
 The public face structures quantify over every hierarchy depth.  Induction
 through one two-substitution refinement instead needs the corresponding
 fixed-phase, fixed-depth proposition.  This module provides that proposition
-and lossless adapters to and from the public structures.
+used by the proof.
 -/
 
 namespace LeanWang
@@ -133,27 +133,6 @@ structure HorizontalBoundaryFacesAt (phase : Phase) (depth : Nat) : Prop where
         boundary row)
       (quadrantAt boundary row) (shadeGrid boundary row) = some .west
 
-theorem VerticalBoundaryFaces.at (faces : VerticalBoundaryFaces)
-    (phase : Phase) (depth : Nat) : VerticalBoundaryFacesAt phase depth :=
-  ⟨faces.above phase depth, faces.below phase depth⟩
-
-theorem HorizontalBoundaryFaces.at (faces : HorizontalBoundaryFaces)
-    (phase : Phase) (depth : Nat) : HorizontalBoundaryFacesAt phase depth :=
-  ⟨faces.right phase depth, faces.left phase depth⟩
-
-theorem verticalBoundaryFaces_of_at
-    (faces : ∀ phase depth, VerticalBoundaryFacesAt phase depth) :
-    VerticalBoundaryFaces := by
-  constructor
-  · exact fun phase depth => (faces phase depth).above
-  · exact fun phase depth => (faces phase depth).below
-
-theorem horizontalBoundaryFaces_of_at
-    (faces : ∀ phase depth, HorizontalBoundaryFacesAt phase depth) :
-    HorizontalBoundaryFaces := by
-  constructor
-  · exact fun phase depth => (faces phase depth).right
-  · exact fun phase depth => (faces phase depth).left
 
 end PairCoverSeamFacesAt
 end Closed104

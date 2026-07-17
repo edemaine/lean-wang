@@ -114,12 +114,6 @@ theorem BoundedPaths.verticalBoundaryFacesAt
               · exact notFits
         | south => rfl
 
-theorem BoundedPaths.verticalBoundaryFaces
-    (paths : ∀ (phase : Phase) (depth : Nat), BoundedPaths phase depth) :
-    VerticalBoundaryFaces :=
-  verticalBoundaryFaces_of_at fun phase depth =>
-    BoundedPaths.verticalBoundaryFacesAt (paths phase depth)
-
 set_option maxHeartbeats 1000000 in
 -- The four dependent grid occurrences make elaboration exceed the default.
 theorem BoundedPaths.horizontalBoundaryFacesAt
@@ -181,11 +175,6 @@ theorem BoundedPaths.horizontalBoundaryFacesAt
               · exact notFits
         | west => rfl
 
-theorem BoundedPaths.horizontalBoundaryFaces
-    (paths : ∀ (phase : Phase) (depth : Nat), BoundedPaths phase depth) :
-    HorizontalBoundaryFaces :=
-  horizontalBoundaryFaces_of_at fun phase depth =>
-    BoundedPaths.horizontalBoundaryFacesAt (paths phase depth)
 
 end PairCoverSeamPathFaces
 end Closed104
