@@ -42,7 +42,7 @@ The reduction has three independent parts:
 The source-dependent machine compiler has been replaced by a fixed universal
 argument.
 
-`LeanWang.Robinson.Machine.UniversalTM0.Semantic` applies Mathlib's `ToPartrec.Code.exists_code` directly
+`LeanWang.UniversalTM0.Semantic` applies Mathlib's `ToPartrec.Code.exists_code` directly
 to the universal partial function, relabels that one fixed evaluator, carries
 Mathlib's native finite supports through TM2, TM1, and TM0, and proves the
 varying binary input primitive recursive. `LeanWang.Robinson.Machine.UniversalTM0.Machine` folds the

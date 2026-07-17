@@ -62,7 +62,7 @@ of the finite-square search and an r.e. packaging of finite obstructions.
 - `LeanWang.Robinson.Machine.History` is the small input-independent kernel of
   finite local history blocks. The obsolete table-program and blank-input
   backends have been removed.
-- `LeanWang.Robinson.Machine.UniversalTM0.Semantic` uses Mathlib's completeness
+- `LeanWang.UniversalTM0.Semantic` uses Mathlib's completeness
   theorem to choose one evaluator code directly, carries its finite supports
   through TM2, TM1, and TM0, and places the source code on its initial tape.
 - `LeanWang.Robinson.Machine.UniversalTM0.Folded` defines the paired coordinates
