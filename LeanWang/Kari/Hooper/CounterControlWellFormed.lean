@@ -51,26 +51,22 @@ def incrementAddresses (growth : Turing.Dir) (source : Nat) :
       , address growth source 24, address growth source 25
       , address growth source 26
       , address growth source 40, address growth source 41
-      , address growth source 42, address growth source 43
-      , address growth source 44 ]
+      , address growth source 42, address growth source 43 ]
   | .right =>
       [ address growth source 16, address growth source 17
       , address growth source 18
       , address growth source 24, address growth source 25
       , address growth source 40, address growth source 41
-      , address growth source 42, address growth source 43
-      , address growth source 44 ]
+      , address growth source 42, address growth source 43 ]
   | .temp =>
       [ address growth source 16, address growth source 17
       , address growth source 24
       , address growth source 40, address growth source 41
-      , address growth source 42, address growth source 43
-      , address growth source 44 ]
+      , address growth source 42, address growth source 43 ]
   | .clock =>
       [ address growth source 16
       , address growth source 40, address growth source 41
-      , address growth source 42, address growth source 43
-      , address growth source 44 ]
+      , address growth source 42, address growth source 43 ]
 
 /-- Search addresses used by both branches of a conditional decrement. -/
 def decrementAddresses (growth : Turing.Dir) (source : Nat) :
