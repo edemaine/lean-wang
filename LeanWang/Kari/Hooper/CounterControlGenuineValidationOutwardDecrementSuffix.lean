@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardDecrement
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardDecrementClock
+import LeanWang.Kari.Hooper.CounterControlOutwardGapTransport
 
 /-!
 # Arbitrary outward validation suffix followed by a decrement
@@ -23,12 +24,15 @@ namespace Hooper
 namespace CounterControlGenuineValidationOutwardDecrementSuffix
 
 open Turing CounterMachine
-open BoundedMarkerProgram CounterControlPlan CounterControlSearchSystem
+open BoundedMarkerProgram FramedMarkerTape
+open CounterControlPlan CounterControlSearchSystem CounterControlCoreFrame
 open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedParentContinuation
+open CounterControlParentEmbedding CounterControlPrefixInstructionResolution
 open CounterControlGenuineValidation
 open CounterControlGenuineValidationOutwardSuffix
 open CounterControlRouteSuffixMortality CounterControlValidationMortality
+open CounterControlResumedRouteEmbedding
 
 noncomputable section
 
@@ -422,6 +426,359 @@ theorem bodyBranchOutcome_of_immortal
         (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
       simpa [branchRule, searchRef, resolve, hback'] using hzeroLocal
     exact ⟨.zero route hboundary (hbranch.trans hzero)⟩
+
+/-! ## Exact generated branch searches -/
+
+/-- Distance-zero guarded first shift produced by the positive branch. -/
+structure PositiveSearchEntry
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)) : Type where
+  route : BodyRouteEnd current growth source register ifZero ifPositive suffix
+  read_blank : route.branchTape.read = blankSymbol
+  next : CounterControlGuardedSearch.GuardedSearch base c
+  selectedRaw_eq : next.current.selectedRaw =
+    CounterControlGenuineDecrementEntry.firstDecrementShiftRaw
+      growth source register
+  selectedRaw_mem : next.current.selectedRaw ∈
+    decrementShiftCommands growth source register
+  outer_eq : next.current.outer = route.finish
+  distance_eq : next.current.distance = 0
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current) next.current.cfg
+
+/-- Distance-zero first recovery search produced by the zero branch. -/
+structure ZeroSearchEntry
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)) : Type where
+  route : BodyRouteEnd current growth source register ifZero ifPositive suffix
+  read_boundary : route.branchTape.read = boundarySymbol
+    (AnchoredCounterGeometry.registerGap register).castSucc
+  next : GenuineSearch base c
+  selectedRaw_eq : next.selectedRaw =
+    CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw
+      growth source register ifZero
+  selectedRaw_mem : next.selectedRaw ∈
+    routeCommandsAux growth source zeroSearchBase zeroDirectBase
+      (.logical growth ifZero)
+      (AnchoredCounterGeometry.routeFromZero register)
+  outer_eq : next.outer = route.finish
+  distance_eq : next.distance = 0
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current) next.cfg
+
+/-- Generated-search form of either exact body branch. -/
+inductive BodyBranchSearchOutcome
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)) : Type where
+  | positive (entry : PositiveSearchEntry current growth source register
+      ifZero ifPositive suffix)
+  | zero (entry : ZeroSearchEntry current growth source register
+      ifZero ifPositive suffix)
+
+/-- Retag either branch endpoint with the first generated command of the
+selected continuation. -/
+theorem bodyBranchSearchOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (outcome : BodyBranchOutcome current growth source register ifZero
+      ifPositive suffix) :
+    Nonempty (BodyBranchSearchOutcome current growth source register ifZero
+      ifPositive suffix) := by
+  cases outcome with
+  | positive route hblank hreach =>
+      let raw := CounterControlGenuineDecrementEntry.firstDecrementShiftRaw
+        growth source register
+      have hraw : raw ∈ rawCommands :=
+        CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_mem_rawCommands
+          growth source register ifZero ifPositive hrule
+      have hmatch :
+          (CounterControlCommandAt.compileRawCommand base c raw hraw).target.Matches
+            route.finish.read := by
+        rw [CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_target]
+        simpa [Target.Matches] using route.finish_read
+      let genuine : GenuineSearch base c :=
+        CounterControlGenuineDecrementEntry.immediateSearch base c raw hraw
+          route.finish hmatch
+      have hdirection : genuine.direction = orient growth .right := by
+        rw [CounterControlGenuineDecrementEntry.immediateSearch_direction,
+          CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_direction]
+      let next : CounterControlGuardedSearch.GuardedSearch base c := {
+        current := genuine
+        guard := by
+          change (genuine.outer.move
+            (NestingMachine.opposite genuine.direction)).read = blankSymbol
+          rw [hdirection]
+          have hopposite : NestingMachine.opposite (orient growth .right) =
+              orient growth .left := by
+            cases growth <;> rfl
+          rw [hopposite]
+          exact hblank }
+      have hreach' : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c) (foundCfg current)
+          genuine.cfg := by
+        rw [CounterControlGenuineDecrementEntry.immediateSearch_cfg]
+        exact hreach
+      refine ⟨.positive {
+        route := route
+        read_blank := hblank
+        next := next
+        selectedRaw_eq := ?_
+        selectedRaw_mem := ?_
+        outer_eq := rfl
+        distance_eq := rfl
+        reaches := hreach' }⟩
+      · exact
+          CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw
+            base c raw hraw route.finish hmatch
+      · rw [show next.current.selectedRaw = raw by
+            exact
+              CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw
+                base c raw hraw route.finish hmatch]
+        exact
+          CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_mem
+            growth source register
+  | zero route hboundary hreach =>
+      let raw := CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw
+        growth source register ifZero
+      have hraw : raw ∈ rawCommands :=
+        CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw_mem_rawCommands
+          growth source register ifZero ifPositive hrule
+      have hmatch :
+          (CounterControlCommandAt.compileRawCommand base c raw hraw).target.Matches
+            route.finish.read := by
+        rw [CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw_target]
+        simpa [Target.Matches] using route.finish_read
+      let next : GenuineSearch base c :=
+        CounterControlGenuineDecrementEntry.immediateSearch base c raw hraw
+          route.finish hmatch
+      have hreach' : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c) (foundCfg current)
+          next.cfg := by
+        rw [CounterControlGenuineDecrementEntry.immediateSearch_cfg]
+        exact hreach
+      refine ⟨.zero {
+        route := route
+        read_boundary := hboundary
+        next := next
+        selectedRaw_eq := ?_
+        selectedRaw_mem := ?_
+        outer_eq := rfl
+        distance_eq := rfl
+        reaches := hreach' }⟩
+      · exact
+          CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw
+            base c raw hraw route.finish hmatch
+      · rw [show next.selectedRaw = raw by
+            exact
+              CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw
+                base c raw hraw route.finish hmatch]
+        exact CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw_mem
+          growth source register ifZero
+
+/-! ## Centered logical endpoints -/
+
+/-- Completed positive shift endpoint, retaining the old body route and the
+centered reconstructed core. -/
+structure PositiveCenteredEnd
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive))
+    (entry : PositiveSearchEntry current growth source register ifZero
+      ifPositive suffix) : Type where
+  direct : CounterControlGuardedShiftCompletion.DecrementPositiveDirectHandoff
+    entry.next growth source register ifZero ifPositive
+  endpoint : CounterControlGuardedShiftEmbedding.DecrementPositiveCenteredEnd
+    entry.next growth source register ifZero ifPositive direct
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current) endpoint.core.cfg
+
+/-- Complete the positive shift branch and reconstruct its centered logical
+core. -/
+theorem PositiveSearchEntry.centeredEnd_of_immortal
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    (entry : PositiveSearchEntry current growth source register ifZero
+      ifPositive suffix)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (PositiveCenteredEnd current growth source register ifZero
+      ifPositive suffix entry) := by
+  have himmortalNext : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) entry.next.current.cfg :=
+    immortalFrom_of_reaches base c himmortal entry.reaches
+  have hfound := reaches_foundCfg_of_immortal entry.next.current himmortalNext
+  have himmortalFound := immortalFrom_of_reaches base c himmortalNext hfound
+  rcases CounterControlGuardedSearch.GuardedSearch.decrementShift_suffix_of_immortal
+      base c hmortal entry.next growth source register ifZero ifPositive
+      hrule entry.selectedRaw_mem himmortalFound with ⟨shiftSuffix⟩
+  rcases CounterControlGuardedShiftCompletion.decrementPositiveDirectHandoff
+      base c entry.next growth source register ifZero ifPositive hrule
+      shiftSuffix with ⟨direct⟩
+  rcases CounterControlGuardedShiftEmbedding.decrementPositiveCenteredEnd
+      base c hmortal entry.next himmortalFound growth source register ifZero
+      ifPositive direct with ⟨endpoint⟩
+  exact ⟨⟨direct, endpoint,
+    entry.reaches.trans (hfound.trans endpoint.reaches)⟩⟩
+
+/-- Completed zero-recovery endpoint, retaining the unchanged selected
+boundary tape at its canonical coordinate in the reconstructed core. -/
+structure ZeroCenteredEnd
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive))
+    (entry : ZeroSearchEntry current growth source register ifZero ifPositive
+      suffix) : Type where
+  core : LogicalCore base c
+  core_represents : CoreRepresents core.registers growth core.tape
+  route_finish : entry.route.finish =
+    atLogical growth core.tape
+      (boundaryOffset core.registers
+        (MarkerSchedule.decrementStartBoundary register))
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current) core.cfg
+
+/-- Follow zero recovery through its preserving route and reconstruct the
+selected body-route boundary in the resulting logical core. -/
+theorem ZeroSearchEntry.centeredEnd_of_immortal
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    (entry : ZeroSearchEntry current growth source register ifZero ifPositive
+      suffix)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (ZeroCenteredEnd current growth source register ifZero
+      ifPositive suffix entry) := by
+  have himmortalNext : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) entry.next.cfg :=
+    immortalFrom_of_reaches base c himmortal entry.reaches
+  have hfound := reaches_foundCfg_of_immortal entry.next himmortalNext
+  have himmortalFound := immortalFrom_of_reaches base c himmortalNext hfound
+  have hcommands : ∀ command,
+      command ∈ routeCommandsAux growth source zeroSearchBase zeroDirectBase
+          (.logical growth ifZero)
+          (AnchoredCounterGeometry.routeFromZero register) →
+        command ∈ rawCommands := by
+    intro command hmem
+    exact CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+      growth hrule (by simp [commandsForRule, decrementCommands, hmem])
+  have hcontinuations : ∀ rule,
+      rule ∈ routeContinuationRules growth source zeroSearchBase
+          zeroDirectBase (AnchoredCounterGeometry.routeFromZero register) →
+        rule ∈ rawDirectRules := by
+    intro rule hmem
+    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      growth hrule
+    simp [directRulesForRule, decrementRules, hmem]
+  rcases CounterControlGenuineRouteEmbedding.progressedRoute base c hmortal
+      entry.next himmortalFound growth source zeroSearchBase zeroDirectBase
+      (.logical growth ifZero)
+      (AnchoredCounterGeometry.routeFromZero register) entry.selectedRaw_mem
+      hcommands hcontinuations with ⟨progress⟩
+  have himmortalLogical := immortalFrom_of_reaches base c himmortalFound
+    progress.reaches
+  change FullTM0.ImmortalFrom
+    (CounterControlNestingBridge.machine base c)
+    ⟨logicalState base c growth ifZero, progress.suffix.finish⟩
+      at himmortalLogical
+  have htargetState : ifZero < logicalSpan :=
+    state_lt_logicalSpan
+      (CounterControlAbstractTrace.target_mem_programStates hrule
+        (by simp [instructionTargets]))
+  rcases
+      CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
+        base c hmortal growth ifZero htargetState progress.suffix.finish
+        himmortalLogical with
+    ⟨instruction, registers, coreTape, limit, target, _hrule, hcore,
+      hcoreBefore, hrunway, htarget, hcenter, _hbody⟩
+  let represented : CoreTargetRepresents registers growth limit target
+      coreTape := {
+    toCorePrefixRepresents := {
+      toCoreRepresents := hcore
+      core_before_limit := hcoreBefore
+      runway := hrunway }
+    target_matches := htarget }
+  let core : LogicalCore base c := {
+    growth := growth
+    source := ifZero
+    source_lt := htargetState
+    registers := registers
+    tape := coreTape
+    limit := limit
+    target := target
+    represented := represented }
+  rcases routeFromZero_toFour register with ⟨routeSource, hroute⟩
+  rcases hroute.position progress.suffix.route_eq with
+    ⟨i, hcurrent, htail⟩
+  have hread : entry.next.foundTape.read = boundarySymbol i.succ := by
+    have hread' := progress.current_read
+    rw [hcurrent] at hread'
+    exact hread'
+  have hentryFound : entry.next.foundTape = entry.route.finish := by
+    rw [GenuineSearch.foundTape, entry.distance_eq, FullTM0.Tape.moveN_zero,
+      entry.outer_eq]
+  have hstartLabel : i.succ =
+      MarkerSchedule.decrementStartBoundary register := by
+    apply (boundarySymbol_injective _ _).mp
+    exact hread.symm.trans
+      ((congrArg FullTM0.Tape.read hentryFound).trans
+        entry.route.finish_read)
+  have hfoundBoundary : entry.next.foundTape =
+      atLogical growth coreTape (boundaryOffset registers i.succ) := by
+    exact htail.start_eq hcore hread progress.suffix.tailGaps hcenter
+  have hrouteFinish : entry.route.finish =
+      atLogical growth coreTape
+        (boundaryOffset registers
+          (MarkerSchedule.decrementStartBoundary register)) := by
+    rw [← hentryFound, hfoundBoundary, hstartLabel]
+  have hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current) core.cfg := by
+    have hrun := entry.reaches.trans (hfound.trans progress.reaches)
+    change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨logicalState base c growth ifZero, progress.suffix.finish⟩ at hrun
+    rw [hcenter] at hrun
+    simpa [core, LogicalCore.cfg, LogicalCore.frame,
+      LogicalCore.abstract, prefixLogicalCfg] using hrun
+  exact ⟨⟨core, hcore, hrouteFinish, hreaches⟩⟩
 
 end
 
