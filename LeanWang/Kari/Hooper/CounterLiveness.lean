@@ -49,6 +49,36 @@ def HaltsFrom (program : Program) (start : Cfg) : Prop :=
     StateTransition.Reaches (step program) start terminal ∧
       step program terminal = none
 
+namespace HaltsFrom
+
+/-- Prepending a finite counter-program execution to a halting computation
+preserves halting. -/
+theorem of_reaches {program : Program} {start current : Cfg}
+    (hprefix : StateTransition.Reaches (step program) start current)
+    (hhalts : HaltsFrom program current) :
+    HaltsFrom program start := by
+  rcases hhalts with ⟨terminal, hterminalReach, hterminal⟩
+  exact ⟨terminal, hprefix.trans hterminalReach, hterminal⟩
+
+end HaltsFrom
+
+/-- Every deterministic partial orbit either reaches a terminal
+configuration or survives for arbitrarily many steps.  This dichotomy does
+not require a decidability assumption: it is the domain/non-domain split for
+`StateTransition.eval`. -/
+theorem haltsFrom_or_immortalFrom (program : Program) (start : Cfg) :
+    HaltsFrom program start ∨
+      Dynamics.ImmortalFrom (step program) start := by
+  classical
+  by_cases hdom : (StateTransition.eval (step program) start).Dom
+  · left
+    rcases Part.dom_iff_mem.mp hdom with ⟨terminal, hterminal⟩
+    rcases StateTransition.mem_eval.mp hterminal with
+      ⟨hreach, hstep⟩
+    exact ⟨terminal, hreach, hstep⟩
+  · right
+    exact (Dynamics.not_eval_dom_iff_immortalFrom _ _).mp hdom
+
 /-- The two global progress obligations for an assembled finite counter
 program.
 
