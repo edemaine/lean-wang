@@ -270,7 +270,7 @@ theorem testHandoff_of_rule
 
 /-- The only generated rules owned by a particular decrement branch source
 read either the positive-case blank or that register's preceding boundary. -/
-private theorem branchRule_read
+theorem branchRule_read
     {growth : Turing.Dir} {source : Nat} {register : Register}
     {ifZero ifPositive : Nat}
     (hprogram : (source, .decrement register ifZero ifPositive) ∈
