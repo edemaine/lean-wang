@@ -289,90 +289,45 @@ theorem branchRule_read
     | nonblank =>
         exact ⟨boundarySymbol ⟨0, by decide⟩, by
           simp [symbolsForRead, nonblankSymbols]⟩
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, hprogramRule, hlocal⟩ |
-      ⟨programRule, hprogramRule, hlocal⟩
-  · have hkey : (rule.source, symbol) ∈
-        CounterControlDeterministic.rawDirectControlKeysForRule
-          .right programRule := by
-      simp only [CounterControlDeterministic.rawDirectControlKeysForRule,
-        List.mem_flatMap]
-      refine ⟨rule, hlocal, ?_⟩
-      simpa [CounterControlDeterministic.rawDirectControlRuleKeys] using hsymbol
-    have howns :=
-      CounterControlDeterministic.rawDirectControlKeysForRule_owns
-        .right programRule (rule.source, symbol) hkey
-    rw [hsource] at howns
-    change growth = .right ∧ source = programRule.1 at howns
-    rcases programRule with ⟨programSource, instruction⟩
-    have hgrowth := howns.1
-    have hprogramSource := howns.2
-    change source = programSource at hprogramSource
-    subst growth
-    subst programSource
-    have hlookupRule :=
-      (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
-        GlobalSourceProgram.program_deterministic).2 hprogramRule
-    have hlookupExpected :=
-      (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
-        GlobalSourceProgram.program_deterministic).2 hprogram
-    rw [hlookupExpected] at hlookupRule
-    have hinstruction := Option.some.inj hlookupRule
-    subst instruction
-    clear howns hkey hsymbol hprogramRule hlookupRule hlookupExpected
-      hprogram
-    cases register <;>
-      simp_all [directRulesForRule, validationRules, decrementRules,
-        routeEntryRules, routeContinuationRules,
-        routeContinuationRulesFrom, MarkerValidation.sweep,
-        AnchoredCounterGeometry.routeToDecrementStart,
-        AnchoredCounterGeometry.routeFromZero, directRef,
-        MarkerSchedule.decrementStartBoundary,
-        AnchoredCounterGeometry.registerGap] <;>
-      norm_num [validationDirectBase, bodyDirectBase, testDirectSlot,
-        branchDirectSlot, finishDirectSlot, zeroDirectBase] at * <;>
-      aesop
-  · have hkey : (rule.source, symbol) ∈
-        CounterControlDeterministic.rawDirectControlKeysForRule
-          .left programRule := by
-      simp only [CounterControlDeterministic.rawDirectControlKeysForRule,
-        List.mem_flatMap]
-      refine ⟨rule, hlocal, ?_⟩
-      simpa [CounterControlDeterministic.rawDirectControlRuleKeys] using hsymbol
-    have howns :=
-      CounterControlDeterministic.rawDirectControlKeysForRule_owns
-        .left programRule (rule.source, symbol) hkey
-    rw [hsource] at howns
-    change growth = .left ∧ source = programRule.1 at howns
-    rcases programRule with ⟨programSource, instruction⟩
-    have hgrowth := howns.1
-    have hprogramSource := howns.2
-    change source = programSource at hprogramSource
-    subst growth
-    subst programSource
-    have hlookupRule :=
-      (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
-        GlobalSourceProgram.program_deterministic).2 hprogramRule
-    have hlookupExpected :=
-      (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
-        GlobalSourceProgram.program_deterministic).2 hprogram
-    rw [hlookupExpected] at hlookupRule
-    have hinstruction := Option.some.inj hlookupRule
-    subst instruction
-    clear howns hkey hsymbol hprogramRule hlookupRule hlookupExpected
-      hprogram
-    cases register <;>
-      simp_all [directRulesForRule, validationRules, decrementRules,
-        routeEntryRules, routeContinuationRules,
-        routeContinuationRulesFrom, MarkerValidation.sweep,
-        AnchoredCounterGeometry.routeToDecrementStart,
-        AnchoredCounterGeometry.routeFromZero, directRef,
-        MarkerSchedule.decrementStartBoundary,
-        AnchoredCounterGeometry.registerGap] <;>
-      norm_num [validationDirectBase, bodyDirectBase, testDirectSlot,
-        branchDirectSlot, finishDirectSlot, zeroDirectBase] at * <;>
-      aesop
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨orientation, programRule, hprogramRule, hlocal⟩
+  have hkey : (rule.source, symbol) ∈
+      CounterControlDeterministic.rawDirectControlKeysForRule
+        orientation programRule :=
+    CounterControlDeterministic.mem_rawDirectControlKeysForRule
+      orientation programRule rule hlocal symbol hsymbol
+  have howns :=
+    CounterControlDeterministic.rawDirectControlKeysForRule_owns
+      orientation programRule (rule.source, symbol) hkey
+  rw [hsource] at howns
+  change growth = orientation ∧ source = programRule.1 at howns
+  rcases programRule with ⟨programSource, instruction⟩
+  have hgrowth := howns.1
+  have hprogramSource := howns.2
+  change source = programSource at hprogramSource
+  subst growth
+  subst programSource
+  have hlookupRule :=
+    (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
+      GlobalSourceProgram.program_deterministic).2 hprogramRule
+  have hlookupExpected :=
+    (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
+      GlobalSourceProgram.program_deterministic).2 hprogram
+  rw [hlookupExpected] at hlookupRule
+  have hinstruction := Option.some.inj hlookupRule
+  subst instruction
+  clear howns hkey hsymbol hprogramRule hlookupRule hlookupExpected hprogram
+  cases register <;>
+    simp_all [directRulesForRule, validationRules, decrementRules,
+      routeEntryRules, routeContinuationRules,
+      routeContinuationRulesFrom, MarkerValidation.sweep,
+      AnchoredCounterGeometry.routeToDecrementStart,
+      AnchoredCounterGeometry.routeFromZero, directRef,
+      MarkerSchedule.decrementStartBoundary,
+      AnchoredCounterGeometry.registerGap] <;>
+    norm_num [validationDirectBase, bodyDirectBase, testDirectSlot,
+      branchDirectSlot, finishDirectSlot, zeroDirectBase] at * <;>
+    aesop
 
 /-- Exact branch selected after the decrement test. -/
 inductive BranchOutcome

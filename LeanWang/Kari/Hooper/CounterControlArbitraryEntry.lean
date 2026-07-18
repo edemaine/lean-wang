@@ -450,28 +450,9 @@ theorem rawDirectRule_source_wellFormed
           simp [symbolsForRead, nonblankSymbols]⟩
   rcases hsymbols with ⟨symbol, hsymbol⟩
   have hkey : (rule.source, symbol) ∈
-      CounterControlDeterministic.rawDirectControlKeys := by
-    simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-      List.mem_flatMap] at hrule
-    simp only [CounterControlDeterministic.rawDirectControlKeys,
-      CounterControlDeterministic.rawDirectControlKeysFor,
-      List.mem_append, List.mem_flatMap]
-    rcases hrule with ⟨programRule, hprogram, hrule⟩ |
-        ⟨programRule, hprogram, hrule⟩
-    · left
-      refine ⟨programRule, hprogram, ?_⟩
-      simp only [CounterControlDeterministic.rawDirectControlKeysForRule,
-        List.mem_flatMap]
-      refine ⟨rule, hrule, ?_⟩
-      simpa [CounterControlDeterministic.rawDirectControlRuleKeys] using
-        hsymbol
-    · right
-      refine ⟨programRule, hprogram, ?_⟩
-      simp only [CounterControlDeterministic.rawDirectControlKeysForRule,
-        List.mem_flatMap]
-      refine ⟨rule, hrule, ?_⟩
-      simpa [CounterControlDeterministic.rawDirectControlRuleKeys] using
-        hsymbol
+      CounterControlDeterministic.rawDirectControlKeys :=
+    CounterControlDeterministic.mem_rawDirectControlKeys rule hrule symbol
+      hsymbol
   exact CounterControlDeterministic.rawDirectControlKeys_wellFormed hkey
 
 /-- Refined direct-region classification with the bounds that make the two

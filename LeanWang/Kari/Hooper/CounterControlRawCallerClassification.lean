@@ -94,61 +94,33 @@ inductive GeneratedCallerClass (raw : RawCommand) : Prop where
 caller. -/
 theorem classify (raw : RawCommand) (hraw : raw ∈ rawCommands) :
     GeneratedCallerClass raw := by
-  simp only [rawCommands, rawCommandsFor, List.mem_append,
-    List.mem_flatMap] at hraw
-  rcases hraw with ⟨rule, hrule, hcommand⟩ | ⟨rule, hrule, hcommand⟩
-  · rcases rule with ⟨source, instruction⟩
-    have horiented := hcommand
-    cases instruction with
-    | increment register next =>
-        simp only [commandsForRule, List.mem_append] at horiented
-        rcases horiented with hvalidation | hbody
-        · exact .validation .right source (.increment register next)
-            hrule hvalidation
-        simp only [incrementCommands, List.mem_append] at hbody
-        rcases hbody with (hshift | hrecovery) | hcleanup
-        · exact .incrementShift .right source register next hrule hshift
-        · exact .incrementRecovery .right source register next hrule hrecovery
-        · exact .cleanup .right source register next hrule hcleanup
-    | decrement register ifZero ifPositive =>
-        simp only [commandsForRule, List.mem_append] at horiented
-        rcases horiented with hvalidation | hbody
-        · exact .validation .right source
-            (.decrement register ifZero ifPositive) hrule hvalidation
-        simp only [decrementCommands, List.mem_append] at hbody
-        rcases hbody with (hentry | hshift) | hzero
-        · exact .decrementEntry .right source register ifZero ifPositive
-            hrule hentry
-        · exact .decrementShift .right source register ifZero ifPositive
-            hrule hshift
-        · exact .zeroRecovery .right source register ifZero ifPositive
-            hrule hzero
-  · rcases rule with ⟨source, instruction⟩
-    have horiented := hcommand
-    cases instruction with
-    | increment register next =>
-        simp only [commandsForRule, List.mem_append] at horiented
-        rcases horiented with hvalidation | hbody
-        · exact .validation .left source (.increment register next)
-            hrule hvalidation
-        simp only [incrementCommands, List.mem_append] at hbody
-        rcases hbody with (hshift | hrecovery) | hcleanup
-        · exact .incrementShift .left source register next hrule hshift
-        · exact .incrementRecovery .left source register next hrule hrecovery
-        · exact .cleanup .left source register next hrule hcleanup
-    | decrement register ifZero ifPositive =>
-        simp only [commandsForRule, List.mem_append] at horiented
-        rcases horiented with hvalidation | hbody
-        · exact .validation .left source
-            (.decrement register ifZero ifPositive) hrule hvalidation
-        simp only [decrementCommands, List.mem_append] at hbody
-        rcases hbody with (hentry | hshift) | hzero
-        · exact .decrementEntry .left source register ifZero ifPositive
-            hrule hentry
-        · exact .decrementShift .left source register ifZero ifPositive
-            hrule hshift
-        · exact .zeroRecovery .left source register ifZero ifPositive
-            hrule hzero
+  rcases (mem_rawCommands_iff raw).1 hraw with
+    ⟨growth, rule, hrule, hcommand⟩
+  rcases rule with ⟨source, instruction⟩
+  cases instruction with
+  | increment register next =>
+      simp only [commandsForRule, List.mem_append] at hcommand
+      rcases hcommand with hvalidation | hbody
+      · exact .validation growth source (.increment register next)
+          hrule hvalidation
+      simp only [incrementCommands, List.mem_append] at hbody
+      rcases hbody with (hshift | hrecovery) | hcleanup
+      · exact .incrementShift growth source register next hrule hshift
+      · exact .incrementRecovery growth source register next hrule hrecovery
+      · exact .cleanup growth source register next hrule hcleanup
+  | decrement register ifZero ifPositive =>
+      simp only [commandsForRule, List.mem_append] at hcommand
+      rcases hcommand with hvalidation | hbody
+      · exact .validation growth source
+          (.decrement register ifZero ifPositive) hrule hvalidation
+      simp only [decrementCommands, List.mem_append] at hbody
+      rcases hbody with (hentry | hshift) | hzero
+      · exact .decrementEntry growth source register ifZero ifPositive
+          hrule hentry
+      · exact .decrementShift growth source register ifZero ifPositive
+          hrule hshift
+      · exact .zeroRecovery growth source register ifZero ifPositive
+          hrule hzero
 
 private theorem routeCommandsAux_preserving
     (growth : Turing.Dir) (source searchSlot directSlot : Nat)

@@ -138,12 +138,9 @@ private theorem successRef_honest_for
 /-- The success reference of every generated raw command is honest. -/
 theorem successRef_honest (raw : RawCommand)
     (hraw : raw ∈ rawCommands) : HonestRef (rawSuccessRef raw) := by
-  simp only [rawCommands, rawCommandsFor, List.mem_append,
-    List.mem_flatMap] at hraw
-  rcases hraw with ⟨programRule, hprogram, hcommand⟩ |
-      ⟨programRule, hprogram, hcommand⟩
-  · exact successRef_honest_for .right programRule hprogram raw hcommand
-  · exact successRef_honest_for .left programRule hprogram raw hcommand
+  rcases (mem_rawCommands_iff raw).1 hraw with
+    ⟨growth, programRule, hprogram, hcommand⟩
+  exact successRef_honest_for growth programRule hprogram raw hcommand
 
 set_option maxHeartbeats 500000 in
 -- As above, discharge the finite collision-reference table generated for all
@@ -183,16 +180,11 @@ theorem collisionRef_honest (raw : RawCommand)
     (hraw : raw ∈ rawCommands) (reference : ControlRef)
     (hcollision : rawCollisionRef raw = some reference) :
     HonestRef reference := by
-  simp only [rawCommands, rawCommandsFor, List.mem_append,
-    List.mem_flatMap] at hraw
-  rcases hraw with ⟨programRule, hprogram, hcommand⟩ |
-      ⟨programRule, hprogram, hcommand⟩
-  · exact honest_of_local .right programRule hprogram reference
-      (collisionRef_local_honest .right programRule raw hcommand reference
-        hcollision)
-  · exact honest_of_local .left programRule hprogram reference
-      (collisionRef_local_honest .left programRule raw hcommand reference
-        hcollision)
+  rcases (mem_rawCommands_iff raw).1 hraw with
+    ⟨growth, programRule, hprogram, hcommand⟩
+  exact honest_of_local growth programRule hprogram reference
+    (collisionRef_local_honest growth programRule raw hcommand reference
+      hcollision)
 
 /-- Compilation resolves exactly the raw symbolic success reference. -/
 theorem compileRawCommand_successState (base : Nat) (c : Nat.Partrec.Code)
@@ -267,14 +259,10 @@ private theorem directTarget_local_honest
 /-- Every generated direct-rule target is an honest bounded continuation. -/
 theorem directTarget_honest (rule : RawDirectRule)
     (hrule : rule ∈ rawDirectRules) : HonestRef rule.target := by
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, hprogram, hlocal⟩ |
-      ⟨programRule, hprogram, hlocal⟩
-  · exact honest_of_local .right programRule hprogram rule.target
-      (directTarget_local_honest .right programRule rule hlocal)
-  · exact honest_of_local .left programRule hprogram rule.target
-      (directTarget_local_honest .left programRule rule hlocal)
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨growth, programRule, hprogram, hlocal⟩
+  exact honest_of_local growth programRule hprogram rule.target
+    (directTarget_local_honest growth programRule rule hlocal)
 
 /-! ## Semantic endpoints -/
 

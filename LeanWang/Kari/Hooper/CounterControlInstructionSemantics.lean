@@ -1690,25 +1690,15 @@ theorem command_mem_rawCommands_of_rule
     (growth : Turing.Dir) {rule : CounterMachine.Rule}
     (hrule : rule ∈ GlobalSourceProgram.program) {raw : RawCommand}
     (hraw : raw ∈ commandsForRule growth rule) :
-    raw ∈ rawCommands := by
-  have horiented : raw ∈ rawCommandsFor growth := by
-    rw [rawCommandsFor, List.mem_flatMap]
-    exact ⟨rule, hrule, hraw⟩
-  cases growth with
-  | right => exact List.mem_append_left _ horiented
-  | left => exact List.mem_append_right _ horiented
+    raw ∈ rawCommands :=
+  (mem_rawCommands_iff raw).2 ⟨growth, rule, hrule, hraw⟩
 
 theorem directRule_mem_rawDirectRules_of_rule
     (growth : Turing.Dir) {rule : CounterMachine.Rule}
     (hrule : rule ∈ GlobalSourceProgram.program) {raw : RawDirectRule}
     (hraw : raw ∈ directRulesForRule growth rule) :
-    raw ∈ rawDirectRules := by
-  have horiented : raw ∈ rawDirectRulesFor growth := by
-    rw [rawDirectRulesFor, List.mem_flatMap]
-    exact ⟨rule, hrule, hraw⟩
-  cases growth with
-  | right => exact List.mem_append_left _ horiented
-  | left => exact List.mem_append_right _ horiented
+    raw ∈ rawDirectRules :=
+  (mem_rawDirectRules_iff raw).2 ⟨growth, rule, hrule, hraw⟩
 
 private theorem validationCommand_mem
     (growth : Turing.Dir) (source : Nat)

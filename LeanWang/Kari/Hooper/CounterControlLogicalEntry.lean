@@ -41,10 +41,9 @@ theorem rawDirectRule_of_logical_source
       rule =
         ⟨growth, .logical growth state, .boundary 4,
           searchRef growth state validationSearchBase, .left⟩ := by
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, hprogram, hlocal⟩ |
-      ⟨programRule, hprogram, hlocal⟩
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨orientation, programRule, hprogram, hlocal⟩
+  cases orientation
   all_goals
     rcases programRule with ⟨source, instruction⟩
     cases growth <;> cases instruction with

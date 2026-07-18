@@ -39,57 +39,31 @@ theorem target_logical_search_or_bridge
       rule.target = directRef growth state (bodyDirectBase + 1)) ∨
     ∃ growth state,
       rule.target = directRef growth state branchDirectSlot := by
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, hprogram, hlocal⟩ |
-      ⟨programRule, hprogram, hlocal⟩
-  · rcases programRule with ⟨source, instruction⟩
-    cases instruction with
-    | increment register target =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, incrementRules,
-            AnchoredCounterGeometry.routeFromIncrement,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
-
-    | decrement register ifZero ifPositive =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, decrementRules,
-            AnchoredCounterGeometry.routeToDecrementStart,
-            AnchoredCounterGeometry.routeFromZero,
-            AnchoredCounterGeometry.registerGap,
-            MarkerSchedule.decrementStartBoundary,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
-  · rcases programRule with ⟨source, instruction⟩
-    cases instruction with
-    | increment register target =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, incrementRules,
-            AnchoredCounterGeometry.routeFromIncrement,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
-    | decrement register ifZero ifPositive =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, decrementRules,
-            AnchoredCounterGeometry.routeToDecrementStart,
-            AnchoredCounterGeometry.routeFromZero,
-            AnchoredCounterGeometry.registerGap,
-            MarkerSchedule.decrementStartBoundary,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨orientation, programRule, hprogram, hlocal⟩
+  rcases programRule with ⟨source, instruction⟩
+  cases orientation <;> cases instruction with
+  | increment register target =>
+      cases register <;>
+        simp_all [directRulesForRule, validationRules,
+          routeEntryRules, routeContinuationRules,
+          routeContinuationRulesFrom, incrementRules,
+          AnchoredCounterGeometry.routeFromIncrement,
+          MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
+        norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
+          finishDirectSlot] at *
+  | decrement register ifZero ifPositive =>
+      cases register <;>
+        simp_all [directRulesForRule, validationRules,
+          routeEntryRules, routeContinuationRules,
+          routeContinuationRulesFrom, decrementRules,
+          AnchoredCounterGeometry.routeToDecrementStart,
+          AnchoredCounterGeometry.routeFromZero,
+          AnchoredCounterGeometry.registerGap,
+          MarkerSchedule.decrementStartBoundary,
+          MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
+        norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
+          finishDirectSlot] at *
 
 /-- A generated direct target carrying a logical reference always names a
 bounded source-program state.  Keeping this fact at the normalization
@@ -100,10 +74,9 @@ theorem target_logical_state_lt
     (growth : Turing.Dir) (state : Nat)
     (htarget : rule.target = .logical growth state) :
     state < logicalSpan := by
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, hprogram, hlocal⟩ |
-      ⟨programRule, hprogram, hlocal⟩
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨orientation, programRule, hprogram, hlocal⟩
+  cases orientation
   all_goals
     rcases programRule with ⟨source, instruction⟩
     have hsource : source < logicalSpan :=
@@ -145,69 +118,39 @@ theorem bridge_source_targets_search
     (hsource : rule.source = directRef growth state (bodyDirectBase + 1) ∨
       rule.source = directRef growth state branchDirectSlot) :
     ∃ address, rule.target = .search address := by
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, hprogram, hlocal⟩ |
-      ⟨programRule, hprogram, hlocal⟩
-  · rcases programRule with ⟨source, instruction⟩
-    cases instruction with
-    | increment register target =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, incrementRules,
-            AnchoredCounterGeometry.routeFromIncrement,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
-    | decrement register ifZero ifPositive =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, decrementRules,
-            AnchoredCounterGeometry.routeToDecrementStart,
-            AnchoredCounterGeometry.routeFromZero,
-            AnchoredCounterGeometry.registerGap,
-            MarkerSchedule.decrementStartBoundary,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
-  · rcases programRule with ⟨source, instruction⟩
-    cases instruction with
-    | increment register target =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, incrementRules,
-            AnchoredCounterGeometry.routeFromIncrement,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
-    | decrement register ifZero ifPositive =>
-        cases register <;>
-          simp_all [directRulesForRule, validationRules,
-            routeEntryRules, routeContinuationRules,
-            routeContinuationRulesFrom, decrementRules,
-            AnchoredCounterGeometry.routeToDecrementStart,
-            AnchoredCounterGeometry.routeFromZero,
-            AnchoredCounterGeometry.registerGap,
-            MarkerSchedule.decrementStartBoundary,
-            MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
-          norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
-            finishDirectSlot] at *
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨orientation, programRule, hprogram, hlocal⟩
+  rcases programRule with ⟨source, instruction⟩
+  cases orientation <;> cases instruction with
+  | increment register target =>
+      cases register <;>
+        simp_all [directRulesForRule, validationRules,
+          routeEntryRules, routeContinuationRules,
+          routeContinuationRulesFrom, incrementRules,
+          AnchoredCounterGeometry.routeFromIncrement,
+          MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
+        norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
+          finishDirectSlot] at *
+  | decrement register ifZero ifPositive =>
+      cases register <;>
+        simp_all [directRulesForRule, validationRules,
+          routeEntryRules, routeContinuationRules,
+          routeContinuationRulesFrom, decrementRules,
+          AnchoredCounterGeometry.routeToDecrementStart,
+          AnchoredCounterGeometry.routeFromZero,
+          AnchoredCounterGeometry.registerGap,
+          MarkerSchedule.decrementStartBoundary,
+          MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
+        norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
+          finishDirectSlot] at *
 
 private theorem localRule_mem_rawDirectRules
     (growth : Turing.Dir) (programRule : CounterMachine.Rule)
     (hprogram : programRule ∈ GlobalSourceProgram.program)
     (rule : RawDirectRule)
     (hlocal : rule ∈ directRulesForRule growth programRule) :
-    rule ∈ rawDirectRules := by
-  have horiented : rule ∈ rawDirectRulesFor growth := by
-    rw [rawDirectRulesFor, List.mem_flatMap]
-    exact ⟨programRule, hprogram, hlocal⟩
-  cases growth with
-  | right => exact List.mem_append_left _ horiented
-  | left => exact List.mem_append_right _ horiented
+    rule ∈ rawDirectRules :=
+  (mem_rawDirectRules_iff rule).2 ⟨growth, programRule, hprogram, hlocal⟩
 
 private theorem local_body_bridge_target_is_source
     (orientation : Turing.Dir) (programRule : CounterMachine.Rule)
@@ -281,32 +224,19 @@ theorem bridge_target_is_source
     (hslot : slot = bodyDirectBase + 1 ∨ slot = branchDirectSlot)
     (htarget : rule.target = directRef growth state slot) :
     ∃ next ∈ rawDirectRules, next.source = rule.target := by
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, hprogram, hlocal⟩ |
-      ⟨programRule, hprogram, hlocal⟩
-  · rcases hslot with rfl | rfl
-    · rcases local_body_bridge_target_is_source .right programRule rule
-          hlocal growth state htarget with ⟨next, hnext, hsource⟩
-      exact ⟨next,
-        localRule_mem_rawDirectRules .right programRule hprogram next hnext,
-        hsource⟩
-    · rcases local_branch_bridge_target_is_source .right programRule rule
-          hlocal growth state htarget with ⟨next, hnext, hsource⟩
-      exact ⟨next,
-        localRule_mem_rawDirectRules .right programRule hprogram next hnext,
-        hsource⟩
-  · rcases hslot with rfl | rfl
-    · rcases local_body_bridge_target_is_source .left programRule rule
-          hlocal growth state htarget with ⟨next, hnext, hsource⟩
-      exact ⟨next,
-        localRule_mem_rawDirectRules .left programRule hprogram next hnext,
-        hsource⟩
-    · rcases local_branch_bridge_target_is_source .left programRule rule
-          hlocal growth state htarget with ⟨next, hnext, hsource⟩
-      exact ⟨next,
-        localRule_mem_rawDirectRules .left programRule hprogram next hnext,
-        hsource⟩
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨orientation, programRule, hprogram, hlocal⟩
+  rcases hslot with rfl | rfl
+  · rcases local_body_bridge_target_is_source orientation programRule rule
+        hlocal growth state htarget with ⟨next, hnext, hsource⟩
+    exact ⟨next,
+      localRule_mem_rawDirectRules orientation programRule hprogram next hnext,
+      hsource⟩
+  · rcases local_branch_bridge_target_is_source orientation programRule rule
+        hlocal growth state htarget with ⟨next, hnext, hsource⟩
+    exact ⟨next,
+      localRule_mem_rawDirectRules orientation programRule hprogram next hnext,
+      hsource⟩
 
 /-- Internal bridge targets lie in the injective part of the symbolic state
 allocation. -/

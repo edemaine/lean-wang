@@ -375,6 +375,42 @@ def rawCommands : List RawCommand :=
 def rawDirectRules : List RawDirectRule :=
   rawDirectRulesFor .right ++ rawDirectRulesFor .left
 
+/-- Reflection theorem for the global bounded-search command enumeration. -/
+theorem mem_rawCommands_iff (raw : RawCommand) :
+    raw ∈ rawCommands ↔
+      ∃ growth rule, rule ∈ GlobalSourceProgram.program ∧
+        raw ∈ commandsForRule growth rule := by
+  constructor
+  · simp only [rawCommands, rawCommandsFor, List.mem_append,
+      List.mem_flatMap]
+    rintro (⟨rule, hrule, hraw⟩ | ⟨rule, hrule, hraw⟩)
+    · exact ⟨.right, rule, hrule, hraw⟩
+    · exact ⟨.left, rule, hrule, hraw⟩
+  · rintro ⟨growth, rule, hrule, hraw⟩
+    simp only [rawCommands, rawCommandsFor, List.mem_append,
+      List.mem_flatMap]
+    cases growth with
+    | right => exact Or.inl ⟨rule, hrule, hraw⟩
+    | left => exact Or.inr ⟨rule, hrule, hraw⟩
+
+/-- Reflection theorem for the global direct-rule enumeration. -/
+theorem mem_rawDirectRules_iff (raw : RawDirectRule) :
+    raw ∈ rawDirectRules ↔
+      ∃ growth rule, rule ∈ GlobalSourceProgram.program ∧
+        raw ∈ directRulesForRule growth rule := by
+  constructor
+  · simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
+      List.mem_flatMap]
+    rintro (⟨rule, hrule, hraw⟩ | ⟨rule, hrule, hraw⟩)
+    · exact ⟨.right, rule, hrule, hraw⟩
+    · exact ⟨.left, rule, hrule, hraw⟩
+  · rintro ⟨growth, rule, hrule, hraw⟩
+    simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
+      List.mem_flatMap]
+    cases growth with
+    | right => exact Or.inl ⟨rule, hrule, hraw⟩
+    | left => exact Or.inr ⟨rule, hrule, hraw⟩
+
 /-- There is exactly one return symbol for every enumerated bounded search. -/
 abbrev numTags : Nat := rawCommands.length
 

@@ -463,12 +463,37 @@ private theorem directRulesForRule_counter_sources
 theorem rawDirectRules_counter_sources :
     ∀ rule ∈ rawDirectRules, IsCounterSource rule.source := by
   intro rule hrule
-  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
-    List.mem_flatMap] at hrule
-  rcases hrule with ⟨programRule, _hprogram, hrule⟩ |
-      ⟨programRule, _hprogram, hrule⟩
-  · exact directRulesForRule_counter_sources .right programRule rule hrule
-  · exact directRulesForRule_counter_sources .left programRule rule hrule
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨growth, programRule, _hprogram, hlocal⟩
+  exact directRulesForRule_counter_sources growth programRule rule hlocal
+
+/-- Every concrete read symbol of a generated local direct rule contributes
+its source key to the corresponding oriented controller fragment. -/
+theorem mem_rawDirectControlKeysForRule
+    (growth : Turing.Dir) (programRule : CounterMachine.Rule)
+    (rule : RawDirectRule)
+    (hlocal : rule ∈ directRulesForRule growth programRule)
+    (symbol : Symbol numTags) (hsymbol : symbol ∈ symbolsForRead rule.read) :
+    (rule.source, symbol) ∈ rawDirectControlKeysForRule growth programRule := by
+  simp only [rawDirectControlKeysForRule, List.mem_flatMap]
+  refine ⟨rule, hlocal, ?_⟩
+  simpa [rawDirectControlRuleKeys] using hsymbol
+
+/-- Every concrete read symbol of a globally generated direct rule contributes
+its source key to the complete controller table. -/
+theorem mem_rawDirectControlKeys
+    (rule : RawDirectRule) (hrule : rule ∈ rawDirectRules)
+    (symbol : Symbol numTags) (hsymbol : symbol ∈ symbolsForRead rule.read) :
+    (rule.source, symbol) ∈ rawDirectControlKeys := by
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨growth, programRule, hprogram, hlocal⟩
+  have hkey := mem_rawDirectControlKeysForRule growth programRule rule hlocal
+    symbol hsymbol
+  simp only [rawDirectControlKeys, rawDirectControlKeysFor,
+    List.mem_append, List.mem_flatMap]
+  cases growth with
+  | right => exact Or.inl ⟨programRule, hprogram, hkey⟩
+  | left => exact Or.inr ⟨programRule, hprogram, hkey⟩
 
 /-- Numeric symbolic keys are exactly the source-offset image of the
 unallocated control-reference keys. -/
