@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutward
+import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardIncrement
 import LeanWang.Kari.Hooper.CounterControlGuardedCleanupProgress
 
 /-!
@@ -28,6 +29,8 @@ open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedSearch
 open CounterControlGenuineValidation
 open CounterControlCleanupSuffixGeometry
+open CounterControlExactCommandContinuation
+open CounterControlCommandContinuationMortality
 
 noncomputable section
 
@@ -950,6 +953,135 @@ theorem handoff_of_collisionEntry
     exact handoff_of_clearedCurrentEntry base c hmortal suffix hrule
       .three (by simpa [hfinish,
         CounterControlCleanupRoute.Stage.slot] using hreaches) himmortal
+
+/-! ## The first increment-shift collision -/
+
+private theorem found_reaches_firstIncrementCollision
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (hraw : current.selectedRaw =
+      CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw
+        growth source register)
+    (hoccupied : ShiftDestinationOccupied current.selectedRaw
+      current.foundTape) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨resolve base c (directRef growth source testDirectSlot),
+        exactCollisionTape
+          (CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw
+            growth source register) current.foundTape⟩ := by
+  let raw :=
+    CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw
+      growth source register
+  let move : MarkerProgram.Move :=
+    ⟨4, orient growth .left, orient growth .right⟩
+  have hread : current.foundTape.read = boundarySymbol 4 := by
+    have htarget := current.selectedRaw_target_matches_foundTape
+    rw [CounterControlCommandAt.compileRawCommand_spec] at htarget
+    simpa [hraw, raw,
+      CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw,
+      CounterControlCommandAt.compileRawAtTag, Command.target,
+      Target.Matches] using htarget
+  have hatRaw := CounterControlCommandAt.CommandAt.compileRawCommand
+    base c current.selectedRaw current.selectedRaw_mem
+  rw [CounterControlCommandAt.compileRawCommand_spec] at hatRaw
+  have hat : CommandAt (CanonicalInitializer.radius c) base
+      (searchState base c ⟨growth, source, bodySearchBase⟩)
+      (.markerShift move
+        (resolve base c (rawSuccessRef raw))
+        (CounterControlCommandAt.rawTag current.selectedRaw
+          current.selectedRaw_mem)
+        (some (orient growth .left))
+        (some (resolve base c
+          (directRef growth source testDirectSlot))))
+      (commands base c) := by
+    simpa [hraw, raw,
+      CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw,
+      move, CounterControlCommandAt.compileRawAtTag, RawCommand.address,
+      rawSuccessRef] using hatRaw
+  have hcollisionLocal :=
+    BoundedMarkerContinuation.machine_reaches_shift_collision_native
+      (coreTable base c) move (resolve base c (rawSuccessRef raw))
+      (resolve base c (directRef growth source testDirectSlot))
+      (CounterControlCommandAt.rawTag current.selectedRaw
+        current.selectedRaw_mem)
+      (some (orient growth .left)) hat current.foundTape hread (by
+        simpa [hraw, raw,
+          CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw,
+          move, ShiftDestinationOccupied] using hoccupied)
+  rw [current.foundCfg_eq, hraw]
+  simpa [CounterControlNestingBridge.machine, raw,
+    CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw,
+    move, exactCollisionTape, controllerCoreEntry_eq,
+    RawCommand.address] using hcollisionLocal
+
+/-- An occupied first increment shift at the end of any outward validation
+suffix reaches cleanup and therefore satisfies the outward handoff law.  The
+native found-command collision step is derived here; callers need provide
+only the occupied-destination fact. -/
+theorem handoff_of_firstIncrementCollision
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {targetState : Nat}
+    {obligation : OutwardObligation current growth source
+      (.increment register targetState)}
+    (suffix : CounterControlGenuineValidationOutwardSuffix.Suffix
+      current growth source (.increment register targetState))
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (hoccupied : ShiftDestinationOccupied
+      (CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw
+        growth source register) suffix.progress.suffix.finish)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  let shift :=
+    CounterControlGenuineValidationOutwardIncrement.bodyIncrementShift
+      base c growth source targetState register hrule
+      suffix.progress.suffix.finish suffix.finish_read
+  have hentry : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      shift.cfg := by
+    rw [CounterControlGenuineValidationOutwardIncrement.bodyIncrementShift_cfg]
+    simpa [bodyEntry, searchRef, CounterControlPlan.resolve] using
+      suffix.reaches_bodyEntry
+  have himmortalShift : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) shift.cfg :=
+    immortalFrom_of_reaches base c himmortal hentry
+  have hfound := CounterControlParentContinuation.reaches_foundCfg_of_immortal
+    shift himmortalShift
+  have hshiftRaw : shift.selectedRaw =
+      CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw
+        growth source register := by
+    simp [shift]
+  have hshiftTape : shift.foundTape = suffix.progress.suffix.finish := by
+    simp [shift, GenuineSearch.foundTape]
+  have hcollisionShift := found_reaches_firstIncrementCollision base c shift
+    growth source register hshiftRaw (by
+      rw [hshiftRaw, hshiftTape]
+      exact hoccupied)
+  have hcollision : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨resolve base c (directRef growth source testDirectSlot),
+        exactCollisionTape
+          (CounterControlGenuineValidationOutwardIncrement.firstIncrementRaw
+            growth source register) suffix.progress.suffix.finish⟩ := by
+    rw [hshiftTape] at hcollisionShift
+    exact hentry.trans (hfound.trans hcollisionShift)
+  have hcleanupDirect :=
+    CounterControlGenuineValidationOutwardIncrement.reaches_cleanup_of_firstIncrementCollision
+      base c growth source targetState register hrule
+      suffix.progress.suffix.finish hoccupied
+  have hcleanup : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+        suffix.progress.suffix.finish.write blankSymbol⟩ :=
+    hcollision.trans hcleanupDirect
+  exact handoff_of_collisionEntry base c hmortal suffix hrule hcleanup
+    himmortal
 
 end
 
