@@ -40,7 +40,7 @@ private instance : Inhabited (Symbol numTags) :=
 
 /-- Cells weakly behind the boundary moved by one shift are inherited from
 the tape weakly behind the previously moved boundary. -/
-private theorem shiftStepTape_behind
+theorem shiftStepTape_behind
     (direction : Turing.Dir)
     (outer : FullTM0.Tape (Symbol numTags)) (distance back : Nat)
     (expected : Fin 5) (positive : 0 < distance) :
@@ -61,7 +61,7 @@ private theorem shiftStepTape_behind
 
 /-- The cells strictly between two consecutively moved boundaries remain
 blank after the second boundary is shifted. -/
-private theorem shiftStepTape_between
+theorem shiftStepTape_between
     (direction : Turing.Dir)
     (outer : FullTM0.Tape (Symbol numTags)) (distance back : Nat)
     (expected : Fin 5)
@@ -93,7 +93,7 @@ private theorem shiftStepTape_between
     omega
 
 /-- The shifted boundary is one cell behind the returned source head. -/
-private theorem shiftStepTape_destination
+theorem shiftStepTape_destination
     (direction : Turing.Dir)
     (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
     (expected : Fin 5) :
@@ -110,7 +110,7 @@ the distance between the boundary moved before the suffix and the boundary
 moved last.  The two fields state that cells behind the first boundary are
 preserved, and that a boundary label absent from the schedule cannot occur
 inside the traversed segment. -/
-private structure ShiftTailBackwardGeometry
+structure ShiftTailBackwardGeometry
     (direction : Turing.Dir) (labels : List (Fin 5))
     (start finish : FullTM0.Tape (Symbol numTags)) : Type where
   travel : Nat
@@ -129,7 +129,7 @@ private structure ShiftTailBackwardGeometry
           boundarySymbol forbidden
 
 /-- Every exact shift trace has its backward coordinate summary. -/
-private theorem shiftTailGaps_backwardGeometry
+theorem shiftTailGaps_backwardGeometry
     {direction : Turing.Dir} {labels : List (Fin 5)}
     {start finish : FullTM0.Tape (Symbol numTags)}
     (trace : ShiftTailGaps direction labels start finish) :
