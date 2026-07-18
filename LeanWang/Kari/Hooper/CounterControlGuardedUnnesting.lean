@@ -239,6 +239,21 @@ theorem haltsFrom_of_guardedUnnestingLaws
         (CounterControlNestingBridge.machine base c) start).mp
           himmortal hstartHalts)
 
+/-- Consumer-facing form of the alternating argument: monotone guarded
+re-entry supplies both the initial guard and guard restoration after every
+strict intermediate replay. -/
+theorem haltsFrom_of_escape_and_monotoneEntry
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hentry : MonotoneGuardedEntryLaw base c)
+    (hescape : GuardedEscapeLaw base c)
+    (start : FullTM0.Cfg (Symbol numTags) FiniteTM0.State) :
+    FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start :=
+  haltsFrom_of_guardedUnnestingLaws base c hmortal
+    (guardedEntryLaw_of_monotoneGuardedEntryLaw base c hentry)
+    (guardedUnnestingLaw_of_escape_and_monotoneEntry
+      base c hentry hescape) start
+
 end
 
 end CounterControlGuardedUnnesting
