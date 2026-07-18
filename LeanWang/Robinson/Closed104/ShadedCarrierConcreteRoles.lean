@@ -4,13 +4,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.ShadedCarrierBorderIntervals
+import LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchy
 import LeanWang.Robinson.Closed104.ShadedCarrierSquareGeometry
 
 /-!
 # Concrete carrier roles in canonical shaded supertiles
 
 The certified border factor identifies every bounded row and column of the
-seed supertile with the recursive selected-border formula. Canonical interval
+seed supertile with the direct selected-border formula. Canonical interval
 edges depend only on that bounded prefix, so their concrete clear cells are
 exactly the arithmetic carrier cells.
 -/

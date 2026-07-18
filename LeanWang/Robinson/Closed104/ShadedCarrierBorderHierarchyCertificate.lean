@@ -6,7 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchyData
 
 /-!
-# Certificate for the recursive selected-border hierarchy
+# Certificate for the finite selected-border hierarchy
 -/
 
 namespace LeanWang

@@ -4,14 +4,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchyCertificate
+import LeanWang.Robinson.Closed104.ShadedCarrierBorderGeometry
 import Mathlib.Tactic.IntervalCases
 
 /-!
 # The selected-border hierarchy on substitution supertiles
 
-The finite extended-patch certificate is promoted here to the general
-recursive border formula and then projected back to concrete substitution
-supertiles.
+The finite extended-patch certificate is promoted here to the general direct
+border formula and then projected back to concrete substitution supertiles.
 -/
 
 namespace LeanWang
@@ -22,7 +22,63 @@ namespace ShadedCarrierBorderHierarchy
 
 open ShadedCarrierHierarchy ShadedCarrierBorderFactor
 open ShadedCarrierBorderFactorSupertiles
+open ShadedCarrierBorderGeometry
 open ShadedSubstitution ShadedSubstitutionPlane
+
+/-- Splitting the direct finite formula at depth one recovers the local
+substitution recurrence used by the finite-state factor. -/
+theorem selectedBorder_succ (level coordinate transverse : Nat) :
+    selectedBorder (level + 1) coordinate transverse =
+      firstBorder
+        (liftBorder coordinate <|
+          selectedBorder level (ceilDivFour coordinate) (ceilDivFour transverse))
+        (liftBorder coordinate <|
+          frameBorder 0 (ceilDivFour coordinate) (ceilDivFour transverse)) := by
+  apply Option.ext
+  intro orientation
+  rw [selectedBorder_eq_some_iff, firstBorder_eq_some_iff,
+    lift_selectedBorder_eq_some_iff, frameBorder_succ]
+  constructor
+  · rintro (outer | ⟨depth, positive, bounded, border⟩)
+    · exact Or.inl (Or.inl outer)
+    · by_cases depthOne : depth = 1
+      · right
+        refine ⟨?_, by simpa [depthOne] using border⟩
+        cases oldEq : liftBorder coordinate
+            (selectedBorder level (ceilDivFour coordinate)
+              (ceilDivFour transverse)) with
+        | none => rfl
+        | some oldOrientation =>
+            exfalso
+            rcases (lift_selectedBorder_eq_some_iff _ _ _ _).1 oldEq with
+              oldOuter | ⟨oldDepth, oldLower, _, oldBorder⟩
+            · exact outerBorder_frameBorder_disjoint oldOuter border
+            · exact frameBorders_disjoint_of_lt (by omega) border oldBorder
+      · left
+        exact Or.inr ⟨depth, by omega, bounded, border⟩
+  · rintro (old | ⟨_, new⟩)
+    · rcases old with outer | ⟨depth, lower, bounded, border⟩
+      · exact Or.inl outer
+      · exact Or.inr ⟨depth, by omega, bounded, border⟩
+    · exact Or.inr ⟨1, by omega, by omega, new⟩
+
+theorem selectedBorder_succ_block
+    (level blockX blockY offsetX offsetY : Nat) :
+    selectedBorder (level + 1)
+        (8 * blockX + offsetX) (8 * blockY + offsetY) =
+      firstBorder
+        (liftBorder offsetX <|
+          selectedBorder level
+            (2 * blockX + ceilDivFour offsetX)
+            (2 * blockY + ceilDivFour offsetY))
+        (liftBorder offsetX <|
+          frameBorder 0
+            (2 * (blockX % 2) + ceilDivFour offsetX)
+            (2 * (blockY % 2) + ceilDivFour offsetY)) := by
+  rw [selectedBorder_succ, ceilDivFour_eight_mul_add,
+    ceilDivFour_eight_mul_add, liftBorder_eight_mul_add,
+    liftBorder_eight_mul_add]
+  rw [frameBorder_zero_parity]
 
 theorem selectedBorder_succ_child
     (level blockX blockY childX childY x y : Nat) :

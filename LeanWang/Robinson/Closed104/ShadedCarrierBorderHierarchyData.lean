@@ -7,13 +7,12 @@ import LeanWang.Robinson.Closed104.ShadedCarrierBorderFactorSupertiles
 import LeanWang.Robinson.Closed104.ShadedCarrierHierarchy
 
 /-!
-# Executable recursive hierarchy formula for the selected shaded borders
+# Executable finite hierarchy formula for the selected shaded borders
 
-Every frame containing the transverse coordinate contributes its two selected
-borders.  Under one two-substitution, an old border lifts through ceiling
-division by four, while the depth-one frames are the newly inserted copy of
-the depth-zero frame pattern.  A finite extended-patch invariant connects this
-arithmetic recursion to the sixteen-state substitution factor.
+The selected border is the outer opening or a boundary from one of the
+finitely many frame depths present at the requested level.  A finite
+extended-patch invariant connects this arithmetic formula to the sixteen-state
+substitution factor.
 -/
 
 namespace LeanWang
@@ -46,19 +45,22 @@ def firstBorder (first second : Option Bool) : Option Bool :=
   | some orientation => some orientation
   | none => second
 
-/-- All selected borders in a canonical level supertile.  Level zero has only
-the outer opening.  Each successor level lifts the previous borders and adds
-the new depth-one frame pattern. -/
-def selectedBorder : Nat → Nat → Nat → Option Bool
-  | 0, coordinate, transverse =>
-      if coordinate = 1 ∧ 1 ≤ transverse then some true else none
-  | level + 1, coordinate, transverse =>
-      firstBorder
-        (liftBorder coordinate <|
-          selectedBorder level (ceilDivFour coordinate)
-            (ceilDivFour transverse))
-        (liftBorder coordinate <|
-          frameBorder 0 (ceilDivFour coordinate) (ceilDivFour transverse))
+/-- The persistent opening on the west or south side of every finite
+supertile. -/
+def outerBorder (coordinate transverse : Nat) : Option Bool :=
+  if coordinate = 1 ∧ 1 ≤ transverse then some true else none
+
+/-- Index zero is the outer border; every positive index is the corresponding
+frame depth. -/
+def borderCandidate (coordinate transverse : Nat) {level : Nat}
+    (index : Fin (level + 1)) : Option Bool :=
+  if index.val = 0 then outerBorder coordinate transverse
+  else frameBorder index.val coordinate transverse
+
+/-- All selected borders in a canonical level supertile, as a direct bounded
+search through its frame depths. -/
+def selectedBorder (level coordinate transverse : Nat) : Option Bool :=
+  Fin.findSome? (borderCandidate coordinate transverse : Fin (level + 1) → _)
 
 /-- A `3 x 3` row-border patch followed by the transposed `3 x 3`
 column-border patch.  The one-cell halo makes refinement local. -/
@@ -112,24 +114,6 @@ theorem liftBorder_eight_mul_add (block offset : Nat)
   | some orientation =>
       cases orientation <;>
         simp [liftBorder, Nat.add_mod, Nat.mul_mod]
-
-theorem selectedBorder_succ_block
-    (level blockX blockY offsetX offsetY : Nat) :
-    selectedBorder (level + 1)
-        (8 * blockX + offsetX) (8 * blockY + offsetY) =
-      firstBorder
-        (liftBorder offsetX <|
-          selectedBorder level
-            (2 * blockX + ceilDivFour offsetX)
-            (2 * blockY + ceilDivFour offsetY))
-        (liftBorder offsetX <|
-          frameBorder 0
-            (2 * (blockX % 2) + ceilDivFour offsetX)
-            (2 * (blockY % 2) + ceilDivFour offsetY)) := by
-  rw [selectedBorder, ceilDivFour_eight_mul_add,
-    ceilDivFour_eight_mul_add, liftBorder_eight_mul_add,
-    liftBorder_eight_mul_add]
-  rw [frameBorder_zero_parity]
 
 structure State where
   classId : Nat

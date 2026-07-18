@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchy
+import LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchyData
 import Mathlib.Data.Nat.Periodic
 
 /-!
@@ -260,6 +260,254 @@ theorem frameBorder_succ (depth coordinate transverse : Nat) :
           simp [liftBorder, closing, fineClosing, boundaryDistinctSymm]
       · simp [liftBorder, opening, closing]
   · rfl
+
+theorem period_dvd_scale_of_lt {small large : Nat} (h : small < large) :
+    period small ∣ scale large := by
+  rw [period, scale]
+  exact Nat.pow_dvd_pow 4 (by omega)
+
+theorem largeOpening_mod_small {small large coordinate : Nat}
+    (h : small < large)
+    (opening : coordinate % period large = frameStartResidue large) :
+    coordinate % period small = 1 := by
+  have periodDvd : period small ∣ period large := by
+    rw [period, period]
+    exact Nat.pow_dvd_pow 4 (by omega)
+  have scaleDvd : period small ∣ scale large := period_dvd_scale_of_lt h
+  calc
+    coordinate % period small =
+        (coordinate % period large) % period small :=
+      (Nat.mod_mod_of_dvd coordinate periodDvd).symm
+    _ = frameStartResidue large % period small := by rw [opening]
+    _ = 1 := by
+      rw [frameStartResidue, Nat.add_mod,
+        Nat.mod_eq_zero_of_dvd scaleDvd]
+      have oneLt : 1 < period small := by
+        rw [period_eq_four_mul_scale]
+        have := scale_pos small
+        omega
+      simp [Nat.mod_eq_of_lt oneLt]
+
+theorem largeClosing_mod_small {small large coordinate : Nat}
+    (h : small < large)
+    (closing : coordinate % period large = frameEndResidue large) :
+    coordinate % period small = 0 := by
+  have periodDvd : period small ∣ period large := by
+    rw [period, period]
+    exact Nat.pow_dvd_pow 4 (by omega)
+  have scaleDvd : period small ∣ scale large := period_dvd_scale_of_lt h
+  calc
+    coordinate % period small =
+        (coordinate % period large) % period small :=
+      (Nat.mod_mod_of_dvd coordinate periodDvd).symm
+    _ = frameEndResidue large % period small := by rw [closing]
+    _ = 0 := by
+      rw [frameEndResidue, Nat.mul_mod,
+        Nat.mod_eq_zero_of_dvd scaleDvd]
+      simp
+
+theorem outerBorder_lift (coordinate transverse : Nat) :
+    liftBorder coordinate
+        (outerBorder (ceilDivFour coordinate) (ceilDivFour transverse)) =
+      outerBorder coordinate transverse := by
+  unfold outerBorder ceilDivFour
+  by_cases hcoarse : (coordinate + 3) / 4 = 1 ∧
+      1 ≤ (transverse + 3) / 4
+  · rw [if_pos hcoarse]
+    have coordinateRange : 1 ≤ coordinate ∧ coordinate ≤ 4 := by omega
+    have transversePositive : 1 ≤ transverse := by omega
+    by_cases hcoordinate : coordinate = 1
+    · simp [liftBorder, hcoordinate, transversePositive]
+    · have coordinateMod : coordinate % 4 ≠ 1 := by omega
+      simp [liftBorder, hcoordinate, coordinateMod]
+  · rw [if_neg hcoarse]
+    by_cases hfine : coordinate = 1 ∧ 1 ≤ transverse
+    · exfalso
+      apply hcoarse
+      omega
+    · simp [liftBorder, hfine]
+
+theorem frameStartResidue_lt_frameEndResidue (depth : Nat) :
+    frameStartResidue depth < frameEndResidue depth := by
+  simp only [frameStartResidue, frameEndResidue]
+  have := scale_pos depth
+  omega
+
+theorem frameBorder_eq_some_true_iff (depth coordinate transverse : Nat) :
+    frameBorder depth coordinate transverse = some true ↔
+      inFrame depth transverse = true ∧
+        coordinate % period depth = frameStartResidue depth := by
+  unfold frameBorder
+  by_cases inside : inFrame depth transverse <;>
+    by_cases opening : coordinate % period depth = frameStartResidue depth <;>
+    simp [inside, opening]
+
+theorem frameBorder_eq_some_false_iff (depth coordinate transverse : Nat) :
+    frameBorder depth coordinate transverse = some false ↔
+      inFrame depth transverse = true ∧
+        coordinate % period depth = frameEndResidue depth := by
+  have distinct : frameStartResidue depth ≠ frameEndResidue depth :=
+    (frameStartResidue_lt_frameEndResidue depth).ne
+  unfold frameBorder
+  by_cases inside : inFrame depth transverse
+  · by_cases opening : coordinate % period depth = frameStartResidue depth
+    · simp [inside, opening, distinct]
+    · by_cases closing : coordinate % period depth = frameEndResidue depth <;>
+        simp [inside, opening, closing, Ne.symm distinct]
+  · simp [inside]
+
+theorem frameBorders_disjoint_of_lt
+    {small large coordinate transverse : Nat} (h : small < large)
+    {smallOrientation largeOrientation : Bool}
+    (smallBorder : frameBorder small coordinate transverse = some smallOrientation)
+    (largeBorder : frameBorder large coordinate transverse = some largeOrientation) :
+    False := by
+  have largeResidue : coordinate % period small = 0 ∨
+      coordinate % period small = 1 := by
+    cases largeOrientation with
+    | false =>
+        left
+        exact largeClosing_mod_small h
+          ((frameBorder_eq_some_false_iff _ _ _).1 largeBorder).2
+    | true =>
+        right
+        exact largeOpening_mod_small h
+          ((frameBorder_eq_some_true_iff _ _ _).1 largeBorder).2
+  have smallResidue : coordinate % period small = frameStartResidue small ∨
+      coordinate % period small = frameEndResidue small := by
+    cases smallOrientation with
+    | false =>
+        exact Or.inr ((frameBorder_eq_some_false_iff _ _ _).1 smallBorder).2
+    | true =>
+        exact Or.inl ((frameBorder_eq_some_true_iff _ _ _).1 smallBorder).2
+  have startLarge : 1 < frameStartResidue small := by
+    simp [frameStartResidue, scale_pos]
+  have endLarge : 1 < frameEndResidue small := by
+    simp only [frameEndResidue]
+    have := scale_pos small
+    omega
+  rcases largeResidue with zero | one <;>
+    rcases smallResidue with start | finish <;> omega
+
+theorem outerBorder_frameBorder_disjoint
+    {depth coordinate transverse : Nat} {outerOrientation frameOrientation : Bool}
+    (outer : outerBorder coordinate transverse = some outerOrientation)
+    (frame : frameBorder depth coordinate transverse = some frameOrientation) :
+    False := by
+  have coordinateOne : coordinate = 1 := by
+    unfold outerBorder at outer
+    split at outer
+    · exact ‹coordinate = 1 ∧ 1 ≤ transverse›.1
+    · simp at outer
+  have oneLtPeriod : 1 < period depth := by
+    rw [period_eq_four_mul_scale]
+    have := scale_pos depth
+    omega
+  have coordinateMod : coordinate % period depth = 1 := by
+    rw [coordinateOne, Nat.mod_eq_of_lt oneLtPeriod]
+  have boundary : coordinate % period depth = frameStartResidue depth ∨
+      coordinate % period depth = frameEndResidue depth := by
+    cases frameOrientation with
+    | false =>
+        exact Or.inr ((frameBorder_eq_some_false_iff _ _ _).1 frame).2
+    | true =>
+        exact Or.inl ((frameBorder_eq_some_true_iff _ _ _).1 frame).2
+  have startLarge : 1 < frameStartResidue depth := by
+    simp [frameStartResidue, scale_pos]
+  have endLarge : 1 < frameEndResidue depth := by
+    simp only [frameEndResidue]
+    have := scale_pos depth
+    omega
+  rcases boundary with start | finish <;> omega
+
+theorem liftBorder_eq_some_imp
+    {coordinate : Nat} {border : Option Bool} {orientation : Bool}
+    (lifted : liftBorder coordinate border = some orientation) :
+    border = some orientation := by
+  cases border with
+  | none => simp [liftBorder] at lifted
+  | some value =>
+      cases value <;> cases orientation <;> simp_all [liftBorder]
+
+theorem firstBorder_eq_some_iff
+    (first second : Option Bool) (orientation : Bool) :
+    firstBorder first second = some orientation ↔
+      first = some orientation ∨ (first = none ∧ second = some orientation) := by
+  cases first <;> cases second <;> simp [firstBorder]
+
+/-- The finite selector contains exactly the outer opening and the frame
+boundaries at depths `1` through `level`. -/
+theorem selectedBorder_eq_some_iff
+    (level coordinate transverse : Nat) (orientation : Bool) :
+    selectedBorder level coordinate transverse = some orientation ↔
+      outerBorder coordinate transverse = some orientation ∨
+        ∃ depth, 1 ≤ depth ∧ depth ≤ level ∧
+          frameBorder depth coordinate transverse = some orientation := by
+  rw [selectedBorder, Fin.findSome?_eq_some_iff]
+  constructor
+  · rintro ⟨index, candidate, _⟩
+    by_cases zero : index.val = 0
+    · left
+      simpa [borderCandidate, zero] using candidate
+    · right
+      exact ⟨index.val, Nat.one_le_iff_ne_zero.2 zero,
+        Nat.le_of_lt_succ index.isLt,
+        by simpa [borderCandidate, zero] using candidate⟩
+  · rintro (outer | ⟨depth, positive, bounded, border⟩)
+    · refine ⟨⟨0, Nat.zero_lt_succ level⟩, ?_, ?_⟩
+      · simpa [borderCandidate] using outer
+      · intro prior priorLt
+        exact (Nat.not_lt_zero prior.val priorLt).elim
+    · refine ⟨⟨depth, by omega⟩, ?_, ?_⟩
+      · simpa [borderCandidate, Nat.ne_of_gt positive] using border
+      · intro prior priorLt
+        by_cases zero : prior.val = 0
+        · cases outerEq : outerBorder coordinate transverse with
+          | none => simp [borderCandidate, zero, outerEq]
+          | some outerOrientation =>
+              exact (outerBorder_frameBorder_disjoint outerEq border).elim
+        · cases priorEq : frameBorder prior.val coordinate transverse with
+          | none => simp [borderCandidate, zero, priorEq]
+          | some priorOrientation =>
+              exact (frameBorders_disjoint_of_lt priorLt priorEq border).elim
+
+theorem lift_selectedBorder_eq_some_iff
+    (level coordinate transverse : Nat) (orientation : Bool) :
+    liftBorder coordinate
+        (selectedBorder level (ceilDivFour coordinate) (ceilDivFour transverse)) =
+          some orientation ↔
+      outerBorder coordinate transverse = some orientation ∨
+        ∃ depth, 2 ≤ depth ∧ depth ≤ level + 1 ∧
+          frameBorder depth coordinate transverse = some orientation := by
+  constructor
+  · intro lifted
+    have coarse := liftBorder_eq_some_imp lifted
+    rcases (selectedBorder_eq_some_iff _ _ _ _).1 coarse with outer | frame
+    · left
+      rw [← outerBorder_lift]
+      simpa only [outer, coarse] using lifted
+    · rcases frame with ⟨depth, positive, bounded, border⟩
+      right
+      refine ⟨depth + 1, by omega, by omega, ?_⟩
+      rw [← frameBorder_succ]
+      simpa only [border, coarse] using lifted
+  · rintro (outer | ⟨depth, depthLower, depthUpper, border⟩)
+    · have coarseLift := outerBorder_lift coordinate transverse
+      rw [outer] at coarseLift
+      have coarseOuter := liftBorder_eq_some_imp coarseLift
+      have coarseSelected := (selectedBorder_eq_some_iff level
+        (ceilDivFour coordinate) (ceilDivFour transverse) orientation).2
+        (Or.inl coarseOuter)
+      simpa only [coarseSelected, coarseOuter] using coarseLift
+    · obtain ⟨prior, depthEq⟩ : ∃ prior, depth = prior + 1 :=
+        ⟨depth - 1, by omega⟩
+      rw [depthEq] at depthLower depthUpper border
+      rw [← frameBorder_succ prior coordinate transverse] at border
+      have coarseBorder := liftBorder_eq_some_imp border
+      have coarseSelected := (selectedBorder_eq_some_iff level
+        (ceilDivFour coordinate) (ceilDivFour transverse) orientation).2
+        (Or.inr ⟨prior, by omega, by omega, coarseBorder⟩)
+      simpa only [coarseSelected, coarseBorder] using border
 
 end ShadedCarrierBorderGeometry
 end Closed104
