@@ -823,6 +823,54 @@ inductive OutwardObligation
         ⟨growth, source, 7⟩ 4 .right
           (bodyEntry growth source instruction) .preserve)
 
+private theorem routeTailGaps_nil_finish_eq
+    {growth : Turing.Dir}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (tail : RouteTailGaps growth [] start finish) :
+    finish = start := by
+  cases tail
+  rfl
+
+/-- The last outward validation command has no route suffix: its exact body
+endpoint is centered on the boundary `4` just found by the original search.
+This is the distance-zero entry used by instruction-specific outward
+continuations. -/
+theorem outwardFour_finish_eq_foundTape
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (progress : ValidationEnd current growth source instruction)
+    (hraw : current.selectedRaw = .boundaryNavigation
+      ⟨growth, source, 7⟩ 4 .right
+        (bodyEntry growth source instruction) .preserve) :
+    progress.suffix.finish = current.foundTape := by
+  have hremaining := remaining_of_boundaryRaw progress 7 4 .right
+    (bodyEntry growth source instruction) hraw
+  simp [MarkerValidation.sweep] at hremaining
+  have htail := progress.suffix.tailGaps
+  rw [hremaining] at htail
+  exact routeTailGaps_nil_finish_eq htail
+
+/-- Consequently the exact completed validation suffix reaches the selected
+instruction body without changing the boundary-`4`-centered tape. -/
+theorem outwardFour_reaches_bodyEntry
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (progress : ValidationEnd current growth source instruction)
+    (hraw : current.selectedRaw = .boundaryNavigation
+      ⟨growth, source, 7⟩ 4 .right
+        (bodyEntry growth source instruction) .preserve) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨resolve base c (bodyEntry growth source instruction),
+        current.foundTape⟩ := by
+  have hrun := progress.reaches
+  rw [outwardFour_finish_eq_foundTape progress hraw] at hrun
+  exact hrun
+
 /-- Arbitrary validation is completely discharged except for a precisely
 typed outward-prefix obligation. -/
 inductive MonotoneOrOutward
