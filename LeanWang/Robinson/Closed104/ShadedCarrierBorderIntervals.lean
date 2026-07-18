@@ -652,6 +652,48 @@ theorem exists_interior_of_nextInterior_eq_some
           cases next
           exact ⟨position, le_rfl, by omega, current⟩
 
+/-- A clear canonical edge lies strictly between a witnessed opening and
+closing border when no closing intervenes before the opening and no border
+intervenes after the closing. -/
+theorem between_borders_of_intervalEdge_eq_none
+    {interior : Nat → Option Bool} {opening closing position length : Nat}
+    (clear : ShadedSignalRectangle.intervalEdge interior length position = .none)
+    (positionClear : interior position = none)
+    (openingBorder : interior opening = some true)
+    (closingBorder : interior closing = some false)
+    (openingBeforeClosing : opening < closing)
+    (closingBeforeEnd : closing < length)
+    (noClosingBeforeOpening : ∀ candidate, position ≤ candidate →
+      candidate < opening → interior candidate ≠ some false)
+    (noBorderAfterClosing : ∀ candidate, closing < candidate →
+      candidate < position → interior candidate = none) :
+    opening < position ∧ position < closing := by
+  have edgeData := (ShadedSignalRectangle.intervalEdge_eq_none_iff
+    interior length position).1 clear
+  constructor
+  · rcases Nat.lt_trichotomy position opening with before | equal | after
+    · have nextTrue : ShadedSignalRectangle.nextInterior interior position
+          (length - position) = some true := by
+        apply nextInterior_eq_true_of_no_false_before openingBorder
+          noClosingBeforeOpening before.le
+          (openingBeforeClosing.trans closingBeforeEnd)
+      rw [nextTrue] at edgeData
+      simp at edgeData
+    · subst opening
+      rw [positionClear] at openingBorder
+      simp at openingBorder
+    · exact after
+  · rcases Nat.lt_trichotomy position closing with before | equal | after
+    · exact before
+    · subst closing
+      rw [positionClear] at closingBorder
+      simp at closingBorder
+    · have previousFalse :
+          ShadedSignalRectangle.previousInterior interior position =
+            some false := by
+        exact previousInterior_eq_closing closingBorder noBorderAfterClosing after
+      exact (edgeData.2 previousFalse).elim
+
 theorem selectedBorder_ne_some_false_before_frameOpening
     {level depth coordinate transverse candidate : Nat}
     (owner : depthAt (level - 1) transverse = some depth)
@@ -950,85 +992,31 @@ theorem horizontalCarrier_of_intervalEdge_pair
         exact depthBound.trans_lt (Nat.sub_lt levelPositive (by decide))
       have closingBeforeEnd := frameClosing_lt_two_mul_scale
         depth_lt_level coordinate_lt
-      by_cases afterOpening :
-          frameStartResidue depth < coordinate % period depth
-      · by_cases beforeClosing :
-            coordinate % period depth < frameEndResidue depth
-        · have geometry : inFrame depth coordinate = true ∧
-              onFrameBoundary depth coordinate = false := by
-            constructor
-            · simp [inFrame]
-              omega
-            · simp [onFrameBoundary]
-              omega
-          simpa [isHorizontalCarrier, owner] using geometry
-        · have endLe : frameEndResidue depth ≤
-              coordinate % period depth := by omega
-          rcases endLe.eq_or_lt with equal | afterClosing
-          · have closingEq : frameClosing depth coordinate = coordinate := by
-              have decomposition := frameBase_add_mod depth coordinate
-              simp only [frameClosing]
-              omega
-            have closingBorder := selectedBorder_frameClosing
-              (level := level) (coordinate := coordinate) owner
-            rw [closingEq] at closingBorder
-            rw [coordinateClear'] at closingBorder
-            simp at closingBorder
-          · have closingBefore : frameClosing depth coordinate < coordinate := by
-              have decomposition := frameBase_add_mod depth coordinate
-              simp only [frameClosing]
-              omega
-            have closingBorder := selectedBorder_frameClosing
-              (level := level) (coordinate := coordinate) owner
-            have previousFalse :
-                ShadedSignalRectangle.previousInterior interior coordinate =
-                  some false := by
-              apply previousInterior_eq_closing
-                  (interior := interior)
-                  (closing := frameClosing depth coordinate)
-                  (position := coordinate)
-                  (closingBorder := by simpa [interior] using closingBorder)
-                  (afterClosing := closingBefore)
-              intro candidate candidateAfter candidateBefore
-              exact selectedBorder_eq_none_after_frameClosing owner
-                candidateAfter candidateBefore
-            exact (edgeData.2 previousFalse).elim
-      · have coordinateLeStart : coordinate % period depth ≤
-            frameStartResidue depth := by omega
-        rcases coordinateLeStart.eq_or_lt with equal | beforeOpening
-        · have openingEq : frameOpening depth coordinate = coordinate := by
-            have decomposition := frameBase_add_mod depth coordinate
-            simp only [frameOpening]
-            omega
-          have openingBorder := selectedBorder_frameOpening
-            (level := level) (coordinate := coordinate) owner
-          rw [openingEq] at openingBorder
-          rw [coordinateClear'] at openingBorder
-          simp at openingBorder
-        · have coordinateBefore : coordinate < frameOpening depth coordinate := by
-            have decomposition := frameBase_add_mod depth coordinate
-            simp only [frameOpening]
-            omega
-          have openingBorder := selectedBorder_frameOpening
-            (level := level) (coordinate := coordinate) owner
-          have openingBeforeEnd : frameOpening depth coordinate <
-              2 * scale level :=
-            (frameOpening_lt_frameClosing depth coordinate).trans closingBeforeEnd
-          have nextTrue : ShadedSignalRectangle.nextInterior interior coordinate
-                (2 * scale level - coordinate) = some true := by
-            apply nextInterior_eq_true_of_no_false_before
-                (interior := interior)
-                (position := coordinate)
-                (opening := frameOpening depth coordinate)
-                (length := 2 * scale level)
-                (openingBorder := by simpa [interior] using openingBorder)
-                (atMostOpening := coordinateBefore.le)
-                (openingBeforeEnd := openingBeforeEnd)
-            intro candidate lower before
-            exact selectedBorder_ne_some_false_before_frameOpening owner
-              coordinateClear' lower before
-          rw [nextTrue] at edgeData
-          simp at edgeData
+      have openingBorder := selectedBorder_frameOpening
+        (level := level) (coordinate := coordinate) owner
+      have closingBorder := selectedBorder_frameClosing
+        (level := level) (coordinate := coordinate) owner
+      have bounds := between_borders_of_intervalEdge_eq_none
+        clear.1 coordinateClear
+        (by simpa [interior] using openingBorder)
+        (by simpa [interior] using closingBorder)
+        (frameOpening_lt_frameClosing depth coordinate) closingBeforeEnd
+        (fun candidate lower before =>
+          selectedBorder_ne_some_false_before_frameOpening owner
+            coordinateClear' lower before)
+        (fun candidate after before =>
+          selectedBorder_eq_none_after_frameClosing owner after before)
+      have decomposition := frameBase_add_mod depth coordinate
+      have geometry : inFrame depth coordinate = true ∧
+          onFrameBoundary depth coordinate = false := by
+        constructor
+        · simp [inFrame]
+          simp only [frameOpening, frameClosing] at bounds
+          omega
+        · simp [onFrameBoundary]
+          simp only [frameOpening, frameClosing] at bounds
+          omega
+      simpa [isHorizontalCarrier, owner] using geometry
 
 theorem intervalEdge_pair_iff_horizontalCarrier
     {level coordinate transverse : Nat}
