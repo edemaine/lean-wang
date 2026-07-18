@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlFrameBacking
+import LeanWang.Kari.Hooper.CounterControlCoreFrame
 
 /-!
 # Counter frames with an infinite blank runway
@@ -27,6 +28,7 @@ namespace CounterControlOpenFrame
 
 open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape FramedCounterGeometry
+open CounterControlCoreFrame
 
 noncomputable section
 
@@ -78,6 +80,20 @@ theorem openTape_represents (registers : Registers) (growth : Turing.Dir)
       simpa [openTape] using install_of_layoutEnd_lt registers growth
         returnTag (blankTape numTags) hpast]
     simp [logicalTape_apply]
+
+/-- An infinite blank runway supplies a target-free prefix representation at
+every chosen finite limit beyond the current core. -/
+theorem prefixRepresents
+    (h : OpenRepresents registers growth returnTag T)
+    {limit : Nat} (hlimit : layoutEnd registers < limit) :
+    PrefixRepresents registers growth returnTag limit T where
+  toTaggedCoreRepresents :=
+    { toCoreRepresents := ⟨h.core⟩
+      tag := h.tag }
+  core_before_limit := hlimit
+  runway := by
+    intro position hcore _hbeforeLimit
+    exact h.runway position hcore
 
 /-! ## The complete target-free local geometry API -/
 
