@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.CanonicalShadeGeometry
+import LeanWang.Robinson.Closed104.CanonicalShadeComparisonCore
 import LeanWang.Robinson.Closed104.RedShadeCycleEvenDescendants
 
 /-!
@@ -29,7 +30,8 @@ open OrientedRedCycles RedCycles RedShades RedShadePaths RedShadeCycles
   RedShadeCycleConnectivity RedShadeCycleBridgeComposition
   RedShadeCycleEvenDescendants OrientedRedBoardTranslations
   ShadedSubstitution CanonicalFreeLineCoordinates CanonicalEvenFreeLines
-  CanonicalShadeGeometry ShadedPlaneSignalGrid Signals.FreeCellLocal
+  CanonicalShadeGeometry CanonicalShadeComparisonCore
+  ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -38,89 +40,6 @@ def scale (depth : Nat) : Nat := 4 ^ depth
 def actualGrid (depth : Nat) (coarse : Nat → Nat → Index) :
     Nat → Nat → Index :=
   iterateRefine (2 * depth + 2) coarse
-
-private theorem Related.right_unique
-    {parity : Bool} {first second third : Option RedShades.Shade}
-    (secondRelation : Related parity first second)
-    (thirdRelation : Related parity first third) :
-    second = third := by
-  cases parity
-  · exact secondRelation.symm.trans thirdRelation
-  · rcases secondRelation with ⟨secondShade, firstEq, secondEq⟩
-    rcases thirdRelation with ⟨thirdShade, firstEq', thirdEq⟩
-    have shadeEq : secondShade = thirdShade :=
-      Option.some.inj (firstEq.symm.trans firstEq')
-    subst thirdShade
-    exact secondEq.trans thirdEq.symm
-
-private theorem value_eq_of_evenCycleBridge
-    {grid : Nat → Nat → Index}
-    {states : Nat → Nat → RedShades.State}
-    {firstWest firstEast firstSouth firstNorth : Nat}
-    {secondWest secondEast secondSouth secondNorth : Nat}
-    {shade : RedShades.Shade} {target : Port}
-    (valid : ValidShadeGrid grid states)
-    (firstCycle : CycleOn grid
-      firstWest firstEast firstSouth firstNorth)
-    (firstShaded : CycleShade states
-      firstWest firstEast firstSouth firstNorth shade)
-    (secondCycle : CycleOn grid
-      secondWest secondEast secondSouth secondNorth)
-    (bridge : EvenCycleBridge grid
-      firstWest firstEast firstSouth firstNorth
-      secondWest secondEast secondSouth secondNorth)
-    (targetOn : OnCycle
-      secondWest secondEast secondSouth secondNorth target) :
-    value states target = some shade := by
-  rcases bridge with ⟨firstPort, secondPort, firstOn, secondOn, path⟩
-  have firstValue := firstOn.value_eq firstCycle firstShaded valid
-  have bridgeEq : value states firstPort = value states secondPort :=
-    path.sound valid
-  have secondValue : value states secondPort = some shade :=
-    bridgeEq.symm.trans firstValue
-  have around := onCycle_connected secondCycle secondOn targetOn
-  have aroundEq : value states secondPort = value states target :=
-    around.sound valid
-  exact aroundEq.symm.trans secondValue
-
-private theorem mem_portsIn {width height : Nat} {port : Port}
-    (hx : port.x < width) (hy : port.y < height) :
-    port ∈ portsIn width height := by
-  rcases port with ⟨x, y, side⟩
-  simp only [portsIn, List.mem_flatMap, List.mem_range]
-  refine ⟨y, hy, x, hx, ?_⟩
-  cases side <;> simp
-
-private theorem bounds_of_mem_portsIn {width height : Nat} {port : Port}
-    (portMem : port ∈ portsIn width height) :
-    port.x < width ∧ port.y < height := by
-  unfold portsIn at portMem
-  rw [List.mem_flatMap] at portMem
-  rcases portMem with ⟨y, hy, portMem⟩
-  rw [List.mem_flatMap] at portMem
-  rcases portMem with ⟨x, hx, portMem⟩
-  simp only [List.mem_range] at hy hx
-  simp only [List.mem_cons, List.not_mem_nil, or_false] at portMem
-  rcases portMem with rfl | rfl | rfl | rfl <;> exact ⟨hx, hy⟩
-
-private theorem sparseCoordinate_two_block (block offset : Nat)
-    (hoffset : offset < 2) :
-    sparseCoordinate (2 * block + offset) =
-      8 * block + sparseCoordinate offset := by
-  have cases : offset = 0 ∨ offset = 1 := by omega
-  rcases cases with rfl | rfl
-  · simp [sparseCoordinate, macroOrigin, localCoordinate]
-  · simp [sparseCoordinate, macroOrigin, localCoordinate]
-    omega
-
-private theorem sparsePort_two_block (blockX blockY : Nat) (port : Port)
-    (hx : port.x < 2) (hy : port.y < 2) :
-    sparsePort (translatePort port (2 * blockX) (2 * blockY)) =
-      translatePort (sparsePort port) (8 * blockX) (8 * blockY) := by
-  rcases port with ⟨x, y, side⟩
-  simp only [sparsePort, translatePort]
-  rw [sparseCoordinate_two_block blockX x hx,
-    sparseCoordinate_two_block blockY y hy]
 
 private theorem rootCycle (depth : Nat) (coarse : Nat → Nat → Index) :
     CycleOn (actualGrid depth coarse)
@@ -132,11 +51,6 @@ private theorem rootCycle (depth : Nat) (coarse : Nat → Nat → Index) :
     norm_num [scale]
   rw [hpow] at cycle
   simpa [actualGrid, Nat.mul_comm] using cycle
-
-private theorem localCycleSource_onCycle :
-    OnCycle 1 3 1 3 cycleSource := by
-  change OnCycle 1 3 1 3 ⟨4, 3, .west⟩
-  apply OnCycle.southWest <;> decide
 
 private theorem value_succ_block (level : Nat) (root : Node)
     (blockX blockY : Nat) (port : Port)
@@ -155,34 +69,6 @@ private theorem value_succ_sparse (level : Nat) (root : Node) (port : Port) :
   rcases port with ⟨x, y, side⟩
   have stateEq := shadeGrid_succ_sparse level root x y
   cases side <;> simpa [value, sparsePort] using congrArg _ stateEq
-
-private theorem localGrid_eq (node : Node) (parent : Index)
-    (parentEq : node.data.parent = parent) :
-    indexGrid node 1 = fineGrid parent := by
-  rw [indexGrid, supertileIndexGrid_eq_iterateRefine]
-  subst parent
-  rfl
-
-private theorem sourceOnCell (blockX blockY : Nat) :
-    OnCycle
-      (4 * blockX + 1) (4 * blockX + 3)
-      (4 * blockY + 1) (4 * blockY + 3)
-      (translatePort cycleSource (8 * blockX) (8 * blockY)) := by
-  have sourceEq :
-      translatePort cycleSource (8 * blockX) (8 * blockY) =
-        ⟨8 * blockX + 4, 8 * blockY + 3, .west⟩ := by
-    simp [translatePort, cycleSource, quarterWest, quarterSouth]
-  have southEq : quarterSouth (4 * blockY + 1) = 8 * blockY + 3 := by
-    simp [quarterSouth]
-    omega
-  rw [sourceEq]
-  simpa only [southEq] using
-    (OnCycle.southWest
-      (west := 4 * blockX + 1) (east := 4 * blockX + 3)
-      (south := 4 * blockY + 1) (north := 4 * blockY + 3)
-      (8 * blockX + 4)
-      (by simp [quarterWest]; omega)
-      (by simp [quarterEast]; omega))
 
 /-- Every live port in the central square has the same shade in an arbitrary
 valid light-root assignment and in the selected canonical assignment. -/
