@@ -104,6 +104,21 @@ def OneStepContinuesOrHalts (base : Nat) (c : Nat.Partrec.Code)
         LogicalFrame base c frame next nextConcrete) ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) concrete
 
+/-- A halting-aware step law whose exact branch only requires that the next
+abstract layout still fit inside the suspended target. -/
+def RoomStepContinuesOrHalts (base : Nat) (c : Nat.Partrec.Code)
+    (frame : Frame (Symbol numTags) Search) : Prop :=
+  ∀ {current next : CounterMachine.Cfg}
+      {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State},
+    step GlobalSourceProgram.program current = some next →
+    FramedMarkerTape.layoutEnd next.registers < frame.distance →
+    LogicalFrame base c frame current concrete →
+      (∃ nextConcrete,
+        FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          concrete nextConcrete ∧
+        LogicalFrame base c frame next nextConcrete) ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) concrete
+
 /-! ## Finite trace lifting -/
 
 /-- A forward one-step law lifts over every finite abstract counter trace. -/
@@ -229,6 +244,62 @@ theorem reaches_logical_or_halts
         · exact Or.inr (FullTM0.HaltsFrom.of_reaches hprefix hhalts)
       · exact Or.inr hhalts
 
+/-- A room-conditional step law lifts over an exact abstract iterate whenever
+the initial layout plus the iterate length still lies before the suspended
+target. -/
+theorem iterate_logical_or_halts_of_room
+    (base : Nat) (c : Nat.Partrec.Code)
+    {frame : Frame (Symbol numTags) Search}
+    (hlaw : RoomStepContinuesOrHalts base c frame)
+    (steps : Nat) {start finish : CounterMachine.Cfg}
+    (hrun : Dynamics.iterate (step GlobalSourceProgram.program)
+      steps start = some finish)
+    (hfits : FramedMarkerTape.layoutEnd start.registers + steps <
+      frame.distance)
+    {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (hlogical : LogicalFrame base c frame start concrete) :
+    (∃ finishConcrete,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        concrete finishConcrete ∧
+      LogicalFrame base c frame finish finishConcrete) ∨
+    FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+      concrete := by
+  induction steps generalizing concrete finish with
+  | zero =>
+      simp only [Dynamics.iterate_zero] at hrun
+      cases Option.some.inj hrun
+      exact Or.inl ⟨concrete, Relation.ReflTransGen.refl, hlogical⟩
+  | succ steps ih =>
+      rw [Dynamics.iterate_succ] at hrun
+      cases hprefix : Dynamics.iterate (step GlobalSourceProgram.program)
+          steps start with
+      | none => simp [hprefix] at hrun
+      | some current =>
+          have hlast : step GlobalSourceProgram.program current =
+              some finish := by
+            simpa [hprefix] using hrun
+          have hprefixFits :
+              FramedMarkerTape.layoutEnd start.registers + steps <
+                frame.distance := by
+            omega
+          rcases ih hprefix hprefixFits hlogical with hcurrent | hhalts
+          · rcases hcurrent with
+              ⟨currentConcrete, hprefixConcrete, hcurrent⟩
+            have hfinishBound :=
+              CounterControlStepGeometry.layoutEnd_le_add_of_iterate
+                (steps + 1) hrun
+            have hfinishFits :
+                FramedMarkerTape.layoutEnd finish.registers <
+                  frame.distance := by
+              omega
+            rcases hlaw hlast hfinishFits hcurrent with hnext | hhalts
+            · rcases hnext with ⟨nextConcrete, hlastConcrete, hnext⟩
+              exact Or.inl
+                ⟨nextConcrete, hprefixConcrete.trans hlastConcrete, hnext⟩
+            · exact Or.inr
+                (FullTM0.HaltsFrom.of_reaches hprefixConcrete hhalts)
+          · exact Or.inr hhalts
+
 /-! ## Endpoint eliminations -/
 
 /-- If a forward abstract trace reaches a clock at least the suspended-search
@@ -319,6 +390,38 @@ theorem haltsFrom_of_abstract_haltsFrom
   rcases hhalts with ⟨terminal, hterminalReach, hterminal⟩
   rcases reaches_logical_or_halts base c hlaw hterminalReach hlogical with
     hfinish | hhalts
+  · rcases hfinish with ⟨finishConcrete, hfinishReach, hfinish⟩
+    rcases hfinish with ⟨_hcore, T, _hback, rfl, hstate⟩
+    apply FullTM0.HaltsFrom.of_reaches hfinishReach
+    refine ⟨logicalCfg base c frame terminal T,
+      Relation.ReflTransGen.refl, ?_⟩
+    simpa [logicalCfg] using
+      (CounterControlTerminalSemantics.machine_step_eq_none_of_counter_step_none
+        base c (frameGrowth base c frame) terminal
+        (FramedMarkerTape.atLogical (frameGrowth base c frame) T
+          (FramedMarkerTape.layoutEnd terminal.registers))
+        hstate hterminal)
+  · exact hhalts
+
+/-- Exact-runtime version of the mortal endpoint theorem.  The simple
+`initial layout + steps` inequality supplies room for every intermediate
+counter configuration. -/
+theorem haltsFrom_of_terminal_iterate_of_room
+    (base : Nat) (c : Nat.Partrec.Code)
+    {frame : Frame (Symbol numTags) Search}
+    (hlaw : RoomStepContinuesOrHalts base c frame)
+    (steps : Nat) {start terminal : CounterMachine.Cfg}
+    (hrun : Dynamics.iterate (step GlobalSourceProgram.program)
+      steps start = some terminal)
+    (hterminal : step GlobalSourceProgram.program terminal = none)
+    (hfits : FramedMarkerTape.layoutEnd start.registers + steps <
+      frame.distance)
+    {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (hlogical : LogicalFrame base c frame start concrete) :
+    FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+      concrete := by
+  rcases iterate_logical_or_halts_of_room base c hlaw steps hrun hfits
+      hlogical with hfinish | hhalts
   · rcases hfinish with ⟨finishConcrete, hfinishReach, hfinish⟩
     rcases hfinish with ⟨_hcore, T, _hback, rfl, hstate⟩
     apply FullTM0.HaltsFrom.of_reaches hfinishReach
