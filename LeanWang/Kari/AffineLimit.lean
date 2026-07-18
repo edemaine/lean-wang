@@ -416,12 +416,73 @@ theorem tendsto_prefixAverage_next
     simpa only [Function.comp_apply, error] using
       (prefixAverage_next_eq (n := φ n) compiled hrow).symm
 
-/-- A forward affine orbit records both the limiting points and the compiled
-branch selected at each time step. -/
+/-- A real vector lies in the coordinatewise closed envelope of a compiled
+branch's finite input alphabet.  The universal-bounds formulation avoids
+choosing minima for a possibly empty list and is exactly what is preserved by
+limits of prefix averages. -/
+def InInputEnvelope (compiled : CompiledAffineBranch)
+    (v : Fin 3 → ℝ) : Prop :=
+  ∀ (j : Fin 3) (lower upper : ℝ),
+    (∀ digit ∈ compiled.inputs,
+      lower ≤ AffineBeatty.toReal digit j ∧
+        AffineBeatty.toReal digit j ≤ upper) →
+      lower ≤ v j ∧ v j ≤ upper
+
+/-- A limit of prefix averages of a compiled row lies in the coordinatewise
+closed envelope of that branch's input alphabet. -/
+theorem inInputEnvelope_of_tendsto_prefixAverage
+    {digits carries : Int × Nat → Nat} {y : Nat}
+    (compiled : CompiledAffineBranch)
+    (hrow : ∀ x : Int,
+      ∃ t ∈ compiled.transducer,
+        AffineSystem.TransitionMatchesCell t digits carries (x, y) ∧
+          t.SatisfiesAffine compiled.branch.rationalMap
+            IntegerAffineBranch.digitValue compiled.branch.carryValue)
+    (sequence : Nat → Nat) (v : Fin 3 → ℝ)
+    (hlimit : Tendsto (prefixAverage digits y ∘ sequence) atTop (𝓝 v)) :
+    InInputEnvelope compiled v := by
+  intro j lower upper hbounds
+  have havgBounds (n : Nat) :
+      lower ≤ prefixAverage digits y n j ∧
+        prefixAverage digits y n j ≤ upper := by
+    have hdigitBounds (i : Nat) :
+        lower ≤ digitValue (digits ((i : Int), y)) j ∧
+          digitValue (digits ((i : Int), y)) j ≤ upper := by
+      rcases exists_inputVector_of_row compiled hrow (i : Int) with
+        ⟨digit, hdigit, heq⟩
+      rw [heq]
+      exact hbounds digit hdigit
+    have hlowerSum :
+        ∑ _i ∈ Finset.range (n + 1), lower ≤
+          ∑ i ∈ Finset.range (n + 1),
+            digitValue (digits ((i : Int), y)) j := by
+      exact Finset.sum_le_sum fun i _hi => (hdigitBounds i).1
+    have hupperSum :
+        ∑ i ∈ Finset.range (n + 1),
+            digitValue (digits ((i : Int), y)) j ≤
+          ∑ _i ∈ Finset.range (n + 1), upper := by
+      exact Finset.sum_le_sum fun i _hi => (hdigitBounds i).2
+    have hden : (0 : ℝ) < (n + 1 : Nat) := by positivity
+    simp only [prefixAverage]
+    simp only [Finset.sum_const, Finset.card_range, nsmul_eq_mul] at hlowerSum hupperSum
+    constructor
+    · exact (le_div_iff₀ hden).2 (by nlinarith)
+    · exact (div_le_iff₀ hden).2 (by nlinarith)
+  have hcoordinate : Tendsto
+      (fun n => prefixAverage digits y (sequence n) j) atTop (𝓝 (v j)) := by
+    exact (tendsto_pi_nhds.mp hlimit) j
+  constructor
+  · exact ge_of_tendsto' hcoordinate fun n => (havgBounds (sequence n)).1
+  · exact le_of_tendsto' hcoordinate fun n => (havgBounds (sequence n)).2
+
+/-- A forward affine orbit records the limiting points, the compiled branch
+selected at each time step, and the closed input-envelope fact inherited from
+the branch's finite digit row. -/
 structure ForwardOrbit (system : AffineSystem) where
   state : Nat → Fin 3 → ℝ
   branch : Nat → CompiledAffineBranch
   branch_mem : ∀ y, branch y ∈ system.branches
+  in_input_envelope : ∀ y, InInputEnvelope (branch y) (state y)
   realizes : ∀ y,
     AffineBeatty.Realizes (branch y).branch (state y) (state (y + 1))
 
@@ -468,6 +529,9 @@ def forwardOrbitOfBottomTendsto
     { state := state
       branch := branchAt
       branch_mem := fun y => (hbranchAt y).1
+      in_input_envelope := fun y =>
+        inInputEnvelope_of_tendsto_prefixAverage (branchAt y)
+          (hbranchAt y).2 φ (state y) (hstate_limit y)
       realizes := fun y => by
         rw [hstate_succ]
         exact realizes_branchMap (branchAt y).branch (state y) }

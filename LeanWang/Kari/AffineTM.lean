@@ -243,6 +243,19 @@ theorem realizes_realStep (spec : LocalRule numSymbols) (v : Fin 3 → ℝ) :
           AffineBeatty.toReal, sideBase] <;>
         field_simp <;> ring
 
+/-- The affine equation has a unique output, so any orbit step using this
+branch is the intended push/pop machine update. -/
+theorem eq_realStep_of_realizes (spec : LocalRule numSymbols)
+    (input output : Fin 3 → ℝ)
+    (hrealizes : AffineBeatty.Realizes spec.branch input output) :
+    output = spec.realStep input := by
+  funext j
+  have hgiven := hrealizes j
+  have hintended := spec.realizes_realStep input j
+  have hden : (0 : ℝ) < spec.branch.denominator := by
+    exact_mod_cast spec.branch.denominator_pos
+  nlinarith
+
 end
 
 end LocalRule

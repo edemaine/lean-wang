@@ -14,6 +14,10 @@ import LeanWang.Kari.AffineLimit
 import LeanWang.Kari.AffineOrbitDiagram
 import LeanWang.Kari.AffineTM
 import LeanWang.Kari.AffineTMEncoding
+import LeanWang.Kari.AffineTMSystem
+import LeanWang.Kari.AffineTMStacks
+import LeanWang.Kari.AffineTMSeries
+import LeanWang.Kari.AffineTMImmortality
 import LeanWang.Kari.TransducerHalfPlane
 import LeanWang.Kari.Hooper
 
