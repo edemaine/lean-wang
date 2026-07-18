@@ -48,8 +48,9 @@ compiler for the fixed source tape, one finite deterministic counter program
 covering every source transition together with its exact designated-start
 semantics, a four-register counter-program layer, its
 exact finite five-boundary marker tape, collision-free suffix shifts for every
-counter operation together with exact chained increment schedules, concrete
-finite-table marker programs with independently directed searches and shifts,
+counter operation together with exact chained increment and
+positive-decrement schedules, concrete finite-table marker programs with
+independently directed searches and shifts,
 relocatable and reflectable finite tables, a verified finite-table linker,
 concrete arbitrary-entry liveness laws for the complete fixed source program,
 and the abstract strong-induction core of Hooper's nested bounded-search

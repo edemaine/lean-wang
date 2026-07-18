@@ -207,11 +207,6 @@ theorem moveTempBoundary_after_clock (registers : Registers) :
   simp only [MarkerTape.canonicalTape_eq_boundary_iff]
   fin_cases label <;>
     simp [MarkerTape.boundaryPosition,
-      RegisterLayout.startBoundary_eq,
-      RegisterLayout.leftBoundary_eq,
-      RegisterLayout.rightBoundary_eq,
-      RegisterLayout.tempBoundary_eq,
-      RegisterLayout.clockBoundary_eq,
       Registers.increment, Registers.set, Registers.get] <;>
     omega
 
@@ -227,11 +222,6 @@ theorem moveRightBoundary_after_temp (registers : Registers) :
   simp only [MarkerTape.canonicalTape_eq_boundary_iff]
   fin_cases label <;>
     simp [MarkerTape.boundaryPosition,
-      RegisterLayout.startBoundary_eq,
-      RegisterLayout.leftBoundary_eq,
-      RegisterLayout.rightBoundary_eq,
-      RegisterLayout.tempBoundary_eq,
-      RegisterLayout.clockBoundary_eq,
       Registers.increment, Registers.set, Registers.get] <;>
     omega
 
@@ -247,11 +237,6 @@ theorem moveLeftBoundary_after_right (registers : Registers) :
   simp only [MarkerTape.canonicalTape_eq_boundary_iff]
   fin_cases label <;>
     simp [MarkerTape.boundaryPosition,
-      RegisterLayout.startBoundary_eq,
-      RegisterLayout.leftBoundary_eq,
-      RegisterLayout.rightBoundary_eq,
-      RegisterLayout.tempBoundary_eq,
-      RegisterLayout.clockBoundary_eq,
       Registers.increment, Registers.set, Registers.get] <;>
     omega
 
@@ -491,6 +476,489 @@ theorem increment_executes (registers : Registers) (register : Register) :
         MarkerShift.incrementOrder] using
         executes_append
           (executes_append (executes_append hclock htemp) hright) hleft
+
+/-! ## Generic left shifts for positive decrements -/
+
+/-- Encoded canonical tape centered at the first cell of gap `i`. -/
+noncomputable def firstGapTape (registers : Registers) (i : Fin 4) :
+    FullTM0.Tape MarkerMachine.Symbol :=
+  MarkerMachine.encodeTape (MarkerTape.firstGapCellTape registers i)
+
+/-- Result of shifting the right boundary of gap `i` left, with the final
+head back at that boundary's old source coordinate. -/
+noncomputable def shiftedLeftBoundaryTape
+    (current next : Registers) (i : Fin 4) :
+    FullTM0.Tape MarkerMachine.Symbol :=
+  MarkerMachine.encodeTape (MarkerMachine.recenter
+    (MarkerTape.canonicalTape next)
+    (MarkerTape.boundaryPosition current i.succ))
+
+/-- Starting at the first cell of a nonempty gap, search right for its
+labelled right boundary, shift that boundary left, and return to its old
+source cell.  The caller supplies the absolute tape identity produced by the
+shift. -/
+theorem positiveGapLeftShift_executes (current next : Registers) (i : Fin 4)
+    (hpositive : 0 < RegisterLayout.values current i)
+    (hmove : MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape current)
+        (MarkerTape.boundaryPosition current i.succ) i.succ =
+      MarkerTape.canonicalTape next) :
+    MarkerChain.Executes
+      [⟨⟨i.succ, .right, .left⟩, .right⟩]
+      (firstGapTape current i) (shiftedLeftBoundaryTape current next i) := by
+  refine MarkerChain.Executes.cons
+    (command := ⟨⟨i.succ, .right, .left⟩, .right⟩)
+    (commands := []) (T := firstGapTape current i)
+    (U := shiftedLeftBoundaryTape current next i)
+    (RegisterLayout.values current i) ?_ ?_ ?_
+  · have hgap := MarkerMachine.encodeTape_searchGap
+      (MarkerTape.searchGap_right_label current i)
+    simpa [firstGapTape] using hgap
+  · change
+      (((((firstGapTape current i).moveN .right
+          (RegisterLayout.values current i)).write
+            MarkerMachine.blankSymbol).move .left).read =
+        MarkerMachine.blankSymbol)
+    rw [FullTM0.Tape.read_eq, FullTM0.Tape.move_left_apply]
+    rw [FullTM0.Tape.write_apply_of_ne MarkerMachine.blankSymbol _
+      (by norm_num : (0 - 1 : Int) ≠ 0)]
+    change MarkerMachine.encodeSymbol
+        (MarkerTape.firstGapCellTape current i
+          (-1 + FullTM0.Tape.offset .right
+            (RegisterLayout.values current i))) =
+      MarkerMachine.blankSymbol
+    rw [MarkerMachine.encodeSymbol_eq_blank_iff]
+    have hinterior := MarkerTape.canonicalTape_gapInterior current i
+      (RegisterLayout.values current i - 1) (by omega)
+    change MarkerTape.canonicalTape current
+      (CounterLayout.firstGapCellTape (RegisterLayout.values current) i
+        (-1 + FullTM0.Tape.offset .right
+          (RegisterLayout.values current i))) = .blank
+    have hcoord :
+        CounterLayout.firstGapCellTape (RegisterLayout.values current) i
+            (-1 + FullTM0.Tape.offset .right
+              (RegisterLayout.values current i)) =
+          (CounterLayout.boundaryPos (RegisterLayout.values current) i : Int) +
+            1 + ((RegisterLayout.values current i - 1 : Nat) : Int) := by
+      unfold CounterLayout.firstGapCellTape
+      simp only [FullTM0.Tape.offset_right]
+      have hpred : RegisterLayout.values current i =
+          (RegisterLayout.values current i - 1) + 1 := by
+        omega
+      rw [hpred]
+      push_cast
+      ring
+    rw [hcoord]
+    exact hinterior
+  · unfold firstGapTape shiftedLeftBoundaryTape
+    change MarkerChain.Executes []
+      (MarkerChain.resultTape
+        ⟨⟨i.succ, .right, .left⟩, reverse .left⟩
+        (RegisterLayout.values current i)
+        (MarkerMachine.encodeTape (MarkerMachine.recenter
+          (MarkerTape.canonicalTape current)
+          ((CounterLayout.boundaryPos (RegisterLayout.values current) i :
+            Int) + 1))))
+      (MarkerMachine.encodeTape (MarkerMachine.recenter
+        (MarkerTape.canonicalTape next)
+        (MarkerTape.boundaryPosition current i.succ)))
+    rw [resultTape_recenter_source]
+    have htarget :
+        (CounterLayout.boundaryPos (RegisterLayout.values current) i : Int) +
+            1 + FullTM0.Tape.offset .right
+              (RegisterLayout.values current i) =
+          MarkerTape.boundaryPosition current i.succ := by
+      have hsucc :
+          (CounterLayout.boundaryPos (RegisterLayout.values current)
+              (i + 1) : Int) =
+            CounterLayout.boundaryPos (RegisterLayout.values current) i +
+              RegisterLayout.values current i + 1 := by
+        exact_mod_cast CounterLayout.boundaryPos_succ
+          (RegisterLayout.values current) i
+      rw [show MarkerTape.boundaryPosition current i.succ =
+          (CounterLayout.boundaryPos (RegisterLayout.values current)
+            (i + 1) : Int) by rfl]
+      rw [hsucc]
+      simp [FullTM0.Tape.offset_right]
+      ring
+    rw [htarget, hmove]
+    exact MarkerChain.Executes.nil _
+
+/-- The first boundary of a positive-decrement schedule can be shifted from
+the boundary itself: the zero-length search recognizes the boundary, and
+positivity guarantees that its left destination is blank. -/
+theorem boundaryLeftShift_executes (current next : Registers) (i : Fin 4)
+    (hpositive : 0 < RegisterLayout.values current i)
+    (hmove : MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape current)
+        (MarkerTape.boundaryPosition current i.succ) i.succ =
+      MarkerTape.canonicalTape next) :
+    MarkerChain.Executes
+      [⟨⟨i.succ, .right, .left⟩, .right⟩]
+      (boundaryTape current i.succ)
+      (shiftedLeftBoundaryTape current next i) := by
+  refine MarkerChain.Executes.cons
+    (command := ⟨⟨i.succ, .right, .left⟩, .right⟩)
+    (commands := []) (T := boundaryTape current i.succ)
+    (U := shiftedLeftBoundaryTape current next i) 0 ?_ ?_ ?_
+  · constructor
+    · intro k hk
+      omega
+    · simp [boundaryTape, MarkerMachine.recenter,
+        FullTM0.Tape.offset]
+  · change
+      (((((boundaryTape current i.succ).moveN .right 0).write
+          MarkerMachine.blankSymbol).move .left).read =
+        MarkerMachine.blankSymbol)
+    rw [FullTM0.Tape.moveN_zero]
+    rw [FullTM0.Tape.read_eq, FullTM0.Tape.move_left_apply]
+    rw [FullTM0.Tape.write_apply_of_ne MarkerMachine.blankSymbol _
+      (by norm_num : (0 - 1 : Int) ≠ 0)]
+    change MarkerMachine.encodeSymbol
+        (MarkerTape.canonicalTape current
+          (MarkerTape.boundaryPosition current i.succ - 1)) =
+      MarkerMachine.blankSymbol
+    rw [MarkerMachine.encodeSymbol_eq_blank_iff]
+    have hinterior := MarkerTape.canonicalTape_gapInterior current i
+      (RegisterLayout.values current i - 1) (by omega)
+    have hcoord :
+        MarkerTape.boundaryPosition current i.succ - 1 =
+          (CounterLayout.boundaryPos (RegisterLayout.values current) i : Int) +
+            1 + ((RegisterLayout.values current i - 1 : Nat) : Int) := by
+      have hsucc :
+          (CounterLayout.boundaryPos (RegisterLayout.values current)
+              (i + 1) : Int) =
+            CounterLayout.boundaryPos (RegisterLayout.values current) i +
+              RegisterLayout.values current i + 1 := by
+        exact_mod_cast CounterLayout.boundaryPos_succ
+          (RegisterLayout.values current) i
+      rw [show MarkerTape.boundaryPosition current i.succ =
+          (CounterLayout.boundaryPos (RegisterLayout.values current)
+            (i + 1) : Int) by rfl]
+      rw [hsucc]
+      omega
+    rw [hcoord]
+    exact hinterior
+  · unfold boundaryTape shiftedLeftBoundaryTape
+    change MarkerChain.Executes []
+      (MarkerChain.resultTape
+        ⟨⟨i.succ, .right, .left⟩, reverse .left⟩ 0
+        (MarkerMachine.encodeTape (MarkerMachine.recenter
+          (MarkerTape.canonicalTape current)
+          (MarkerTape.boundaryPosition current i.succ))))
+      (MarkerMachine.encodeTape (MarkerMachine.recenter
+        (MarkerTape.canonicalTape next)
+        (MarkerTape.boundaryPosition current i.succ)))
+    rw [resultTape_recenter_source]
+    simp only [FullTM0.Tape.offset_right, Nat.cast_zero, add_zero]
+    rw [hmove]
+    exact MarkerChain.Executes.nil _
+
+/-! ## Canonical intermediate layouts for decrements -/
+
+/-- Undoing the first boundary shift of a `left` increment leaves exactly a
+`right` increment. -/
+theorem moveLeftBoundary_before_right (registers : Registers) :
+    MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape (registers.increment .left))
+        (MarkerTape.boundaryPosition (registers.increment .left) 1) 1 =
+      MarkerTape.canonicalTape (registers.increment .right) := by
+  rw [MarkerMachine.moveAt_left]
+  apply MarkerShift.tape_ext_boundary
+  intro position label
+  rw [MarkerShift.moveLeftAt_eq_boundary_iff]
+  simp only [MarkerTape.canonicalTape_eq_boundary_iff]
+  fin_cases label <;>
+    simp [MarkerTape.boundaryPosition,
+      Registers.increment, Registers.set, Registers.get] <;>
+    omega
+
+/-- Undoing the first boundary shift of a `right` increment leaves exactly a
+`temp` increment. -/
+theorem moveRightBoundary_before_temp (registers : Registers) :
+    MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape (registers.increment .right))
+        (MarkerTape.boundaryPosition (registers.increment .right) 2) 2 =
+      MarkerTape.canonicalTape (registers.increment .temp) := by
+  rw [MarkerMachine.moveAt_left]
+  apply MarkerShift.tape_ext_boundary
+  intro position label
+  rw [MarkerShift.moveLeftAt_eq_boundary_iff]
+  simp only [MarkerTape.canonicalTape_eq_boundary_iff]
+  fin_cases label <;>
+    simp [MarkerTape.boundaryPosition,
+      RegisterLayout.startBoundary_eq,
+      RegisterLayout.leftBoundary_eq,
+      RegisterLayout.rightBoundary_eq,
+      RegisterLayout.tempBoundary_eq,
+      RegisterLayout.clockBoundary_eq,
+      Registers.increment, Registers.set, Registers.get] <;>
+    omega
+
+/-- Undoing the first boundary shift of a `temp` increment leaves exactly a
+`clock` increment. -/
+theorem moveTempBoundary_before_clock (registers : Registers) :
+    MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape (registers.increment .temp))
+        (MarkerTape.boundaryPosition (registers.increment .temp) 3) 3 =
+      MarkerTape.canonicalTape (registers.increment .clock) := by
+  rw [MarkerMachine.moveAt_left]
+  apply MarkerShift.tape_ext_boundary
+  intro position label
+  rw [MarkerShift.moveLeftAt_eq_boundary_iff]
+  simp only [MarkerTape.canonicalTape_eq_boundary_iff]
+  fin_cases label <;>
+    simp [MarkerTape.boundaryPosition,
+      RegisterLayout.startBoundary_eq,
+      RegisterLayout.leftBoundary_eq,
+      RegisterLayout.rightBoundary_eq,
+      RegisterLayout.tempBoundary_eq,
+      RegisterLayout.clockBoundary_eq,
+      Registers.increment, Registers.set, Registers.get] <;>
+    omega
+
+/-- Moving the sole shifted boundary of a `clock` increment left restores the
+base layout. -/
+theorem moveClockBoundary_after_increment (registers : Registers) :
+    MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape (registers.increment .clock))
+        (MarkerTape.boundaryPosition (registers.increment .clock) 4) 4 =
+      MarkerTape.canonicalTape registers := by
+  rw [MarkerMachine.moveAt_left]
+  apply MarkerShift.tape_ext_boundary
+  intro position label
+  rw [MarkerShift.moveLeftAt_eq_boundary_iff]
+  simp only [MarkerTape.canonicalTape_eq_boundary_iff]
+  fin_cases label <;>
+    simp [MarkerTape.boundaryPosition,
+      RegisterLayout.startBoundary_eq,
+      RegisterLayout.leftBoundary_eq,
+      RegisterLayout.rightBoundary_eq,
+      RegisterLayout.tempBoundary_eq,
+      RegisterLayout.clockBoundary_eq,
+      Registers.increment, Registers.set, Registers.get] <;>
+    omega
+
+/-- A positive named-register decrement is inverse to incrementing the
+resulting register tuple. -/
+theorem increment_decrement_registers (registers : Registers)
+    (register : Register) (hpositive : 0 < registers.get register) :
+    (registers.decrement register).increment register = registers := by
+  apply RegisterLayout.values_injective
+  rw [RegisterLayout.values_increment, RegisterLayout.values_decrement]
+  exact CounterLayout.increment_decrement
+    (RegisterLayout.values registers) (RegisterLayout.registerIndex register)
+    (by simpa using hpositive)
+
+/-! ## Complete positive-decrement schedules -/
+
+/-- The boundary immediately after the selected register gap. -/
+def decrementStartBoundary : Register → Fin 5
+  | .left => 1
+  | .right => 2
+  | .temp => 3
+  | .clock => 4
+
+/-- Canonical input tape for a positive decrement, centered on the first
+boundary that the collision-free schedule moves. -/
+noncomputable def decrementStartTape (registers : Registers)
+    (register : Register) : FullTM0.Tape MarkerMachine.Symbol :=
+  boundaryTape registers (decrementStartBoundary register)
+
+/-- Canonical exit tape after all suffix boundaries have moved left.  The
+head is on the old source cell of boundary `4`, immediately right of its new
+position. -/
+noncomputable def decrementBaseFinishTape (registers : Registers) :
+    FullTM0.Tape MarkerMachine.Symbol :=
+  MarkerMachine.encodeTape (MarkerMachine.recenter
+    (MarkerTape.canonicalTape registers)
+    (MarkerTape.boundaryPosition (registers.increment .clock) 4))
+
+/-- Canonical exit tape of a positive named-register decrement. -/
+noncomputable def decrementFinishTape (registers : Registers)
+    (register : Register) : FullTM0.Tape MarkerMachine.Symbol :=
+  decrementBaseFinishTape (registers.decrement register)
+
+theorem decrementLeft_first (registers : Registers) :
+    MarkerChain.Executes [⟨⟨1, .right, .left⟩, .right⟩]
+      (boundaryTape (registers.increment .left) 1)
+      (firstGapTape (registers.increment .right) 1) := by
+  have h := boundaryLeftShift_executes
+    (registers.increment .left) (registers.increment .right) (0 : Fin 4)
+    (by simp [RegisterLayout.values, Registers.increment,
+      Registers.set, Registers.get])
+    (moveLeftBoundary_before_right registers)
+  have hlabel : (0 : Fin 4).succ = (1 : Fin 5) := by rfl
+  rw [hlabel] at h
+  have hout : shiftedLeftBoundaryTape (registers.increment .left)
+      (registers.increment .right) 0 =
+      firstGapTape (registers.increment .right) 1 := by
+    funext position
+    simp [shiftedLeftBoundaryTape, firstGapTape,
+      MarkerTape.firstGapCellTape, CounterLayout.firstGapCellTape,
+      MarkerMachine.recenter, MarkerTape.boundaryPosition,
+      Registers.increment, Registers.set, Registers.get]
+  rw [hout] at h
+  exact h
+
+theorem decrementRight_first (registers : Registers) :
+    MarkerChain.Executes [⟨⟨2, .right, .left⟩, .right⟩]
+      (boundaryTape (registers.increment .right) 2)
+      (firstGapTape (registers.increment .temp) 2) := by
+  have h := boundaryLeftShift_executes
+    (registers.increment .right) (registers.increment .temp) (1 : Fin 4)
+    (by simp [RegisterLayout.values, Registers.increment,
+      Registers.set, Registers.get])
+    (moveRightBoundary_before_temp registers)
+  have hlabel : (1 : Fin 4).succ = (2 : Fin 5) := by rfl
+  rw [hlabel] at h
+  have hout : shiftedLeftBoundaryTape (registers.increment .right)
+      (registers.increment .temp) 1 =
+      firstGapTape (registers.increment .temp) 2 := by
+    funext position
+    simp [shiftedLeftBoundaryTape, firstGapTape,
+      MarkerTape.firstGapCellTape, CounterLayout.firstGapCellTape,
+      MarkerMachine.recenter, MarkerTape.boundaryPosition,
+      Registers.increment, Registers.set, Registers.get]
+    congr 2 <;> ring
+  rw [hout] at h
+  exact h
+
+theorem decrementTemp_first (registers : Registers) :
+    MarkerChain.Executes [⟨⟨3, .right, .left⟩, .right⟩]
+      (boundaryTape (registers.increment .temp) 3)
+      (firstGapTape (registers.increment .clock) 3) := by
+  have h := boundaryLeftShift_executes
+    (registers.increment .temp) (registers.increment .clock) (2 : Fin 4)
+    (by simp [RegisterLayout.values, Registers.increment,
+      Registers.set, Registers.get])
+    (moveTempBoundary_before_clock registers)
+  have hlabel : (2 : Fin 4).succ = (3 : Fin 5) := by rfl
+  rw [hlabel] at h
+  have hout : shiftedLeftBoundaryTape (registers.increment .temp)
+      (registers.increment .clock) 2 =
+      firstGapTape (registers.increment .clock) 3 := by
+    funext position
+    simp [shiftedLeftBoundaryTape, firstGapTape,
+      MarkerTape.firstGapCellTape, CounterLayout.firstGapCellTape,
+      MarkerMachine.recenter, MarkerTape.boundaryPosition,
+      Registers.increment, Registers.set, Registers.get]
+    congr 2 <;> ring
+  rw [hout] at h
+  exact h
+
+theorem decrementClock_first (registers : Registers) :
+    MarkerChain.Executes [⟨⟨4, .right, .left⟩, .right⟩]
+      (boundaryTape (registers.increment .clock) 4)
+      (decrementBaseFinishTape registers) := by
+  simpa [decrementBaseFinishTape, shiftedLeftBoundaryTape] using
+    boundaryLeftShift_executes
+      (registers.increment .clock) registers (3 : Fin 4)
+      (by simp [RegisterLayout.values, Registers.increment,
+        Registers.set, Registers.get])
+      (moveClockBoundary_after_increment registers)
+
+theorem decrementRight_step (registers : Registers) :
+    MarkerChain.Executes [⟨⟨2, .right, .left⟩, .right⟩]
+      (firstGapTape (registers.increment .right) 1)
+      (firstGapTape (registers.increment .temp) 2) := by
+  have h := positiveGapLeftShift_executes
+    (registers.increment .right) (registers.increment .temp) (1 : Fin 4)
+    (by simp [RegisterLayout.values, Registers.increment,
+      Registers.set, Registers.get])
+    (moveRightBoundary_before_temp registers)
+  have hlabel : (1 : Fin 4).succ = (2 : Fin 5) := by rfl
+  rw [hlabel] at h
+  have hout : shiftedLeftBoundaryTape (registers.increment .right)
+      (registers.increment .temp) 1 =
+      firstGapTape (registers.increment .temp) 2 := by
+    funext position
+    simp [shiftedLeftBoundaryTape, firstGapTape,
+      MarkerTape.firstGapCellTape, CounterLayout.firstGapCellTape,
+      MarkerMachine.recenter, MarkerTape.boundaryPosition,
+      Registers.increment, Registers.set, Registers.get]
+    congr 2 <;> ring
+  rw [hout] at h
+  exact h
+
+theorem decrementTemp_step (registers : Registers) :
+    MarkerChain.Executes [⟨⟨3, .right, .left⟩, .right⟩]
+      (firstGapTape (registers.increment .temp) 2)
+      (firstGapTape (registers.increment .clock) 3) := by
+  have h := positiveGapLeftShift_executes
+    (registers.increment .temp) (registers.increment .clock) (2 : Fin 4)
+    (by simp [RegisterLayout.values, Registers.increment,
+      Registers.set, Registers.get])
+    (moveTempBoundary_before_clock registers)
+  have hlabel : (2 : Fin 4).succ = (3 : Fin 5) := by rfl
+  rw [hlabel] at h
+  have hout : shiftedLeftBoundaryTape (registers.increment .temp)
+      (registers.increment .clock) 2 =
+      firstGapTape (registers.increment .clock) 3 := by
+    funext position
+    simp [shiftedLeftBoundaryTape, firstGapTape,
+      MarkerTape.firstGapCellTape, CounterLayout.firstGapCellTape,
+      MarkerMachine.recenter, MarkerTape.boundaryPosition,
+      Registers.increment, Registers.set, Registers.get]
+    congr 2 <;> ring
+  rw [hout] at h
+  exact h
+
+theorem decrementClock_step (registers : Registers) :
+    MarkerChain.Executes [⟨⟨4, .right, .left⟩, .right⟩]
+      (firstGapTape (registers.increment .clock) 3)
+      (decrementBaseFinishTape registers) := by
+  simpa [decrementBaseFinishTape, shiftedLeftBoundaryTape] using
+    positiveGapLeftShift_executes
+      (registers.increment .clock) registers (3 : Fin 4)
+      (by simp [RegisterLayout.values, Registers.increment,
+        Registers.set, Registers.get])
+      (moveClockBoundary_after_increment registers)
+
+/-- Starting from a layout obtained by incrementing the selected register,
+the complete collision-free decrement schedule restores the base layout. -/
+theorem decrement_fromIncrement_executes (registers : Registers)
+    (register : Register) :
+    MarkerChain.Executes (decrementCommands register)
+      (boundaryTape (registers.increment register)
+        (decrementStartBoundary register))
+      (decrementBaseFinishTape registers) := by
+  have hleft := decrementLeft_first registers
+  have hrightFirst := decrementRight_first registers
+  have htempFirst := decrementTemp_first registers
+  have hclockFirst := decrementClock_first registers
+  have hright := decrementRight_step registers
+  have htemp := decrementTemp_step registers
+  have hclock := decrementClock_step registers
+  cases register with
+  | clock =>
+      simpa [decrementCommands, decrementStartBoundary,
+        MarkerShift.decrementOrder] using hclockFirst
+  | temp =>
+      simpa [decrementCommands, decrementStartBoundary,
+        MarkerShift.decrementOrder] using
+        executes_append htempFirst hclock
+  | right =>
+      simpa [decrementCommands, decrementStartBoundary,
+        MarkerShift.decrementOrder] using
+        executes_append (executes_append hrightFirst htemp) hclock
+  | left =>
+      simpa [decrementCommands, decrementStartBoundary,
+        MarkerShift.decrementOrder] using
+        executes_append
+          (executes_append (executes_append hleft hright) htemp) hclock
+
+/-- Every positive decrement schedule executes exactly on a canonical
+five-boundary layout. -/
+theorem decrement_executes (registers : Registers) (register : Register)
+    (hpositive : 0 < registers.get register) :
+    MarkerChain.Executes (decrementCommands register)
+      (decrementStartTape registers register)
+      (decrementFinishTape registers register) := by
+  have h := decrement_fromIncrement_executes
+    (registers.decrement register) register
+  rw [increment_decrement_registers registers register hpositive] at h
+  simpa [decrementStartTape, decrementFinishTape] using h
 
 end MarkerSchedule
 end Hooper
