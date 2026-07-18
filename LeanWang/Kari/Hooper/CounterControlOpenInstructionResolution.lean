@@ -1788,12 +1788,121 @@ theorem installCore_open_of_extension
     rw [installCore_of_layoutEnd_lt next growth T hpast]
     exact h.runway position (hle.trans_lt hpast)
 
+/-! ## A common envelope interface for positive-decrement schedules -/
+
+/-- Every represented register value lies below any strict upper bound on
+the complete five-boundary layout. -/
+theorem registerValue_lt_of_layoutEnd_lt (registers : Registers)
+    (i : Fin 4) {limit : Nat} (h : layoutEnd registers < limit) :
+    RegisterLayout.values registers i < limit := by
+  fin_cases i <;>
+    simp [RegisterLayout.values, layoutEnd,
+      RegisterLayout.clockBoundary_eq] at h ⊢ <;> omega
+
+/-- A strict bound on a counter layout is necessarily positive. -/
+theorem limit_positive_of_layoutEnd_lt (registers : Registers)
+    {limit : Nat} (h : layoutEnd registers < limit) : 0 < limit := by
+  have hend : 0 < layoutEnd registers := by
+    simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+  omega
+
+/-- The operational content needed by the four positive-decrement schedules.
+The open and finite-prefix representations differ only in how their blank
+runway is bounded; the controller trace itself is identical. -/
+structure DecrementEnvelope (growth : Turing.Dir) (limit : Nat) where
+  Represents : Registers → FullTM0.Tape (Symbol numTags) → Prop
+  first : ∀ (base : Nat) (c : Nat.Partrec.Code)
+      (counterState searchSlot : Nat) (success : ControlRef)
+      {current next : Registers} {T : FullTM0.Tape (Symbol numTags)}
+      (hlimit : 0 < limit) (h : Represents current T) (i : Fin 4)
+      (hpositive : 0 < RegisterLayout.values current i)
+      (hlower : layoutEnd next ≤ layoutEnd current)
+      (hupper : layoutEnd current ≤ layoutEnd next + 1)
+      (hsource : boundaryOffset current i.succ ≤ layoutEnd current)
+      (hdestination : boundaryOffset current i.succ - 1 ≤ layoutEnd next)
+      (hshrink : layoutEnd next < layoutEnd current →
+        boundaryOffset current i.succ = layoutEnd current)
+      (hmove : MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape current)
+        (MarkerTape.boundaryPosition current i.succ) i.succ =
+          MarkerTape.canonicalTape next)
+      (hraw : RawCommand.markerShift
+        ⟨growth, counterState, searchSlot⟩ i.succ .right .left success
+        (some .right) none ∈ rawCommands),
+    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+          atLogical growth T (boundaryOffset current i.succ)⟩
+        ⟨resolve base c success,
+          atLogical growth
+            (installCore next growth
+              (writeLogical growth T
+                (boundaryOffset current i.succ) blankSymbol))
+            (boundaryOffset current i.succ)⟩ ∧
+      Represents next
+        (installCore next growth
+          (writeLogical growth T
+            (boundaryOffset current i.succ) blankSymbol))) ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+          atLogical growth T (boundaryOffset current i.succ)⟩
+  following : ∀ (base : Nat) (c : Nat.Partrec.Code)
+      (counterState searchSlot : Nat) (success : ControlRef)
+      {current next : Registers} {T : FullTM0.Tape (Symbol numTags)}
+      (h : Represents current T) (i : Fin 4)
+      (hpositive : 0 < RegisterLayout.values current i)
+      (hdistance : RegisterLayout.values current i < limit)
+      (hlower : layoutEnd next ≤ layoutEnd current)
+      (hupper : layoutEnd current ≤ layoutEnd next + 1)
+      (hsource : boundaryOffset current i.succ ≤ layoutEnd current)
+      (hdestination : boundaryOffset current i.succ - 1 ≤ layoutEnd next)
+      (hshrink : layoutEnd next < layoutEnd current →
+        boundaryOffset current i.succ = layoutEnd current)
+      (hmove : MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape current)
+        (MarkerTape.boundaryPosition current i.succ) i.succ =
+          MarkerTape.canonicalTape next)
+      (hraw : RawCommand.markerShift
+        ⟨growth, counterState, searchSlot⟩ i.succ .right .left success
+        (some .right) none ∈ rawCommands),
+    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+          atLogical growth T (firstGapOffset current i)⟩
+        ⟨resolve base c success,
+          atLogical growth
+            (installCore next growth
+              (writeLogical growth T
+                (boundaryOffset current i.succ) blankSymbol))
+            (boundaryOffset current i.succ)⟩ ∧
+      Represents next
+        (installCore next growth
+          (writeLogical growth T
+            (boundaryOffset current i.succ) blankSymbol))) ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+          atLogical growth T (firstGapOffset current i)⟩
+  install_equal_length : ∀ {current next : Registers}
+      {T : FullTM0.Tape (Symbol numTags)},
+    Represents current T → layoutEnd next = layoutEnd current →
+      Represents next (installCore next growth T)
+  registerValue_lt : ∀ {registers : Registers}
+      {T : FullTM0.Tape (Symbol numTags)},
+    Represents registers T → ∀ i : Fin 4,
+      RegisterLayout.values registers i < limit
+  limit_positive : ∀ {registers : Registers}
+      {T : FullTM0.Tape (Symbol numTags)},
+    Represents registers T → 0 < limit
+  decrement : ∀ {registers : Registers}
+      {T : FullTM0.Tape (Symbol numTags)} (register : Register),
+    Represents registers T → 0 < registers.get register →
+      Represents (registers.decrement register)
+        (decrementCoreTape registers growth register T)
+
 /-- The one-shift clock-decrement schedule resolves on an open core. -/
-theorem machine_reaches_decrementClockSchedule_or_halts_of_open
+private theorem machine_reaches_decrementClockSchedule_or_halts_of_envelope
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
-    {registers : Registers} {growth : Turing.Dir}
+    {registers : Registers} {growth : Turing.Dir} {limit : Nat}
     {T : FullTM0.Tape (Symbol numTags)}
-    (h : CoreOpenRepresents registers growth T)
+    (E : DecrementEnvelope growth limit) (h : E.Represents registers T)
     (hpositive : 0 < registers.get .clock)
     (hraw : RawCommand.markerShift
       ⟨growth, source, secondarySearchBase⟩ 4 .right .left
@@ -1806,12 +1915,11 @@ theorem machine_reaches_decrementClockSchedule_or_halts_of_open
           atLogical growth
             (decrementCoreTape registers growth .clock T)
             (layoutEnd registers)⟩ ∧
-      CoreOpenRepresents (registers.decrement .clock) growth
+      E.Represents (registers.decrement .clock)
         (decrementCoreTape registers growth .clock T)) ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
           atLogical growth T (layoutEnd registers)⟩ := by
-  let limit := layoutEnd registers + 1
   let next := registers.decrement .clock
   have hp : 0 < registers.clock := by
     simpa [Registers.get] using hpositive
@@ -1827,9 +1935,9 @@ theorem machine_reaches_decrementClockSchedule_or_halts_of_open
       registers .clock hpositive
     rw [hinv] at hm
     exact hm
-  have hrun := machine_reaches_decrementFirst_or_halts_of_open
-    (next := next) base c limit source secondarySearchBase
-    (directRef growth source finishDirectSlot) (by simp [limit]) h
+  have hrun := E.first
+    (next := next) base c source secondarySearchBase
+    (directRef growth source finishDirectSlot) (E.limit_positive h) h
     (3 : Fin 4) (by simpa [RegisterLayout.values] using hp)
     (by omega) (by omega) (boundaryOffset_le_layoutEnd registers 4)
     (by change layoutEnd registers - 1 ≤ layoutEnd next; omega)
@@ -1838,11 +1946,11 @@ theorem machine_reaches_decrementClockSchedule_or_halts_of_open
     MarkerSchedule.decrementStartBoundary, boundaryOffset_four] using hrun
 
 /-- The two-shift temp-decrement schedule resolves on an open core. -/
-theorem machine_reaches_decrementTempSchedule_or_halts_of_open
+private theorem machine_reaches_decrementTempSchedule_or_halts_of_envelope
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
-    {registers : Registers} {growth : Turing.Dir}
+    {registers : Registers} {growth : Turing.Dir} {limit : Nat}
     {T : FullTM0.Tape (Symbol numTags)}
-    (h : CoreOpenRepresents registers growth T)
+    (E : DecrementEnvelope growth limit) (h : E.Represents registers T)
     (hpositive : 0 < registers.get .temp)
     (hcommands : ∀ raw,
       raw ∈ decrementShiftCommands growth source .temp →
@@ -1854,12 +1962,11 @@ theorem machine_reaches_decrementTempSchedule_or_halts_of_open
           atLogical growth
             (decrementCoreTape registers growth .temp T)
             (layoutEnd registers)⟩ ∧
-      CoreOpenRepresents (registers.decrement .temp) growth
+      E.Represents (registers.decrement .temp)
         (decrementCoreTape registers growth .temp T)) ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
           atLogical growth T (boundaryOffset registers 3)⟩ := by
-  let limit := layoutEnd registers + 1
   let final := registers.decrement .temp
   have hp : 0 < registers.temp := by
     simpa [Registers.get] using hpositive
@@ -1871,9 +1978,8 @@ theorem machine_reaches_decrementTempSchedule_or_halts_of_open
   have hclockEnd : layoutEnd clockRegs = layoutEnd registers := by
     rw [← hinv]
     simp only [clockRegs, layoutEnd_increment]
-  have hclockOpen : CoreOpenRepresents clockRegs growth clockTape := by
-    apply installCore_open_of_extension h
-    rw [hclockEnd]
+  have hclockOpen : E.Represents clockRegs clockTape :=
+    E.install_equal_length h hclockEnd
   have hmoveThree : MarkerMachine.moveAt .left
       (MarkerTape.canonicalTape registers)
       (MarkerTape.boundaryPosition registers 3) 3 =
@@ -1888,9 +1994,10 @@ theorem machine_reaches_decrementTempSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have hthree := machine_reaches_decrementFirst_or_halts_of_open
-    (next := clockRegs) base c limit source secondarySearchBase
-    (searchRef growth source (secondarySearchBase + 1)) (by simp [limit]) h
+  have hthree := E.first
+    (next := clockRegs) base c source secondarySearchBase
+    (searchRef growth source (secondarySearchBase + 1))
+    (E.limit_positive h) h
     (2 : Fin 4) (by simpa [RegisterLayout.values] using hp)
     (by rw [hclockEnd]) (by rw [hclockEnd]; omega)
     (boundaryOffset_le_layoutEnd registers 3)
@@ -1915,16 +2022,13 @@ theorem machine_reaches_decrementTempSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have hfour := machine_reaches_decrementFollowing_or_halts_of_open
-    (next := final) base c limit source (secondarySearchBase + 1)
+  have hfour := E.following
+    (next := final) base c source (secondarySearchBase + 1)
     (directRef growth source finishDirectSlot) hclockOpen (3 : Fin 4)
     (by simp [clockRegs, final, RegisterLayout.values,
       Registers.increment, Registers.decrement, Registers.set,
       Registers.get])
-    (by simp [limit, clockRegs, final, layoutEnd,
-      RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-      Registers.increment, Registers.decrement, Registers.set,
-      Registers.get] <;> omega)
+    (E.registerValue_lt hclockOpen (3 : Fin 4))
     (by omega) (by omega) (boundaryOffset_le_layoutEnd clockRegs 4)
     (by change layoutEnd clockRegs - 1 ≤ layoutEnd final; omega)
     (by intro _; rfl) hmoveFour hrawFour
@@ -1965,15 +2069,15 @@ theorem machine_reaches_decrementTempSchedule_or_halts_of_open
     (hfour.imp (fun hsuccess => hsuccess.1) id)
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨by simpa [hhead] using hrun,
-        decrementCoreTape_preserves_open h .temp hpositive⟩
+        E.decrement .temp h hpositive⟩
   · exact Or.inr (by simpa [hhead] using hhalts)
 
 /-- The three-shift right-decrement schedule resolves on an open core. -/
-theorem machine_reaches_decrementRightSchedule_or_halts_of_open
+private theorem machine_reaches_decrementRightSchedule_or_halts_of_envelope
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
-    {registers : Registers} {growth : Turing.Dir}
+    {registers : Registers} {growth : Turing.Dir} {limit : Nat}
     {T : FullTM0.Tape (Symbol numTags)}
-    (h : CoreOpenRepresents registers growth T)
+    (E : DecrementEnvelope growth limit) (h : E.Represents registers T)
     (hpositive : 0 < registers.get .right)
     (hcommands : ∀ raw,
       raw ∈ decrementShiftCommands growth source .right →
@@ -1985,12 +2089,11 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_open
           atLogical growth
             (decrementCoreTape registers growth .right T)
             (layoutEnd registers)⟩ ∧
-      CoreOpenRepresents (registers.decrement .right) growth
+      E.Represents (registers.decrement .right)
         (decrementCoreTape registers growth .right T)) ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
           atLogical growth T (boundaryOffset registers 2)⟩ := by
-  let limit := layoutEnd registers + 1
   let final := registers.decrement .right
   have hinv : final.increment .right = registers :=
     MarkerSchedule.increment_decrement_registers registers .right hpositive
@@ -2004,12 +2107,10 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_open
   have hclockEnd : layoutEnd clockRegs = layoutEnd registers := by
     rw [← hinv]
     simp only [clockRegs, layoutEnd_increment]
-  have htempOpen : CoreOpenRepresents tempRegs growth tempTape := by
-    apply installCore_open_of_extension h
-    rw [htempEnd]
-  have hclockOpen : CoreOpenRepresents clockRegs growth clockTape := by
-    apply installCore_open_of_extension h
-    rw [hclockEnd]
+  have htempOpen : E.Represents tempRegs tempTape :=
+    E.install_equal_length h htempEnd
+  have hclockOpen : E.Represents clockRegs clockTape :=
+    E.install_equal_length h hclockEnd
   have hmoveTwo : MarkerMachine.moveAt .left
       (MarkerTape.canonicalTape registers)
       (MarkerTape.boundaryPosition registers 2) 2 =
@@ -2024,9 +2125,10 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have htwo := machine_reaches_decrementFirst_or_halts_of_open
-    (next := tempRegs) base c limit source secondarySearchBase
-    (searchRef growth source (secondarySearchBase + 1)) (by simp [limit]) h
+  have htwo := E.first
+    (next := tempRegs) base c source secondarySearchBase
+    (searchRef growth source (secondarySearchBase + 1))
+    (E.limit_positive h) h
     (1 : Fin 4)
     (by simpa [RegisterLayout.values, Registers.get] using hpositive)
     (by rw [htempEnd]) (by rw [htempEnd]; omega)
@@ -2050,16 +2152,13 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have hthree := machine_reaches_decrementFollowing_or_halts_of_open
-    (next := clockRegs) base c limit source (secondarySearchBase + 1)
+  have hthree := E.following
+    (next := clockRegs) base c source (secondarySearchBase + 1)
     (searchRef growth source (secondarySearchBase + 2)) htempOpen (2 : Fin 4)
     (by simp [tempRegs, final, RegisterLayout.values,
       Registers.increment, Registers.decrement, Registers.set,
       Registers.get])
-    (by simp [limit, tempRegs, final, layoutEnd,
-      RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-      Registers.increment, Registers.decrement, Registers.set,
-      Registers.get] <;> omega)
+    (E.registerValue_lt htempOpen (2 : Fin 4))
     (by rw [hclockEnd, htempEnd])
     (by rw [hclockEnd, htempEnd]; omega)
     (boundaryOffset_le_layoutEnd tempRegs 3)
@@ -2086,16 +2185,13 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have hfour := machine_reaches_decrementFollowing_or_halts_of_open
-    (next := final) base c limit source (secondarySearchBase + 2)
+  have hfour := E.following
+    (next := final) base c source (secondarySearchBase + 2)
     (directRef growth source finishDirectSlot) hclockOpen (3 : Fin 4)
     (by simp [clockRegs, final, RegisterLayout.values,
       Registers.increment, Registers.decrement, Registers.set,
       Registers.get])
-    (by simp [limit, clockRegs, final, layoutEnd,
-      RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-      Registers.increment, Registers.decrement, Registers.set,
-      Registers.get] <;> omega)
+    (E.registerValue_lt hclockOpen (3 : Fin 4))
     (by omega) (by omega) (boundaryOffset_le_layoutEnd clockRegs 4)
     (by change layoutEnd clockRegs - 1 ≤ layoutEnd final; omega)
     (by intro _; rfl) hmoveFour hrawFour
@@ -2159,15 +2255,15 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_open
       (hfour.imp (fun hsuccess => hsuccess.1) id))
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨by simpa [hheadTwo] using hrun,
-        decrementCoreTape_preserves_open h .right hpositive⟩
+        E.decrement .right h hpositive⟩
   · exact Or.inr (by simpa [hheadTwo] using hhalts)
 
 /-- The four-shift left-decrement schedule resolves on an open core. -/
-theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
+private theorem machine_reaches_decrementLeftSchedule_or_halts_of_envelope
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
-    {registers : Registers} {growth : Turing.Dir}
+    {registers : Registers} {growth : Turing.Dir} {limit : Nat}
     {T : FullTM0.Tape (Symbol numTags)}
-    (h : CoreOpenRepresents registers growth T)
+    (E : DecrementEnvelope growth limit) (h : E.Represents registers T)
     (hpositive : 0 < registers.get .left)
     (hcommands : ∀ raw,
       raw ∈ decrementShiftCommands growth source .left →
@@ -2179,12 +2275,11 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
           atLogical growth
             (decrementCoreTape registers growth .left T)
             (layoutEnd registers)⟩ ∧
-      CoreOpenRepresents (registers.decrement .left) growth
+      E.Represents (registers.decrement .left)
         (decrementCoreTape registers growth .left T)) ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
           atLogical growth T (boundaryOffset registers 1)⟩ := by
-  let limit := layoutEnd registers + 1
   let final := registers.decrement .left
   have hinv : final.increment .left = registers :=
     MarkerSchedule.increment_decrement_registers registers .left hpositive
@@ -2203,15 +2298,12 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
   have hclockEnd : layoutEnd clockRegs = layoutEnd registers := by
     rw [← hinv]
     simp only [clockRegs, layoutEnd_increment]
-  have hrightOpen : CoreOpenRepresents rightRegs growth rightTape := by
-    apply installCore_open_of_extension h
-    rw [hrightEnd]
-  have htempOpen : CoreOpenRepresents tempRegs growth tempTape := by
-    apply installCore_open_of_extension h
-    rw [htempEnd]
-  have hclockOpen : CoreOpenRepresents clockRegs growth clockTape := by
-    apply installCore_open_of_extension h
-    rw [hclockEnd]
+  have hrightOpen : E.Represents rightRegs rightTape :=
+    E.install_equal_length h hrightEnd
+  have htempOpen : E.Represents tempRegs tempTape :=
+    E.install_equal_length h htempEnd
+  have hclockOpen : E.Represents clockRegs clockTape :=
+    E.install_equal_length h hclockEnd
   have hmoveOne : MarkerMachine.moveAt .left
       (MarkerTape.canonicalTape registers)
       (MarkerTape.boundaryPosition registers 1) 1 =
@@ -2226,9 +2318,10 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have hone := machine_reaches_decrementFirst_or_halts_of_open
-    (next := rightRegs) base c limit source secondarySearchBase
-    (searchRef growth source (secondarySearchBase + 1)) (by simp [limit]) h
+  have hone := E.first
+    (next := rightRegs) base c source secondarySearchBase
+    (searchRef growth source (secondarySearchBase + 1))
+    (E.limit_positive h) h
     (0 : Fin 4)
     (by simpa [RegisterLayout.values, Registers.get] using hpositive)
     (by rw [hrightEnd]) (by rw [hrightEnd]; omega)
@@ -2252,16 +2345,13 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have htwo := machine_reaches_decrementFollowing_or_halts_of_open
-    (next := tempRegs) base c limit source (secondarySearchBase + 1)
+  have htwo := E.following
+    (next := tempRegs) base c source (secondarySearchBase + 1)
     (searchRef growth source (secondarySearchBase + 2)) hrightOpen (1 : Fin 4)
     (by simp [rightRegs, final, RegisterLayout.values,
       Registers.increment, Registers.decrement, Registers.set,
       Registers.get])
-    (by simp [limit, rightRegs, final, layoutEnd,
-      RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-      Registers.increment, Registers.decrement, Registers.set,
-      Registers.get] <;> omega)
+    (E.registerValue_lt hrightOpen (1 : Fin 4))
     (by rw [htempEnd, hrightEnd])
     (by rw [htempEnd, hrightEnd]; omega)
     (boundaryOffset_le_layoutEnd rightRegs 2)
@@ -2285,16 +2375,13 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have hthree := machine_reaches_decrementFollowing_or_halts_of_open
-    (next := clockRegs) base c limit source (secondarySearchBase + 2)
+  have hthree := E.following
+    (next := clockRegs) base c source (secondarySearchBase + 2)
     (searchRef growth source (secondarySearchBase + 3)) htempOpen (2 : Fin 4)
     (by simp [tempRegs, final, RegisterLayout.values,
       Registers.increment, Registers.decrement, Registers.set,
       Registers.get])
-    (by simp [limit, tempRegs, final, layoutEnd,
-      RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-      Registers.increment, Registers.decrement, Registers.set,
-      Registers.get] <;> omega)
+    (E.registerValue_lt htempOpen (2 : Fin 4))
     (by rw [hclockEnd, htempEnd])
     (by rw [hclockEnd, htempEnd]; omega)
     (boundaryOffset_le_layoutEnd tempRegs 3)
@@ -2321,16 +2408,13 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
     apply hcommands
     simp [decrementShiftCommands, decrementShiftCommandsAux,
       MarkerShift.decrementOrder]
-  have hfour := machine_reaches_decrementFollowing_or_halts_of_open
-    (next := final) base c limit source (secondarySearchBase + 3)
+  have hfour := E.following
+    (next := final) base c source (secondarySearchBase + 3)
     (directRef growth source finishDirectSlot) hclockOpen (3 : Fin 4)
     (by simp [clockRegs, final, RegisterLayout.values,
       Registers.increment, Registers.decrement, Registers.set,
       Registers.get])
-    (by simp [limit, clockRegs, final, layoutEnd,
-      RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-      Registers.increment, Registers.decrement, Registers.set,
-      Registers.get] <;> omega)
+    (E.registerValue_lt hclockOpen (3 : Fin 4))
     (by omega) (by omega) (boundaryOffset_le_layoutEnd clockRegs 4)
     (by change layoutEnd clockRegs - 1 ≤ layoutEnd final; omega)
     (by intro _; rfl) hmoveFour hrawFour
@@ -2415,8 +2499,96 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
         (hfour.imp (fun hsuccess => hsuccess.1) id)))
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨by simpa [hheadOne] using hrun,
-        decrementCoreTape_preserves_open h .left hpositive⟩
+        E.decrement .left h hpositive⟩
   · exact Or.inr (by simpa [hheadOne] using hhalts)
+
+/-- A positive-decrement schedule depends only on the common envelope
+operations, not on whether its blank runway is finite or infinite. -/
+theorem machine_reaches_decrementSchedule_or_halts_of_envelope
+    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
+    (register : Register)
+    {registers : Registers} {growth : Turing.Dir} {limit : Nat}
+    {T : FullTM0.Tape (Symbol numTags)}
+    (E : DecrementEnvelope growth limit) (h : E.Represents registers T)
+    (hpositive : 0 < registers.get register)
+    (hcommands : ∀ raw,
+      raw ∈ decrementShiftCommands growth source register →
+        raw ∈ rawCommands) :
+    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
+          atLogical growth T
+            (boundaryOffset registers
+              (MarkerSchedule.decrementStartBoundary register))⟩
+        ⟨resolve base c (directRef growth source finishDirectSlot),
+          atLogical growth
+            (decrementCoreTape registers growth register T)
+            (layoutEnd registers)⟩ ∧
+      E.Represents (registers.decrement register)
+        (decrementCoreTape registers growth register T)) ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
+          atLogical growth T
+            (boundaryOffset registers
+              (MarkerSchedule.decrementStartBoundary register))⟩ := by
+  cases register with
+  | clock =>
+      have hraw : RawCommand.markerShift
+          ⟨growth, source, secondarySearchBase⟩ 4 .right .left
+          (directRef growth source finishDirectSlot) (some .right) none ∈
+            rawCommands := by
+        apply hcommands
+        simp [decrementShiftCommands, decrementShiftCommandsAux,
+          MarkerShift.decrementOrder]
+      simpa [MarkerSchedule.decrementStartBoundary] using
+        machine_reaches_decrementClockSchedule_or_halts_of_envelope
+          base c source E h hpositive hraw
+  | temp =>
+      simpa [MarkerSchedule.decrementStartBoundary] using
+        machine_reaches_decrementTempSchedule_or_halts_of_envelope
+          base c source E h hpositive hcommands
+  | right =>
+      simpa [MarkerSchedule.decrementStartBoundary] using
+        machine_reaches_decrementRightSchedule_or_halts_of_envelope
+          base c source E h hpositive hcommands
+  | left =>
+      simpa [MarkerSchedule.decrementStartBoundary] using
+        machine_reaches_decrementLeftSchedule_or_halts_of_envelope
+          base c source E h hpositive hcommands
+
+/-- An open runway equipped with a finite search bound.  The extra bound is
+proof-only and is preserved because every intermediate decrement layout has
+the same length as the input layout. -/
+def openDecrementEnvelope (growth : Turing.Dir) (limit : Nat) :
+    DecrementEnvelope growth limit where
+  Represents registers T :=
+    CoreOpenRepresents registers growth T ∧ layoutEnd registers < limit
+  first := by
+    intro base c counterState searchSlot success current next T hlimit h i
+      hpositive hlower hupper hsource hdestination hshrink hmove hraw
+    have hrun := machine_reaches_decrementFirst_or_halts_of_open
+      base c limit counterState searchSlot success hlimit h.1 i hpositive
+      hlower hupper hsource hdestination hshrink hmove hraw
+    exact hrun.imp (fun hs => ⟨hs.1, hs.2, hlower.trans_lt h.2⟩) id
+  following := by
+    intro base c counterState searchSlot success current next T h i hpositive
+      hdistance hlower hupper hsource hdestination hshrink hmove hraw
+    have hrun := machine_reaches_decrementFollowing_or_halts_of_open
+      base c limit counterState searchSlot success h.1 i hpositive hdistance
+      hlower hupper hsource hdestination hshrink hmove hraw
+    exact hrun.imp (fun hs => ⟨hs.1, hs.2, hlower.trans_lt h.2⟩) id
+  install_equal_length := by
+    intro current next T h heq
+    exact ⟨installCore_open_of_extension h.1 (heq.ge), by simpa [heq] using h.2⟩
+  registerValue_lt := by
+    intro registers T h i
+    exact registerValue_lt_of_layoutEnd_lt registers i h.2
+  limit_positive := by
+    intro registers T h
+    exact limit_positive_of_layoutEnd_lt registers h.2
+  decrement := by
+    intro registers T register h hpositive
+    exact ⟨decrementCoreTape_preserves_open h.1 register hpositive,
+      (layoutEnd_decrement_lt registers register hpositive).trans h.2⟩
 
 /-- Uniform target-free positive-decrement schedule. -/
 theorem machine_reaches_decrementSchedule_or_halts_of_open
@@ -2445,30 +2617,12 @@ theorem machine_reaches_decrementSchedule_or_halts_of_open
           atLogical growth T
             (boundaryOffset registers
               (MarkerSchedule.decrementStartBoundary register))⟩ := by
-  cases register with
-  | clock =>
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, secondarySearchBase⟩ 4 .right .left
-          (directRef growth source finishDirectSlot) (some .right) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommands, decrementShiftCommandsAux,
-          MarkerShift.decrementOrder]
-      simpa [MarkerSchedule.decrementStartBoundary] using
-        machine_reaches_decrementClockSchedule_or_halts_of_open base c source
-          h hpositive hraw
-  | temp =>
-      simpa [MarkerSchedule.decrementStartBoundary] using
-        machine_reaches_decrementTempSchedule_or_halts_of_open base c source
-          h hpositive hcommands
-  | right =>
-      simpa [MarkerSchedule.decrementStartBoundary] using
-        machine_reaches_decrementRightSchedule_or_halts_of_open base c source
-          h hpositive hcommands
-  | left =>
-      simpa [MarkerSchedule.decrementStartBoundary] using
-        machine_reaches_decrementLeftSchedule_or_halts_of_open base c source
-          h hpositive hcommands
+  let limit := layoutEnd registers + 1
+  let E := openDecrementEnvelope growth limit
+  have hE : E.Represents registers T := ⟨h, by simp [limit]⟩
+  have hrun := machine_reaches_decrementSchedule_or_halts_of_envelope
+    base c source register E hE hpositive hcommands
+  exact hrun.imp (fun hs => ⟨hs.1, hs.2.1⟩) id
 
 /-! ## Target-free positive-decrement handoff and finish -/
 
