@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Closed104.RedShadeGraph
+import LeanWang.Robinson.Closed104.RedShadeGraphBoundedPath
 
 /-!
 Executable certificates for finite red-shade graph paths.
@@ -19,7 +19,7 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeGraphCertificate
 
-open RedCycles Signals.FreeCellLocal RedShadeGraph
+open RedCycles Signals.FreeCellLocal RedShadeGraph RedShadeGraphBoundedPath
 
 inductive Kind where
   | horizontalMatch
@@ -163,6 +163,74 @@ theorem path_of_endpoint {indexGrid : Nat → Nat → Index} :
               (Path.ofLink (move.link_of_valid hvalid.2))
               (ih htail)
       · rw [if_neg hvalid] at hend
+        contradiction
+
+/-- Follow checked moves while also verifying that every visited port remains
+inside one finite search box. -/
+def portInBounds (port : Port) (width height : Nat) : Bool :=
+  port.x < width && port.y < height
+
+theorem portInBounds_eq_true {port : Port} {width height : Nat}
+    (bounded : portInBounds port width height = true) :
+    PortInBounds port width height := by
+  simpa [portInBounds, PortInBounds, Bool.and_eq_true] using bounded
+
+def boundedEndpoint (indexGrid : Nat → Nat → Index)
+    (width height : Nat) : Port → List Move → Option (Port × Bool)
+  | start, [] =>
+      if portInBounds start width height then some (start, false) else none
+  | start, move :: moves =>
+      if move.first = start ∧ move.valid indexGrid = true ∧
+          portInBounds start width height = true ∧
+          portInBounds move.second width height = true then
+        match boundedEndpoint indexGrid width height move.second moves with
+        | none => none
+        | some (finish, parity) => some (finish, Bool.xor move.parity parity)
+      else none
+
+/-- A successful bounded move-list check is a genuine path all of whose ports
+stay inside the checked box. -/
+theorem boundedPath_of_boundedEndpoint
+    {indexGrid : Nat → Nat → Index} {width height : Nat} :
+    ∀ {moves : List Move} {start finish : Port} {parity : Bool},
+      boundedEndpoint indexGrid width height start moves =
+          some (finish, parity) →
+        BoundedPath indexGrid width height start finish parity := by
+  intro moves
+  induction moves with
+  | nil =>
+      intro start finish parity checked
+      rw [boundedEndpoint] at checked
+      split at checked
+      · rename_i inBounds
+        simp only [Option.some.injEq, Prod.mk.injEq] at checked
+        rcases checked with ⟨rfl, rfl⟩
+        exact BoundedPath.refl start (portInBounds_eq_true inBounds)
+      · contradiction
+  | cons move moves inductionHypothesis =>
+      intro start finish parity checked
+      rw [boundedEndpoint] at checked
+      by_cases valid : move.first = start ∧ move.valid indexGrid = true ∧
+          portInBounds start width height = true ∧
+          portInBounds move.second width height = true
+      · rw [if_pos valid] at checked
+        cases tail : boundedEndpoint indexGrid width height move.second moves with
+        | none => simp [tail] at checked
+        | some result =>
+            rcases result with ⟨tailFinish, tailParity⟩
+            rw [tail] at checked
+            simp only [Option.some.injEq, Prod.mk.injEq] at checked
+            rcases checked with ⟨rfl, rfl⟩
+            have firstBounds : PortInBounds move.first width height := by
+              rw [valid.1]
+              exact portInBounds_eq_true valid.2.2.1
+            rw [← valid.1]
+            exact BoundedPath.trans
+              (BoundedPath.ofLink (move.link_of_valid valid.2.1)
+                firstBounds
+                (portInBounds_eq_true valid.2.2.2))
+              (inductionHypothesis tail)
+      · rw [if_neg valid] at checked
         contradiction
 
 end RedShadeGraphCertificate

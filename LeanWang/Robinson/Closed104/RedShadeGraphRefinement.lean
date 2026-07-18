@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraphRefinementCheck
-import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate
 import LeanWang.Robinson.Closed104.RedShadeGraphTranslation
 
 /-!
@@ -18,7 +17,7 @@ namespace Closed104
 namespace RedShadeGraphRefinement
 
 open RedCycles RedShadeGraph RedShadeGraphBoundedPath
-  RedShadeGraphStaticCertificate RedShadeGraphTranslation
+  RedShadeGraphSearch RedShadeGraphTranslation
   RefinementTranslation Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
@@ -62,15 +61,11 @@ theorem boundedConnectorPath (parent : Index) (side : ExitSide)
   rw [hpresent] at hcase
   simp only [if_true] at hcase
   simp only [Option.isSome_iff_exists] at hcase
-  rcases hcase with ⟨⟨index, state⟩, route⟩
-  have route' := route
-  unfold connectorRoute? at route'
-  have accepted := accept_of_route? route'
+  rcases hcase with ⟨node, route⟩
+  have accepted := List.find?_some route
   simp only [Bool.and_eq_true, decide_eq_true_eq] at accepted
-  have parityEq : state.parity = false := by
-    cases parity : state.parity <;> simp_all
-  have path := boundedPath_of_route? route'
-  simpa only [accepted.1.1, accepted.1.2, parityEq] using path
+  simpa only [accepted.1.1.1, accepted.1.1.2, accepted.1.2] using
+    (node.boundedPath_of_valid accepted.2)
 
 /-- A live old east/north port reaches the same external macro port evenly. -/
 theorem connectorPath (parent : Index) (side : ExitSide)

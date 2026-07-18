@@ -5,7 +5,6 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraphLocalCoverageCheck
 import LeanWang.Robinson.Closed104.RedShadeGraphTranslation
-import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate
 import LeanWang.Robinson.Closed104.SignalFreeCellEmbedding
 
 /-!
@@ -23,7 +22,7 @@ namespace Closed104
 namespace RedShadeGraphLocalCoverage
 
 open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoundedPath
-  RedShadeGraphRefinement RedShadeGraphStaticCertificate
+  RedShadeGraphRefinement RedShadeGraphSearch
   RedShadeGraphTranslation RefinementTranslation
   Signals.FreeCellLocal Signals.FreeCellEmbedding
 
@@ -70,15 +69,12 @@ theorem exists_boundedPath
   have targetChecked := checked target targetMem
   simp only [targetCovered, targetPresent, if_true,
     Option.isSome_iff_exists] at targetChecked
-  rcases targetChecked with ⟨⟨index, state⟩, route⟩
-  have routeMem : (index, state) ∈ routes parent := by
-    unfold routeNode? at route
-    exact List.mem_of_find?_eq_some route
-  have current := List.find?_some route
-  simp only [decide_eq_true_eq] at current
-  have sound := sound_of_mem_evaluated routeMem
-  refine ⟨state.origin, sound.1, state.parity, ?_⟩
-  simpa only [current] using sound.2
+  rcases targetChecked with ⟨node, route⟩
+  have accepted := List.find?_some route
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at accepted
+  refine ⟨node.origin, accepted.1.1, node.parity, ?_⟩
+  simpa only [accepted.1.2] using
+    (node.boundedPath_of_valid accepted.2)
 
 theorem base_exists_boundedPath {target : Port}
     (targetMem : target ∈ portsIn 8 8)
@@ -93,17 +89,12 @@ theorem base_exists_boundedPath {target : Port}
     targetPresent, decide_true, Bool.true_and, if_true]
     at targetChecked
   simp only [Option.isSome_iff_exists] at targetChecked
-  rcases targetChecked with ⟨⟨index, state⟩, route⟩
-  have routeMem : (index, state) ∈ baseRoutes := by
-    unfold baseRoute? routeNode? at route
-    exact List.mem_of_find?_eq_some route
-  have current := List.find?_some route
-  simp only [decide_eq_true_eq] at current
-  have sound := sound_of_mem_evaluated routeMem
-  have sourceMem := sound.1
-  simp only [List.mem_singleton] at sourceMem
-  refine ⟨state.parity, ?_⟩
-  simpa only [sourceMem, current] using sound.2
+  rcases targetChecked with ⟨node, route⟩
+  have accepted := List.find?_some route
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at accepted
+  refine ⟨node.parity, ?_⟩
+  simpa only [accepted.1.1, accepted.1.2] using
+    (node.boundedPath_of_valid accepted.2)
 
 /-- Translate a bounded local route into the corresponding macrocell. -/
 theorem boundedPath_two_block

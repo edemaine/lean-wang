@@ -4,15 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraphLocalCoverageGeometry
-import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificateData
+import LeanWang.Robinson.Closed104.RedShadeGraphSearch
 
 /-!
-# Static local red-graph coverage under two substitutions
+# Checked local red-graph coverage under two substitutions
 
 Inside the `8 x 8` quarter-cell block replacing one corrected tile, every
 present red port is connected either to the new central cell cycle or to the
-sparse copy of a present old port. The checked predecessor forests are static;
-no graph search runs in this module.
+sparse copy of a present old port. The graph flood is untrusted: every selected
+node is accepted only after its retained move list passes the bounded checker.
 -/
 
 namespace LeanWang
@@ -22,24 +22,23 @@ namespace Closed104
 namespace RedShadeGraphLocalCoverage
 
 open RedShadeCycles RedShadeGraph RedShadeGraphRefinement
-  RedShadeGraphStaticCertificate RedShadeGraphStaticCertificateData
+  RedShadeGraphSearch
 
 set_option maxRecDepth 20000
 
-def forest (parent : Index) : List Instruction :=
-  localForests.getD (localForestIndices.getD parent.val localForests.length) []
+def routes (parent : Index) : List Node :=
+  exploreFast (fineGrid parent) 8 8 1000 (sources parent)
 
-def routes (parent : Index) : List (Nat × State) :=
-  evaluated (fineGrid parent) 8 8 (sources parent) (forest parent)
+def routeNode? (parent : Index) (found : List Node) (target : Port) :
+    Option Node :=
+  found.find? fun node =>
+    decide (node.origin ∈ sources parent) &&
+      decide (node.current = target) && node.valid (fineGrid parent) 8 8
 
-def routeNode? (found : List (Nat × State)) (target : Port) :
-    Option (Nat × State) :=
-  found.find? fun route => decide (route.2.current = target)
-
-def targetCovered (parent : Index) (found : List (Nat × State))
+def targetCovered (parent : Index) (found : List Node)
     (target : Port) : Bool :=
   if portPresent (fineGrid parent) target then
-    (routeNode? found target).isSome
+    (routeNode? parent found target).isSome
   else true
 
 def parentCovered (parent : Index) : Bool :=
@@ -49,11 +48,13 @@ def parentCovered (parent : Index) : Bool :=
 def allParentsCovered : Bool :=
   (List.finRange 104).all parentCovered
 
-def baseRoutes : List (Nat × State) :=
-  evaluated (fineGrid 0) 8 8 [cycleSource] baseForest
+def baseRoutes : List Node :=
+  exploreFast (fineGrid 0) 8 8 1000 [cycleSource]
 
-def baseRoute? (target : Port) : Option (Nat × State) :=
-  routeNode? baseRoutes target
+def baseRoute? (target : Port) : Option Node :=
+  baseRoutes.find? fun node =>
+    decide (node.origin = cycleSource) &&
+      decide (node.current = target) && node.valid (fineGrid 0) 8 8
 
 def baseTargetCovered (target : Port) : Bool :=
   if 2 ≤ target.x && target.x < 6 && 2 ≤ target.y && target.y < 6 &&

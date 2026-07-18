@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraphLocalCoverageData
-import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificateData
+import LeanWang.Robinson.Closed104.RedShadeGraphSearch
 
 /-! Executable finite connectivity check for the odd comparison base. -/
 
@@ -15,8 +15,7 @@ namespace Closed104
 namespace CanonicalOddShadeBase
 
 open RedCycles RedShadeGraph RedShadeGraphLocalCoverage
-  RedShadeGraphStaticCertificate RedShadeGraphStaticCertificateData
-  RedShadeCycles
+  RedShadeGraphSearch RedShadeCycles
 
 def indexGrid : Nat → Nat → Index :=
   iterateRefine 4 (fun _ _ => (0 : Index))
@@ -25,16 +24,15 @@ def cyclePorts : List Port :=
   [⟨5, 5, .east⟩, ⟨12, 5, .west⟩,
     ⟨12, 12, .west⟩, ⟨5, 12, .east⟩]
 
-def forest : List Instruction := oddBaseForest
+def routes : List Node :=
+  exploreFast indexGrid 16 16 4000 cyclePorts
 
-def routes : List (Nat × State) :=
-  evaluated indexGrid 16 16 cyclePorts forest
+def baseRoute? (found : List Node) (target : Port) : Option Node :=
+  found.find? fun node =>
+    decide (node.origin ∈ cyclePorts) &&
+      decide (node.current = target) && node.valid indexGrid 16 16
 
-def baseRoute? (found : List (Nat × State)) (target : Port) :
-    Option (Nat × State) :=
-  found.find? fun route => decide (route.2.current = target)
-
-def targetCovered (found : List (Nat × State)) (target : Port) : Bool :=
+def targetCovered (found : List Node) (target : Port) : Bool :=
   if 4 ≤ target.x && target.x < 12 && 4 ≤ target.y && target.y < 12 &&
       portPresent indexGrid target then
     (baseRoute? found target).isSome

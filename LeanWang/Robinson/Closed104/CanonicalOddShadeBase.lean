@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.CanonicalOddShadeBaseCheck
-import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate
 
 /-! Soundness interface for the finite odd comparison base. -/
 
@@ -16,7 +15,7 @@ namespace CanonicalOddShadeBase
 
 open RedCycles RedShadePaths RedShadeCycles RedShadeGraph
   RedShadeGraphBoundedPath RedShadeGraphLocalCoverage
-  RedShadeGraphStaticCertificate
+  RedShadeGraphSearch
 
 /-- Every live port in the central base square has a bounded path from the
 odd root cycle, with a certificate-selected parity. -/
@@ -33,15 +32,12 @@ theorem exists_boundedPath {target : Port}
     targetPresent, decide_true, Bool.true_and, if_true,
     Option.isSome_iff_exists]
       at covered
-  rcases covered with ⟨⟨index, state⟩, route⟩
-  have routeMem : (index, state) ∈ routes := by
-    unfold baseRoute? at route
-    exact List.mem_of_find?_eq_some route
-  have current := List.find?_some route
-  simp only [decide_eq_true_eq] at current
-  have sound := sound_of_mem_evaluated routeMem
-  refine ⟨state.origin, state.parity, sound.1, ?_⟩
-  simpa only [current] using sound.2
+  rcases covered with ⟨node, route⟩
+  have accepted := List.find?_some route
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at accepted
+  refine ⟨node.origin, node.parity, accepted.1.1, ?_⟩
+  simpa only [accepted.1.2] using
+    (node.boundedPath_of_valid accepted.2)
 
 end CanonicalOddShadeBase
 end Closed104
