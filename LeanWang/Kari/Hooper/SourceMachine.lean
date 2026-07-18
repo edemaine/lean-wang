@@ -78,6 +78,14 @@ theorem ambientCanonical_supported (c : Nat.Partrec.Code) :
 def canonical (c : Nat.Partrec.Code) : FullTM0.Cfg Alphabet State :=
   supported.liftCfg (ambientCanonical c) (ambientCanonical_supported c)
 
+/-- The canonical source control state is fixed; only its tape depends on the
+program code. -/
+@[simp]
+theorem canonical_q (c : Nat.Partrec.Code) :
+    (canonical c).q = (default : State) := by
+  apply Subtype.ext
+  rfl
+
 @[simp]
 theorem forget_canonical (c : Nat.Partrec.Code) :
     supported.forgetCfg (canonical c) = ambientCanonical c :=

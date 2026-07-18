@@ -37,6 +37,13 @@ def canonicalCounterCfg (c : Nat.Partrec.Code) : CounterMachine.Cfg :=
       (SourceRegisterSemantics.canonical c).tape.head,
     logicalRegisters (SourceRegisterSemantics.canonical c).tape 0⟩
 
+/-- Explicit numeric form of the code-dependent canonical counter state. -/
+theorem canonicalCounterCfg_state (c : Nat.Partrec.Code) :
+    (canonicalCounterCfg c).state =
+      controlCode (default : SourceMachine.State)
+        (UniversalTM0Semantic.input c).headI := by
+  simp [canonicalCounterCfg, SourceRegisterSemantics.canonical]
+
 @[simp]
 theorem canonicalCounterCfg_temp (c : Nat.Partrec.Code) :
     (canonicalCounterCfg c).registers.temp = 0 :=

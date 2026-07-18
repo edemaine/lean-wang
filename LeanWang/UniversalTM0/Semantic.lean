@@ -328,6 +328,16 @@ theorem input_primrec : Primrec input := rawInput_primrec.comp sourceInput_primr
 
 theorem input_computable : Computable input := input_primrec.to_comp
 
+/-- Any fixed numeric observation of the initial scanned symbol is primitive
+recursive.  Stating this projection here keeps the proof on the canonical
+alphabet encoding used internally by the universal-machine construction;
+callers may choose their own finite numeric coding in `observe`. -/
+theorem input_head_nat_primrec
+    (observe : Turing.TM2to1.Γ' Stack StackSymbol → Nat) :
+    Primrec fun c : Nat.Partrec.Code => observe (input c).headI := by
+  exact (Primrec.dom_finite observe).comp
+    (Primrec.list_headI.comp input_primrec)
+
 theorem tm2_eval_dom_iff (c : Nat.Partrec.Code) :
     (Turing.TM2.eval tm2 Turing.PartrecToTM2.K'.main
       (Turing.PartrecToTM2.trList [sourceInput c])).Dom ↔

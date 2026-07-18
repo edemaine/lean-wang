@@ -42,6 +42,7 @@ import LeanWang.Kari.Hooper.CanonicalInitializerFrame
 import LeanWang.Kari.Hooper.CanonicalInitializerProgramComputable
 import LeanWang.Kari.Hooper.FramedCounterGeometry
 import LeanWang.Kari.Hooper.CounterControlPlan
+import LeanWang.Kari.Hooper.CounterControlPlanComputable
 import LeanWang.Kari.Hooper.CounterControlWellFormed
 import LeanWang.Kari.Hooper.CounterControlCommandAt
 import LeanWang.Kari.Hooper.CounterControlDeterministic
@@ -78,7 +79,8 @@ an executable uniformly computable tag-sensitive canonical initializer with
 exact framed semantics, framed increment/decrement and collision-cleanup
 geometry, an executable two-orientation counter-control plan with
 tag-selected initialization, structurally verified search indexing and table
-determinism, command-oriented access to compiled controller blocks, reusable
+determinism whose complete table is primitive recursive in the source code,
+command-oriented access to compiled controller blocks, reusable
 execution bridges from bounded commands to framed tape endpoints, and an
 exact nearby-or-nested execution dichotomy, together with exact near-branch
 semantics for direct glue, navigation, erasure, and both marker-shift
