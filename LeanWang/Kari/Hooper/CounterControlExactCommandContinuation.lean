@@ -68,16 +68,21 @@ def exactCollisionTape (raw : RawCommand)
       (T.write blankSymbol).move (orient address.growth shift)
   | _ => T
 
+/-- A marker shift sees a nonblank destination after clearing its source.
+The predicate is false for navigation commands. -/
+def ShiftDestinationOccupied (raw : RawCommand)
+    (T : FullTM0.Tape (Symbol numTags)) : Prop :=
+  match raw with
+  | .markerShift address _ _ shift _ _ _ =>
+      ((T.write blankSymbol).move
+        (orient address.growth shift)).read ≠ blankSymbol
+  | _ => False
+
 /-- The only unhandled found-state continuation: a marker shift has an
 occupied destination but was compiled without a collision reference. -/
 def ShiftBlocked (raw : RawCommand)
     (T : FullTM0.Tape (Symbol numTags)) : Prop :=
-  match raw with
-  | .markerShift address _ _ shift _ _ collision =>
-      collision = none ∧
-        ((T.write blankSymbol).move
-          (orient address.growth shift)).read ≠ blankSymbol
-  | _ => False
+  rawCollisionRef raw = none ∧ ShiftDestinationOccupied raw T
 
 /-! ## Exact found-state classification -/
 
@@ -95,12 +100,35 @@ inductive FoundContinuationOutcome (base : Nat) (c : Nat.Partrec.Code)
         ⟨resolve base c (rawSuccessRef raw), exactSuccessTape raw T⟩)
   | collision (reference : ControlRef)
       (isCollision : rawCollisionRef raw = some reference)
+      (isOccupied : ShiftDestinationOccupied raw T)
       (reaches : FullTM0.Reaches
         (CounterControlNestingBridge.machine base c)
         ⟨foundState (CanonicalInitializer.radius c)
             (searchState base c raw.address), T⟩
         ⟨resolve base c reference, exactCollisionTape raw T⟩)
   | blocked (isBlocked : ShiftBlocked raw T)
+
+namespace FoundContinuationOutcome
+
+/-- If the marker-shift destination is known not to be occupied, the exact
+classification collapses to its success reachability witness.  Navigation
+commands satisfy the premise definitionally. -/
+def reachesSuccess_of_destinationFree
+    {base : Nat} {c : Nat.Partrec.Code}
+    {raw : RawCommand} {hraw : raw ∈ rawCommands}
+    {T : FullTM0.Tape (Symbol numTags)}
+    (outcome : FoundContinuationOutcome base c raw hraw T)
+    (hfree : ¬ ShiftDestinationOccupied raw T) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c raw.address), T⟩
+      ⟨resolve base c (rawSuccessRef raw), exactSuccessTape raw T⟩ := by
+  cases outcome with
+  | success reaches => exact reaches
+  | collision _ _ occupied _ => exact False.elim (hfree occupied)
+  | blocked blocked => exact False.elim (hfree blocked.2)
+
+end FoundContinuationOutcome
 
 /-- A generated command at its exact found target either executes to its
 exact success tape, executes to its exact collision tape, or is an occupied
@@ -241,7 +269,8 @@ def exact_found_continuation
             apply FoundContinuationOutcome.blocked
             exact ⟨rfl, hblank⟩
         | some reference =>
-            apply FoundContinuationOutcome.collision reference rfl
+            apply FoundContinuationOutcome.collision reference rfl (by
+              simpa [ShiftDestinationOccupied] using hblank)
             have hrun :=
               BoundedMarkerContinuation.machine_reaches_shift_collision_native
                 (coreTable base c) move (resolve base c success)
