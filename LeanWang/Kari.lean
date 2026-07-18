@@ -20,11 +20,12 @@ import LeanWang.Kari.AffineTMSeries
 import LeanWang.Kari.AffineTMImmortality
 import LeanWang.Kari.TransducerHalfPlane
 import LeanWang.Kari.Hooper
+import LeanWang.Kari.Final
 
 /-!
 # Kari's proof of Wang domino undecidability
 
 This namespace contains an independent formalization of Kari's construction.
-It is intentionally isolated from `LeanWang.Robinson`; both constructions will
-eventually provide the shared `LeanWang.DominoProblem.Reduction` interface.
+It is intentionally isolated from `LeanWang.Robinson`; both constructions
+provide the shared `LeanWang.DominoProblem.Reduction` interface.
 -/

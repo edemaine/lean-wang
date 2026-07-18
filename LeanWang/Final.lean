@@ -4,14 +4,16 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.DominoProblem
+import LeanWang.Kari.Final
 import LeanWang.Robinson.Final
 
 /-!
 # Main Wang domino problem results
 
 The statements in this module mention only the proof-neutral domino problem
-interface.  The current proofs are supplied by the Robinson construction; a
-second construction can prove the same statements in its own namespace.
+interface.  The repository supplies independent Robinson and Kari--Hooper
+reduction certificates; this public theorem surface chooses the Robinson
+certificate while importing and checking both constructions.
 -/
 
 noncomputable section

@@ -2,11 +2,11 @@
 
 Lean formalization of the undecidability of tiling the plane with Wang tiles.
 
-**Status:** the Berger/Robinson proof is complete. It proves co-r.e.
-completeness and undecidability of both the direct and natural-number-encoded
-Wang domino problems. A second, independent proof based on Kari's affine
-construction and Hooper's immortality construction is in progress under
-`LeanWang.Kari`.
+**Status:** two independent proofs are complete: the Berger/Robinson
+construction and the Kari--Hooper affine construction. Each supplies the same
+proof-neutral reduction certificate and therefore proves co-r.e. completeness
+and undecidability of both the direct and natural-number-encoded Wang domino
+problems.
 
 The main statements and reduction interface are proof-neutral. The Robinson
 proof follows [`cirm.pdf`](cirm.pdf) and [`robinson.pdf`](robinson.pdf); the
@@ -17,7 +17,8 @@ is in [`plan.md`](plan.md).
 ## Where to start
 
 - [`LeanWang/Final.lean`](LeanWang/Final.lean) contains the main public theorem
-  statements and currently discharges them with the completed Robinson proof.
+  statements. It imports and checks both completed constructions while keeping
+  the statements independent of either proof technique.
 - [`LeanWang/DominoProblem.lean`](LeanWang/DominoProblem.lean) defines the
   proof-neutral domino predicates, the shared reduction certificate, and the
   generic co-r.e.-completeness and undecidability consequences.
@@ -27,8 +28,11 @@ is in [`plan.md`](plan.md).
 - [`LeanWang/Robinson/Reduction.lean`](LeanWang/Robinson/Reduction.lean) is the
   main place to read how fixed-corner machine tilings are converted to plane
   tilings.
+- [`LeanWang/Kari/Final.lean`](LeanWang/Kari/Final.lean) is the corresponding
+  Kari--Hooper endpoint: it combines the effective counter controller, Kari's
+  affine compiler, and the Wang encoding into a second `DominoProblem.Reduction`.
 - [`LeanWang/Kari.lean`](LeanWang/Kari.lean) is the aggregate entry point for
-  the in-progress Kari--Hooper formalization.
+  the completed Kari--Hooper formalization.
 
 ## Proof structure
 
@@ -50,9 +54,9 @@ route entirely. The generated initializer, position-code compiler, and their
 correctness modules have been removed from the repository; the retained proof
 uses the generic machine-to-Wang theorem directly.
 
-### Kari--Hooper (in progress)
+### Kari--Hooper
 
-The second proof is developing an effective version of Hooper's nested
+The second proof formalizes an effective version of Hooper's nested
 bounded-search construction:
 
 ```text
@@ -63,16 +67,15 @@ Nat.Partrec.Code c
   -> encode its bi-infinite affine diagrams by Wang tiles
 ```
 
-The difficult converse is being organized around guarded generated searches.
-The current modules formalize the finite counter-control compiler, designated
-forward simulation, affine encoding, and much of the arbitrary-configuration
-mortality argument. This tree does not yet provide a second completed
-`DominoProblem.Reduction`.
+The difficult arbitrary-configuration converse is organized around guarded
+generated searches. The completed modules prove the finite counter-control
+compiler and its designated forward simulation, rule out every immortal
+off-path controller configuration, and feed the resulting immortality
+equivalence through Kari's affine and Wang-tile encodings.
 
-The completed Robinson construction produces a
-`LeanWang.DominoProblem.Reduction`, which records the computable tileset map
-and its equivalence with fixed-input nonhalting. Kari is being developed
-toward the same interface. The current proof-neutral public theorem surface is
+Both completed constructions produce a `LeanWang.DominoProblem.Reduction`,
+which records the computable tileset map and its equivalence with fixed-input
+nonhalting. The proof-neutral public theorem surface is
 [`LeanWang.Final`](LeanWang/Final.lean):
 
 ```lean
@@ -109,6 +112,7 @@ LeanWang/
     Closed104/
     Reduction.lean, Final.lean
   Kari/
+    Final.lean
     Hooper/
 ```
 
@@ -122,8 +126,7 @@ The top-level modules are shared by all proof techniques:
   transport its finite machine support through Mathlib's TM2, TM1, and TM0
   models.
 - `Final` is the public theorem module. The default `lake build` target imports
-  this file, so it checks the completed Robinson proof rather than the
-  in-progress Kari aggregate.
+  this file, so it checks both completed proof certificates.
 
 The completed Robinson proof is split by responsibility:
 
@@ -142,16 +145,17 @@ The completed Robinson proof is split by responsibility:
 - `Robinson/Reduction.lean` connects machine histories to the scaffold, and
   `Robinson/Final.lean` supplies the completed reduction certificate.
 
-The in-progress second proof is isolated under `Kari/`:
+The independent second proof is isolated under `Kari/`:
 
 - The files directly in `Kari/` formalize transducers, piecewise-affine
   dynamics, Beatty encodings, affine Turing-machine diagrams, and their Wang
   encodings.
 - `Kari/Hooper/` formalizes Hooper's nested counter and bounded-search
   construction, including finite control, marker geometry, forward simulation,
-  and the developing arbitrary-configuration mortality converse.
-- `Kari.lean` imports the current Kari development for separate checking, but
-  it is not imported by `LeanWang.Final` and is not yet a second proof endpoint.
+  and the arbitrary-configuration mortality converse.
+- `Kari/Final.lean` exports the second reduction certificate and its generic
+  complexity consequences. `Kari.lean` imports the full development for
+  separate checking, and `LeanWang.Final` imports the completed endpoint.
 
 The superseded exhaustive PairCover seam proof remains available as provenance
 in the [last pre-cleanup commit](https://github.com/edemaine/lean-wang/tree/a8bcfd206a9816868d0a77bda96c46227313dad3).
@@ -165,8 +169,8 @@ and committed component roots in
 ## Build
 
 ```bash
-lake build                 # completed public theorem surface
-lake build LeanWang.Kari   # current in-progress Kari aggregate
+lake build                 # public theorem surface and both proofs
+lake build LeanWang.Kari   # complete Kari--Hooper aggregate
 ```
 
 All Lean source files are nonexecutable (`100644`). The source contains no

@@ -13,8 +13,9 @@ import LeanWang.FiniteSearch
 This module states the Wang domino problem independently of any particular
 undecidability construction.  A `DominoProblem.Reduction` packages a computable
 many-one reduction from the complement of Mathlib's fixed-input halting problem.
-Concrete proof techniques, currently the Robinson construction, provide values
-of this structure in their own module trees.
+Concrete proof techniques provide values of this structure in their own module
+trees; the repository contains independent Robinson and Kari--Hooper
+certificates.
 
 The shared reduction certificate supplies co-r.e. hardness via universality of
 Mathlib's partial-recursive evaluator.  Independently, exhaustive finite-square
