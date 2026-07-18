@@ -38,7 +38,7 @@ def sourceOffset : ControlRef → Nat
   | .direct ⟨.left, state, slot⟩ =>
       2 * logicalSpan + directSpan + state * directStride + slot
   | .search _ => 0
-  | .sharedReturn => 0
+  | .sharedReturn _ => 0
 
 /-- Exactly the two reference forms permitted as sources of direct glue
 rules. -/
@@ -46,7 +46,7 @@ def IsCounterSource : ControlRef → Prop
   | .logical _ _ => True
   | .direct _ => True
   | .search _ => False
-  | .sharedReturn => False
+  | .sharedReturn _ => False
 
 instance (reference : ControlRef) : Decidable (IsCounterSource reference) := by
   cases reference <;> simp only [IsCounterSource] <;> infer_instance
@@ -70,7 +70,7 @@ theorem resolve_eq_add_sourceOffset (base : Nat) (c : Nat.Partrec.Code)
           Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] <;>
         omega
   | search address => simp [IsCounterSource] at hsource
-  | sharedReturn => simp [IsCounterSource] at hsource
+  | sharedReturn _ => simp [IsCounterSource] at hsource
 
 /-! ## Fixed direct-rule keys -/
 
@@ -102,7 +102,7 @@ def Owns (growth : Turing.Dir) (source : Nat) : ControlRef → Prop
   | .direct address =>
       address.growth = growth ∧ address.counterState = source
   | .search _ => False
-  | .sharedReturn => False
+  | .sharedReturn _ => False
 
 /-- Within one counter instruction, every direct transition key is unique. -/
 theorem rawDirectControlKeysForRule_nodup (growth : Turing.Dir)
@@ -230,7 +230,7 @@ def WellFormedSource : ControlRef → Prop
   | .direct address =>
       address.counterState < logicalSpan ∧ address.slot < directStride
   | .search _ => False
-  | .sharedReturn => False
+  | .sharedReturn _ => False
 
 /-- The local part of `WellFormedSource`, independent of the source state of
 the counter instruction that owns the reference. -/
@@ -238,7 +238,7 @@ def SlotBound : ControlRef → Prop
   | .logical _ _ => True
   | .direct address => address.slot < directStride
   | .search _ => False
-  | .sharedReturn => False
+  | .sharedReturn _ => False
 
 theorem rawDirectControlKeysForRule_slotBound (growth : Turing.Dir)
     (programRule : CounterMachine.Rule) :
@@ -396,7 +396,7 @@ theorem sourceOffset_injective_on {first second : ControlRef}
           exact (logical_direct_sourceOffset_ne firstGrowth secondGrowth
             hfirst hsecondSource hsecondSlot heq).elim
       | search _ => simp [WellFormedSource] at hsecond
-      | sharedReturn => simp [WellFormedSource] at hsecond
+      | sharedReturn _ => simp [WellFormedSource] at hsecond
   | direct firstAddress =>
       rcases firstAddress with ⟨firstGrowth, firstSource, firstSlot⟩
       change firstSource < logicalSpan ∧ firstSlot < directStride at hfirst
@@ -432,9 +432,9 @@ theorem sourceOffset_injective_on {first second : ControlRef}
               ⟨rfl, rfl⟩
             rfl
       | search _ => simp [WellFormedSource] at hsecond
-      | sharedReturn => simp [WellFormedSource] at hsecond
+      | sharedReturn _ => simp [WellFormedSource] at hsecond
   | search _ => simp [WellFormedSource] at hfirst
-  | sharedReturn => simp [WellFormedSource] at hfirst
+  | sharedReturn _ => simp [WellFormedSource] at hfirst
 
 /-- The fixed plan never uses a search or shared-return state as a direct-rule
 source. -/
