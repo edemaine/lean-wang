@@ -12,6 +12,7 @@ import LeanWang.Kari.Hooper.CounterArithmetic
 import LeanWang.Kari.Hooper.SourceMachine
 import LeanWang.Kari.Hooper.StackEncoding
 import LeanWang.Kari.Hooper.SourceControl
+import LeanWang.Kari.Hooper.SourceProgram
 import LeanWang.Kari.Hooper.SearchGeometry
 import LeanWang.Kari.Hooper.CounterLayout
 import LeanWang.Kari.Hooper.RegisterLayout
@@ -21,6 +22,7 @@ import LeanWang.Kari.Hooper.MarkerMachine
 import LeanWang.Kari.Hooper.FiniteTM0Program
 import LeanWang.Kari.Hooper.MarkerProgram
 import LeanWang.Kari.Hooper.BasicLemma
+import LeanWang.Kari.Hooper.NestingMachine
 
 /-!
 # Hooper's immortality construction
