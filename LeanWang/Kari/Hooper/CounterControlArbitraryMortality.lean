@@ -134,7 +134,9 @@ theorem reaches_compilerHandoff_of_immortalFrom
         simpa [canonicalEntry] using
           (CounterControlDirectNormalization.Exit.logical
             (base := base) (c := c) (initializerGrowth tag)
-            (GlobalSourceSemantics.canonicalCounterCfg c).state U)
+            (GlobalSourceSemantics.canonicalCounterCfg c).state
+            (CounterControlAbstractTrace.canonicalCounterCfg_state_lt_logicalSpan c)
+            U)
   | direct hsource =>
       rcases CounterControlDirectNormalization.normalizes_arbitrary_entry
           base c start hsource with

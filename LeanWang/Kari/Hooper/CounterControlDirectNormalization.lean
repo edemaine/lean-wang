@@ -54,6 +54,7 @@ theorem target_logical_search_or_bridge
             MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
           norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
             finishDirectSlot] at *
+
     | decrement register ifZero ifPositive =>
         cases register <;>
           simp_all [directRulesForRule, validationRules,
@@ -89,6 +90,52 @@ theorem target_logical_search_or_bridge
             MarkerValidation.sweep, directRef, searchRef] <;> aesop <;>
           norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
             finishDirectSlot] at *
+
+/-- A generated direct target carrying a logical reference always names a
+bounded source-program state.  Keeping this fact at the normalization
+frontier prevents a merely numeric state alias from being interpreted as
+logical control. -/
+theorem target_logical_state_lt
+    (rule : RawDirectRule) (hrule : rule ∈ rawDirectRules)
+    (growth : Turing.Dir) (state : Nat)
+    (htarget : rule.target = .logical growth state) :
+    state < logicalSpan := by
+  simp only [rawDirectRules, rawDirectRulesFor, List.mem_append,
+    List.mem_flatMap] at hrule
+  rcases hrule with ⟨programRule, hprogram, hlocal⟩ |
+      ⟨programRule, hprogram, hlocal⟩
+  all_goals
+    rcases programRule with ⟨source, instruction⟩
+    have hsource : source < logicalSpan :=
+      state_lt_logicalSpan
+        (source_mem_programStates (source, instruction) hprogram)
+    have htargetBound : ∀ target ∈ instructionTargets instruction,
+        target < logicalSpan := by
+      intro target htargetState
+      apply state_lt_logicalSpan
+      simp only [programStates, List.mem_flatMap]
+      exact ⟨(source, instruction), hprogram, by
+        simp [ruleStates, htargetState]⟩
+    cases instruction with
+    | increment register target =>
+        cases register <;>
+          simp_all [directRulesForRule, validationRules,
+            routeEntryRules, routeContinuationRules,
+            routeContinuationRulesFrom, incrementRules,
+            AnchoredCounterGeometry.routeFromIncrement,
+            MarkerValidation.sweep, directRef, searchRef,
+            instructionTargets] <;> aesop
+    | decrement register ifZero ifPositive =>
+        cases register <;>
+          simp_all [directRulesForRule, validationRules,
+            routeEntryRules, routeContinuationRules,
+            routeContinuationRulesFrom, decrementRules,
+            AnchoredCounterGeometry.routeToDecrementStart,
+            AnchoredCounterGeometry.routeFromZero,
+            AnchoredCounterGeometry.registerGap,
+            MarkerSchedule.decrementStartBoundary,
+            MarkerValidation.sweep, directRef, searchRef,
+            instructionTargets] <;> aesop
 
 /-- A rule whose source is one of the two internal bridges always exits to a
 bounded search; it cannot remain in direct control. -/
@@ -278,6 +325,7 @@ theorem bridge_target_wellFormed
 inductive Exit (base : Nat) (c : Nat.Partrec.Code) :
     FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop
   | logical (growth : Turing.Dir) (state : Nat)
+      (state_lt : state < logicalSpan)
       (T : FullTM0.Tape (Symbol numTags)) :
       Exit base c ⟨logicalState base c growth state, T⟩
   | search (address : SearchAddress)
@@ -310,6 +358,7 @@ theorem normalizes_arbitrary_entry
       refine ⟨_, hone, ?_⟩
       simpa [htarget, resolve] using
         (Exit.logical (base := base) (c := c) growth state
+          (target_logical_state_lt rule hrule growth state htarget)
           (cfg.tape.move (orient rule.growth rule.direction)))
     · right
       refine ⟨_, hone, ?_⟩
