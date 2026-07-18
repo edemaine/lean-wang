@@ -44,8 +44,11 @@ import LeanWang.Kari.Hooper.CounterControlPlan
 import LeanWang.Kari.Hooper.CounterControlWellFormed
 import LeanWang.Kari.Hooper.CounterControlCommandAt
 import LeanWang.Kari.Hooper.CounterControlDeterministic
+import LeanWang.Kari.Hooper.CounterControlDirectSemantics
 import LeanWang.Kari.Hooper.CounterControlBridge
 import LeanWang.Kari.Hooper.CounterControlNestingBridge
+import LeanWang.Kari.Hooper.CounterControlNavigationSemantics
+import LeanWang.Kari.Hooper.CounterControlShiftSemantics
 
 /-!
 # Hooper's immortality construction
@@ -74,7 +77,9 @@ geometry, an executable two-orientation counter-control plan with
 tag-selected initialization, structurally verified search indexing and table
 determinism, command-oriented access to compiled controller blocks, reusable
 execution bridges from bounded commands to framed tape endpoints, and an
-exact nearby-or-nested execution dichotomy,
+exact nearby-or-nested execution dichotomy, together with exact near-branch
+semantics for direct glue, navigation, erasure, and both marker-shift
+orientations,
 and both directions of the abstract strong-induction core of Hooper's nested
 construction.  The remaining files prove the compiled plan's operational
 semantics and use its shared canonical core to discharge the nesting laws.
