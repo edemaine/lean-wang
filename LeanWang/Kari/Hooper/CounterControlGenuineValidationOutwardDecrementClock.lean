@@ -111,80 +111,9 @@ private theorem clockBranchRead_of_immortal
     (himmortal : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) (foundCfg current)) :
     T.read = blankSymbol ∨ T.read = boundarySymbol 3 := by
-  let positiveRule : RawDirectRule :=
-    ⟨growth, directRef growth source branchDirectSlot, .blank,
-      searchRef growth source secondarySearchBase, .right⟩
-  have hpositiveRule : positiveRule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-      growth hprogram
-    change positiveRule ∈ validationRules growth source ++
-      decrementRules growth source .clock ifZero ifPositive
-    apply List.mem_append_right
-    simp [positiveRule, decrementRules]
-  have hsourceDirect :
-      resolve base c (directRef growth source branchDirectSlot) ∈
-        FiniteTM0.sourceStates (directTable base c) := by
-    simp only [directTable, FiniteTM0.sourceStates, List.map_flatMap,
-      List.mem_flatMap]
-    refine ⟨positiveRule, hpositiveRule, ?_⟩
-    simp only [directRuleTable, List.map_map, List.mem_map,
-      FiniteTM0.Rule.mk, Function.comp_apply]
-    refine ⟨blankSymbol, ?_, ?_⟩
-    · simp [positiveRule, symbolsForRead]
-    · simp [positiveRule]
-  have himmortalBranch := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
-  rcases CounterControlArbitraryEntry.direct_step_or_haltsFrom base c
-      (resolve base c (directRef growth source branchDirectSlot)) T
-      hsourceDirect with
-    hhalts | ⟨rule, hrule, hnumeric, hmatch, _hstep⟩
-  · exact False.elim
-      ((FullTM0.HaltsFrom.immortalFrom_iff_not _ _).mp
-        himmortalBranch hhalts)
-  · have hruleCounter :
-        CounterControlDeterministic.IsCounterSource rule.source :=
-      CounterControlDeterministic.rawDirectRules_counter_sources rule hrule
-    have hbranchCounter : CounterControlDeterministic.IsCounterSource
-        (directRef growth source branchDirectSlot) := by
-      simp [directRef, CounterControlDeterministic.IsCounterSource]
-    have hoffset : CounterControlDeterministic.sourceOffset rule.source =
-        CounterControlDeterministic.sourceOffset
-          (directRef growth source branchDirectSlot) := by
-      apply Nat.add_left_cancel
-      calc
-        rightLogicalBase base c +
-              CounterControlDeterministic.sourceOffset rule.source =
-            resolve base c rule.source :=
-          (CounterControlDeterministic.resolve_eq_add_sourceOffset
-            base c hruleCounter).symm
-        _ = resolve base c
-              (directRef growth source branchDirectSlot) := hnumeric.symm
-        _ = rightLogicalBase base c +
-              CounterControlDeterministic.sourceOffset
-                (directRef growth source branchDirectSlot) :=
-          CounterControlDeterministic.resolve_eq_add_sourceOffset
-            base c hbranchCounter
-    have hbranchWell : CounterControlDeterministic.WellFormedSource
-        (directRef growth source branchDirectSlot) := by
-      change source < logicalSpan ∧ branchDirectSlot < directStride
-      constructor
-      · exact state_lt_logicalSpan
-          (source_mem_programStates
-            (source, .decrement .clock ifZero ifPositive) hprogram)
-      · norm_num [branchDirectSlot, directStride]
-    have hsymbolic : rule.source =
-        directRef growth source branchDirectSlot :=
-      CounterControlDeterministic.sourceOffset_injective_on
-        (CounterControlArbitraryEntry.rawDirectRule_source_wellFormed
-          rule hrule) hbranchWell hoffset
-    rcases CounterControlGuardedDecrementEntry.branchRule_read
-        hprogram rule hrule hsymbolic with hblank | hboundary
-    · left
-      rw [hblank] at hmatch
-      simpa [RawRead.Matches] using hmatch
-    · right
-      rw [hboundary] at hmatch
-      simpa [RawRead.Matches,
-        AnchoredCounterGeometry.registerGap] using hmatch
+  simpa [AnchoredCounterGeometry.registerGap] using
+    (CounterControlDecrementEntry.branchRead_of_reaches base c hprogram
+      (foundCfg current) T hreaches himmortal)
 
 private def outwardHandoff_of_monotone
     {base : Nat} {c : Nat.Partrec.Code}
@@ -275,34 +204,11 @@ theorem outwardFour_clockDecrement_handoff
       (current.foundTape.move (orient growth .left)).move
           (orient growth .right) = current.foundTape := by
     cases growth <;> simp [orient, FullTM0.Tape.move]
-  rcases hbranchRead with hblank | hboundary
-  · let branchRule : RawDirectRule :=
-      ⟨growth, directRef growth source branchDirectSlot, .blank,
-        searchRef growth source secondarySearchBase, .right⟩
-    have hbranchRule : branchRule ∈ rawDirectRules := by
-      apply
-        CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-          growth hrule
-      change branchRule ∈ validationRules growth source ++
-        decrementRules growth source .clock ifZero ifPositive
-      apply List.mem_append_right
-      simp [branchRule, decrementRules]
-    have hbranchMatch : branchRule.read.Matches
-        (current.foundTape.move (orient growth .left)).read := by
-      simpa [branchRule, RawRead.Matches] using hblank
-    have hpositiveLocal := CounterControlDirectSemantics.reaches_directRule
-      base c branchRule hbranchRule
-        (current.foundTape.move (orient growth .left)) hbranchMatch
-    have hpositiveStepRaw : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨resolve base c (directRef growth source branchDirectSlot),
-          current.foundTape.move (orient growth .left)⟩
-        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
-          (current.foundTape.move (orient growth .left)).move
-            (orient growth .right)⟩ := by
-      change FullTM0.Reaches
-        (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-      simpa [branchRule, searchRef, resolve] using hpositiveLocal
+  rcases CounterControlDecrementEntry.branchStep_of_read base c hrule
+      (current.foundTape.move (orient growth .left)) hbranchRead with ⟨step⟩
+  rcases step with ⟨hblank, hpositiveStepRaw⟩ |
+    ⟨hboundary, hzeroStepRaw⟩
+  ·
     have hpositiveStep : FullTM0.Reaches
         (CounterControlNestingBridge.machine base c)
         ⟨resolve base c (directRef growth source branchDirectSlot),
@@ -383,34 +289,7 @@ theorem outwardFour_clockDecrement_handoff
           hcommand himmortalNext with ⟨outcome⟩
     exact ⟨outwardHandoff_of_monotone hreachesNext (by simp [next])
       outcome⟩
-  · let branchRule : RawDirectRule :=
-      ⟨growth, directRef growth source branchDirectSlot, .boundary 3,
-        searchRef growth source zeroSearchBase, .right⟩
-    have hbranchRule : branchRule ∈ rawDirectRules := by
-      apply
-        CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-          growth hrule
-      change branchRule ∈ validationRules growth source ++
-        decrementRules growth source .clock ifZero ifPositive
-      apply List.mem_append_right
-      simp [branchRule, decrementRules,
-        AnchoredCounterGeometry.registerGap]
-    have hbranchMatch : branchRule.read.Matches
-        (current.foundTape.move (orient growth .left)).read := by
-      simpa [branchRule, RawRead.Matches] using hboundary
-    have hzeroLocal := CounterControlDirectSemantics.reaches_directRule
-      base c branchRule hbranchRule
-        (current.foundTape.move (orient growth .left)) hbranchMatch
-    have hzeroStepRaw : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨resolve base c (directRef growth source branchDirectSlot),
-          current.foundTape.move (orient growth .left)⟩
-        ⟨searchState base c ⟨growth, source, zeroSearchBase⟩,
-          (current.foundTape.move (orient growth .left)).move
-            (orient growth .right)⟩ := by
-      change FullTM0.Reaches
-        (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-      simpa [branchRule, searchRef, resolve] using hzeroLocal
+  ·
     have hzeroStep : FullTM0.Reaches
         (CounterControlNestingBridge.machine base c)
         ⟨resolve base c (directRef growth source branchDirectSlot),

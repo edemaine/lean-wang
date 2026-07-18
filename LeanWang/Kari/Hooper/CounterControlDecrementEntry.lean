@@ -247,6 +247,232 @@ theorem testHandoff_of_rule
   exact testHandoff base c current growth source register ifZero ifPositive
     hrule progress
 
+/-! ## Representation-independent branch selection -/
+
+/-- The only generated rules owned by a decrement branch source read the
+positive-case blank or that register's preceding boundary. -/
+theorem branchRule_read
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (hprogram : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (rule : RawDirectRule) (hrule : rule ∈ rawDirectRules)
+    (hsource : rule.source = directRef growth source branchDirectSlot) :
+    rule.read = .blank ∨
+      rule.read = .boundary
+        (AnchoredCounterGeometry.registerGap register).castSucc := by
+  obtain ⟨symbol, hsymbol⟩ : ∃ symbol, symbol ∈ symbolsForRead rule.read := by
+    cases rule.read with
+    | blank => exact ⟨blankSymbol, by simp [symbolsForRead]⟩
+    | boundary label =>
+        exact ⟨boundarySymbol label, by simp [symbolsForRead]⟩
+    | nonblank =>
+        exact ⟨boundarySymbol ⟨0, by decide⟩, by
+          simp [symbolsForRead, nonblankSymbols]⟩
+  rcases (mem_rawDirectRules_iff rule).1 hrule with
+    ⟨orientation, programRule, hprogramRule, hlocal⟩
+  have hkey : (rule.source, symbol) ∈
+      CounterControlDeterministic.rawDirectControlKeysForRule
+        orientation programRule :=
+    CounterControlDeterministic.mem_rawDirectControlKeysForRule
+      orientation programRule rule hlocal symbol hsymbol
+  have howns :=
+    CounterControlDeterministic.rawDirectControlKeysForRule_owns
+      orientation programRule (rule.source, symbol) hkey
+  rw [hsource] at howns
+  change growth = orientation ∧ source = programRule.1 at howns
+  rcases programRule with ⟨programSource, instruction⟩
+  have hgrowth := howns.1
+  have hprogramSource := howns.2
+  change source = programSource at hprogramSource
+  subst growth
+  subst programSource
+  have hlookupRule :=
+    (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
+      GlobalSourceProgram.program_deterministic).2 hprogramRule
+  have hlookupExpected :=
+    (CounterProgram.lookupInstruction_eq_some_iff_of_deterministic
+      GlobalSourceProgram.program_deterministic).2 hprogram
+  rw [hlookupExpected] at hlookupRule
+  have hinstruction := Option.some.inj hlookupRule
+  subst instruction
+  clear howns hkey hsymbol hprogramRule hlookupRule hlookupExpected hprogram
+  cases register <;>
+    simp_all [directRulesForRule, validationRules, decrementRules,
+      routeEntryRules, routeContinuationRules,
+      routeContinuationRulesFrom, MarkerValidation.sweep,
+      AnchoredCounterGeometry.routeToDecrementStart,
+      AnchoredCounterGeometry.routeFromZero, directRef,
+      MarkerSchedule.decrementStartBoundary,
+      AnchoredCounterGeometry.registerGap] <;>
+    norm_num [validationDirectBase, bodyDirectBase, testDirectSlot,
+      branchDirectSlot, finishDirectSlot, zeroDirectBase] at * <;>
+    aesop
+
+/-- Once an immortal execution reaches a decrement branch source, its tape
+symbol must select one of the two rules owned by that source. -/
+theorem branchRead_of_reaches
+    (base : Nat) (c : Nat.Partrec.Code)
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (hprogram : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (start : FullTM0.Cfg (Symbol numTags) FiniteTM0.State)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) start
+      ⟨resolve base c (directRef growth source branchDirectSlot), T⟩)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) start) :
+    T.read = blankSymbol ∨ T.read = boundarySymbol
+        (AnchoredCounterGeometry.registerGap register).castSucc := by
+  let positiveRule : RawDirectRule :=
+    ⟨growth, directRef growth source branchDirectSlot, .blank,
+      searchRef growth source secondarySearchBase, .right⟩
+  have hpositiveRule : positiveRule ∈ rawDirectRules := by
+    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      growth hprogram
+    change positiveRule ∈ validationRules growth source ++
+      decrementRules growth source register ifZero ifPositive
+    apply List.mem_append_right
+    simp [positiveRule, decrementRules]
+  have hsourceDirect :
+      resolve base c (directRef growth source branchDirectSlot) ∈
+        FiniteTM0.sourceStates (directTable base c) := by
+    simp only [directTable, FiniteTM0.sourceStates, List.map_flatMap,
+      List.mem_flatMap]
+    refine ⟨positiveRule, hpositiveRule, ?_⟩
+    simp only [directRuleTable, List.map_map, List.mem_map,
+      FiniteTM0.Rule.mk, Function.comp_apply]
+    refine ⟨blankSymbol, ?_, ?_⟩
+    · simp [positiveRule, symbolsForRead]
+    · simp [positiveRule]
+  have himmortalBranch := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
+  rcases CounterControlArbitraryEntry.direct_step_or_haltsFrom base c
+      (resolve base c (directRef growth source branchDirectSlot))
+      T hsourceDirect with
+    hhalts | ⟨rule, hrule, hnumeric, hmatch, _hstep⟩
+  · exact False.elim
+      ((FullTM0.HaltsFrom.immortalFrom_iff_not _ _).mp
+        himmortalBranch hhalts)
+  · have hruleCounter :
+        CounterControlDeterministic.IsCounterSource rule.source :=
+      CounterControlDeterministic.rawDirectRules_counter_sources rule hrule
+    have hbranchCounter : CounterControlDeterministic.IsCounterSource
+        (directRef growth source branchDirectSlot) := by
+      simp [directRef, CounterControlDeterministic.IsCounterSource]
+    have hoffset : CounterControlDeterministic.sourceOffset rule.source =
+        CounterControlDeterministic.sourceOffset
+          (directRef growth source branchDirectSlot) := by
+      apply Nat.add_left_cancel
+      calc
+        rightLogicalBase base c +
+              CounterControlDeterministic.sourceOffset rule.source =
+            resolve base c rule.source :=
+          (CounterControlDeterministic.resolve_eq_add_sourceOffset
+            base c hruleCounter).symm
+        _ = resolve base c
+              (directRef growth source branchDirectSlot) := hnumeric.symm
+        _ = rightLogicalBase base c +
+              CounterControlDeterministic.sourceOffset
+                (directRef growth source branchDirectSlot) :=
+          CounterControlDeterministic.resolve_eq_add_sourceOffset
+            base c hbranchCounter
+    have hbranchWell : CounterControlDeterministic.WellFormedSource
+        (directRef growth source branchDirectSlot) := by
+      change source < logicalSpan ∧ branchDirectSlot < directStride
+      constructor
+      · exact state_lt_logicalSpan
+          (source_mem_programStates
+            (source, .decrement register ifZero ifPositive) hprogram)
+      · norm_num [branchDirectSlot, directStride]
+    have hsymbolic : rule.source =
+        directRef growth source branchDirectSlot :=
+      CounterControlDeterministic.sourceOffset_injective_on
+        (CounterControlArbitraryEntry.rawDirectRule_source_wellFormed
+          rule hrule) hbranchWell hoffset
+    rcases branchRule_read hprogram rule hrule hsymbolic with
+      hblank | hboundary
+    · left
+      rw [hblank] at hmatch
+      simpa [RawRead.Matches] using hmatch
+    · right
+      rw [hboundary] at hmatch
+      simpa [RawRead.Matches] using hmatch
+
+/-- The single direct step selected at a decrement branch source. -/
+inductive BranchStep
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (T : FullTM0.Tape (Symbol numTags)) : Type where
+  | positive
+      (read_blank : T.read = blankSymbol)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        ⟨resolve base c (directRef growth source branchDirectSlot), T⟩
+        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
+          T.move (orient growth .right)⟩)
+  | zero
+      (read_boundary : T.read = boundarySymbol
+        (AnchoredCounterGeometry.registerGap register).castSucc)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        ⟨resolve base c (directRef growth source branchDirectSlot), T⟩
+        ⟨searchState base c ⟨growth, source, zeroSearchBase⟩,
+          T.move (orient growth .right)⟩)
+
+/-- Execute the generated direct rule selected by a classified branch-cell
+symbol. -/
+theorem branchStep_of_read
+    (base : Nat) (c : Nat.Partrec.Code)
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (hprogram : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = blankSymbol ∨
+      T.read = boundarySymbol
+        (AnchoredCounterGeometry.registerGap register).castSucc) :
+    Nonempty (BranchStep base c growth source register T) := by
+  rcases hread with hblank | hboundary
+  · let raw : RawDirectRule :=
+      ⟨growth, directRef growth source branchDirectSlot, .blank,
+        searchRef growth source secondarySearchBase, .right⟩
+    have hraw : raw ∈ rawDirectRules := by
+      apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+        growth hprogram
+      change raw ∈ validationRules growth source ++
+        decrementRules growth source register ifZero ifPositive
+      apply List.mem_append_right
+      simp [raw, decrementRules]
+    have hmatch : raw.read.Matches T.read := by
+      simpa [raw, RawRead.Matches] using hblank
+    have hstep := CounterControlDirectSemantics.reaches_directRule base c raw
+      hraw T hmatch
+    refine ⟨BranchStep.positive hblank ?_⟩
+    change FullTM0.Reaches (FiniteTM0.machine
+      (CounterControlPlan.table base c)) _ _
+    simpa [raw, searchRef, resolve] using hstep
+  · let raw : RawDirectRule :=
+      ⟨growth, directRef growth source branchDirectSlot,
+        .boundary (AnchoredCounterGeometry.registerGap register).castSucc,
+        searchRef growth source zeroSearchBase, .right⟩
+    have hraw : raw ∈ rawDirectRules := by
+      apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+        growth hprogram
+      change raw ∈ validationRules growth source ++
+        decrementRules growth source register ifZero ifPositive
+      apply List.mem_append_right
+      simp [raw, decrementRules]
+    have hmatch : raw.read.Matches T.read := by
+      simpa [raw, RawRead.Matches] using hboundary
+    have hstep := CounterControlDirectSemantics.reaches_directRule base c raw
+      hraw T hmatch
+    refine ⟨BranchStep.zero hboundary ?_⟩
+    change FullTM0.Reaches (FiniteTM0.machine
+      (CounterControlPlan.table base c)) _ _
+    simpa [raw, searchRef, resolve] using hstep
+
 end
 
 end CounterControlDecrementEntry

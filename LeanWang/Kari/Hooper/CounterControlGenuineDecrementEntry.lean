@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlDecrementEntry
-import LeanWang.Kari.Hooper.CounterControlGuardedDecrementEntry
 import LeanWang.Kari.Hooper.CounterControlGuardedShiftCompletion
 
 /-!
@@ -29,7 +28,6 @@ open CounterControlGenuineRouteEmbedding
 open CounterControlDecrementEntry
 open CounterControlRouteSuffixMortality CounterControlValidationMortality
 open CounterControlParentContinuation
-open CounterControlGuardedDecrementEntry
 open CounterControlSearchSystem
 open CounterControlGuardedSearch
 open CounterControlGuardedSearch.GuardedSearch
@@ -117,81 +115,9 @@ theorem branchRead_of_reaches
     (himmortal : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) (foundCfg current)) :
     T.read = blankSymbol ∨ T.read = boundarySymbol
-        (AnchoredCounterGeometry.registerGap register).castSucc := by
-  let positiveRule : RawDirectRule :=
-    ⟨growth, directRef growth source branchDirectSlot, .blank,
-      searchRef growth source secondarySearchBase, .right⟩
-  have hpositiveRule : positiveRule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-      growth hprogram
-    change positiveRule ∈ validationRules growth source ++
-      decrementRules growth source register ifZero ifPositive
-    apply List.mem_append_right
-    simp [positiveRule, decrementRules]
-  have hsourceDirect :
-      resolve base c (directRef growth source branchDirectSlot) ∈
-        FiniteTM0.sourceStates (directTable base c) := by
-    simp only [directTable, FiniteTM0.sourceStates, List.map_flatMap,
-      List.mem_flatMap]
-    refine ⟨positiveRule, hpositiveRule, ?_⟩
-    simp only [directRuleTable, List.map_map, List.mem_map,
-      FiniteTM0.Rule.mk, Function.comp_apply]
-    refine ⟨blankSymbol, ?_, ?_⟩
-    · simp [positiveRule, symbolsForRead]
-    · simp [positiveRule]
-  have himmortalBranch := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
-  rcases CounterControlArbitraryEntry.direct_step_or_haltsFrom base c
-      (resolve base c (directRef growth source branchDirectSlot))
-      T hsourceDirect with
-    hhalts | ⟨rule, hrule, hnumeric, hmatch, _hstep⟩
-  · exact False.elim
-      ((FullTM0.HaltsFrom.immortalFrom_iff_not _ _).mp
-        himmortalBranch hhalts)
-  · have hruleCounter :
-        CounterControlDeterministic.IsCounterSource rule.source :=
-      CounterControlDeterministic.rawDirectRules_counter_sources rule hrule
-    have hbranchCounter : CounterControlDeterministic.IsCounterSource
-        (directRef growth source branchDirectSlot) := by
-      simp [directRef, CounterControlDeterministic.IsCounterSource]
-    have hoffset : CounterControlDeterministic.sourceOffset rule.source =
-        CounterControlDeterministic.sourceOffset
-          (directRef growth source branchDirectSlot) := by
-      apply Nat.add_left_cancel
-      calc
-        rightLogicalBase base c +
-              CounterControlDeterministic.sourceOffset rule.source =
-            resolve base c rule.source :=
-          (CounterControlDeterministic.resolve_eq_add_sourceOffset
-            base c hruleCounter).symm
-        _ = resolve base c
-              (directRef growth source branchDirectSlot) := hnumeric.symm
-        _ = rightLogicalBase base c +
-              CounterControlDeterministic.sourceOffset
-                (directRef growth source branchDirectSlot) :=
-          CounterControlDeterministic.resolve_eq_add_sourceOffset
-            base c hbranchCounter
-    have hbranchWell : CounterControlDeterministic.WellFormedSource
-        (directRef growth source branchDirectSlot) := by
-      change source < logicalSpan ∧ branchDirectSlot < directStride
-      constructor
-      · exact state_lt_logicalSpan
-          (source_mem_programStates
-            (source, .decrement register ifZero ifPositive)
-            hprogram)
-      · norm_num [branchDirectSlot, directStride]
-    have hsymbolic : rule.source =
-        directRef growth source branchDirectSlot :=
-      CounterControlDeterministic.sourceOffset_injective_on
-        (CounterControlArbitraryEntry.rawDirectRule_source_wellFormed
-          rule hrule) hbranchWell hoffset
-    rcases CounterControlGuardedDecrementEntry.branchRule_read
-        hprogram rule hrule hsymbolic with hblank | hboundary
-    · left
-      rw [hblank] at hmatch
-      simpa [RawRead.Matches] using hmatch
-    · right
-      rw [hboundary] at hmatch
-      simpa [RawRead.Matches] using hmatch
+        (AnchoredCounterGeometry.registerGap register).castSucc :=
+  CounterControlDecrementEntry.branchRead_of_reaches base c hprogram
+    (foundCfg current) T hreaches himmortal
 
 /-- Immortality forces the branch cell of a completed decrement-entry route
 to carry exactly one symbol for which the instruction generated an outgoing
@@ -222,58 +148,15 @@ theorem branchOutcome_of_read
         (AnchoredCounterGeometry.registerGap register).castSucc) :
     Nonempty (BranchOutcome current growth source register
       ifZero ifPositive) := by
-  rcases hread with hblank | hboundary
-  · let raw : RawDirectRule :=
-      ⟨growth, directRef growth source branchDirectSlot, .blank,
-        searchRef growth source secondarySearchBase, .right⟩
-    have hraw : raw ∈ rawDirectRules := by
-      apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-        growth handoff.rule_mem
-      change raw ∈ validationRules growth source ++
-        decrementRules growth source register ifZero ifPositive
-      apply List.mem_append_right
-      simp [raw, decrementRules]
-    have hmatch : raw.read.Matches (branchTape handoff.route).read := by
-      simpa [raw, RawRead.Matches] using hblank
-    have hstep := CounterControlDirectSemantics.reaches_directRule base c raw
-      hraw (branchTape handoff.route) hmatch
-    refine ⟨BranchOutcome.positive handoff hblank ?_⟩
-    have hstep' : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨resolve base c (directRef growth source branchDirectSlot),
-          branchTape handoff.route⟩
-        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
-          (branchTape handoff.route).move (orient growth .right)⟩ := by
-      change FullTM0.Reaches (FiniteTM0.machine
-        (CounterControlPlan.table base c)) _ _
-      simpa [raw, searchRef, resolve] using hstep
-    exact handoff.reaches.trans hstep'
-  · let raw : RawDirectRule :=
-      ⟨growth, directRef growth source branchDirectSlot,
-        .boundary (AnchoredCounterGeometry.registerGap register).castSucc,
-        searchRef growth source zeroSearchBase, .right⟩
-    have hraw : raw ∈ rawDirectRules := by
-      apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-        growth handoff.rule_mem
-      change raw ∈ validationRules growth source ++
-        decrementRules growth source register ifZero ifPositive
-      apply List.mem_append_right
-      simp [raw, decrementRules]
-    have hmatch : raw.read.Matches (branchTape handoff.route).read := by
-      simpa [raw, RawRead.Matches] using hboundary
-    have hstep := CounterControlDirectSemantics.reaches_directRule base c raw
-      hraw (branchTape handoff.route) hmatch
-    refine ⟨BranchOutcome.zero handoff hboundary ?_⟩
-    have hstep' : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨resolve base c (directRef growth source branchDirectSlot),
-          branchTape handoff.route⟩
-        ⟨searchState base c ⟨growth, source, zeroSearchBase⟩,
-          (branchTape handoff.route).move (orient growth .right)⟩ := by
-      change FullTM0.Reaches (FiniteTM0.machine
-        (CounterControlPlan.table base c)) _ _
-      simpa [raw, searchRef, resolve] using hstep
-    exact handoff.reaches.trans hstep'
+  rcases CounterControlDecrementEntry.branchStep_of_read base c
+      handoff.rule_mem (branchTape handoff.route) hread with ⟨step⟩
+  cases step with
+  | positive hblank hstep =>
+      exact ⟨BranchOutcome.positive handoff hblank
+        (handoff.reaches.trans hstep)⟩
+  | zero hboundary hstep =>
+      exact ⟨BranchOutcome.zero handoff hboundary
+        (handoff.reaches.trans hstep)⟩
 
 /-- Complete an arbitrary genuine decrement-entry caller and select its exact
 generated branch. -/
