@@ -1212,6 +1212,188 @@ theorem ZeroCenteredEnd.distance_lt_layoutEnd
     current.distance suffix.current_gap
       (suffix.current_foundTape.trans hcurrentFound)
 
+/-! ## Branch handoffs which do not require new shifted geometry -/
+
+/-- Lift a monotone continuation of a retagged search back through an
+arbitrary outward-validation obligation. -/
+private def outwardHandoff_of_monotone
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current next : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    {obligation : OutwardObligation current growth source instruction}
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current) (foundCfg next))
+    (hdistance : current.distance ≤ next.distance)
+    (outcome : FoundMonotoneGuardedEntryOutcome next) :
+    OutwardInstructionHandoff current obligation := by
+  cases outcome with
+  | logical core htail hinside =>
+      exact .logical core (hreaches.trans htail) (hdistance.trans hinside)
+  | nextSearch guarded htail hle =>
+      exact .nextSearch guarded (hreaches.trans htail) (hdistance.trans hle)
+
+/-- The zero branch preserves every marker, so its centered endpoint and
+the retained suffix margin immediately give the instruction handoff. -/
+theorem ZeroSearchEntry.outwardHandoff_of_immortal
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    (entry : ZeroSearchEntry current growth source register ifZero ifPositive
+      suffix)
+    (obligation : OutwardObligation current growth source
+      (.decrement register ifZero ifPositive))
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  rcases entry.centeredEnd_of_immortal hmortal hrule himmortal with
+    ⟨endpoint⟩
+  exact ⟨.logical endpoint.core endpoint.reaches
+    endpoint.distance_lt_layoutEnd.le⟩
+
+/-- Retag the original outward gap with the first positive-decrement shift
+when both searches target the same boundary. -/
+private def retagCurrent
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands)
+    (htarget :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).target =
+        Target.boundary target)
+    (hdirection :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).searchDirection =
+        orient growth .right)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches current.outer
+      (orient growth .right) current.distance) : GenuineSearch base c := by
+  let search : Search := CounterControlCommandAt.rawTag raw hraw
+  exact {
+    search := search
+    outer := current.outer
+    distance := current.distance
+    gap := by
+      have hcommand : command base c search =
+          CounterControlCommandAt.compileRawCommand base c raw hraw := by
+        rfl
+      rw [hcommand, htarget, hdirection]
+      exact hgap }
+
+@[simp] private theorem retagCurrent_distance
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
+    (retagCurrent base c current growth target raw hraw htarget hdirection
+      hgap).distance = current.distance :=
+  rfl
+
+@[simp] private theorem retagCurrent_selectedRaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
+    (retagCurrent base c current growth target raw hraw htarget hdirection
+      hgap).selectedRaw = raw := by
+  exact CounterControlCommandAt.rawCommands_get_rawTag raw hraw
+
+private theorem retagCurrent_foundTape
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap
+    (hcurrentDirection : current.direction = orient growth .right) :
+    (retagCurrent base c current growth target raw hraw htarget hdirection
+      hgap).foundTape = current.foundTape := by
+  change current.outer.moveN
+      (command base c (CounterControlCommandAt.rawTag raw hraw)).searchDirection
+      current.distance =
+    current.outer.moveN current.direction current.distance
+  have hcommand : command base c (CounterControlCommandAt.rawTag raw hraw) =
+      CounterControlCommandAt.compileRawCommand base c raw hraw := by
+    rfl
+  rw [hcommand, hdirection, hcurrentDirection]
+
+/-- If the original validation caller found exactly the selected decrement
+boundary, its whole gap can be retagged as the first shift.  This retains
+the original distance while the existing total shift continuation handles
+both positive-distance and distance-zero searches. -/
+theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    (entry : PositiveSearchEntry current growth source register ifZero
+      ifPositive suffix)
+    (obligation : OutwardObligation current growth source
+      (.decrement register ifZero ifPositive))
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (hboundary : suffix.index.succ =
+      MarkerSchedule.decrementStartBoundary register)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  let raw := CounterControlGenuineDecrementEntry.firstDecrementShiftRaw
+    growth source register
+  have hraw : raw ∈ rawCommands :=
+    CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_mem_rawCommands
+      growth source register ifZero ifPositive hrule
+  have htarget :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).target =
+        Target.boundary suffix.index.succ := by
+    rw [CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_target]
+    exact congrArg Target.boundary hboundary.symm
+  have hdirection :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).searchDirection =
+        orient growth .right :=
+    CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_direction
+      base c growth source register hraw
+  let next := retagCurrent base c current growth suffix.index.succ raw hraw
+    htarget hdirection suffix.current_gap
+  have hnextFound : next.foundTape = current.foundTape :=
+    retagCurrent_foundTape base c current growth suffix.index.succ raw hraw
+      htarget hdirection suffix.current_gap suffix.current_direction
+  have hentryFound : entry.next.current.foundTape = entry.route.finish := by
+    rw [GenuineSearch.foundTape, entry.distance_eq,
+      FullTM0.Tape.moveN_zero, entry.outer_eq]
+  have hrouteFinish : entry.route.finish = current.foundTape :=
+    entry.route.finish_eq_current_of_boundary_eq hboundary
+  have hfoundEq : foundCfg entry.next.current = foundCfg next := by
+    rw [entry.next.current.foundCfg_eq, next.foundCfg_eq]
+    rw [entry.selectedRaw_eq, retagCurrent_selectedRaw,
+      hentryFound, hrouteFinish, hnextFound]
+  have himmortalEntry : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) entry.next.current.cfg :=
+    immortalFrom_of_reaches base c himmortal entry.reaches
+  have hfoundEntry := reaches_foundCfg_of_immortal entry.next.current
+    himmortalEntry
+  have hreachesNext : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      (foundCfg next) := by
+    rw [← hfoundEq]
+    exact entry.reaches.trans hfoundEntry
+  have himmortalNext := immortalFrom_of_reaches base c himmortal
+    hreachesNext
+  have hcommand : next.selectedRaw ∈
+      decrementShiftCommands growth source register := by
+    rw [retagCurrent_selectedRaw]
+    exact CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_mem
+      growth source register
+  rcases
+      CounterControlDecrementShiftContinuation.foundMonotoneGuardedEntryOutcome_of_decrementShift
+        base c hmortal next growth source register ifZero ifPositive hrule
+        hcommand himmortalNext with
+    ⟨outcome⟩
+  exact ⟨outwardHandoff_of_monotone hreachesNext (by simp [next]) outcome⟩
+
 end
 
 end CounterControlGenuineValidationOutwardDecrementSuffix
