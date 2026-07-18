@@ -51,7 +51,7 @@ def clearHorizontal (node x y : Nat) : Bool :=
   (modelData node).isSome && selectedHorizontal? node x y == none
 
 def fineNode? (node x y : Nat) : Option Nat :=
-  childNode node (x / 2 + 4 * (y / 2))
+  childNode node ((x / 2) % 4 + 4 * ((y / 2) % 4))
 
 def fineClearVertical (node x y : Nat) : Bool :=
   match fineNode? node x y with
@@ -113,6 +113,15 @@ def evenLocalValid (node : Nat) : Bool :=
 
 def evenLocalComplete : Bool :=
   reachable.all evenLocalValid
+
+def evenBaseNode? : Option Nat :=
+  childNode (encodeNode false 0) 10
+
+def evenBaseNodeId : Nat :=
+  evenBaseNode?.getD 0
+
+def evenBaseValid : Bool :=
+  rowClear evenBaseNodeId 1 && columnClear evenBaseNodeId 1
 
 end CanonicalFreeLine
 end Closed104

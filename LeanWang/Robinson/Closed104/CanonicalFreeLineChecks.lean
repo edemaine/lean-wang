@@ -19,6 +19,14 @@ set_option linter.style.nativeDecide false in
 theorem evenLocalComplete_eq_true : evenLocalComplete = true := by
   native_decide
 
+set_option linter.style.nativeDecide false in
+theorem evenBaseValid_eq_true : evenBaseValid = true := by
+  native_decide
+
+set_option linter.style.nativeDecide false in
+theorem evenBaseNode?_eq_some : evenBaseNode? = some evenBaseNodeId := by
+  native_decide
+
 end CanonicalFreeLine
 end Closed104
 end Figure13Layers

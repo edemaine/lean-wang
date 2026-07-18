@@ -15,6 +15,8 @@ namespace CanonicalFreeLine
 
 open ShadedSubstitution
 
+set_option maxRecDepth 20000
+
 theorem evenLocalValid_of_mem {node : Nat} (hnode : node ∈ reachable) :
     evenLocalValid node = true := by
   exact List.all_eq_true.1 evenLocalComplete_eq_true node hnode
@@ -75,6 +77,16 @@ theorem cycleSourceShade_eq_dark {node : Nat} (hnode : node ∈ reachable) :
     decide (cycleSourceShade? node = some .dark)) (by
       simp [evenLocalChecks])
   exact of_decide_eq_true checked
+
+theorem evenBaseRowClear_eq_true : rowClear evenBaseNodeId 1 = true := by
+  have checked := evenBaseValid_eq_true
+  simp only [evenBaseValid, Bool.and_eq_true] at checked
+  exact checked.1
+
+theorem evenBaseColumnClear_eq_true : columnClear evenBaseNodeId 1 = true := by
+  have checked := evenBaseValid_eq_true
+  simp only [evenBaseValid, Bool.and_eq_true] at checked
+  exact checked.2
 
 end CanonicalFreeLine
 end Closed104
