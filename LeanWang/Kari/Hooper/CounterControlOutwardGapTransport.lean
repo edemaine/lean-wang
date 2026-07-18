@@ -152,11 +152,76 @@ theorem found_inward_read_blank
   rw [hmove]
   simpa only [FullTM0.Tape.read_moveN] using gap.blank forward_lt
 
-/-- A canonical core center followed inward to the old found endpoint
+/-- A positive canonical anchor followed inward to the old found endpoint
 retains the old gap margin as soon as boundary `0` is absent along the
-intervening prefix.  This form is convenient when a completed shift suffix
-provides a backward-travel offset but not yet an exact canonical coordinate
-for the old boundary. -/
+intervening prefix. -/
+theorem distance_lt_anchor_of_centerOffset
+    {registers : Registers} {growth : Turing.Dir} {target : Fin 5}
+    {coreTape center oldOuter oldFound :
+      FullTM0.Tape (Symbol numTags)}
+    {distance anchor toFound : Nat}
+    (core : CoreRepresents registers growth coreTape)
+    (oldGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches oldOuter
+      (orient growth .right) distance)
+    (oldFound_eq : oldOuter.moveN (orient growth .right) distance =
+      oldFound)
+    (anchor_pos : 1 < anchor)
+    (centered : center = atLogical growth coreTape anchor)
+    (foundAt : center.moveN (orient growth .left) toFound = oldFound)
+    (avoidsZero : ∀ back ≤ toFound,
+      (center.moveN (orient growth .left) back).read ≠ boundarySymbol 0) :
+    distance < anchor := by
+  have hboundaryZero :
+      (center.moveN (orient growth .left)
+        (anchor - 1)).read = boundarySymbol 0 := by
+    rw [centered]
+    have hend : anchor = 1 + (anchor - 1) := by omega
+    conv_lhs =>
+      enter [1, 1]
+      rw [hend]
+    simp only [orient_eq_orientDirection]
+    rw [atLogical_moveN_left, atLogical_read]
+    simpa using core.boundary (0 : Fin 5)
+  by_contra hnot
+  have hdistance : anchor ≤ distance :=
+    Nat.le_of_not_gt hnot
+  by_cases hprefix : anchor - 1 ≤ toFound
+  · exact (avoidsZero (anchor - 1) hprefix) hboundaryZero
+  · have htoFound : toFound < anchor - 1 :=
+      Nat.lt_of_not_ge hprefix
+    let remaining := anchor - 1 - toFound
+    have hremainingPos : 0 < remaining := by
+      dsimp [remaining]
+      omega
+    have hremainingLe : remaining ≤ distance := by
+      dsimp [remaining]
+      omega
+    have hsum : toFound + remaining = anchor - 1 := by
+      dsimp [remaining]
+      omega
+    have hblank := found_inward_read_blank oldGap oldFound_eq
+      hremainingPos hremainingLe
+    have hopposite : NestingMachine.opposite (orient growth .right) =
+        orient growth .left := by
+      cases growth <;> rfl
+    rw [hopposite] at hblank
+    have hcoordinate :
+        (center.moveN (orient growth .left)
+          (toFound + remaining)).read =
+        (oldFound.moveN (orient growth .left) remaining).read := by
+      rw [← FullTM0.Tape.moveN_add, foundAt]
+    have hzeroBlank :
+        (center.moveN (orient growth .left)
+          (anchor - 1)).read = blankSymbol := by
+      rw [← hsum, hcoordinate]
+      exact hblank
+    rw [hboundaryZero] at hzeroBlank
+    exact blankSymbol_ne_boundarySymbol 0 hzeroBlank.symm
+
+/-- A canonical logical-end center followed inward to the old found endpoint
+retains the old gap margin.  This is the common specialization used by
+completed instruction schedules. -/
 theorem distance_lt_layoutEnd_of_centerOffset
     {registers : Registers} {growth : Turing.Dir} {target : Fin 5}
     {coreTape center oldOuter oldFound :
@@ -173,55 +238,11 @@ theorem distance_lt_layoutEnd_of_centerOffset
     (avoidsZero : ∀ back ≤ toFound,
       (center.moveN (orient growth .left) back).read ≠ boundarySymbol 0) :
     distance < layoutEnd registers := by
-  have hendPositive : 1 < layoutEnd registers := by
-    simp [layoutEnd, RegisterLayout.clockBoundary_eq]
-  have hboundaryZero :
-      (center.moveN (orient growth .left)
-        (layoutEnd registers - 1)).read = boundarySymbol 0 := by
-    rw [centered]
-    have hend : layoutEnd registers =
-        1 + (layoutEnd registers - 1) := by omega
-    conv_lhs =>
-      enter [1, 1]
-      rw [hend]
-    simp only [orient_eq_orientDirection]
-    rw [atLogical_moveN_left, atLogical_read]
-    simpa using core.boundary (0 : Fin 5)
-  by_contra hnot
-  have hdistance : layoutEnd registers ≤ distance :=
-    Nat.le_of_not_gt hnot
-  by_cases hprefix : layoutEnd registers - 1 ≤ toFound
-  · exact (avoidsZero (layoutEnd registers - 1) hprefix) hboundaryZero
-  · have htoFound : toFound < layoutEnd registers - 1 :=
-      Nat.lt_of_not_ge hprefix
-    let remaining := layoutEnd registers - 1 - toFound
-    have hremainingPos : 0 < remaining := by
-      dsimp [remaining]
-      omega
-    have hremainingLe : remaining ≤ distance := by
-      dsimp [remaining]
-      omega
-    have hsum : toFound + remaining = layoutEnd registers - 1 := by
-      dsimp [remaining]
-      omega
-    have hblank := found_inward_read_blank oldGap oldFound_eq
-      hremainingPos hremainingLe
-    have hopposite : NestingMachine.opposite (orient growth .right) =
-        orient growth .left := by
-      cases growth <;> rfl
-    rw [hopposite] at hblank
-    have hcoordinate :
-        (center.moveN (orient growth .left)
-          (toFound + remaining)).read =
-        (oldFound.moveN (orient growth .left) remaining).read := by
-      rw [← FullTM0.Tape.moveN_add, foundAt]
-    have hzeroBlank :
-        (center.moveN (orient growth .left)
-          (layoutEnd registers - 1)).read = blankSymbol := by
-      rw [← hsum, hcoordinate]
-      exact hblank
-    rw [hboundaryZero] at hzeroBlank
-    exact blankSymbol_ne_boundarySymbol 0 hzeroBlank.symm
+  apply distance_lt_anchor_of_centerOffset core oldGap oldFound_eq
+  · simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+  · exact centered
+  · exact foundAt
+  · exact avoidsZero
 
 /-- Inward-ray agreement at the corresponding canonical boundary is enough
 to retain the original outward caller's strict layout margin. -/
