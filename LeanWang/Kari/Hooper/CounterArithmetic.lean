@@ -342,21 +342,18 @@ theorem lookup_multiply_entry
       (show 0 < factor + 3 by omega))
 
 theorem lookup_multiply_add
-    {target temp : Register} {factor offset i : Nat}
-    (hi : i < factor) :
+    {target temp : Register} {factor offset localState : Nat}
+    (hlocal : 0 < localState) (hle : localState ≤ factor) :
     lookupInstruction
         ((multiplyFixedBlock target temp factor).instantiate offset)
-        (offset + (i + 1)) =
+        (offset + localState) =
       some (.increment temp
-        (offset + (if i + 1 = factor then 0 else i + 2))) := by
-  have hlocal : i + 1 < factor + 3 := by omega
-  have hnonzero : i + 1 ≠ 0 := by omega
-  have hle : i + 1 ≤ factor := by omega
-  simpa [multiplyFixedBlock, multiplyFixedInstruction,
-    hnonzero, hle] using
+        (offset + (if localState = factor then 0 else localState + 1))) := by
+  have hsource : localState < factor + 3 := by omega
+  simpa [multiplyFixedBlock, multiplyFixedInstruction, hlocal.ne', hle] using
     (lookup_denseBlock_instantiate
       (width := factor + 3) (offset := offset)
-      (instruction := multiplyFixedInstruction target temp factor) hlocal)
+      (instruction := multiplyFixedInstruction target temp factor) hsource)
 
 theorem lookup_multiply_transfer_entry
     {target temp : Register} {factor offset : Nat} :
@@ -415,7 +412,8 @@ private theorem multiply_addLoop_reaches_aux
         | succ remaining => simp [multiplyAddState]
                             omega
       have hlookup := lookup_multiply_add
-        (target := target) (temp := temp) (offset := offset) hi
+        (target := target) (temp := temp) (offset := offset)
+        (localState := i + 1) (by omega) (Nat.succ_le_iff.mpr hi)
       rw [htarget] at hlookup
       have hstep :
           step ((multiplyFixedBlock target temp factor).instantiate offset)
