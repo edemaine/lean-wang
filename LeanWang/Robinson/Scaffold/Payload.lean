@@ -189,18 +189,6 @@ def payloadsWithNParams (p : PayloadNParams) : TileSet :=
   p.colors.flatMap fun s =>
     payloadsWithNSParams { colors := p.colors, n := p.n, s := s }
 
-/-- Payload tiles with fixed north, south, and east colors and west in `colors`. -/
-def payloadsWithNSE (colors : List Nat) (n s e : Nat) : TileSet :=
-  payloadsWithNSEParams { colors := colors, n := n, s := s, e := e }
-
-/-- Payload tiles with fixed north and south colors and remaining colors in `colors`. -/
-def payloadsWithNS (colors : List Nat) (n s : Nat) : TileSet :=
-  payloadsWithNSParams { colors := colors, n := n, s := s }
-
-/-- Payload tiles with fixed north color and remaining colors in `colors`. -/
-def payloadsWithN (colors : List Nat) (n : Nat) : TileSet :=
-  payloadsWithNParams { colors := colors, n := n }
-
 /--
 All payload tiles whose edge colors come from a finite color palette.
 
@@ -208,7 +196,7 @@ Inactive scaffold cells use this complete palette, so they can absorb arbitrary
 instance-tile edge colors while still keeping the combined tileset finite.
 -/
 def completePayloadsFromColors (colors : List Nat) : TileSet :=
-  colors.flatMap fun n => payloadsWithN colors n
+  colors.flatMap fun n => payloadsWithNParams { colors := colors, n := n }
 
 /-- The inactive-cell payload palette induced by an instance tileset. -/
 def completePayloads (T : TileSet) : TileSet :=
@@ -305,173 +293,6 @@ theorem mem_completePayloads_of_mem {T : TileSet} {t : WangTile}
     (mem_payloadPalette_s ht)
     (mem_payloadPalette_e ht)
     (mem_payloadPalette_w ht)
-
-/--
-Any valid rectangle over the instance tileset is also valid over the inactive
-payload palette.  The edge constraints are unchanged; only tile membership is
-weakened from `T` to `completePayloads T`.
--/
-theorem validRectangle_completePayloads_of_validRectangle {T : TileSet}
-    {w h : Nat} {x : Rectangle w h}
-    (hx : ValidRectangle T x) : ValidRectangle (completePayloads T) x := by
-  constructor
-  · intro i j
-    exact mem_completePayloads_of_mem (hx.1 i j)
-  · exact hx.2
-
-theorem tileableRectangle_completePayloads_of_tileableRectangle {T : TileSet}
-    {w h : Nat} :
-    TileableRectangle T w h → TileableRectangle (completePayloads T) w h := by
-  rintro ⟨x, hx⟩
-  exact ⟨x, validRectangle_completePayloads_of_validRectangle hx⟩
-
-theorem tileableSquare_completePayloads_of_tileableSquare {T : TileSet}
-    {n : Nat} :
-    TileableSquare T n → TileableSquare (completePayloads T) n :=
-  tileableRectangle_completePayloads_of_tileableRectangle
-
-theorem tileableFixedCornerSquare_completePayloads_of_tileableFixedCornerSquare
-    {T : TileSet} {seed : WangTile} {n : Nat} :
-    TileableFixedCornerSquare T seed n →
-      TileableFixedCornerSquare (completePayloads T) seed n := by
-  rintro ⟨hn, x, hx, hseed⟩
-  exact ⟨hn, x, validRectangle_completePayloads_of_validRectangle hx, hseed⟩
-
-/--
-Box-pattern analogue of `validRectangle_completePayloads_of_validRectangle`.
-This is useful for finite scaffold patches, whose backward direction is stated
-on centered boxes rather than origin-based rectangles.
--/
-theorem validBoxTiling_completePayloads_of_validBoxTiling {T : TileSet}
-    {r : Nat} {x : BoxPattern T r} :
-    ValidBoxTiling T r x →
-      ValidBoxTiling (completePayloads T) r
-        (fun p => ⟨(x p).1, mem_completePayloads_of_mem (x p).2⟩) := by
-  intro hx
-  constructor
-  · intro p hp
-    exact hx.1 p hp
-  · intro p hp
-    exact hx.2 p hp
-
-theorem tileableBox_completePayloads_of_tileableBox {T : TileSet} {r : Nat} :
-    TileableBox T r → TileableBox (completePayloads T) r := by
-  rintro ⟨x, hx⟩
-  exact ⟨fun p => ⟨(x p).1, mem_completePayloads_of_mem (x p).2⟩,
-    validBoxTiling_completePayloads_of_validBoxTiling hx⟩
-
-theorem monochromeTile_mem_completePayloads (T : TileSet) :
-    monochromeTile ∈ completePayloads T := by
-  change ({ n := 0, s := 0, e := 0, w := 0 } : WangTile) ∈ completePayloads T
-  exact mk_mem_completePayloads
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-
-/-- Inactive payload tile whose west edge absorbs a specified palette color. -/
-def inactivePayloadWithWest (c : Nat) : WangTile where
-  n := 0
-  s := 0
-  e := 0
-  w := c
-
-/-- Inactive payload tile whose east edge absorbs a specified palette color. -/
-def inactivePayloadWithEast (c : Nat) : WangTile where
-  n := 0
-  s := 0
-  e := c
-  w := 0
-
-/-- Inactive payload tile whose south edge absorbs a specified palette color. -/
-def inactivePayloadWithSouth (c : Nat) : WangTile where
-  n := 0
-  s := c
-  e := 0
-  w := 0
-
-/-- Inactive payload tile whose north edge absorbs a specified palette color. -/
-def inactivePayloadWithNorth (c : Nat) : WangTile where
-  n := c
-  s := 0
-  e := 0
-  w := 0
-
-theorem inactivePayloadWithWest_mem_completePayloads {T : TileSet} {c : Nat}
-    (hc : c ∈ payloadPalette T) :
-    inactivePayloadWithWest c ∈ completePayloads T := by
-  change ({ n := 0, s := 0, e := 0, w := c } : WangTile) ∈ completePayloads T
-  exact mk_mem_completePayloads
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-    hc
-
-theorem inactivePayloadWithEast_mem_completePayloads {T : TileSet} {c : Nat}
-    (hc : c ∈ payloadPalette T) :
-    inactivePayloadWithEast c ∈ completePayloads T := by
-  change ({ n := 0, s := 0, e := c, w := 0 } : WangTile) ∈ completePayloads T
-  exact mk_mem_completePayloads
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-    hc
-    (zero_mem_payloadPalette T)
-
-theorem inactivePayloadWithSouth_mem_completePayloads {T : TileSet} {c : Nat}
-    (hc : c ∈ payloadPalette T) :
-    inactivePayloadWithSouth c ∈ completePayloads T := by
-  change ({ n := 0, s := c, e := 0, w := 0 } : WangTile) ∈ completePayloads T
-  exact mk_mem_completePayloads
-    (zero_mem_payloadPalette T)
-    hc
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-
-theorem inactivePayloadWithNorth_mem_completePayloads {T : TileSet} {c : Nat}
-    (hc : c ∈ payloadPalette T) :
-    inactivePayloadWithNorth c ∈ completePayloads T := by
-  change ({ n := c, s := 0, e := 0, w := 0 } : WangTile) ∈ completePayloads T
-  exact mk_mem_completePayloads
-    hc
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-    (zero_mem_payloadPalette T)
-
-theorem hMatches_inactivePayloadWithWest (t : WangTile) :
-    WangTile.HMatches t (inactivePayloadWithWest t.e) := by
-  rfl
-
-theorem hMatches_inactivePayloadWithEast (t : WangTile) :
-    WangTile.HMatches (inactivePayloadWithEast t.w) t := by
-  rfl
-
-theorem vMatches_inactivePayloadWithSouth (t : WangTile) :
-    WangTile.VMatches t (inactivePayloadWithSouth t.n) := by
-  rfl
-
-theorem vMatches_inactivePayloadWithNorth (t : WangTile) :
-    WangTile.VMatches (inactivePayloadWithNorth t.s) t := by
-  rfl
-
-theorem inactivePayloadWithWest_mem_completePayloads_of_mem
-    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
-    inactivePayloadWithWest t.e ∈ completePayloads T :=
-  inactivePayloadWithWest_mem_completePayloads (mem_payloadPalette_e ht)
-
-theorem inactivePayloadWithEast_mem_completePayloads_of_mem
-    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
-    inactivePayloadWithEast t.w ∈ completePayloads T :=
-  inactivePayloadWithEast_mem_completePayloads (mem_payloadPalette_w ht)
-
-theorem inactivePayloadWithSouth_mem_completePayloads_of_mem
-    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
-    inactivePayloadWithSouth t.n ∈ completePayloads T :=
-  inactivePayloadWithSouth_mem_completePayloads (mem_payloadPalette_n ht)
-
-theorem inactivePayloadWithNorth_mem_completePayloads_of_mem
-    {T : TileSet} {t : WangTile} (ht : t ∈ T) :
-    inactivePayloadWithNorth t.s ∈ completePayloads T :=
-  inactivePayloadWithNorth_mem_completePayloads (mem_payloadPalette_s ht)
 
 theorem tileColors_primrec : Primrec tileColors := by
   unfold tileColors

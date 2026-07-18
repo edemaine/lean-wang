@@ -73,16 +73,15 @@ def historyTile (M : Machine) (input : List Nat) (time position : Nat) :
 
 theorem historyTile_hMatches (M : Machine) (input : List Nat)
     (time position : Nat) :
-    WangTile.HMatches (historyTile M input time position).toWangTile
-      (historyTile M input time (position + 1)).toWangTile := by
-  simp [WangTile.HMatches, MachineHistoryTile.toWangTile,
-    historyTile, runCellLeft, runCell, run_succ]
-
-theorem historyTile_vMatches (M : Machine) (input : List Nat)
-    (time position : Nat) :
-    WangTile.VMatches (historyTile M input time position).toWangTile
-      (historyTile M input (time + 1) position).toWangTile := by
-  simp [WangTile.VMatches, MachineHistoryTile.toWangTile, historyTile]
+    (historyTile M input time position).prevCenter =
+        (historyTile M input time (position + 1)).prevLeft ∧
+      (historyTile M input time position).prevRight =
+        (historyTile M input time (position + 1)).prevCenter ∧
+      (historyTile M input time position).nextCenter =
+        (historyTile M input time (position + 1)).nextLeft ∧
+      (historyTile M input time position).nextRight =
+        (historyTile M input time (position + 1)).nextCenter := by
+  simp [historyTile, runCellLeft, runCell, run_succ]
 
 theorem historyTile_cells_mem {M : Machine} {input : List Nat}
     (supported : Supported M input) (notHalts : ¬ Halts M input)

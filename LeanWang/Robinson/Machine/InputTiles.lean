@@ -260,15 +260,13 @@ theorem initialTile_hMatches (M : Machine) (input : List Nat) (position : Nat) :
   by_cases hposition : position + 1 < tailPosition input
   · simp [hposition, show position < tailPosition input by omega,
       hMatches_toWangTile_iff]
-    simpa only [MachineHistoryTile.hMatches_toWangTile_iff_cells] using
-      historyTile_hMatches M input 0 position
+    exact historyTile_hMatches M input 0 position
   · have htail : tailPosition input ≤ position + 1 := by omega
     by_cases hbefore : position < tailPosition input
     · have heq : position + 1 = tailPosition input := by omega
       simp [hbefore, heq, hMatches_toWangTile_iff]
       rw [← heq]
-      simpa only [MachineHistoryTile.hMatches_toWangTile_iff_cells] using
-        historyTile_hMatches M input 0 position
+      exact historyTile_hMatches M input 0 position
     · simp [hbefore, hposition, hMatches_toWangTile_iff]
       rw [historyTile_zero_eq_tail_of_tailPosition_le M input (by omega :
         tailPosition input ≤ position)]
@@ -304,8 +302,7 @@ theorem runTile_hMatches (M : Machine) (input : List Nat)
   | zero => simpa [runTile] using initialTile_hMatches M input position
   | succ time =>
       simp [runTile, hMatches_toWangTile_iff]
-      simpa only [MachineHistoryTile.hMatches_toWangTile_iff_cells] using
-        historyTile_hMatches M input (time + 1) position
+      exact historyTile_hMatches M input (time + 1) position
 
 theorem runTile_vMatches (M : Machine) (input : List Nat)
     (time position : Nat) :

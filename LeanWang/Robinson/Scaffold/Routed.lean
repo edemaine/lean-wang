@@ -148,7 +148,7 @@ theorem edge_mem_payloadPalette_of_mem_completePayloads
     tile.n ∈ payloadPalette T ∧ tile.s ∈ payloadPalette T ∧
       tile.e ∈ payloadPalette T ∧ tile.w ∈ payloadPalette T := by
   rcases tile with ⟨n, s, e, w⟩
-  simpa [completePayloads, completePayloadsFromColors, payloadsWithN,
+  simpa [completePayloads, completePayloadsFromColors,
     payloadsWithNParams, payloadsWithNSParams, payloadsWithNSEParams] using htile
 
 theorem horizontalPayloadWires_primrec : Primrec horizontalPayloadWires := by
