@@ -103,7 +103,7 @@ private theorem reaches_append_right_of_source_disjoint {numSymbols : Nat}
 /-- The initializer table runs inside the complete controller table.  This is
 the state-allocation bridge: initializer sources begin at the shared core
 entry, strictly after every bounded-controller source. -/
-private theorem initializer_reaches_in_machine
+theorem initializer_reaches_in_machine
     (base : Nat) (c : Nat.Partrec.Code)
     {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
     (hreach : FullTM0.Reaches
