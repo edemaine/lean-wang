@@ -36,6 +36,7 @@ import LeanWang.Kari.Hooper.BasicLemma
 import LeanWang.Kari.Hooper.BasicLemmaConverse
 import LeanWang.Kari.Hooper.NestingMachine
 import LeanWang.Kari.Hooper.BoundedMarkerProgram
+import LeanWang.Kari.Hooper.BoundedMarkerProgramComputable
 import LeanWang.Kari.Hooper.BoundedMarkerContinuation
 import LeanWang.Kari.Hooper.CanonicalInitializerFrame
 import LeanWang.Kari.Hooper.CanonicalInitializerProgramComputable
@@ -70,7 +71,8 @@ anchors, concrete finite-table marker programs with
 independently directed searches and shifts,
 relocatable and reflectable finite tables, a verified finite-table linker,
 concrete arbitrary-entry liveness laws for the complete fixed source program,
-a deterministic tagged controller for a finite family of bounded searches,
+a deterministic, uniformly primitive-recursive tagged controller for a finite
+family of bounded searches,
 an executable uniformly computable tag-sensitive canonical initializer with
 exact framed semantics, framed increment/decrement and collision-cleanup
 geometry, an executable two-orientation counter-control plan with
