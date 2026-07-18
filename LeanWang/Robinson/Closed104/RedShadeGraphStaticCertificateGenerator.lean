@@ -72,18 +72,32 @@ def oddCyclePorts : List Port :=
 def oddNodes : List Node :=
   exploreFast oddIndexGrid 16 16 4000 oddCyclePorts
 
-def localForests : List (List Instruction) :=
+def allLocalForests : List (List Instruction) :=
   (List.finRange 104).map fun parent =>
     instructionsFor (sources parent) (localNodes parent)
 
-def connectorForests : List (List Instruction) :=
-  (List.finRange 104).flatMap fun parent =>
+def localForests : List (List Instruction) :=
+  allLocalForests.eraseDups
+
+def localForestIndices : List Nat :=
+  allLocalForests.map fun forest =>
+    (localForests.findIdx? (forest = ·)).getD localForests.length
+
+def allConnectorBundles : List (List (List Instruction)) :=
+  (List.finRange 104).map fun parent =>
     exitSides.flatMap fun side =>
       (List.range 2).map fun offset =>
         let source := internalPort side offset
         instructionsFor [source]
           (RedShadeGraphStaticCertificateGenerator.connectorNodes
             parent side offset)
+
+def connectorBundles : List (List (List Instruction)) :=
+  allConnectorBundles.eraseDups
+
+def connectorBundleIndices : List Nat :=
+  allConnectorBundles.map fun bundle =>
+    (connectorBundles.findIdx? (bundle = ·)).getD connectorBundles.length
 
 def baseForest : List Instruction :=
   instructionsFor [cycleSource]
@@ -124,6 +138,21 @@ def renderForests (forests : List (List Instruction)) : String :=
       (forests.map fun forest => "  " ++ renderInstructions forest "  ") ++
       "\n]"
 
+def renderForestBundles (bundles : List (List (List Instruction))) : String :=
+  if bundles.isEmpty then "[]"
+  else
+    "[\n" ++ String.intercalate ",\n"
+      (bundles.map fun bundle => "  " ++
+        (renderForests bundle).replace "\n" "\n  ") ++
+      "\n]"
+
+def renderNats (values : List Nat) : String :=
+  let lineCount := (values.length + 15) / 16
+  let lines := (List.range lineCount).map fun line =>
+    String.intercalate ", "
+      (((values.drop (16 * line)).take 16).map toString)
+  "[\n  " ++ String.intercalate ",\n  " lines ++ "\n]"
+
 def output : String :=
   "/-\n" ++
   "Copyright (c) 2026 lean-wang contributors. All rights reserved.\n" ++
@@ -131,15 +160,23 @@ def output : String :=
   "Authors: Erik Demaine, Stefan Langerman, GPT 5.5\n" ++
   "-/\n" ++
   "import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate\n\n" ++
-  "/-! Generated static predecessor forests for finite red-graph paths. -/\n\n" ++
+  "/-!\n" ++
+  "Generated static predecessor forests for finite red-graph paths.  Regenerate\n" ++
+  "this file with `RedShadeGraphStaticCertificateGenerator`; the active proof\n" ++
+  "checks these instructions without importing the generator or graph search.\n" ++
+  "-/\n\n" ++
   "namespace LeanWang\nnamespace OllingerRobinson\n" ++
   "namespace Figure13Layers\nnamespace Closed104\n" ++
   "namespace RedShadeGraphStaticCertificateData\n\n" ++
   "open RedShadeGraphStaticCertificate\n\n" ++
   "def localForests : List (List Instruction) :=\n" ++
     renderForests localForests ++ "\n\n" ++
-  "def connectorForests : List (List Instruction) :=\n" ++
-    renderForests connectorForests ++ "\n\n" ++
+  "def localForestIndices : List Nat :=\n" ++
+    renderNats localForestIndices ++ "\n\n" ++
+  "def connectorBundles : List (List (List Instruction)) :=\n" ++
+    renderForestBundles connectorBundles ++ "\n\n" ++
+  "def connectorBundleIndices : List Nat :=\n" ++
+    renderNats connectorBundleIndices ++ "\n\n" ++
   "def baseForest : List Instruction :=\n" ++
     renderInstructions baseForest "" ++ "\n\n" ++
   "def oddBaseForest : List Instruction :=\n" ++

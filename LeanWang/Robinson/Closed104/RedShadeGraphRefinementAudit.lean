@@ -31,8 +31,9 @@ def exitSideCode : ExitSide → Nat
 
 def connectorForest (parent : Index) (side : ExitSide) (offset : Nat) :
     List Instruction :=
-  connectorForests.getD
-    (4 * parent.val + 2 * exitSideCode side + offset) []
+  let bundle := connectorBundles.getD
+    (connectorBundleIndices.getD parent.val connectorBundles.length) []
+  bundle.getD (2 * exitSideCode side + offset) []
 
 def connectorRoute? (parent : Index) (side : ExitSide) (offset : Nat) :
     Option (Nat × State) :=

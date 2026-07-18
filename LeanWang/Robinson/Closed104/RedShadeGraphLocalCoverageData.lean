@@ -27,7 +27,7 @@ open RedShadeCycles RedShadeGraph RedShadeGraphRefinement
 set_option maxRecDepth 20000
 
 def forest (parent : Index) : List Instruction :=
-  localForests.getD parent.val []
+  localForests.getD (localForestIndices.getD parent.val localForests.length) []
 
 def routes (parent : Index) : List (Nat × State) :=
   evaluated (fineGrid parent) 8 8 (sources parent) (forest parent)
