@@ -40,6 +40,55 @@ private theorem write_neighbor_read
   cases direction <;>
     simp [FullTM0.Tape.read, FullTM0.Tape.move, FullTM0.Tape.write]
 
+/-- A distance-zero marker shift with a free destination already has the
+missing one-cell guard, independently of whether the command carries a
+collision reference. -/
+theorem guarded_of_zero_markerShift_destinationFree
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c)
+    (hzero : current.distance = 0)
+    (address : SearchAddress) (expected : Fin 5)
+    (search shift : Turing.Dir) (success : ControlRef)
+    (departure : Option Turing.Dir) (collision : Option ControlRef)
+    (hraw : current.selectedRaw = .markerShift address expected search shift
+      success departure collision)
+    (hfree : ¬ ShiftDestinationOccupied current.selectedRaw
+      current.foundTape) :
+    ∃ guarded : GuardedSearch base c, guarded.current = current := by
+  let raw : RawCommand := .markerShift address expected search shift success
+    departure collision
+  have hmem : raw ∈ rawCommands := by
+    simpa [raw, hraw] using current.selectedRaw_mem
+  have hsearch : orient address.growth search = current.direction := by
+    have hdirection := current.selectedRaw_direction_eq
+    rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+      at hdirection
+    rw [hraw] at hdirection
+    exact hdirection
+  have hshift : orient address.growth shift =
+      NestingMachine.opposite current.direction := by
+    have hopposite :=
+      CounterControlRawCallerClassification.markerShift_oriented_shift_eq_opposite_search
+        address expected search shift success departure collision hmem
+    rw [hsearch] at hopposite
+    exact hopposite
+  have hfound : current.foundTape = current.outer := by
+    simp [GenuineSearch.foundTape, hzero]
+  have hblankDestination : ((current.foundTape.write blankSymbol).move
+      (NestingMachine.opposite current.direction)).read = blankSymbol := by
+    have hfree' : ¬ ((current.foundTape.write blankSymbol).move
+        (orient address.growth shift)).read ≠ blankSymbol := by
+      simpa [hraw, ShiftDestinationOccupied] using hfree
+    rw [hshift] at hfree'
+    exact Classical.not_not.mp hfree'
+  have hguard : (current.outer.move
+      (NestingMachine.opposite current.direction)).read = blankSymbol := by
+    rw [← hfound]
+    rw [← write_neighbor_read current.foundTape blankSymbol
+      (NestingMachine.opposite current.direction)]
+    exact hblankDestination
+  exact ⟨⟨current, hguard⟩, rfl⟩
+
 /-- A selected distance-zero marker shift without a collision reference is
 guarded on every immortal found-state orbit. -/
 theorem guarded_of_zero_markerShift_noCollision
