@@ -368,10 +368,28 @@ structure DecrementPositiveLogicalEnd
     (foundCfg current.current) core.cfg
   strictly_inside : current.current.distance < layoutEnd core.registers
 
+/-- The same endpoint with the reconstruction equality and core invariant
+exposed for callers which began before the first decrement shift. -/
+structure DecrementPositiveCenteredEnd
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (direct : DecrementPositiveDirectHandoff current growth source register
+      ifZero ifPositive) : Type where
+  core : LogicalCore base c
+  core_represents : CoreRepresents core.registers growth core.tape
+  center : decrementPositiveTape direct.suffix =
+    atLogical growth core.tape (layoutEnd core.registers)
+  reaches : FullTM0.Reaches
+    (CounterControlNestingBridge.machine base c)
+    (foundCfg current.current) core.cfg
+  strictly_inside : current.current.distance < layoutEnd core.registers
+
 /-- Immortality at the guarded found state turns the completed positive
 decrement handoff into a represented logical core which strictly contains
 the guarded parent gap. -/
-theorem decrementPositiveLogicalEnd
+theorem decrementPositiveCenteredEnd
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
     (current : GuardedSearch base c)
@@ -382,7 +400,8 @@ theorem decrementPositiveLogicalEnd
     (ifZero ifPositive : Nat)
     (direct : DecrementPositiveDirectHandoff current growth source register
       ifZero ifPositive) :
-    Nonempty (DecrementPositiveLogicalEnd current) := by
+    Nonempty (DecrementPositiveCenteredEnd current growth source register
+      ifZero ifPositive direct) := by
   have himmortalLogical := immortalFrom_of_reaches base c himmortal
     direct.reaches
   change FullTM0.ImmortalFrom
@@ -424,7 +443,24 @@ theorem decrementPositiveLogicalEnd
     rw [hcenter] at hrun
     simpa [core, LogicalCore.cfg, LogicalCore.frame,
       LogicalCore.abstract, prefixLogicalCfg] using hrun
-  exact ⟨⟨core, hreaches, hinside⟩⟩
+  exact ⟨⟨core, hcore, hcenter, hreaches, hinside⟩⟩
+
+/-- Consumer-facing projection of `decrementPositiveCenteredEnd`. -/
+theorem decrementPositiveLogicalEnd
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (direct : DecrementPositiveDirectHandoff current growth source register
+      ifZero ifPositive) :
+    Nonempty (DecrementPositiveLogicalEnd current) := by
+  rcases decrementPositiveCenteredEnd base c hmortal current himmortal growth
+      source register ifZero ifPositive direct with ⟨endpoint⟩
+  exact ⟨⟨endpoint.core, endpoint.reaches, endpoint.strictly_inside⟩⟩
 
 /-- Completed positive-decrement shifts supply the logical branch of the
 found guarded-parent continuation law. -/
