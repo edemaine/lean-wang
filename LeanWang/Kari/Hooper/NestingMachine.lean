@@ -961,7 +961,7 @@ def searchSystem (radius : Nat) (expected : Fin 5)
   direction := id
   radius := fun _ => bound radius
   isBlank := fun a => a = MarkerMachine.blankSymbol
-  isMark := fun a => a = MarkerMachine.boundarySymbol expected
+  isMark := fun _ a => a = MarkerMachine.boundarySymbol expected
   nestedAt := NestedAt radius expected
   boundaryAt := BoundaryAt radius expected
 

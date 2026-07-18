@@ -63,7 +63,7 @@ configuration without changing the absolute tape contents, or reaches a
 terminal configuration of the whole machine. -/
 def Resolves (S : SearchSystem Γ Λ Search) (k : Nat) : Prop :=
   ∀ (s : Search) (T : FullTM0.Tape Γ),
-    SearchGap S.isBlank S.isMark T (S.direction s) k →
+    SearchGap S.isBlank (S.isMark s) T (S.direction s) k →
       FullTM0.Reaches S.machine (S.startCfg s T) (S.successCfg s T k) ∨
         FullTM0.HaltsFrom S.machine (S.startCfg s T)
 
@@ -80,12 +80,12 @@ computation either restores its saved frame at the far boundary or halts. -/
 structure ConverseNestingLaws (S : SearchSystem Γ Λ Search) where
   /-- A target within the local radius is found without nesting. -/
   direct : ∀ {s T k},
-    SearchGap S.isBlank S.isMark T (S.direction s) k →
+    SearchGap S.isBlank (S.isMark s) T (S.direction s) k →
       k ≤ S.radius s →
         FullTM0.Reaches S.machine (S.startCfg s T) (S.successCfg s T k)
   /-- A target outside the local radius launches a well-formed nested frame. -/
   launch : ∀ {s T k},
-    SearchGap S.isBlank S.isMark T (S.direction s) k →
+    SearchGap S.isBlank (S.isMark s) T (S.direction s) k →
       S.radius s < k →
         ∃ c, FullTM0.Reaches S.machine (S.startCfg s T) c ∧
           S.nestedAt ⟨s, T, k⟩ c
@@ -126,7 +126,7 @@ theorem resolves (L : ConverseNestingLaws S) : ∀ k, S.Resolves k := by
         · have hunwind := L.unwind hboundary
           have hkpos : 0 < k := lt_of_le_of_lt (Nat.zero_le _) hfar
           obtain ⟨j, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hkpos)
-          have htail : SearchGap S.isBlank S.isMark
+          have htail : SearchGap S.isBlank (S.isMark s)
               (T.move (S.direction s)) (S.direction s) j :=
             hgap.tail
           rcases ih j (Nat.lt_succ_self j) s

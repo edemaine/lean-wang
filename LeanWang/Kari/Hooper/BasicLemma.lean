@@ -52,7 +52,7 @@ structure SearchSystem (Γ : Type u) (Λ : Type v) (Search : Type w)
   direction : Search → Turing.Dir
   radius : Search → Nat
   isBlank : Γ → Prop
-  isMark : Γ → Prop
+  isMark : Search → Γ → Prop
   nestedAt : Frame Γ Search → FullTM0.Cfg Γ Λ → Prop
   boundaryAt : Frame Γ Search → FullTM0.Cfg Γ Λ → Prop
 
@@ -75,7 +75,7 @@ def successCfg (S : SearchSystem Γ Λ Search) (s : Search)
 the absolute tape contents. -/
 def Solves (S : SearchSystem Γ Λ Search) (k : Nat) : Prop :=
   ∀ (s : Search) (T : FullTM0.Tape Γ),
-    SearchGap S.isBlank S.isMark T (S.direction s) k →
+    SearchGap S.isBlank (S.isMark s) T (S.direction s) k →
       FullTM0.Reaches S.machine (S.startCfg s T) (S.successCfg s T k)
 
 end SearchSystem
@@ -89,13 +89,13 @@ inside a failed search grows forever. -/
 structure NestingLaws (S : SearchSystem Γ Λ Search) (CoreImmortal : Prop) where
   /-- A target within the local radius is found without nesting. -/
   direct : ∀ {s T k},
-    SearchGap S.isBlank S.isMark T (S.direction s) k →
+    SearchGap S.isBlank (S.isMark s) T (S.direction s) k →
       k ≤ S.radius s →
         FullTM0.Reaches S.machine (S.startCfg s T) (S.successCfg s T k)
   /-- A more distant target causes a well-formed nested computation to be
   launched inside the outer gap. -/
   launch : ∀ {s T k},
-    SearchGap S.isBlank S.isMark T (S.direction s) k →
+    SearchGap S.isBlank (S.isMark s) T (S.direction s) k →
       S.radius s < k →
         ∃ c, FullTM0.Reaches S.machine (S.startCfg s T) c ∧
           S.nestedAt ⟨s, T, k⟩ c
@@ -138,7 +138,7 @@ theorem basicLemma (L : NestingLaws S CoreImmortal) (hcore : CoreImmortal) :
         have hunwind := L.unwind hboundary
         have hkpos : 0 < k := lt_of_le_of_lt (Nat.zero_le _) hfar
         obtain ⟨j, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hkpos)
-        have htail : SearchGap S.isBlank S.isMark
+        have htail : SearchGap S.isBlank (S.isMark s)
             (T.move (S.direction s)) (S.direction s) j :=
           hgap.tail
         have hshort := ih j (Nat.lt_succ_self j) s
