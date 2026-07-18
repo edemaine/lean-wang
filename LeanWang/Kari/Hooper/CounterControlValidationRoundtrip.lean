@@ -592,6 +592,53 @@ theorem logical_reconstructs_firstNonblank_of_immortal
   · exact ⟨instruction, registers, coreTape, distance, hrule, hcore,
       hcenter, hbody, hpast, hrunway, hnonblank⟩
 
+/-- Consumer-facing form of the first-obstruction theorem.  The obstruction
+is classified by an actual controller target, and the body configuration is
+stated directly on the reconstructed core tape.  These are exactly the raw
+fields of a finite tag-free core target representation. -/
+theorem logical_reconstructs_coreTarget_fields_of_immortal
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (growth : Turing.Dir) (source : Nat) (hsourceBound : source < logicalSpan)
+    (logicalTape : FullTM0.Tape (Symbol numTags))
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+        ⟨logicalState base c growth source, logicalTape⟩) :
+    ∃ (instruction : CounterMachine.Instruction)
+        (registers : Registers)
+        (coreTape : FullTM0.Tape (Symbol numTags))
+        (distance : Nat) (target : Target numTags),
+      (source, instruction) ∈ GlobalSourceProgram.program ∧
+        CounterControlCoreFrame.CoreRepresents registers growth coreTape ∧
+        layoutEnd registers < distance ∧
+        (∀ position, layoutEnd registers < position →
+          position < distance →
+            FramedMarkerTape.logicalTape growth coreTape position =
+              blankSymbol) ∧
+        target.Matches
+          (FramedMarkerTape.logicalTape growth coreTape distance) ∧
+        logicalTape = atLogical growth coreTape (layoutEnd registers) ∧
+        FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          ⟨logicalState base c growth source, logicalTape⟩
+          ⟨resolve base c (bodyEntry growth source instruction),
+            atLogical growth coreTape (layoutEnd registers)⟩ := by
+  rcases logical_reconstructs_firstNonblank_of_immortal base c hmortal
+      growth source hsourceBound logicalTape himmortal with
+    ⟨instruction, registers, coreTape, distance, hrule, hcore, hcenter,
+      hbody, hpast, hrunway, hnonblank⟩
+  rcases CounterControlArbitrarySearchMortality.exists_target_matches_of_ne_blank
+      (FramedMarkerTape.logicalTape growth coreTape distance) hnonblank with
+    ⟨target, htarget⟩
+  have hbodyCanonical : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      ⟨logicalState base c growth source, logicalTape⟩
+      ⟨resolve base c (bodyEntry growth source instruction),
+        atLogical growth coreTape (layoutEnd registers)⟩ := by
+    rw [← hcenter]
+    exact hbody
+  exact ⟨instruction, registers, coreTape, distance, target, hrule, hcore,
+    hpast, hrunway, htarget, hcenter, hbodyCanonical⟩
+
 end
 
 end CounterControlValidationRoundtrip
