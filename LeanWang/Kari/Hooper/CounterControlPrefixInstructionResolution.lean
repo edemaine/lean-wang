@@ -1081,11 +1081,8 @@ theorem machine_reaches_incrementHandoff_of_prefix
   have hcoord : boundaryOffset registers
         (MarkerSchedule.decrementStartBoundary register) + 1 =
       boundaryOffset (registers.increment register)
-        (MarkerSchedule.decrementStartBoundary register) := by
-    cases register <;>
-      simp [MarkerSchedule.decrementStartBoundary, boundaryOffset,
-        CounterLayout.boundaryPos, RegisterLayout.values,
-        Registers.increment, Registers.set, Registers.get] <;> omega
+        (MarkerSchedule.decrementStartBoundary register) :=
+    AnchoredCounterGeometry.incrementStartBoundary_add_one registers register
   rw [show orient growth .right =
     OrientedMarkerTape.orientDirection growth .right by
       exact orient_eq_orientDirection growth .right,
@@ -1704,10 +1701,12 @@ def prefixDecrementEnvelope (growth : Turing.Dir) (limit : Nat) :
       h.core_before_limit)
   registerValue_lt := by
     intro registers T h i
-    exact registerValue_lt_of_layoutEnd_lt registers i h.core_before_limit
+    exact AnchoredCounterGeometry.registerValue_lt_of_layoutEnd_lt
+      registers i h.core_before_limit
   limit_positive := by
     intro registers T h
-    exact limit_positive_of_layoutEnd_lt registers h.core_before_limit
+    exact AnchoredCounterGeometry.limit_positive_of_layoutEnd_lt
+      registers h.core_before_limit
   decrement := by
     intro registers T register h hpositive
     exact decrementCoreTape_preserves_prefix h register hpositive

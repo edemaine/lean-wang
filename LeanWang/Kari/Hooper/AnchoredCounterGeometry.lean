@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Kari.Hooper.MarkerValidation
+import LeanWang.Kari.Hooper.FramedMarkerTape
 
 /-!
 # Boundary-4 geometry for counter instructions
@@ -31,6 +32,7 @@ namespace AnchoredCounterGeometry
 
 open Turing CounterMachine
 open MarkerSchedule
+open FramedMarkerTape
 
 private def leftLeg (target : Fin 5) : MarkerValidation.Leg :=
   ⟨target, .left⟩
@@ -55,6 +57,62 @@ theorem registerGap_succ (register : Register) :
     (registerGap register).succ = decrementStartBoundary register := by
   cases register <;> rfl
 
+@[simp] theorem values_registerGap (registers : Registers)
+    (register : Register) :
+    RegisterLayout.values registers (registerGap register) =
+      registers.get register := by
+  cases register <;> rfl
+
+/-- Each register value is bounded by the end of the complete marker layout. -/
+theorem registerValue_lt_of_layoutEnd_lt (registers : Registers)
+    (i : Fin 4) {limit : Nat} (h : layoutEnd registers < limit) :
+    RegisterLayout.values registers i < limit := by
+  fin_cases i <;>
+    simp [RegisterLayout.values, layoutEnd,
+      RegisterLayout.clockBoundary_eq] at h ⊢ <;> omega
+
+/-- A strict upper bound on a complete marker layout is positive. -/
+theorem limit_positive_of_layoutEnd_lt (registers : Registers)
+    {limit : Nat} (h : layoutEnd registers < limit) : 0 < limit := by
+  have hend : 0 < layoutEnd registers := by
+    simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+  omega
+
+/-- The first cell after an increment schedule is the corresponding boundary
+in the incremented layout. -/
+theorem incrementStartBoundary_add_one (registers : Registers)
+    (register : Register) :
+    boundaryOffset registers (decrementStartBoundary register) + 1 =
+      boundaryOffset (registers.increment register)
+        (decrementStartBoundary register) := by
+  cases register <;>
+    simp [decrementStartBoundary, boundaryOffset,
+      CounterLayout.boundaryPos, RegisterLayout.values,
+      Registers.increment, Registers.set, Registers.get] <;> omega
+
+/-- When the selected register is zero, stepping left from its final boundary
+lands on the preceding boundary. -/
+theorem zeroTest_predecessor (registers : Registers) (register : Register)
+    (hzero : registers.get register = 0) :
+    boundaryOffset registers (decrementStartBoundary register) - 1 =
+      boundaryOffset registers (registerGap register).castSucc := by
+  cases register <;>
+    simp [Registers.get] at hzero <;>
+    simp [decrementStartBoundary, registerGap, boundaryOffset,
+      CounterLayout.boundaryPos, RegisterLayout.values, hzero]
+
+/-- Arithmetic coordinate of the last blank cell in a positive selected
+register gap. -/
+theorem positiveTest_predecessor (registers : Registers)
+    (register : Register) (hpositive : 0 < registers.get register) :
+    firstGapOffset registers (registerGap register) +
+        (registers.get register - 1) =
+      boundaryOffset registers (decrementStartBoundary register) - 1 := by
+  cases register <;>
+    simp [Registers.get, decrementStartBoundary, registerGap,
+      firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
+      RegisterLayout.values] at hpositive ⊢ <;> omega
+
 /-- Route from boundary `4` to the boundary immediately after the selected
 register. -/
 def routeToDecrementStart : Register → List MarkerValidation.Leg
@@ -78,6 +136,10 @@ def routeFromZero : Register → List MarkerValidation.Leg
   | .right => [rightLeg 2, rightLeg 3, rightLeg 4]
   | .temp => [rightLeg 3, rightLeg 4]
   | .clock => [rightLeg 4]
+
+theorem routeFromZero_ne_nil (register : Register) :
+    routeFromZero register ≠ [] := by
+  cases register <;> simp [routeFromZero]
 
 theorem routeToDecrementStart_executes (registers : Registers)
     (register : Register) :

@@ -9,6 +9,7 @@ import LeanWang.Kari.Hooper.CounterControlCleanupSemantics
 import LeanWang.Kari.Hooper.CounterControlSearchSystem
 import LeanWang.Kari.Hooper.CounterControlFrameBacking
 import LeanWang.Kari.Hooper.CounterControlStepGeometry
+import LeanWang.Kari.Hooper.CounterControlCoreFrame
 
 /-!
 # Semantics of complete counter-controller instructions
@@ -2483,11 +2484,9 @@ theorem machine_reaches_incrementHandoff
   have hcoord : boundaryOffset spec.registers
         (MarkerSchedule.decrementStartBoundary register) + 1 =
       boundaryOffset (spec.registers.increment register)
-        (MarkerSchedule.decrementStartBoundary register) := by
-    cases register <;>
-      simp [MarkerSchedule.decrementStartBoundary, boundaryOffset,
-        CounterLayout.boundaryPos, RegisterLayout.values,
-        Registers.increment, Registers.set, Registers.get] <;> omega
+        (MarkerSchedule.decrementStartBoundary register) :=
+    AnchoredCounterGeometry.incrementStartBoundary_add_one
+      spec.registers register
   rw [show orient spec.growth .right =
     OrientedMarkerTape.orientDirection spec.growth .right by
       exact orient_eq_orientDirection spec.growth .right,
@@ -2767,32 +2766,9 @@ theorem decrement_zero_predecessor_read
   have hcoord : boundaryOffset spec.registers
         (MarkerSchedule.decrementStartBoundary register) - 1 =
       boundaryOffset spec.registers
-        (AnchoredCounterGeometry.registerGap register).castSucc := by
-    cases register with
-    | left =>
-        have hz : spec.registers.left = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | right =>
-        have hz : spec.registers.right = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | temp =>
-        have hz : spec.registers.temp = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | clock =>
-        have hz : spec.registers.clock = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
+        (AnchoredCounterGeometry.registerGap register).castSucc :=
+    AnchoredCounterGeometry.zeroTest_predecessor
+      spec.registers register hzero
   rw [hcoord, atLogical_read]
   exact h.boundary _
 
@@ -2879,39 +2855,16 @@ theorem machine_reaches_decrementZeroRecovery_solved
   have hsourcePosition : boundaryOffset spec.registers
         (MarkerSchedule.decrementStartBoundary register) - 1 =
       boundaryOffset spec.registers
-        (AnchoredCounterGeometry.registerGap register).castSucc := by
-    cases register with
-    | left =>
-        have hz : spec.registers.left = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | right =>
-        have hz : spec.registers.right = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | temp =>
-        have hz : spec.registers.temp = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | clock =>
-        have hz : spec.registers.clock = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
+        (AnchoredCounterGeometry.registerGap register).castSucc :=
+    AnchoredCounterGeometry.zeroTest_predecessor
+      spec.registers register hzero
   have hrun := route_reaches_solved_at_of_ne_nil base c
     spec.outerDistance hshort spec.growth source zeroSearchBase zeroDirectBase
     (directRef spec.growth source branchDirectSlot)
     (.logical spec.growth ifZero)
     (AnchoredCounterGeometry.registerGap register).castSucc route
-    (by cases register <;> simp [route,
-      AnchoredCounterGeometry.routeFromZero]) T
+    (by simpa [route] using
+      AnchoredCounterGeometry.routeFromZero_ne_nil register) T
     (boundaryOffset spec.registers
       (AnchoredCounterGeometry.registerGap register).castSucc)
     (layoutEnd spec.registers)
@@ -2975,65 +2928,10 @@ theorem decrement_positive_predecessor_blank
     (atLogical spec.growth T
       (boundaryOffset spec.registers
         (MarkerSchedule.decrementStartBoundary register) - 1)).read =
-      blankSymbol := by
-  rw [atLogical_read]
-  cases register with
-  | left =>
-      have hp : 0 < spec.registers.left := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (0 : Fin 4) (spec.registers.left - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset spec.registers 0 : Int) +
-          (spec.registers.left - 1 : Nat) =
-          (boundaryOffset spec.registers 1 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | right =>
-      have hp : 0 < spec.registers.right := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (1 : Fin 4) (spec.registers.right - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset spec.registers 1 : Int) +
-          (spec.registers.right - 1 : Nat) =
-          (boundaryOffset spec.registers 2 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | temp =>
-      have hp : 0 < spec.registers.temp := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (2 : Fin 4) (spec.registers.temp - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset spec.registers 2 : Int) +
-          (spec.registers.temp - 1 : Nat) =
-          (boundaryOffset spec.registers 3 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | clock =>
-      have hp : 0 < spec.registers.clock := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (3 : Fin 4) (spec.registers.clock - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset spec.registers 3 : Int) +
-          (spec.registers.clock - 1 : Nat) =
-          (boundaryOffset spec.registers 4 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, layoutEnd, RegisterLayout.clockBoundary_eq]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
+      blankSymbol :=
+  (show CounterControlCoreFrame.CoreRepresents
+      spec.registers spec.growth T from ⟨h.core⟩)
+    |>.positive_predecessor_blank register hpositive
 
 /-- Clearing a source cell which the next canonical core covers preserves
 the same exact outer backing. -/

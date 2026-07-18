@@ -114,6 +114,32 @@ theorem gap_blank (h : CoreRepresents registers growth T)
   rw [hcoordinate']
   exact hcore
 
+/-- The cell immediately preceding the tested boundary is blank when the
+selected represented register is positive. -/
+theorem positive_predecessor_blank
+    (h : CoreRepresents registers growth T) (register : Register)
+    (hpositive : 0 < registers.get register) :
+    (atLogical growth T
+      (boundaryOffset registers
+        (MarkerSchedule.decrementStartBoundary register) - 1)).read =
+      blankSymbol := by
+  rw [atLogical_read]
+  have hblank := h.gap_blank
+    (AnchoredCounterGeometry.registerGap register)
+    (registers.get register - 1) (by
+      rw [AnchoredCounterGeometry.values_registerGap]
+      omega)
+  have hcoordinate :
+      (firstGapOffset registers
+          (AnchoredCounterGeometry.registerGap register) : Int) +
+          (registers.get register - 1 : Nat) =
+        (boundaryOffset registers
+          (MarkerSchedule.decrementStartBoundary register) - 1 : Nat) := by
+    exact_mod_cast AnchoredCounterGeometry.positiveTest_predecessor
+      registers register hpositive
+  rw [hcoordinate] at hblank
+  exact hblank
+
 theorem searchGap_boundary_zero
     (h : CoreRepresents registers growth T) :
     SearchGap (fun symbol => symbol = blankSymbol)

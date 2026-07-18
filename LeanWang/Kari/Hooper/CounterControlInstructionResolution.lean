@@ -2167,39 +2167,16 @@ theorem machine_reaches_decrementZeroRecovery_or_halts
   have hsourcePosition : boundaryOffset spec.registers
         (MarkerSchedule.decrementStartBoundary register) - 1 =
       boundaryOffset spec.registers
-        (AnchoredCounterGeometry.registerGap register).castSucc := by
-    cases register with
-    | left =>
-        have hz : spec.registers.left = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | right =>
-        have hz : spec.registers.right = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | temp =>
-        have hz : spec.registers.temp = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | clock =>
-        have hz : spec.registers.clock = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
+        (AnchoredCounterGeometry.registerGap register).castSucc :=
+    AnchoredCounterGeometry.zeroTest_predecessor
+      spec.registers register hzero
   have hrun := route_reaches_or_halts_at_of_ne_nil base c
     spec.outerDistance hshort spec.growth source zeroSearchBase zeroDirectBase
     (directRef spec.growth source branchDirectSlot)
     (.logical spec.growth ifZero)
     (AnchoredCounterGeometry.registerGap register).castSucc route
-    (by cases register <;> simp [route,
-      AnchoredCounterGeometry.routeFromZero]) T
+    (by simpa [route] using
+      AnchoredCounterGeometry.routeFromZero_ne_nil register) T
     (boundaryOffset spec.registers
       (AnchoredCounterGeometry.registerGap register).castSucc)
     (layoutEnd spec.registers)

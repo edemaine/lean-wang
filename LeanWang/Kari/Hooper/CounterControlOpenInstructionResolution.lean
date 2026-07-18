@@ -1315,11 +1315,8 @@ theorem machine_reaches_incrementHandoff_of_open
   have hcoord : boundaryOffset registers
         (MarkerSchedule.decrementStartBoundary register) + 1 =
       boundaryOffset (registers.increment register)
-        (MarkerSchedule.decrementStartBoundary register) := by
-    cases register <;>
-      simp [MarkerSchedule.decrementStartBoundary, boundaryOffset,
-        CounterLayout.boundaryPos, RegisterLayout.values,
-        Registers.increment, Registers.set, Registers.get] <;> omega
+        (MarkerSchedule.decrementStartBoundary register) :=
+    AnchoredCounterGeometry.incrementStartBoundary_add_one registers register
   rw [show orient growth .right =
     OrientedMarkerTape.orientDirection growth .right by
       exact orient_eq_orientDirection growth .right,
@@ -1789,22 +1786,6 @@ theorem installCore_open_of_extension
     exact h.runway position (hle.trans_lt hpast)
 
 /-! ## A common envelope interface for positive-decrement schedules -/
-
-/-- Every represented register value lies below any strict upper bound on
-the complete five-boundary layout. -/
-theorem registerValue_lt_of_layoutEnd_lt (registers : Registers)
-    (i : Fin 4) {limit : Nat} (h : layoutEnd registers < limit) :
-    RegisterLayout.values registers i < limit := by
-  fin_cases i <;>
-    simp [RegisterLayout.values, layoutEnd,
-      RegisterLayout.clockBoundary_eq] at h ⊢ <;> omega
-
-/-- A strict bound on a counter layout is necessarily positive. -/
-theorem limit_positive_of_layoutEnd_lt (registers : Registers)
-    {limit : Nat} (h : layoutEnd registers < limit) : 0 < limit := by
-  have hend : 0 < layoutEnd registers := by
-    simp [layoutEnd, RegisterLayout.clockBoundary_eq]
-  omega
 
 /-- The operational content needed by the four positive-decrement schedules.
 The open and finite-prefix representations differ only in how their blank
@@ -2581,10 +2562,11 @@ def openDecrementEnvelope (growth : Turing.Dir) (limit : Nat) :
     exact ⟨installCore_open_of_extension h.1 (heq.ge), by simpa [heq] using h.2⟩
   registerValue_lt := by
     intro registers T h i
-    exact registerValue_lt_of_layoutEnd_lt registers i h.2
+    exact AnchoredCounterGeometry.registerValue_lt_of_layoutEnd_lt
+      registers i h.2
   limit_positive := by
     intro registers T h
-    exact limit_positive_of_layoutEnd_lt registers h.2
+    exact AnchoredCounterGeometry.limit_positive_of_layoutEnd_lt registers h.2
   decrement := by
     intro registers T register h hpositive
     exact ⟨decrementCoreTape_preserves_open h.1 register hpositive,
@@ -2636,66 +2618,8 @@ theorem decrement_positive_predecessor_blank_of_core
     (atLogical growth T
       (boundaryOffset registers
         (MarkerSchedule.decrementStartBoundary register) - 1)).read =
-      blankSymbol := by
-  rw [atLogical_read]
-  cases register with
-  | left =>
-      have hp : 0 < registers.left := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (0 : Fin 4) (registers.left - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset registers 0 : Int) +
-          (registers.left - 1 : Nat) =
-          (boundaryOffset registers 1 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | right =>
-      have hp : 0 < registers.right := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (1 : Fin 4) (registers.right - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset registers 1 : Int) +
-          (registers.right - 1 : Nat) =
-          (boundaryOffset registers 2 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | temp =>
-      have hp : 0 < registers.temp := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (2 : Fin 4) (registers.temp - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset registers 2 : Int) +
-          (registers.temp - 1 : Nat) =
-          (boundaryOffset registers 3 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | clock =>
-      have hp : 0 < registers.clock := by
-        simpa [Registers.get] using hpositive
-      have hb := h.gap_blank (3 : Fin 4) (registers.clock - 1) (by
-        simp [RegisterLayout.values]
-        omega)
-      have hcoord : (firstGapOffset registers 3 : Int) +
-          (registers.clock - 1 : Nat) =
-          (boundaryOffset registers 4 - 1 : Nat) := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, layoutEnd,
-          RegisterLayout.clockBoundary_eq]
-        omega
-      rw [hcoord] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
+      blankSymbol :=
+  h.positive_predecessor_blank register hpositive
 
 /-- The positive branch reads that blank predecessor and moves right onto the
 first boundary of the decrement schedule. -/
@@ -3064,39 +2988,15 @@ theorem machine_reaches_decrementZeroRecovery_or_halts_of_core
   have hsourcePosition : boundaryOffset registers
         (MarkerSchedule.decrementStartBoundary register) - 1 =
       boundaryOffset registers
-        (AnchoredCounterGeometry.registerGap register).castSucc := by
-    cases register with
-    | left =>
-        have hz : registers.left = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | right =>
-        have hz : registers.right = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | temp =>
-        have hz : registers.temp = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
-    | clock =>
-        have hz : registers.clock = 0 := by
-          simpa [Registers.get] using hzero
-        simp [MarkerSchedule.decrementStartBoundary,
-          AnchoredCounterGeometry.registerGap, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values, hz]
+        (AnchoredCounterGeometry.registerGap register).castSucc :=
+    AnchoredCounterGeometry.zeroTest_predecessor registers register hzero
   have hrun := route_reaches_or_halts_at_of_ne_nil base c limit
     (shortResolves_all base c limit) growth source zeroSearchBase
     zeroDirectBase (directRef growth source branchDirectSlot)
     (.logical growth ifZero)
     (AnchoredCounterGeometry.registerGap register).castSucc route
-    (by cases register <;> simp [route,
-      AnchoredCounterGeometry.routeFromZero]) T
+    (by simpa [route] using
+      AnchoredCounterGeometry.routeFromZero_ne_nil register) T
     (boundaryOffset registers
       (AnchoredCounterGeometry.registerGap register).castSucc)
     (layoutEnd registers)
