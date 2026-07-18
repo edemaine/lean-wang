@@ -163,7 +163,7 @@ theorem parentDistance_lt_layoutEnd_of_toBoundary_endpoint
         (boundaryOffset registers i.castSucc) := by
     exact htail.start_eq hcore hread progress.suffix.tailGaps hcenter
   have hdirection : current.direction = orient growth .left := by
-    have hdirection := current.selectedRaw_direction_eq
+    have hdirection := current.current.selectedRaw_direction_eq
     rw [CounterControlCommandAt.compileRawCommand_searchDirection]
       at hdirection
     rw [progress.suffix.raw_eq, hcurrent] at hdirection

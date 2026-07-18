@@ -165,6 +165,45 @@ private theorem moveN_move_moveN_opposite
       FullTM0.Tape.offset, FullTM0.Tape.move] <;>
     congr 1 <;> omega
 
+/-- A boundary search starting immediately beyond the found end of a blank
+gap must travel at least as far as that gap before finding any boundary in
+the reverse direction. -/
+theorem reverseBoundaryGap_distance_ge
+    {outer : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
+    {distance replayDistance : Nat} {target replayTarget : Fin 5}
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches outer direction distance)
+    (hreplay : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary replayTarget).Matches
+      ((outer.moveN direction distance).move
+        (NestingMachine.opposite direction))
+      (NestingMachine.opposite direction) replayDistance) :
+    distance ≤ replayDistance := by
+  by_contra hnot
+  have hlt : replayDistance < distance := by omega
+  let index := distance - (replayDistance + 1)
+  have hindex : index < distance := by
+    dsimp [index]
+    omega
+  have hblank := hgap.blank hindex
+  have hmarked := hreplay.marked
+  have htapes := moveN_move_moveN_opposite outer direction distance
+    replayDistance hlt
+  have hread :
+      (((outer.moveN direction distance).move
+          (NestingMachine.opposite direction)).moveN
+            (NestingMachine.opposite direction) replayDistance).read =
+        outer (FullTM0.Tape.offset direction index) := by
+    rw [htapes]
+    simp [index]
+  have hboundary :
+      outer (FullTM0.Tape.offset direction index) =
+        boundarySymbol replayTarget := by
+    rw [← hread]
+    simpa [FullTM0.Tape.read_moveN, Target.Matches] using hmarked
+  rw [hboundary] at hblank
+  exact blankSymbol_ne_boundarySymbol replayTarget hblank.symm
+
 private theorem move_move_opposite
     (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir) :
     (T.move direction).move (NestingMachine.opposite direction) = T := by

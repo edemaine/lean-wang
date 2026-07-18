@@ -125,8 +125,10 @@ private theorem progressedRoute
     Nonempty (ResumedRouteEnd resumed growth source searchSlot directSlot
       after route) := by
   have hsuccess := resumed.reaches_selectedRaw_success
-  have htape := CounterControlRouteSuffixMortality.exactSuccessTape_eq_of_mem_routeCommandsAux growth source
-    searchSlot directSlot after route hroute resumed.parentFoundTape
+  have htape :=
+    CounterControlRouteSuffixMortality.exactSuccessTape_eq_of_mem_routeCommandsAux
+      growth source searchSlot directSlot after route hroute
+      resumed.parentFoundTape
   rw [htape] at hsuccess
   have himmortalSuccess := FullTM0.ImmortalFrom.of_reaches himmortal hsuccess
   have htarget : RawTargetMatches resumed.selectedRaw

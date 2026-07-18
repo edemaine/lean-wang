@@ -213,31 +213,6 @@ theorem blankSymbol_ne_boundarySymbol {numTags : Nat} (label : Fin 5) :
   exact fun h => MarkerMachine.blankSymbol_ne_boundarySymbol label
     (baseSymbol_injective h)
 
-/-- A labelled boundary has a unique first-blank distance from a fixed tape
-and direction. -/
-theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (firstGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (secondGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := secondGap.blank hlt
-    have hmarked := firstGap.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by
-      simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := firstGap.blank hlt
-    have hmarked := secondGap.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by
-      simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 theorem blankSymbol_ne_tagSymbol {numTags : Nat} (tag : Fin numTags) :
     (blankSymbol : Symbol numTags) ≠ tagSymbol tag :=
   baseSymbol_ne_tagSymbol _ _
@@ -264,6 +239,32 @@ def Target.Matches {numTags : Nat} :
 instance {numTags : Nat} (target : Target numTags)
     (symbol : Symbol numTags) : Decidable (target.Matches symbol) := by
   cases target <;> simp only [Target.Matches] <;> infer_instance
+
+/-- A labelled boundary has a unique first-blank distance from a fixed tape
+and direction. -/
+theorem boundaryGap_distance_unique
+    {numTags : Nat}
+    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
+    {first second : Nat} {target : Fin 5}
+    (firstGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches T direction first)
+    (secondGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches T direction second) :
+    first = second := by
+  by_contra hne
+  rcases lt_or_gt_of_ne hne with hlt | hlt
+  · have hblank := secondGap.blank hlt
+    have hmarked := firstGap.marked
+    rw [show T (FullTM0.Tape.offset direction first) =
+        boundarySymbol target by
+      simpa [Target.Matches] using hmarked] at hblank
+    exact blankSymbol_ne_boundarySymbol target hblank.symm
+  · have hblank := firstGap.blank hlt
+    have hmarked := secondGap.marked
+    rw [show T (FullTM0.Tape.offset direction second) =
+        boundarySymbol target by
+      simpa [Target.Matches] using hmarked] at hblank
+    exact blankSymbol_ne_boundarySymbol target hblank.symm
 
 /-- Target-recognition rules at one scan state.  Every recognized symbol is
 rewritten to itself, so arbitrary native tagged tapes are preserved. -/

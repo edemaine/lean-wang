@@ -81,8 +81,8 @@ theorem progressedRoute
       after route) := by
   have hfree : ¬ ShiftDestinationOccupied current.selectedRaw
       current.foundTape :=
-    CounterControlRouteSuffixMortality.destinationFree_of_mem_routeCommandsAux growth source searchSlot
-      directSlot after route hroute current.foundTape
+    CounterControlRouteSuffixMortality.destinationFree_of_mem_routeCommandsAux
+      growth source searchSlot directSlot after route hroute current.foundTape
   have hsuccess : FullTM0.Reaches
       (CounterControlNestingBridge.machine base c)
       (foundCfg current)
@@ -91,13 +91,14 @@ theorem progressedRoute
     rw [current.foundCfg_eq]
     exact current.foundContinuationOutcome.reachesSuccess_of_destinationFree
       hfree
-  have htape := CounterControlRouteSuffixMortality.exactSuccessTape_eq_of_mem_routeCommandsAux growth source
-    searchSlot directSlot after route hroute current.foundTape
+  have htape :=
+    CounterControlRouteSuffixMortality.exactSuccessTape_eq_of_mem_routeCommandsAux
+      growth source searchSlot directSlot after route hroute current.foundTape
   rw [htape] at hsuccess
   have himmortalSuccess := FullTM0.ImmortalFrom.of_reaches himmortal hsuccess
   have htarget : RawTargetMatches current.selectedRaw current.foundTape :=
-    CounterControlRouteSuffixMortality.rawTargetMatches_of_compiled base c current.selectedRaw
-      current.selectedRaw_mem current.foundTape
+    CounterControlRouteSuffixMortality.rawTargetMatches_of_compiled base c
+      current.selectedRaw current.selectedRaw_mem current.foundTape
       current.selectedRaw_target_matches_foundTape
   rcases reaches_routeSuffix_of_immortal base c hmortal growth source
       searchSlot directSlot after route current.selectedRaw hroute hcommands
