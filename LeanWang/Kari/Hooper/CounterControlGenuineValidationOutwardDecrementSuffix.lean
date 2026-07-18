@@ -7,6 +7,7 @@ import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardDecrement
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardDecrementClock
 import LeanWang.Kari.Hooper.CounterControlOutwardGapTransport
+import LeanWang.Kari.Hooper.CounterControlOutwardRouteShiftRay
 import LeanWang.Kari.Hooper.CounterControlRouteRoundtrip
 
 /-!
@@ -1045,6 +1046,62 @@ theorem PositiveSearchEntry.centeredEnd_of_immortal
   exact ⟨⟨direct, endpoint,
     entry.reaches.trans (hfound.trans endpoint.reaches)⟩⟩
 
+/-- The retained positive suffix starts with exactly the tested boundary
+and contains precisely the later decrement labels. -/
+private theorem PositiveCenteredEnd.position_eq
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    {entry : PositiveSearchEntry current growth source register ifZero
+      ifPositive suffix}
+    (endpoint : PositiveCenteredEnd current growth source register ifZero
+      ifPositive suffix entry) :
+    endpoint.direct.suffix.position.current =
+        MarkerSchedule.decrementStartBoundary register ∧
+      endpoint.direct.suffix.position.remaining =
+        CounterControlGuardedDecrementPositiveEmbedding.shiftAfter
+          (MarkerSchedule.decrementStartBoundary register) := by
+  have hraw := entry.selectedRaw_eq.symm.trans
+    endpoint.direct.suffix.position.raw_eq
+  have hlength : endpoint.direct.suffix.position.before.length = 0 := by
+    have hslot := congrArg (fun raw : RawCommand => raw.address.slot) hraw
+    simp [CounterControlGenuineDecrementEntry.firstDecrementShiftRaw,
+      RawCommand.address] at hslot
+    exact List.length_eq_zero_iff.mpr hslot
+  have hbefore : endpoint.direct.suffix.position.before = [] :=
+    List.length_eq_zero_iff.mp hlength
+  have hlabels := endpoint.direct.suffix.position.labels_eq
+  rw [hbefore] at hlabels
+  simp only [List.nil_append] at hlabels
+  cases register with
+  | left =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary,
+          CounterControlGuardedDecrementPositiveEmbedding.shiftAfter] using
+            hlabels.2.symm⟩
+  | right =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary,
+          CounterControlGuardedDecrementPositiveEmbedding.shiftAfter] using
+            hlabels.2.symm⟩
+  | temp =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary,
+          CounterControlGuardedDecrementPositiveEmbedding.shiftAfter] using
+            hlabels.2.symm⟩
+  | clock =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary,
+          CounterControlGuardedDecrementPositiveEmbedding.shiftAfter] using
+            hlabels.2⟩
+
 /-- Completed zero-recovery endpoint, retaining the unchanged selected
 boundary tape at its canonical coordinate in the reconstructed core. -/
 structure ZeroCenteredEnd
@@ -1211,6 +1268,135 @@ theorem ZeroCenteredEnd.distance_lt_layoutEnd
   exact rightGap_distance_lt_layoutEnd endpoint.core_represents suffix.index
     current.distance suffix.current_gap
       (suffix.current_foundTape.trans hcurrentFound)
+
+/-- When the original validation caller lies strictly inward of the
+decremented gap, split its retained route at the shifted boundary.  The
+later route cancels against the decrement body; the earlier route and first
+one-cell shift form an inward ray bridge, which the remaining shifts carry
+back from the reconstructed logical center. -/
+theorem PositiveCenteredEnd.distance_lt_layoutEnd_of_boundary_lt_start
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    {entry : PositiveSearchEntry current growth source register ifZero
+      ifPositive suffix}
+    (endpoint : PositiveCenteredEnd current growth source register ifZero
+      ifPositive suffix entry)
+    (hstrict : (suffix.index.succ : Nat) <
+      (MarkerSchedule.decrementStartBoundary register : Nat)) :
+    current.distance < layoutEnd endpoint.endpoint.core.registers := by
+  let s := MarkerSchedule.decrementStartBoundary register
+  rcases
+      CounterControlGenuineValidationOutwardIncrement.ToFour.splitAt
+        suffix.remaining_toFour s (Nat.le_of_lt hstrict) with
+    ⟨early, late, hremaining, hearly, hlate⟩
+  have hall : RouteTailGaps growth (early ++ late) current.foundTape
+      suffix.progress.suffix.finish := by
+    rw [← hremaining]
+    exact suffix.tailGaps
+  rcases
+      CounterControlGenuineValidationOutwardIncrement.routeTailGaps_split
+        growth early late current.foundTape suffix.progress.suffix.finish
+        hall with
+    ⟨middle, hEarly, hLate⟩
+  have hmiddleRead : middle.read = boundarySymbol s :=
+    hearly.finish_read suffix.current_read hEarly
+  have hfinishMiddle : entry.route.finish = middle := by
+    cases register with
+    | left =>
+        have hout := hLate
+        rw [toFour_one hlate] at hout
+        have hin := entry.route.tailGaps
+        rw [toBoundary_four_one
+          (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+            .left)] at hin
+        exact routeTail_nil_finish (roundtripFromOne hmiddleRead hout hin)
+    | right =>
+        have hout := hLate
+        rw [toFour_two hlate] at hout
+        have hin := entry.route.tailGaps
+        rw [toBoundary_four_two
+          (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+            .right)] at hin
+        exact routeTail_nil_finish (roundtripFromTwo hmiddleRead hout hin)
+    | temp =>
+        have hout := hLate
+        rw [toFour_three hlate] at hout
+        have hin := entry.route.tailGaps
+        rw [toBoundary_four_three
+          (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+            .temp)] at hin
+        exact routeTail_nil_finish (roundtripFromThree hmiddleRead hout hin)
+    | clock =>
+        have hout := hLate
+        rw [toFour_four hlate] at hout
+        have hin := entry.route.tailGaps
+        rw [toBoundary_four_four
+          (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+            .clock)] at hin
+        exact (routeTail_nil_finish hin).trans (routeTail_nil_finish hout)
+  have hEarly' : RouteTailGaps growth early current.foundTape
+      entry.route.finish := by
+    rw [hfinishMiddle]
+    exact hEarly
+  have hblank : (entry.route.finish.move (orient growth .left)).read =
+      blankSymbol := by
+    simpa [BodyRouteEnd.branchTape] using entry.read_blank
+  rcases
+      CounterControlOutwardRouteShiftRay.ToUpper.inwardRayBridge_of_firstDecrementShift
+        hearly hstrict suffix.current_read (Fin.succ_ne_zero suffix.index)
+        hEarly' hblank with
+    ⟨bridge⟩
+  rcases endpoint.position_eq with ⟨hposition, hremainingLabels⟩
+  have hdirection : entry.next.direction = orient growth .right := by
+    have hdirection := entry.next.current.selectedRaw_direction_eq
+    rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+      at hdirection
+    rw [entry.selectedRaw_eq] at hdirection
+    exact hdirection.symm
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hparent : entry.next.parentOuter =
+      entry.route.finish.move (orient growth .left) := by
+    change entry.next.current.outer.move
+      (NestingMachine.opposite entry.next.direction) = _
+    rw [hdirection, hopposite, entry.outer_eq]
+  have hbacking :
+      entry.next.shiftedParentBacking endpoint.direct.suffix.position.current =
+        CounterControlResumedShiftCoordinates.shiftStepTape
+          (orient growth .right)
+          (entry.route.finish.move (orient growth .left)) 1 s := by
+    unfold CounterControlGuardedSearch.GuardedSearch.shiftedParentBacking
+    rw [hdirection, entry.distance_eq, Nat.zero_add, hparent, hposition]
+  rw [← hbacking] at bridge
+  rcases CounterControlGuardedShiftEmbedding.shiftTailGaps_backwardGeometry
+      endpoint.direct.suffix.tailGaps with
+    ⟨geometry⟩
+  have hlabelsNe : ∀ label ∈ endpoint.direct.suffix.position.remaining,
+      label ≠ (0 : Fin 5) := by
+    intro label hlabel
+    rw [hremainingLabels] at hlabel
+    exact
+      CounterControlGuardedDecrementPositiveEmbedding.shiftAfter_label_ne_zero
+        (MarkerSchedule.decrementStartBoundary register) label hlabel
+  let fullBridge :=
+    CounterControlOutwardRouteShiftRay.InwardRayBridge.prependShiftTail
+      bridge geometry hlabelsNe
+  apply CounterControlOutwardGapTransport.distance_lt_layoutEnd_of_centerRay
+    endpoint.endpoint.core_represents suffix.current_gap
+      suffix.current_foundTape endpoint.endpoint.center
+  · intro back
+    simpa [fullBridge,
+      CounterControlGuardedShiftCompletion.decrementPositiveTape] using
+        fullBridge.ray back
+  · intro back hback
+    simpa [fullBridge,
+      CounterControlGuardedShiftCompletion.decrementPositiveTape] using
+        fullBridge.avoidsZero back hback
 
 /-! ## Branch handoffs which do not require new shifted geometry -/
 
@@ -1884,6 +2070,149 @@ private theorem outwardHandoff_of_boundaryTwo_beforeStart
         exact hthird'
       apply outwardHandoff_of_decrementEntrySearch hmortal hrule hcommand
         hreachesNext (by simpa [next] using hdistance) himmortal
+
+/-! ## Final-boundary dispatch -/
+
+private theorem foundTape_read_of_outwardRaw
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source slot : Nat) (expected : Fin 5)
+    (success : ControlRef)
+    (hraw : current.selectedRaw = .boundaryNavigation
+      ⟨growth, source, slot⟩ expected .right success .preserve) :
+    current.foundTape.read = boundarySymbol expected := by
+  have hmatch := current.selectedRaw_target_matches_foundTape
+  rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
+  simpa [hraw, CounterControlCommandAt.compileRawAtTag,
+    compileNavigationAction, Command.target, Target.Matches] using hmatch
+
+/-- Once a retained suffix is known to start at boundary `4`, the outward
+obligation itself must be its `four` constructor.  Dispatch that constructor
+to the existing clock and non-clock decrement theorems. -/
+private theorem outwardHandoff_of_boundaryFour
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (obligation : OutwardObligation current growth source
+      (.decrement register ifZero ifPositive))
+    (suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive))
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (hindex : suffix.index.succ = 4)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  have hreadFour : current.foundTape.read = boundarySymbol 4 := by
+    simpa [hindex] using suffix.current_read
+  cases obligation with
+  | one progress hraw =>
+      have hreadOne := foundTape_read_of_outwardRaw current growth source 4 1
+        (directRef growth source 4) hraw
+      have heq : (1 : Fin 5) = 4 :=
+        (boundarySymbol_injective 1 4).mp (hreadOne.symm.trans hreadFour)
+      have hval := congrArg Fin.val heq
+      omega
+  | two progress hraw =>
+      have hreadTwo := foundTape_read_of_outwardRaw current growth source 5 2
+        (directRef growth source 5) hraw
+      have heq : (2 : Fin 5) = 4 :=
+        (boundarySymbol_injective 2 4).mp (hreadTwo.symm.trans hreadFour)
+      have hval := congrArg Fin.val heq
+      omega
+  | three progress hraw =>
+      have hreadThree := foundTape_read_of_outwardRaw current growth source 6
+        3 (directRef growth source 6) hraw
+      have heq : (3 : Fin 5) = 4 :=
+        (boundarySymbol_injective 3 4).mp (hreadThree.symm.trans hreadFour)
+      have hval := congrArg Fin.val heq
+      omega
+  | four progress hraw =>
+      by_cases hclock : register = .clock
+      · subst register
+        exact
+          CounterControlGenuineValidationOutwardDecrementClock.outwardFour_clockDecrement_handoff
+            base c hmortal current growth source ifZero ifPositive hrule
+            progress hraw himmortal
+      · exact
+          CounterControlGenuineValidationOutwardDecrement.outwardFour_nonclockDecrement_handoff
+            base c hmortal current growth source register ifZero ifPositive
+            hrule progress hraw hclock himmortal
+
+/-! ## Public arbitrary-suffix decrement handoff -/
+
+/-- Every outward-validation obligation followed by a decrement has the
+instruction-wide monotone handoff.  Zero recovery preserves the retained
+margin.  On the positive branch, callers below the shifted gap use the
+inward-ray bridge, callers at the shifted boundary retag their original
+gap, and callers above it re-enter a later inward body search. -/
+theorem outwardDecrement_handoff
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (obligation : OutwardObligation current growth source
+      (.decrement register ifZero ifPositive))
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  rcases CounterControlGenuineValidationOutwardSuffix.suffix obligation with
+    ⟨suffix⟩
+  rcases bodyBranchOutcome_of_immortal base c hmortal current growth source
+      register ifZero ifPositive hrule suffix himmortal with
+    ⟨branch⟩
+  rcases bodyBranchSearchOutcome base c hrule branch with ⟨search⟩
+  cases search with
+  | zero entry =>
+      exact entry.outwardHandoff_of_immortal obligation hmortal hrule
+        himmortal
+  | positive entry =>
+      by_cases hbelow : (suffix.index.succ : Nat) <
+          (MarkerSchedule.decrementStartBoundary register : Nat)
+      · rcases entry.centeredEnd_of_immortal hmortal hrule himmortal with
+          ⟨endpoint⟩
+        have hinside := endpoint.distance_lt_layoutEnd_of_boundary_lt_start
+          hbelow
+        exact ⟨.logical endpoint.endpoint.core endpoint.reaches hinside.le⟩
+      · by_cases hequal : (suffix.index.succ : Nat) =
+            (MarkerSchedule.decrementStartBoundary register : Nat)
+        · have hboundary : suffix.index.succ =
+              MarkerSchedule.decrementStartBoundary register := by
+            apply Fin.ext
+            exact hequal
+          exact entry.outwardHandoff_of_boundary_eq obligation hmortal hrule
+            hboundary himmortal
+        · have habove :
+              (MarkerSchedule.decrementStartBoundary register : Nat) <
+                (suffix.index.succ : Nat) := by
+            omega
+          generalize hindex : suffix.index = index
+          fin_cases index
+          · rw [hindex] at habove
+            cases register <;>
+              simp [MarkerSchedule.decrementStartBoundary] at habove
+          · apply outwardHandoff_of_boundaryTwo_beforeStart
+              (suffix := suffix) obligation hmortal hrule
+            · apply Fin.ext
+              simp [hindex]
+            · simpa [hindex] using habove
+            · exact himmortal
+          · apply outwardHandoff_of_boundaryThree_beforeStart
+              (suffix := suffix) obligation hmortal hrule
+            · apply Fin.ext
+              simp [hindex]
+            · simpa [hindex] using habove
+            · exact himmortal
+          · apply outwardHandoff_of_boundaryFour obligation suffix hmortal
+              hrule
+            · apply Fin.ext
+              simp [hindex]
+            · exact himmortal
 
 end
 
