@@ -66,6 +66,51 @@ def GuardedEntryLaw (base : Nat) (c : Nat.Partrec.Code) : Prop :=
       current.cfg →
       ∃ next : GuardedSearch base c, EntersGuardedSearch current next
 
+/-- A first-entry transition which does not lose the genuine gap already
+seen.  This stronger form is stable enough to alternate an unguarded replay
+search with the next shared-return guard. -/
+structure MonotoneGuardedEntry
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c) (next : GuardedSearch base c) : Prop where
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    current.cfg next.current.cfg
+  distance_le : current.distance ≤ next.current.distance
+
+/-- Every immortal genuine search eventually returns to the guarded phase
+without decreasing its known finite gap. -/
+def MonotoneGuardedEntryLaw (base : Nat) (c : Nat.Partrec.Code) : Prop :=
+  ∀ current : GenuineSearch base c,
+    FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
+      current.cfg →
+      ∃ next : GuardedSearch base c, MonotoneGuardedEntry current next
+
+/-- Forgetting the distance comparison gives the ordinary guarded-entry
+law. -/
+theorem guardedEntryLaw_of_monotoneGuardedEntryLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hlaw : MonotoneGuardedEntryLaw base c) :
+    GuardedEntryLaw base c := by
+  intro current himmortal
+  rcases hlaw current himmortal with ⟨next, hnext⟩
+  exact ⟨next, ⟨hnext.reaches⟩⟩
+
+/-- A guarded search exposes a strictly larger genuine search, which may be
+an intermediate replay search rather than a shared-return search. -/
+structure GuardedEscapes
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c) (next : GenuineSearch base c) : Prop where
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    current.current.cfg next.cfg
+  distance_lt : current.current.distance < next.distance
+
+/-- Local strict-progress obligation before restoring the shared-return
+guard. -/
+def GuardedEscapeLaw (base : Nat) (c : Nat.Partrec.Code) : Prop :=
+  ∀ current : GuardedSearch base c,
+    FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
+      current.current.cfg →
+      ∃ next : GenuineSearch base c, GuardedEscapes current next
+
 /-- One strict unnesting transition between guarded returned searches. -/
 structure GuardedUnnests
     {base : Nat} {c : Nat.Partrec.Code}
@@ -80,6 +125,21 @@ def GuardedUnnestingLaw (base : Nat) (c : Nat.Partrec.Code) : Prop :=
     FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
       current.current.cfg →
       ∃ next : GuardedSearch base c, GuardedUnnests current next
+
+/-- Strict escape followed by monotone guarded re-entry is one stable
+guarded unnesting step. -/
+theorem guardedUnnestingLaw_of_escape_and_monotoneEntry
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hentry : MonotoneGuardedEntryLaw base c)
+    (hescape : GuardedEscapeLaw base c) :
+    GuardedUnnestingLaw base c := by
+  intro current himmortal
+  rcases hescape current himmortal with ⟨middle, hmiddle⟩
+  have himmortalMiddle := immortalFrom_of_reaches base c
+    himmortal hmiddle.reaches
+  rcases hentry middle himmortalMiddle with ⟨next, hnext⟩
+  exact ⟨next, ⟨hmiddle.reaches.trans hnext.reaches,
+    hmiddle.distance_lt.trans_le hnext.distance_le⟩⟩
 
 /-! ## Iteration -/
 
