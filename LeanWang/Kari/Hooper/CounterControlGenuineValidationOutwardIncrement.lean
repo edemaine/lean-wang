@@ -7,6 +7,7 @@ import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutward
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
 import LeanWang.Kari.Hooper.CounterControlGuardedIncrementEmbedding
 import LeanWang.Kari.Hooper.CounterControlGuardedDecrementPositiveEmbedding
+import LeanWang.Kari.Hooper.CounterControlOutwardGapTransport
 
 /-!
 # Final outward validation followed by an arbitrary increment
@@ -42,6 +43,7 @@ open CounterControlGuardedShiftCompletion
 open CounterControlGuardedShiftEmbedding
 open CounterControlGuardedIncrementEmbedding
 open CounterControlGuardedDecrementPositiveEmbedding
+open CounterControlOutwardGapTransport
 open CounterControlResumedShiftCoordinates
 open CounterControlResumedRouteEmbedding
 
@@ -404,6 +406,66 @@ def guardedBodyIncrement
       hblank).current =
       bodyIncrementShift base c growth source next register hrule T hread :=
   rfl
+
+/-- A position witness for the selected shift entered from a completed
+validation suffix is the head of the increment schedule. -/
+theorem bodyIncrementShift_position
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4)
+    (position : IncrementShiftPosition growth source bodySearchBase true
+      (MarkerShift.incrementOrder register)
+      (bodyIncrementShift base c growth source next register hrule T
+        hread).selectedRaw) :
+    position.before = [] ∧ position.current = 4 ∧
+      position.remaining = incrementRemaining register := by
+  have haddress := congrArg RawCommand.address position.raw_eq
+  simp only [bodyIncrementShift_selectedRaw] at haddress
+  simp [firstIncrementRaw, RawCommand.address] at haddress
+  have hbefore : position.before = [] := haddress
+  have hlabels := position.labels_eq
+  rw [hbefore] at hlabels
+  cases register <;>
+    simp [MarkerShift.incrementOrder, incrementRemaining] at hlabels ⊢ <;>
+    aesop
+
+/-- The first successful shift entered from a completed validation suffix
+is the pure one-cell outward move used by `firstIncrementAgreement`. -/
+theorem guardedBodyIncrement_shiftedParentBacking
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4)
+    (hblank : (T.move (orient growth .right)).read = blankSymbol)
+    (expected : Fin 5) :
+    (guardedBodyIncrement base c growth source next register hrule T hread
+      hblank).shiftedParentBacking expected =
+      shiftStepTape (orient growth .left)
+        (T.move (orient growth .right)) 1 expected := by
+  let shift := bodyIncrementShift base c growth source next register hrule T
+    hread
+  let guarded := guardedBodyIncrement base c growth source next register
+    hrule T hread hblank
+  have hshiftDirection : shift.direction = orient growth .left :=
+    bodyIncrementShift_direction base c growth source next register hrule T
+      hread
+  have hopposite : NestingMachine.opposite (orient growth .left) =
+      orient growth .right := by
+    cases growth <;> rfl
+  unfold GuardedSearch.shiftedParentBacking GuardedSearch.parentOuter
+  change shiftStepTape guarded.direction
+      (guarded.current.outer.move
+        (NestingMachine.opposite guarded.direction))
+      (guarded.current.distance + 1) expected = _
+  rw [show guarded.direction = shift.direction by rfl]
+  rw [show guarded.current = shift by rfl]
+  rw [hshiftDirection, hopposite]
+  dsimp [shift]
 
 /-! ## Mirrored route/shift alignment -/
 
@@ -793,6 +855,27 @@ theorem firstShift_reverse_blank
         apply congrArg outer
         omega
 
+/-- Looking inward from the endpoint of an outward exact gap reads blank
+at every positive distance through the old origin. -/
+theorem outwardFound_reverse_blank
+    (direction : Turing.Dir)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance back : Nat)
+    (target : Fin 5)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches outer direction distance)
+    (hpositive : 0 < back) (hback : back ≤ distance) :
+    (((outer.moveN direction distance).moveN
+      (NestingMachine.opposite direction) back).read) = blankSymbol := by
+  let index := distance - back
+  have hindex : index < distance := by
+    dsimp [index]
+    omega
+  have hblank := hgap.blank hindex
+  cases direction <;>
+    simp [NestingMachine.opposite, FullTM0.Tape.read,
+      FullTM0.Tape.moveN, FullTM0.Tape.offset, index] at hblank ⊢ <;>
+    rw [← hblank] <;> congr 1 <;> omega
+
 private theorem boundaryGap_distance_unique
     {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
     {first second : Nat} {target : Fin 5}
@@ -1012,6 +1095,157 @@ theorem outwardGap_lt_layoutEnd_of_incrementTail
           simp [layoutEnd, RegisterLayout.clockBoundary_eq,
             RegisterLayout.values] <;> omega
       exact holdLt.trans hlayout
+
+/-- If the descending increment schedule reaches strictly inward of the
+original validation boundary, pairing the common route prefix exposes the
+first unconsumed shift.  Its destination must lie beyond the whole old
+outward gap, while canonical backward geometry places it inside the
+reconstructed layout. -/
+theorem outwardSuffix_gap_lt_layoutEnd_of_lowerIncrementTail
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (suffix : Suffix current growth source (.increment register next))
+    (last : Fin 5)
+    (shiftStart shiftFinish coreTape : FullTM0.Tape (Symbol numTags))
+    (labels : List (Fin 5)) (registers : Registers)
+    (initial : ShiftedAgainst (orient growth .left) 4 shiftStart
+      suffix.progress.suffix.finish)
+    (shiftTrace : ShiftTailGaps (orient growth .left) labels shiftStart
+      shiftFinish)
+    (schedule : DescendingTo 4 labels last)
+    (hlast : (last : Nat) ≤ (suffix.index : Nat))
+    (hcore : CoreRepresents registers growth coreTape)
+    (hfinish : shiftFinish.move (orient growth .right) =
+      atLogical growth coreTape (boundaryOffset registers last)) :
+    current.distance < layoutEnd registers := by
+  have hlastSource : (last : Nat) ≤ (suffix.index.succ : Nat) := by
+    exact hlast.trans (by simp)
+  rcases alignOutwardRoute suffix.remaining_toFour suffix.current_read
+      suffix.tailGaps initial shiftTrace schedule hlastSource with
+    ⟨shifted, remaining, agreement, remainingTrace, remainingSchedule⟩
+  rcases descendingTo_uncons_of_le suffix.index remainingSchedule hlast with
+    ⟨later, hremaining, laterSchedule⟩
+  rw [hremaining] at remainingTrace
+  have hoppositeLeft : NestingMachine.opposite (orient growth .left) =
+      orient growth .right := by
+    cases growth <;> rfl
+  have hoppositeRight : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hstartRead :
+      (shifted.move (orient growth .right)).read =
+        boundarySymbol suffix.index.succ := by
+    rw [← hoppositeLeft]
+    exact agreement.destination
+  have holdBlank : ∀ back ≤ current.distance,
+      (shifted.moveN (orient growth .left) back).read = blankSymbol := by
+    intro back hback
+    cases back with
+    | zero => simpa using agreement.blank
+    | succ back =>
+        have hagreement := agreement.ahead (back + 1) (by omega)
+        have hold :
+            (current.foundTape.moveN (orient growth .left)
+              (back + 1)).read = blankSymbol := by
+          rw [← suffix.current_foundTape, ← hoppositeRight]
+          exact outwardFound_reverse_blank (orient growth .right)
+            current.outer current.distance (back + 1) suffix.index.succ
+            suffix.current_gap (by omega) hback
+        exact hagreement.trans hold
+  exact outwardGap_lt_layoutEnd_of_incrementTail growth suffix.index shifted
+    shiftFinish coreTape current.distance later last registers remainingTrace
+    laterSchedule hstartRead holdBlank hcore hfinish
+
+/-- When the increment schedule ends exactly at the original validation
+boundary, the paired route leaves the old boundary cell blank and moves that
+boundary one cell outward.  Thus the old gap becomes a canonical gap one
+cell longer. -/
+theorem outwardGap_lt_layoutEnd_of_terminalIncrementAgreement
+    (growth : Turing.Dir) (index : Fin 4)
+    (oldOuter oldFound shifted coreTape :
+      FullTM0.Tape (Symbol numTags))
+    (distance : Nat) (registers : Registers)
+    (oldGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary index.succ).Matches oldOuter
+      (orient growth .right) distance)
+    (oldFound_eq : oldOuter.moveN (orient growth .right) distance =
+      oldFound)
+    (agreement : ShiftedAgainst (orient growth .left) index.succ shifted
+      oldFound)
+    (hcore : CoreRepresents registers growth coreTape)
+    (hcenter : shifted.move (orient growth .right) =
+      atLogical growth coreTape (boundaryOffset registers index.succ)) :
+    distance < layoutEnd registers := by
+  let newOuter := shifted.moveN (orient growth .left) distance
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have newGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary index.succ).Matches newOuter
+      (orient growth .right) (distance + 1) := by
+    constructor
+    · intro forward hforward
+      have hle : forward ≤ distance := by omega
+      let back := distance - forward
+      have hnew :
+          (newOuter.moveN (orient growth .right) forward).read =
+            (shifted.moveN (orient growth .left) back).read := by
+        dsimp [newOuter, back]
+        cases growth <;>
+          simp [orient, FullTM0.Tape.read, FullTM0.Tape.moveN,
+            FullTM0.Tape.offset] <;>
+          congr 1 <;> omega
+      rw [← FullTM0.Tape.read_moveN newOuter (orient growth .right) forward,
+        hnew]
+      by_cases hback : back = 0
+      · simpa [hback] using agreement.blank
+      · have hbackPositive : 0 < back := Nat.pos_of_ne_zero hback
+        rw [agreement.ahead back hbackPositive]
+        have hold :
+            (oldFound.moveN (orient growth .left) back).read =
+              (oldOuter.moveN (orient growth .right) forward).read := by
+          rw [← oldFound_eq]
+          dsimp [back]
+          cases growth <;>
+            simp [orient, FullTM0.Tape.read, FullTM0.Tape.moveN,
+              FullTM0.Tape.offset] <;>
+            congr 1 <;> omega
+        rw [hold]
+        simpa only [FullTM0.Tape.read_moveN] using oldGap.blank (by
+          dsimp [back] at hback
+          omega)
+    · have hfound :
+          newOuter.moveN (orient growth .right) (distance + 1) =
+            shifted.move (orient growth .right) := by
+        funext position
+        cases growth <;>
+          simp [newOuter, orient, FullTM0.Tape.move,
+            FullTM0.Tape.moveN, FullTM0.Tape.offset] <;>
+          congr 1 <;> omega
+      rw [← FullTM0.Tape.read_moveN newOuter (orient growth .right)
+        (distance + 1), hfound]
+      change (shifted.move (orient growth .right)).read =
+        boundarySymbol index.succ
+      have hoppositeLeft : NestingMachine.opposite (orient growth .left) =
+          orient growth .right := by
+        cases growth <;> rfl
+      rw [← hoppositeLeft]
+      exact agreement.destination
+  have hfound :
+      newOuter.moveN (orient growth .right) (distance + 1) =
+        atLogical growth coreTape (boundaryOffset registers index.succ) := by
+    rw [show newOuter.moveN (orient growth .right) (distance + 1) =
+        shifted.move (orient growth .right) by
+      funext position
+      cases growth <;>
+        simp [newOuter, orient, FullTM0.Tape.move,
+          FullTM0.Tape.moveN, FullTM0.Tape.offset] <;>
+        congr 1 <;> omega]
+    exact hcenter
+  have hlong : distance + 1 < layoutEnd registers :=
+    rightGap_distance_lt_layoutEnd hcore index (distance + 1) newGap hfound
+  omega
 
 private theorem immortalFrom_of_reaches
     (base : Nat) (c : Nat.Partrec.Code)
