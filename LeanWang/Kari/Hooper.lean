@@ -39,6 +39,7 @@ import LeanWang.Kari.Hooper.BoundedMarkerProgram
 import LeanWang.Kari.Hooper.BoundedMarkerContinuation
 import LeanWang.Kari.Hooper.CanonicalInitializerFrame
 import LeanWang.Kari.Hooper.CanonicalInitializerProgramComputable
+import LeanWang.Kari.Hooper.FramedCounterGeometry
 
 /-!
 # Hooper's immortality construction
@@ -62,7 +63,8 @@ relocatable and reflectable finite tables, a verified finite-table linker,
 concrete arbitrary-entry liveness laws for the complete fixed source program,
 a deterministic tagged controller for a finite family of bounded searches,
 an executable uniformly computable tag-sensitive canonical initializer with
-exact framed semantics,
+exact framed semantics, framed increment/decrement and collision-cleanup
+geometry,
 and both directions of the abstract strong-induction core of Hooper's nested
 construction.  The remaining files will compile the counter instructions to
 those searches and implement the shared canonical core that discharges the
