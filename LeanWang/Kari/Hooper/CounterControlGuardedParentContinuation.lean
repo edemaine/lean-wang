@@ -101,6 +101,31 @@ def FoundGuardedEntryContinuationLaw
       (foundCfg current) →
       Nonempty (FoundGuardedEntryOutcome current)
 
+/-- First-entry outcome retaining the comparison needed to alternate with a
+strict but temporarily unguarded replay search. -/
+inductive FoundMonotoneGuardedEntryOutcome
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c) : Type where
+  | logical (core : LogicalCore base c)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        (foundCfg current) core.cfg)
+      (inside : current.distance ≤
+        FramedMarkerTape.layoutEnd core.registers)
+  | nextSearch (next : GuardedSearch base c)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        (foundCfg current) next.current.cfg)
+      (distance_le : current.distance ≤ next.current.distance)
+
+/-- Exact monotone continuation obligation for an arbitrary genuine search. -/
+def FoundMonotoneGuardedEntryContinuationLaw
+    (base : Nat) (c : Nat.Partrec.Code) : Prop :=
+  ∀ current : GenuineSearch base c,
+    FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
+      (foundCfg current) →
+      Nonempty (FoundMonotoneGuardedEntryOutcome current)
+
 /-- A found-state outcome supplies one strict guarded unnesting step.  In the
 logical branch, finite-prefix totality cleans the represented core, resumes
 its saved caller, and the shared return supplies the guard. -/
@@ -176,6 +201,45 @@ theorem guardedEntryLaw_of_foundGuardedEntryContinuationLaw
   have himmortalFound := immortalFrom_foundCfg current himmortal
   rcases hlaw current himmortalFound with ⟨outcome⟩
   exact entersGuardedSearch_of_foundEntryOutcome base c hmortal current
+    himmortal outcome
+
+/-- A comparison-preserving found-state outcome reaches the guarded phase
+without decreasing the known gap. -/
+theorem monotoneGuardedEntry_of_foundOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) current.cfg)
+    (outcome : FoundMonotoneGuardedEntryOutcome current) :
+    ∃ next : GuardedSearch base c, MonotoneGuardedEntry current next := by
+  have hfound := reaches_foundCfg_of_immortal current himmortal
+  cases outcome with
+  | nextSearch next htail hdistance =>
+      exact ⟨next, ⟨hfound.trans htail, hdistance⟩⟩
+  | logical core htail hinside =>
+      have himmortalFound := immortalFrom_of_reaches base c
+        himmortal hfound
+      have himmortalCore := immortalFrom_of_reaches base c
+        himmortalFound htail
+      rcases core.reaches_resumed_of_immortal base c hmortal
+          himmortalCore with ⟨resumed⟩
+      let next : GuardedSearch base c :=
+        CounterControlGuardedResume.PrefixResumedSearch.toGuardedSearch resumed
+      refine ⟨next, ⟨hfound.trans (htail.trans resumed.reaches), ?_⟩⟩
+      exact hinside.trans (core.layoutEnd_le_resumedDistance resumed)
+
+/-- The exact comparison-preserving continuation law supplies monotone
+guarded re-entry. -/
+theorem monotoneGuardedEntryLaw_of_foundContinuationLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hlaw : FoundMonotoneGuardedEntryContinuationLaw base c) :
+    MonotoneGuardedEntryLaw base c := by
+  intro current himmortal
+  have himmortalFound := immortalFrom_foundCfg current himmortal
+  rcases hlaw current himmortalFound with ⟨outcome⟩
+  exact monotoneGuardedEntry_of_foundOutcome base c hmortal current
     himmortal outcome
 
 end
