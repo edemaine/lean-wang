@@ -29,16 +29,25 @@ noncomputable section
 
 /-! ## Concrete state allocation -/
 
-theorem controllerReturn_primrec (base : Nat) :
-    Primrec fun c : Nat.Partrec.Code => controllerReturn base c := by
+private theorem controllerBlockEnd_primrec (base : Nat) :
+    Primrec fun c : Nat.Partrec.Code =>
+      BoundedMarkerProgram.commandOffset base
+        (CanonicalInitializer.radius c) numTags := by
   exact BoundedMarkerProgram.commandOffset_primrec.comp
     (Primrec.pair (Primrec.const base)
       (Primrec.pair CanonicalInitializer.radius_primrec
         (Primrec.const numTags)))
 
+theorem controllerReturn_primrec (base : Nat) (growth : Turing.Dir) :
+    Primrec fun c : Nat.Partrec.Code => controllerReturn base c growth := by
+  cases growth
+  · exact controllerBlockEnd_primrec base
+  · exact Primrec.succ.comp (controllerBlockEnd_primrec base)
+
 theorem controllerCoreEntry_primrec (base : Nat) :
     Primrec fun c : Nat.Partrec.Code => controllerCoreEntry base c := by
-  exact Primrec.succ.comp (controllerReturn_primrec base)
+  exact Primrec.nat_add.comp (controllerBlockEnd_primrec base)
+    (Primrec.const 2)
 
 theorem initializerEnd_primrec (base : Nat) :
     Primrec fun c : Nat.Partrec.Code => initializerEnd base c := by
@@ -106,7 +115,7 @@ theorem resolve_primrec (base : Nat) (ref : ControlRef) :
   | logical growth state => exact logicalState_primrec base growth state
   | direct address => exact directState_primrec base address
   | search address => exact searchState_primrec base address
-  | sharedReturn => exact controllerReturn_primrec base
+  | sharedReturn growth => exact controllerReturn_primrec base growth
 
 /-! ## The varying tagged command list -/
 
