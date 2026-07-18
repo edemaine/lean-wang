@@ -104,6 +104,52 @@ theorem rule_mem_of_stepCase {program : Program} {cfg nextCfg : Cfg}
       exact ⟨.decrement register ifZero ifPositive,
         rule_mem_of_lookupInstruction_eq_some hlookup, hlookup⟩
 
+/-! ## Uniform layout growth -/
+
+/-- One primitive counter instruction enlarges the five-boundary layout by at
+most one cell.  Zero tests preserve it and positive decrements shrink it. -/
+theorem layoutEnd_next_le_add_one_of_step_eq_some
+    {program : Program} {cfg nextCfg : Cfg}
+    (hstep : step program cfg = some nextCfg) :
+    layoutEnd nextCfg.registers ≤ layoutEnd cfg.registers + 1 := by
+  cases stepCase_of_step_eq_some hstep with
+  | increment register next _ hnext =>
+      subst nextCfg
+      simp
+  | decrementZero register ifZero ifPositive _ _ hnext =>
+      subst nextCfg
+      change layoutEnd cfg.registers ≤ layoutEnd cfg.registers + 1
+      omega
+  | decrementPositive register ifZero ifPositive _ hpositive hnext =>
+      subst nextCfg
+      change layoutEnd (cfg.registers.decrement register) ≤
+        layoutEnd cfg.registers + 1
+      have hshrink := layoutEnd_decrement_lt cfg.registers register hpositive
+      omega
+
+/-- After `steps` exact primitive counter transitions, the represented layout
+has grown by at most `steps` cells. -/
+theorem layoutEnd_le_add_of_iterate
+    {program : Program} (steps : Nat) {start finish : Cfg}
+    (hiterate : Dynamics.iterate (step program) steps start = some finish) :
+    layoutEnd finish.registers ≤ layoutEnd start.registers + steps := by
+  induction steps generalizing finish with
+  | zero =>
+      simp only [Dynamics.iterate_zero] at hiterate
+      cases Option.some.inj hiterate
+      exact Nat.le_refl _
+  | succ steps ih =>
+      rw [Dynamics.iterate_succ] at hiterate
+      cases hprefix : Dynamics.iterate (step program) steps start with
+      | none => simp [hprefix] at hiterate
+      | some current =>
+          have hlast : step program current = some finish := by
+            simpa [hprefix] using hiterate
+          have hprefixBound := ih hprefix
+          have hlastBound :=
+            layoutEnd_next_le_add_one_of_step_eq_some hlast
+          omega
+
 /-! ## The only outward-frame dichotomy -/
 
 /-- Since the current core already lies strictly before the suspended target,
