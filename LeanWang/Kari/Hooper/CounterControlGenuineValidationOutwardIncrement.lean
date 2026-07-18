@@ -598,6 +598,259 @@ theorem routeGaps_uncons
       | cons _ _ _ _ distance gap finish tail =>
           exact ⟨distance, gap, .cons next rest _ finish tail⟩
 
+/-! ## Splitting a consecutive outward route -/
+
+/-- Consecutive rightward legs from `source` through an arbitrary upper
+boundary `target`. -/
+inductive ToUpper : Fin 5 → Fin 5 → List MarkerValidation.Leg → Prop where
+  | here (target : Fin 5) : ToUpper target target []
+  | step (i : Fin 4) {target : Fin 5}
+      {rest : List MarkerValidation.Leg}
+      (tail : ToUpper i.succ target rest) :
+      ToUpper i.castSucc target (⟨i.succ, .right⟩ :: rest)
+
+theorem ToUpper.source_le
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToUpper source target route) :
+    (source : Nat) ≤ (target : Nat) := by
+  induction hroute with
+  | here => simp
+  | step i _ ih =>
+      exact (show (i.castSucc : Nat) ≤ (i.succ : Nat) by simp).trans ih
+
+/-- A traced consecutive outward route ends centered on its advertised
+upper boundary. -/
+theorem ToUpper.finish_read
+    {growth : Turing.Dir} {source target : Fin 5}
+    {route : List MarkerValidation.Leg}
+    (hroute : ToUpper source target route)
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (hread : start.read = boundarySymbol source)
+    (htrace : CounterControlRouteSuffixMortality.RouteTailGaps growth route
+      start finish) :
+    finish.read = boundarySymbol target := by
+  induction hroute generalizing start finish with
+  | here =>
+      cases htrace
+      exact hread
+  | step i tail ih =>
+      cases htrace with
+      | cons _ _ start finish trace =>
+          rcases routeGaps_uncons growth ⟨i.succ, .right⟩ _ _ _ trace with
+            ⟨distance, gap, restTrace⟩
+          let found :=
+            ((start.move (orient growth .right)).moveN
+              (orient growth .right) distance)
+          have hfoundRead : found.read = boundarySymbol i.succ := by
+            change (Target.boundary i.succ).Matches found.read
+            simpa [found, FullTM0.Tape.read_moveN] using gap.marked
+          exact ih hfoundRead restTrace
+
+/-- Split a route to boundary `4` at any boundary not below its source. -/
+theorem ToFour.splitAt
+    {source : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToFour source route) (target : Fin 5)
+    (hle : (source : Nat) ≤ (target : Nat)) :
+    ∃ early late,
+      route = early ++ late ∧
+      ToUpper source target early ∧ ToFour target late := by
+  induction hroute generalizing target with
+  | four =>
+      have htarget : target = 4 := by
+        apply Fin.ext
+        have hbound := target.isLt
+        simp at hle ⊢
+        omega
+      subst target
+      exact ⟨[], [], rfl, .here 4, .four⟩
+  | step i tail ih =>
+      by_cases htarget : target = i.castSucc
+      · subst target
+        exact ⟨[], ⟨i.succ, .right⟩ :: _, rfl, .here _, .step i tail⟩
+      · have hupper : (i.succ : Nat) ≤ (target : Nat) := by
+          have htargetVal : (i.castSucc : Nat) < (target : Nat) := by
+            have hne : (i.castSucc : Nat) ≠ (target : Nat) := by
+              intro heq
+              apply htarget
+              exact Fin.ext heq.symm
+            omega
+          have hstep : (i.succ : Nat) = (i.castSucc : Nat) + 1 := by
+            simp
+          omega
+        rcases ih target hupper with
+          ⟨early, late, htail, hearly, hlate⟩
+        exact ⟨⟨i.succ, .right⟩ :: early, late, by simp [htail],
+          .step i hearly, hlate⟩
+
+/-- Split a nonempty route trace after a nonempty list prefix. -/
+theorem routeGaps_split
+    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
+    (rest late : List MarkerValidation.Leg)
+    (outer finish : FullTM0.Tape (Symbol numTags))
+    (trace : CounterControlValidationMortality.RouteGaps growth
+      ((leg :: rest) ++ late) outer finish) :
+    ∃ middle,
+      CounterControlValidationMortality.RouteGaps growth (leg :: rest)
+        outer middle ∧
+      CounterControlRouteSuffixMortality.RouteTailGaps growth late
+        middle finish := by
+  induction rest generalizing leg outer with
+  | nil =>
+      cases late with
+      | nil =>
+          simpa using
+            (show ∃ middle,
+                CounterControlValidationMortality.RouteGaps growth [leg]
+                  outer middle ∧
+                CounterControlRouteSuffixMortality.RouteTailGaps growth []
+                  middle finish from
+              ⟨finish, by simpa using trace, .nil finish⟩)
+      | cons next late =>
+          cases trace with
+          | cons _ _ _ outer distance gap finish tail =>
+              let middle := outer.moveN (orient growth leg.direction) distance
+              exact ⟨middle, .last leg outer distance gap,
+                .cons next late middle finish tail⟩
+  | cons next rest ih =>
+      cases trace with
+      | cons _ _ _ outer distance gap finish tail =>
+          rcases ih next
+              ((outer.moveN (orient growth leg.direction) distance).move
+                (orient growth next.direction)) tail with
+            ⟨middle, earlyTrace, lateTrace⟩
+          exact ⟨middle,
+            .cons leg next rest outer distance gap middle earlyTrace,
+            lateTrace⟩
+
+/-- Split a route-tail trace according to a list decomposition. -/
+theorem routeTailGaps_split
+    (growth : Turing.Dir)
+    (early late : List MarkerValidation.Leg)
+    (start finish : FullTM0.Tape (Symbol numTags))
+    (trace : CounterControlRouteSuffixMortality.RouteTailGaps growth
+      (early ++ late) start finish) :
+    ∃ middle,
+      CounterControlRouteSuffixMortality.RouteTailGaps growth early
+        start middle ∧
+      CounterControlRouteSuffixMortality.RouteTailGaps growth late
+        middle finish := by
+  cases early with
+  | nil => exact ⟨start, .nil start, by simpa using trace⟩
+  | cons leg rest =>
+      cases trace with
+      | cons _ _ start finish routeTrace =>
+          rcases routeGaps_split growth leg rest late
+              (start.move (orient growth leg.direction)) finish routeTrace with
+            ⟨middle, earlyTrace, lateTrace⟩
+          exact ⟨middle, .cons leg rest start middle earlyTrace, lateTrace⟩
+
+theorem ToUpper.eq_nil_of_same
+    {source : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToUpper source source route) : route = [] := by
+  cases hroute with
+  | here => rfl
+  | step i tail =>
+      have hle := tail.source_le
+      have hstep : (i.succ : Nat) = (i.castSucc : Nat) + 1 := by simp
+      omega
+
+/-- Reverse the part of an outward validation route lying strictly below
+the increment's terminal shifted boundary.  The first leg consumes the
+newly cleared old boundary; every later leg is an ordinary canonical
+inward-ray transport. -/
+theorem ToUpper.inwardAgreement_of_terminalIncrement
+    {growth : Turing.Dir} {source target : Fin 5}
+    {route : List MarkerValidation.Leg}
+    (hroute : ToUpper source target route)
+    (hstrict : (source : Nat) < (target : Nat))
+    {start finish shifted coreTape : FullTM0.Tape (Symbol numTags)}
+    (hread : start.read = boundarySymbol source)
+    (htrace : CounterControlRouteSuffixMortality.RouteTailGaps growth route
+      start finish)
+    (terminal : ShiftedAgainst (orient growth .left) target shifted finish)
+    {registers : Registers}
+    (hcore : CoreRepresents registers growth coreTape)
+    (hcenter : shifted.move (orient growth .right) =
+      atLogical growth coreTape (boundaryOffset registers target)) :
+    ∀ back,
+      ((atLogical growth coreTape (boundaryOffset registers source)).moveN
+        (orient growth .left) back).read =
+      (start.moveN (orient growth .left) back).read := by
+  induction hroute generalizing start finish shifted with
+  | here => simp at hstrict
+  | @step i endpoint rest tail ih =>
+      cases htrace with
+      | cons _ _ start finish trace =>
+          rcases routeGaps_uncons growth ⟨i.succ, .right⟩ _ _ _ trace with
+            ⟨distance, gap, restTrace⟩
+          let oldUpper :=
+            ((start.move (orient growth .right)).moveN
+              (orient growth .right) distance)
+          have holdUpper :
+              (start.move (orient growth .right)).moveN
+                (orient growth .right) distance = oldUpper := rfl
+          have hupperRead : oldUpper.read = boundarySymbol i.succ := by
+            change (Target.boundary i.succ).Matches oldUpper.read
+            simpa [oldUpper, FullTM0.Tape.read_moveN] using gap.marked
+          by_cases hterminal : endpoint = i.succ
+          · cases hterminal
+            have hrest : rest = ([] : List MarkerValidation.Leg) :=
+              ToUpper.eq_nil_of_same tail
+            rw [hrest] at restTrace
+            cases restTrace
+            have hclearedCanonical : shifted =
+                atLogical growth coreTape (lastGapOffset registers i) := by
+              calc
+                shifted = (shifted.move (orient growth .right)).move
+                    (orient growth .left) := by
+                  funext position
+                  cases growth <;>
+                    simp [orient, FullTM0.Tape.move]
+                _ = (atLogical growth coreTape
+                    (boundaryOffset registers i.succ)).move
+                      (orient growth .left) := by rw [hcenter]
+                _ = atLogical growth coreTape
+                    (lastGapOffset registers i) := by
+                  rw [show boundaryOffset registers i.succ =
+                      lastGapOffset registers i + 1 by
+                    simp [lastGapOffset, boundaryOffset,
+                      CounterLayout.boundaryPos_succ]]
+                  simp only [orient_eq_orientDirection]
+                  rw [atLogical_move_left]
+            exact lowerBoundary_inwardAgreement_of_shiftedUpper hcore hread
+              gap holdUpper terminal.blank (fun back hback =>
+                terminal.ahead back hback) hclearedCanonical
+          · have hupperStrict : (i.succ : Nat) < (endpoint : Nat) := by
+              have hle := tail.source_le
+              have hne : (i.succ : Nat) ≠ (endpoint : Nat) := by
+                intro heq
+                apply hterminal
+                exact Fin.ext heq.symm
+              omega
+            have hupperAgreement := ih hupperStrict hupperRead restTrace
+              terminal hcenter
+            exact lowerBoundary_inwardAgreement_of_upperAgreement hcore hread
+              gap holdUpper hupperAgreement
+
+theorem descendingTo_last_le
+    {current last : Fin 5} {labels : List (Fin 5)}
+    (schedule : DescendingTo current labels last) :
+    (last : Nat) ≤ (current : Nat) := by
+  induction schedule with
+  | done => simp
+  | step i _ ih =>
+      exact ih.trans (show (i.castSucc : Nat) ≤ (i.succ : Nat) by simp)
+
+theorem descendingTo_eq_nil_of_same
+    {current : Fin 5} {labels : List (Fin 5)}
+    (schedule : DescendingTo current labels current) : labels = [] := by
+  cases schedule with
+  | done => rfl
+  | step i tail =>
+      have hle := descendingTo_last_le tail
+      have hstep : (i.succ : Nat) = (i.castSucc : Nat) + 1 := by simp
+      omega
+
 theorem descendingTo_uncons_of_le_aux
     {current : Fin 5} {labels : List (Fin 5)} {last : Fin 5}
     (schedule : DescendingTo current labels last) (lower : Fin 4)
@@ -1156,6 +1409,59 @@ theorem outwardSuffix_gap_lt_layoutEnd_of_lowerIncrementTail
   exact outwardGap_lt_layoutEnd_of_incrementTail growth suffix.index shifted
     shiftFinish coreTape current.distance later last registers remainingTrace
     laterSchedule hstartRead holdBlank hcore hfinish
+
+/-- If the increment schedule stops strictly outside the original caller,
+split validation at that terminal boundary.  The upper suffix pairs with all
+increment shifts; reversing the unshifted lower prefix then identifies the
+caller's whole inward ray with its canonical boundary. -/
+theorem outwardSuffix_gap_lt_layoutEnd_of_upperIncrementTerminal
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (suffix : Suffix current growth source (.increment register next))
+    (last : Fin 5)
+    (shiftStart shiftFinish coreTape : FullTM0.Tape (Symbol numTags))
+    (labels : List (Fin 5)) (registers : Registers)
+    (initial : ShiftedAgainst (orient growth .left) 4 shiftStart
+      suffix.progress.suffix.finish)
+    (shiftTrace : ShiftTailGaps (orient growth .left) labels shiftStart
+      shiftFinish)
+    (schedule : DescendingTo 4 labels last)
+    (hstrict : (suffix.index.succ : Nat) < (last : Nat))
+    (hcore : CoreRepresents registers growth coreTape)
+    (hfinish : shiftFinish.move (orient growth .right) =
+      atLogical growth coreTape (boundaryOffset registers last)) :
+    current.distance < layoutEnd registers := by
+  have hle : (suffix.index.succ : Nat) ≤ (last : Nat) :=
+    Nat.le_of_lt hstrict
+  rcases CounterControlGenuineValidationOutwardIncrement.ToFour.splitAt
+      suffix.remaining_toFour last hle with
+    ⟨early, late, hroute, hearly, hlate⟩
+  have hrouteTrace :
+      CounterControlRouteSuffixMortality.RouteTailGaps growth
+        (early ++ late) current.foundTape suffix.progress.suffix.finish := by
+    rw [← hroute]
+    exact suffix.tailGaps
+  rcases routeTailGaps_split growth early late current.foundTape
+      suffix.progress.suffix.finish hrouteTrace with
+    ⟨middle, earlyTrace, lateTrace⟩
+  have hmiddleRead : middle.read = boundarySymbol last :=
+    hearly.finish_read suffix.current_read earlyTrace
+  rcases alignOutwardRoute hlate hmiddleRead lateTrace initial shiftTrace
+      schedule (Nat.le_refl (last : Nat)) with
+    ⟨shifted, remaining, terminal, remainingTrace, remainingSchedule⟩
+  have hremaining : remaining = [] :=
+    descendingTo_eq_nil_of_same remainingSchedule
+  rw [hremaining] at remainingTrace
+  cases remainingTrace
+  have inwardAgreement :=
+    hearly.inwardAgreement_of_terminalIncrement hstrict suffix.current_read
+      earlyTrace terminal hcore hfinish
+  apply distance_lt_layoutEnd_of_inwardAgreement hcore suffix.current_gap
+    suffix.current_foundTape
+  · intro back _
+    exact inwardAgreement back
+  · rfl
 
 /-- When the increment schedule ends exactly at the original validation
 boundary, the paired route leaves the old boundary cell blank and moves that
