@@ -448,6 +448,31 @@ private theorem continuation_shift_reaches_verify_native {numTags : Nat}
     simp [command, continuationTable, Command.move]
   exact hclear.trans hmove
 
+/-- Linked-machine prefix common to successful and blocked marker shifts:
+clear the found boundary and move to the destination-verification state.
+This endpoint is useful when a command has no collision exit and an occupied
+destination must be shown terminal. -/
+theorem machine_reaches_shift_verify_native {numTags : Nat}
+    {base radius commandOffset : Nat} {commands : List (Command numTags)}
+    (core : FiniteTM0.Table (AlphabetSize numTags))
+    (move : MarkerProgram.Move)
+    (successState : FiniteTM0.State) (returnTag : Fin numTags)
+    (departure : Option Turing.Dir)
+    (collisionState : Option FiniteTM0.State)
+    (hat : CommandAt radius base commandOffset
+      (Command.move move successState returnTag departure collisionState)
+      commands)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol move.expected) :
+    FullTM0.Reaches (machine base radius commands core)
+      ⟨foundState radius commandOffset, T⟩
+      ⟨verifyState radius commandOffset,
+        (T.write blankSymbol).move move.shiftDirection⟩ := by
+  exact machine_reaches_of_continuation core hat
+    (continuation_shift_reaches_verify_native radius commandOffset
+      (coreEntry base radius commands) move successState returnTag departure
+      collisionState T hread)
+
 /-- A collision-free shift clears the old boundary, moves to its blank
 destination, writes the same labelled boundary, and performs the optional
 departure exactly once. -/
