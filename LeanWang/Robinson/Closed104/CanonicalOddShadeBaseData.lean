@@ -20,12 +20,8 @@ def indexGrid : Nat → Nat → Index :=
   iterateRefine 4 (fun _ _ => (0 : Index))
 
 def cyclePorts : List Port :=
-  (List.range 6).flatMap fun offset =>
-    let coordinate := 6 + offset
-    [⟨coordinate, 5, .west⟩, ⟨coordinate, 5, .east⟩,
-      ⟨coordinate, 12, .west⟩, ⟨coordinate, 12, .east⟩,
-      ⟨5, coordinate, .south⟩, ⟨5, coordinate, .north⟩,
-      ⟨12, coordinate, .south⟩, ⟨12, coordinate, .north⟩]
+  [⟨5, 5, .east⟩, ⟨12, 5, .west⟩,
+    ⟨12, 12, .west⟩, ⟨5, 12, .east⟩]
 
 def nodes : List Node :=
   exploreFast indexGrid 16 16 4000 cyclePorts
