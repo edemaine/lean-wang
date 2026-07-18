@@ -295,125 +295,6 @@ theorem selectedBorder_none_between_frameBounds
   have geometry := between_frameBounds afterOpening beforeClosing
   exact selectedBorder_eq_none_of_owner_interior owner geometry.1 geometry.2
 
-theorem previousInterior_eq_opening
-    {interior : Nat → Option Bool} {opening closing position : Nat}
-    (openingBorder : interior opening = some true)
-    (between : ∀ candidate, opening < candidate → candidate < closing →
-      interior candidate = none)
-    (afterOpening : opening < position) (atMostClosing : position ≤ closing) :
-    ShadedSignalRectangle.previousInterior interior position = some true := by
-  have startLe : opening + 1 ≤ position := by omega
-  induction position, startLe using Nat.le_induction with
-  | base =>
-      simp [ShadedSignalRectangle.previousInterior, openingBorder]
-  | succ position _ inductionHypothesis =>
-      have positionBetween : opening < position ∧ position < closing := by omega
-      have previous := inductionHypothesis positionBetween.1 (by omega)
-      simp [ShadedSignalRectangle.previousInterior,
-        between position positionBetween.1 positionBetween.2, previous]
-
-theorem previousInterior_eq_closing
-    {interior : Nat → Option Bool} {closing position : Nat}
-    (closingBorder : interior closing = some false)
-    (between : ∀ candidate, closing < candidate → candidate < position →
-      interior candidate = none)
-    (afterClosing : closing < position) :
-    ShadedSignalRectangle.previousInterior interior position = some false := by
-  have startLe : closing + 1 ≤ position := by omega
-  induction position, startLe using Nat.le_induction with
-  | base =>
-      simp [ShadedSignalRectangle.previousInterior, closingBorder]
-  | succ position _ inductionHypothesis =>
-      have positionBetween : closing < position ∧ position < position + 1 := by
-        omega
-      have previous := inductionHypothesis
-        (fun candidate lower upper => between candidate lower (by omega))
-        positionBetween.1
-      simp [ShadedSignalRectangle.previousInterior,
-        between position positionBetween.1 positionBetween.2, previous]
-
-theorem nextInterior_eq_closing
-    {interior : Nat → Option Bool} {position closing length : Nat}
-    (closingBorder : interior closing = some false)
-    (between : ∀ candidate, position ≤ candidate → candidate < closing →
-      interior candidate = none)
-    (atMostClosing : position ≤ closing) (closingBeforeEnd : closing < length) :
-    ShadedSignalRectangle.nextInterior interior position (length - position) =
-      some false := by
-  induction distance : closing - position generalizing position with
-  | zero =>
-      have positionEq : position = closing := by omega
-      subst position
-      have fuelPositive : 0 < length - closing := by omega
-      obtain ⟨fuel, fuelEq⟩ := Nat.exists_eq_succ_of_ne_zero fuelPositive.ne'
-      rw [fuelEq]
-      simp [ShadedSignalRectangle.nextInterior, closingBorder]
-  | succ distance inductionHypothesis =>
-      have positionBefore : position < closing := by omega
-      have fuelEq : length - position = length - (position + 1) + 1 := by omega
-      rw [fuelEq]
-      simp only [ShadedSignalRectangle.nextInterior,
-        between position (by omega) positionBefore]
-      apply inductionHypothesis (position := position + 1)
-      · intro candidate lower upper
-        exact between candidate (by omega) upper
-      · omega
-      · omega
-
-theorem nextInterior_eq_true_of_no_false_before
-    {interior : Nat → Option Bool} {position opening length : Nat}
-    (openingBorder : interior opening = some true)
-    (noClosing : ∀ candidate, position ≤ candidate → candidate < opening →
-      interior candidate ≠ some false)
-    (atMostOpening : position ≤ opening)
-    (openingBeforeEnd : opening < length) :
-    ShadedSignalRectangle.nextInterior interior position (length - position) =
-      some true := by
-  induction distance : opening - position generalizing position with
-  | zero =>
-      have positionEq : position = opening := by omega
-      subst position
-      have fuelPositive : 0 < length - opening := by omega
-      obtain ⟨fuel, fuelEq⟩ := Nat.exists_eq_succ_of_ne_zero fuelPositive.ne'
-      rw [fuelEq]
-      simp [ShadedSignalRectangle.nextInterior, openingBorder]
-  | succ distance inductionHypothesis =>
-      have positionBefore : position < opening := by omega
-      have fuelEq : length - position = length - (position + 1) + 1 := by omega
-      rw [fuelEq]
-      cases current : interior position with
-      | none =>
-          simp only [ShadedSignalRectangle.nextInterior, current]
-          apply inductionHypothesis (position := position + 1)
-          · intro candidate lower upper
-            exact noClosing candidate (by omega) upper
-          · omega
-          · omega
-      | some orientation =>
-          cases orientation with
-          | false => exact (noClosing position le_rfl positionBefore current).elim
-          | true => simp [ShadedSignalRectangle.nextInterior, current]
-
-theorem exists_interior_of_nextInterior_eq_some
-    {interior : Nat → Option Bool} {position fuel : Nat}
-    {orientation : Bool}
-    (next : ShadedSignalRectangle.nextInterior interior position fuel =
-      some orientation) :
-    ∃ candidate, position ≤ candidate ∧ candidate < position + fuel ∧
-      interior candidate = some orientation := by
-  induction fuel generalizing position with
-  | zero => simp [ShadedSignalRectangle.nextInterior] at next
-  | succ fuel inductionHypothesis =>
-      cases current : interior position with
-      | none =>
-          simp only [ShadedSignalRectangle.nextInterior, current] at next
-          obtain ⟨candidate, lower, upper, selected⟩ := inductionHypothesis next
-          exact ⟨candidate, by omega, by omega, selected⟩
-      | some currentOrientation =>
-          simp only [ShadedSignalRectangle.nextInterior, current] at next
-          cases next
-          exact ⟨position, le_rfl, by omega, current⟩
-
 /-- A clear canonical edge lies strictly between a witnessed opening and
 closing border when no closing intervenes before the opening and no border
 intervenes after the closing. -/
@@ -436,7 +317,8 @@ theorem between_borders_of_intervalEdge_eq_none
   · rcases Nat.lt_trichotomy position opening with before | equal | after
     · have nextTrue : ShadedSignalRectangle.nextInterior interior position
           (length - position) = some true := by
-        apply nextInterior_eq_true_of_no_false_before openingBorder
+        apply ShadedSignalRectangle.nextInterior_eq_of_no_opposite_before
+          openingBorder
           noClosingBeforeOpening before.le
           (openingBeforeClosing.trans closingBeforeEnd)
       rw [nextTrue] at edgeData
@@ -453,7 +335,8 @@ theorem between_borders_of_intervalEdge_eq_none
     · have previousFalse :
           ShadedSignalRectangle.previousInterior interior position =
             some false := by
-        exact previousInterior_eq_closing closingBorder noBorderAfterClosing after
+        exact ShadedSignalRectangle.previousInterior_eq_of_none_between
+          closingBorder noBorderAfterClosing after
       exact (edgeData.2 previousFalse).elim
 
 theorem selectedBorder_ne_some_false_before_frameOpening
@@ -660,21 +543,24 @@ theorem intervalEdge_pair_of_horizontalCarrier
           (before : position ≤ frameClosing depth coordinate) :
           ShadedSignalRectangle.previousInterior
               (fun x => selectedBorder level x transverse) position = some true :=
-        previousInterior_eq_opening openingBorder noBorder after before
+        ShadedSignalRectangle.previousInterior_eq_of_none_between
+          openingBorder (fun candidate lower upper =>
+            noBorder candidate lower (upper.trans_le before)) after
       have next (position : Nat)
           (lower : coordinate ≤ position)
           (before : position ≤ frameClosing depth coordinate) :
           ShadedSignalRectangle.nextInterior
               (fun x => selectedBorder level x transverse) position
                 (2 * scale level - position) = some false := by
-        apply nextInterior_eq_closing
+        apply ShadedSignalRectangle.nextInterior_eq_of_no_opposite_before
             (interior := fun x => selectedBorder level x transverse)
             (position := position)
-            (closing := frameClosing depth coordinate)
+            (border := frameClosing depth coordinate)
             (length := 2 * scale level) closingBorder
-            (atMostClosing := before) (closingBeforeEnd := closingBeforeEnd)
+            (atMostBorder := before) (borderBeforeEnd := closingBeforeEnd)
         intro candidate candidateLower candidateBefore
-        exact noBorder candidate (by omega) candidateBefore
+        rw [noBorder candidate (by omega) candidateBefore]
+        simp
       constructor
       · rw [ShadedSignalRectangle.intervalEdge_eq_none_iff]
         exact ⟨next coordinate (by omega) (by omega), by
@@ -709,7 +595,7 @@ theorem horizontalCarrier_of_intervalEdge_pair
   cases owner : depthAt (level - 1) transverse with
   | none =>
       obtain ⟨candidate, lower, upper, selected⟩ :=
-        exists_interior_of_nextInterior_eq_some edgeData.1
+        ShadedSignalRectangle.exists_interior_of_nextInterior_eq_some edgeData.1
       have candidate_lt : candidate < 2 * scale level := by
         have coordinateLe : coordinate ≤ 2 * scale level := coordinate_lt.le
         simpa [Nat.add_sub_of_le coordinateLe] using upper

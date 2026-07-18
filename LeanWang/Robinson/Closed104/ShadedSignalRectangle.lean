@@ -154,6 +154,84 @@ def nextInterior (interior : Nat → Option Bool) : Nat → Nat → Option Bool
       | some positive => some positive
       | none => nextInterior interior (position + 1) fuel
 
+/-- A selected border remains the previous one until another border occurs. -/
+theorem previousInterior_eq_of_none_between
+    {interior : Nat → Option Bool} {border position : Nat}
+    {orientation : Bool}
+    (selected : interior border = some orientation)
+    (between : ∀ candidate, border < candidate → candidate < position →
+      interior candidate = none)
+    (afterBorder : border < position) :
+    previousInterior interior position = some orientation := by
+  have startLe : border + 1 ≤ position := by omega
+  induction position, startLe using Nat.le_induction with
+  | base => simp [previousInterior, selected]
+  | succ position _ inductionHypothesis =>
+      have positionBetween : border < position ∧ position < position + 1 := by
+        omega
+      have previous := inductionHypothesis
+        (fun candidate lower upper => between candidate lower (by omega))
+        positionBetween.1
+      simp [previousInterior,
+        between position positionBetween.1 positionBetween.2, previous]
+
+/-- The first selected border in a bounded suffix has its prescribed
+orientation if no oppositely oriented border occurs before it. -/
+theorem nextInterior_eq_of_no_opposite_before
+    {interior : Nat → Option Bool} {position border length : Nat}
+    {orientation : Bool}
+    (selected : interior border = some orientation)
+    (noOpposite : ∀ candidate, position ≤ candidate → candidate < border →
+      interior candidate ≠ some (!orientation))
+    (atMostBorder : position ≤ border) (borderBeforeEnd : border < length) :
+    nextInterior interior position (length - position) = some orientation := by
+  induction distance : border - position generalizing position with
+  | zero =>
+      have positionEq : position = border := by omega
+      subst position
+      have fuelPositive : 0 < length - border := by omega
+      obtain ⟨fuel, fuelEq⟩ := Nat.exists_eq_succ_of_ne_zero fuelPositive.ne'
+      rw [fuelEq]
+      simp [nextInterior, selected]
+  | succ distance inductionHypothesis =>
+      have positionBefore : position < border := by omega
+      have fuelEq : length - position = length - (position + 1) + 1 := by omega
+      rw [fuelEq]
+      cases current : interior position with
+      | none =>
+          simp only [nextInterior, current]
+          apply inductionHypothesis (position := position + 1)
+          · intro candidate lower upper
+            exact noOpposite candidate (by omega) upper
+          · omega
+          · omega
+      | some currentOrientation =>
+          cases orientation <;> cases currentOrientation
+          · simp [nextInterior, current]
+          · exact (noOpposite position le_rfl positionBefore current).elim
+          · exact (noOpposite position le_rfl positionBefore current).elim
+          · simp [nextInterior, current]
+
+/-- A successful bounded suffix scan witnesses the selected border it found. -/
+theorem exists_interior_of_nextInterior_eq_some
+    {interior : Nat → Option Bool} {position fuel : Nat}
+    {orientation : Bool}
+    (next : nextInterior interior position fuel = some orientation) :
+    ∃ candidate, position ≤ candidate ∧ candidate < position + fuel ∧
+      interior candidate = some orientation := by
+  induction fuel generalizing position with
+  | zero => simp [nextInterior] at next
+  | succ fuel inductionHypothesis =>
+      cases current : interior position with
+      | none =>
+          simp only [nextInterior, current] at next
+          obtain ⟨candidate, lower, upper, selected⟩ := inductionHypothesis next
+          exact ⟨candidate, by omega, by omega, selected⟩
+      | some currentOrientation =>
+          simp only [nextInterior, current] at next
+          cases next
+          exact ⟨position, le_rfl, by omega, current⟩
+
 /-- Canonical edge flow determined by the nearest selected borders.  The
 clear case is the interval after an opening border and before a closing one. -/
 def intervalEdge (interior : Nat → Option Bool) (length position : Nat) :
