@@ -212,6 +212,92 @@ private theorem decrementOrder_label_ne_zero
 
 /-! ## Strict containment after a positive decrement -/
 
+/-- A completed decrement-shift suffix cannot carry its first moved boundary
+past canonical boundary `0`.  Thus its retained backward travel is shorter
+than the span from boundary `4` to boundary `0`. -/
+theorem decrementShift_travel_lt_layoutEnd_sub_one
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (suffix : DecrementShiftSuffixReached current growth source register)
+    (registers : Registers)
+    (coreTape : FullTM0.Tape (Symbol numTags))
+    (hcore : CoreRepresents registers growth coreTape)
+    (hcenter : decrementPositiveTape suffix =
+      atLogical growth coreTape (layoutEnd registers))
+    (geometry : ShiftTailBackwardGeometry (orient growth .right)
+      suffix.position.remaining
+      (current.shiftedParentBacking suffix.position.current)
+      suffix.finish) :
+    geometry.travel < layoutEnd registers - 1 := by
+  have hdirection : current.direction = orient growth .right := by
+    have hdirection := current.selectedRaw_direction_eq
+    rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+      at hdirection
+    rw [suffix.position.raw_eq] at hdirection
+    exact hdirection.symm
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hcurrentMem : suffix.position.current ∈
+      MarkerShift.decrementOrder register := by
+    have heq := congrArg
+      (fun labels : List (Fin 5) => suffix.position.current ∈ labels)
+      suffix.position.labels_eq
+    exact heq.mpr (by simp)
+  have hcurrentNe : suffix.position.current ≠ 0 :=
+    decrementOrder_label_ne_zero register suffix.position.current hcurrentMem
+  have hremaining : ∀ label ∈ suffix.position.remaining,
+      label ≠ (0 : Fin 5) := by
+    intro label hlabel
+    apply decrementOrder_label_ne_zero register label
+    have heq := congrArg (fun labels : List (Fin 5) => label ∈ labels)
+      suffix.position.labels_eq
+    exact heq.mpr (by simp [hlabel])
+  have hstartRead :
+      ((current.shiftedParentBacking suffix.position.current).move
+        (NestingMachine.opposite (orient growth .right))).read =
+          boundarySymbol suffix.position.current := by
+    have hread := suffix.handoff.destination_boundary
+    rw [hdirection] at hread
+    exact hread
+  have hstartAvoid :
+      ((current.shiftedParentBacking suffix.position.current).move
+        (NestingMachine.opposite (orient growth .right))).read ≠
+          boundarySymbol 0 := by
+    rw [hstartRead]
+    intro heq
+    exact hcurrentNe
+      ((boundarySymbol_injective suffix.position.current 0).mp heq)
+  have hfinishEq :
+      suffix.finish.move
+          (NestingMachine.opposite (orient growth .right)) =
+        atLogical growth coreTape (layoutEnd registers) := by
+    rw [hopposite]
+    exact hcenter
+  have hendPositive : 1 < layoutEnd registers := by
+    simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+  have hboundaryZero :
+      ((suffix.finish.move
+          (NestingMachine.opposite (orient growth .right))).moveN
+            (NestingMachine.opposite (orient growth .right))
+            (layoutEnd registers - 1)).read = boundarySymbol 0 := by
+    rw [hfinishEq, hopposite]
+    have hend : layoutEnd registers = 1 + (layoutEnd registers - 1) := by
+      omega
+    conv_lhs =>
+      enter [1, 1]
+      rw [hend]
+    simp only [orient_eq_orientDirection]
+    rw [atLogical_moveN_left, atLogical_read]
+    simpa using hcore.boundary (0 : Fin 5)
+  by_contra hnot
+  have hle : layoutEnd registers - 1 ≤ geometry.travel :=
+    Nat.le_of_not_gt hnot
+  have havoid := geometry.avoids (0 : Fin 5) hstartAvoid hremaining
+    (layoutEnd registers - 1) hle
+  exact havoid hboundaryZero
+
 /-- The parent gap of any guarded shift caller is strictly contained in a
 canonical core centered at the completed positive-decrement endpoint.
 
