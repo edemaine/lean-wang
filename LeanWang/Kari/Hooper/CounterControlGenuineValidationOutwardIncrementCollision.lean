@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
+import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutward
 import LeanWang.Kari.Hooper.CounterControlGuardedCleanupProgress
 
 /-!
@@ -22,7 +23,7 @@ namespace Hooper
 namespace CounterControlGenuineValidationOutwardIncrementCollision
 
 open Turing CounterMachine
-open BoundedMarkerProgram CounterControlPlan
+open BoundedMarkerProgram CounterControlPlan CounterControlSearchSystem
 open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedSearch
 open CounterControlGenuineValidation
@@ -118,6 +119,14 @@ theorem InwardRayEq.trans
     InwardRayEq inward first third := by
   intro distance
   exact (firstSecond distance).trans (secondThird distance)
+
+theorem InwardRayEq.symm
+    {inward : Turing.Dir}
+    {first second : FullTM0.Tape (Symbol numTags)}
+    (agreement : InwardRayEq inward first second) :
+    InwardRayEq inward second first := by
+  intro distance
+  exact (agreement distance).symm
 
 /-- Clearing the cell just behind an inward-moving head does not change the
 ray at or ahead of that head. -/
@@ -301,6 +310,134 @@ theorem clearedEndpointStep_ray
   simpa only [eraseDepart, FullTM0.Tape.move_moveN,
     Nat.add_comm] using hstep
 
+/-! ## Genuine cleanup checkpoints -/
+
+/-- Package an exact gap at any of the four cleanup stages as a genuine
+generated search. -/
+def cleanupSearch
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (stage : CounterControlCleanupRoute.Stage)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches outer
+      (orient growth .left) distance) : GenuineSearch base c := by
+  let raw := CounterControlCleanupRoute.command growth source stage
+  let hmem := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source register targetState hrule stage
+  let search : Search := CounterControlCommandAt.rawTag raw hmem
+  exact {
+    search := search
+    outer := outer
+    distance := distance
+    gap := by
+      have hcommand : CounterControlSearchSystem.command base c search =
+          CounterControlCommandAt.compileRawCommand base c raw hmem := rfl
+      rw [hcommand, CounterControlCleanupRoute.compile_command]
+      simpa [raw, Command.target, Command.searchDirection] using hgap }
+
+@[simp] theorem cleanupSearch_cfg
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (stage : CounterControlCleanupRoute.Stage)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches outer
+      (orient growth .left) distance) :
+    (cleanupSearch base c growth source register targetState hrule stage
+      outer distance hgap).cfg =
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩ := by
+  let raw := CounterControlCleanupRoute.command growth source stage
+  let hmem := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source register targetState hrule stage
+  let search : Search := CounterControlCommandAt.rawTag raw hmem
+  have hget : rawCommands.get search = raw :=
+    CounterControlCommandAt.rawCommands_get_rawTag raw hmem
+  change (searchSystem base c).startCfg search outer = _
+  change (⟨CounterControlSearchSystem.commandOffset base c search, outer⟩ :
+    FullTM0.Cfg (Symbol numTags) FiniteTM0.State) = _
+  unfold CounterControlSearchSystem.commandOffset
+  rw [hget]
+  rw [CounterControlCleanupRoute.command_address]
+
+@[simp] theorem cleanupSearch_selectedRaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (stage : CounterControlCleanupRoute.Stage)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches outer
+      (orient growth .left) distance) :
+    (cleanupSearch base c growth source register targetState hrule stage
+      outer distance hgap).selectedRaw =
+      CounterControlCleanupRoute.command growth source stage := by
+  let raw := CounterControlCleanupRoute.command growth source stage
+  let hmem := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source register targetState hrule stage
+  unfold cleanupSearch GenuineSearch.selectedRaw
+  change rawCommands.get (CounterControlCommandAt.rawTag raw hmem) = raw
+  exact CounterControlCommandAt.rawCommands_get_rawTag raw hmem
+
+private theorem cleanupGap_of_immortal
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (stage : CounterControlCleanupRoute.Stage)
+    (outer : FullTM0.Tape (Symbol numTags))
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩) :
+    ∃ distance, SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches outer
+      (orient growth .left) distance := by
+  have hraw := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source register targetState hrule stage
+  exact CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
+    base c hmortal ⟨growth, source, stage.slot⟩ stage.expected .left
+    (stage.successRef growth source) (.erase (some .left))
+    (by simpa [CounterControlCleanupRoute.command] using hraw)
+    outer himmortal
+
+private theorem reaches_cleanupSuccess_of_immortal
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (stage : CounterControlCleanupRoute.Stage)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches outer
+      (orient growth .left) distance)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩
+      ⟨resolve base c (stage.successRef growth source),
+        eraseDepart outer (orient growth .left) distance⟩ := by
+  have hraw := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source register targetState hrule stage
+  have hreach :=
+    CounterControlCleanupEraseProgress.machine_reaches_boundary_erase_of_immortal
+      base c ⟨growth, source, stage.slot⟩ stage.expected .left
+      (stage.successRef growth source) (some .left)
+      (by simpa [CounterControlCleanupRoute.command] using hraw)
+      outer distance hgap himmortal
+  simpa [eraseDepart] using hreach
+
 /-- Any reached cleanup caller whose gap contains the original outward gap
 produces the required outward-instruction handoff.  The cleanup suffix itself
 grows strictly, so the consumer-facing comparison is weak only because that
@@ -335,6 +472,137 @@ theorem handoff_of_cleanupEntry
     ⟨next, hnext, hstrict⟩
   exact ⟨.nextSearch next
     (hreaches.trans hnext) (hdistance.trans hstrict.le)⟩
+
+/-- A cleanup-stage entry whose inward ray is the reverse of the original
+outward found tape has a gap at least as large as the original caller. -/
+theorem handoff_of_cleanupRayEntry
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {targetState : Nat}
+    {obligation : OutwardObligation current growth source
+      (.increment register targetState)}
+    (suffix : CounterControlGenuineValidationOutwardSuffix.Suffix
+      current growth source (.increment register targetState))
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (stage : CounterControlCleanupRoute.Stage)
+    (outer : FullTM0.Tape (Symbol numTags))
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩)
+    (agreement : InwardRayEq (orient growth .left) outer
+      ((current.foundTape.write blankSymbol).move (orient growth .left)))
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  have himmortalEntry : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩ :=
+    immortalFrom_of_reaches base c himmortal hreaches
+  rcases cleanupGap_of_immortal base c hmortal growth source register
+      targetState hrule stage outer himmortalEntry with
+    ⟨distance, hgap⟩
+  have hcleared : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches
+      ((current.foundTape.write blankSymbol).move (orient growth .left))
+      (orient growth .left) distance :=
+    agreement.symm.searchGap hgap
+  have hreplay : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches
+      (current.foundTape.move (orient growth .left))
+      (orient growth .left) distance :=
+    (InwardRayEq.clearedBehind current.foundTape
+      (orient growth .left)).symm.searchGap hcleared
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hreplay' : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches
+      ((current.outer.moveN (orient growth .right) current.distance).move
+        (NestingMachine.opposite (orient growth .right)))
+      (NestingMachine.opposite (orient growth .right)) distance := by
+    rw [hopposite, suffix.current_foundTape]
+    exact hreplay
+  have hdistance : current.distance ≤ distance :=
+    CounterControlInwardValidationReplay.reverseBoundaryGap_distance_ge
+      suffix.current_gap hreplay'
+  let cleanup := cleanupSearch base c growth source register targetState
+    hrule stage outer distance hgap
+  have hcleanup : rawCommands.get cleanup.search ∈
+      cleanupCommands growth source := by
+    change cleanup.selectedRaw ∈ cleanupCommands growth source
+    rw [show cleanup.selectedRaw =
+        CounterControlCleanupRoute.command growth source stage by
+      simp [cleanup]]
+    exact CounterControlCleanupRoute.command_mem_cleanupCommands
+      growth source stage
+  have hcleanupCfg : cleanup.cfg =
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩ := by
+    simp [cleanup]
+  apply handoff_of_cleanupEntry base c hmortal hrule cleanup hcleanup
+    (by simpa [hcleanupCfg] using hreaches) hdistance himmortal
+
+/-- If collision cleanup starts on the cleared endpoint of the original
+outward gap, its first reverse gap is strictly larger immediately. -/
+theorem handoff_of_clearedCurrentEntry
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {targetState : Nat}
+    {obligation : OutwardObligation current growth source
+      (.increment register targetState)}
+    (suffix : CounterControlGenuineValidationOutwardSuffix.Suffix
+      current growth source (.increment register targetState))
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (stage : CounterControlCleanupRoute.Stage)
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩,
+        current.foundTape.write blankSymbol⟩)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  have himmortalEntry : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩,
+        current.foundTape.write blankSymbol⟩ :=
+    immortalFrom_of_reaches base c himmortal hreaches
+  rcases cleanupGap_of_immortal base c hmortal growth source register
+      targetState hrule stage (current.foundTape.write blankSymbol)
+      himmortalEntry with ⟨distance, hgap⟩
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hreverse : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches
+      ((current.outer.moveN (orient growth .right) current.distance).write
+        blankSymbol)
+      (NestingMachine.opposite (orient growth .right)) distance := by
+    rw [hopposite, suffix.current_foundTape]
+    exact hgap
+  have hdistance : current.distance ≤ distance :=
+    (CounterControlGenuineValidationOutward.clearedReverseGap_distance_gt
+      suffix.current_gap hreverse).le
+  let cleanup := cleanupSearch base c growth source register targetState
+    hrule stage (current.foundTape.write blankSymbol) distance hgap
+  have hcleanup : rawCommands.get cleanup.search ∈
+      cleanupCommands growth source := by
+    change cleanup.selectedRaw ∈ cleanupCommands growth source
+    rw [show cleanup.selectedRaw =
+        CounterControlCleanupRoute.command growth source stage by
+      simp [cleanup]]
+    exact CounterControlCleanupRoute.command_mem_cleanupCommands
+      growth source stage
+  have hcleanupCfg : cleanup.cfg =
+      ⟨searchState base c ⟨growth, source, stage.slot⟩,
+        current.foundTape.write blankSymbol⟩ := by
+    simp [cleanup]
+  apply handoff_of_cleanupEntry base c hmortal hrule cleanup hcleanup
+    (by simpa [hcleanupCfg] using hreaches) hdistance himmortal
 
 end
 
