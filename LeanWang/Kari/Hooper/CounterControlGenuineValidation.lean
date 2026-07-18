@@ -878,6 +878,168 @@ def OutwardContinuationLaw
           (foundCfg current) →
         Nonempty (FoundMonotoneGuardedEntryOutcome current)
 
+/-- The instruction-wide handoff needed by an outward validation caller.
+The instruction has reached the first command of a later complete validation
+round.  All operational work after that point is already supplied by
+`validation_reconstructs_of_immortal`; the only genuinely new invariant is
+`margin`, which says that the old outward gap lies strictly inside the core
+reconstructed by that later round.
+
+The cycle reach is included in `margin` to tie its anchored tape to this
+particular validation entry.  This avoids asking for a global statement
+about every tape which happens to represent the same register tuple. -/
+structure NextValidationHandoff
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (_obligation : OutwardObligation current growth source instruction) :
+    Type where
+  nextGrowth : Turing.Dir
+  nextSource : Nat
+  nextInstruction : CounterMachine.Instruction
+  nextRule : (nextSource, nextInstruction) ∈
+    GlobalSourceProgram.program
+  outer : FullTM0.Tape (Symbol numTags)
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current)
+    ⟨searchState base c
+        ⟨nextGrowth, nextSource, validationSearchBase⟩, outer⟩
+  margin : ∀ (registers : Registers)
+      (T : FullTM0.Tape (Symbol numTags)),
+    CounterControlValidationConverse.BoundaryZeroRepresents
+        registers nextGrowth T →
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c
+            ⟨nextGrowth, nextSource, validationSearchBase⟩, outer⟩
+        ⟨resolve base c
+            (bodyEntry nextGrowth nextSource nextInstruction),
+          atLogical nextGrowth T
+            (RegisterLayout.clockBoundary registers)⟩ →
+        current.distance < layoutEnd registers
+
+private theorem immortalFrom_of_reaches
+    (base : Nat) (c : Nat.Partrec.Code)
+    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) first)
+    (hreach : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) first second) :
+    FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) second := by
+  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
+  intro hhalts
+  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
+
+/-- Existing validation converse and open-body mortality discharge every
+field after an instruction-wide handoff has supplied the old-gap margin. -/
+theorem NextValidationHandoff.monotone
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    {obligation : OutwardObligation current growth source instruction}
+    (handoff : NextValidationHandoff current obligation)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
+  let nextCfg : FullTM0.Cfg (Symbol numTags) FiniteTM0.State :=
+    ⟨searchState base c
+        ⟨handoff.nextGrowth, handoff.nextSource, validationSearchBase⟩,
+      handoff.outer⟩
+  have himmortalNext : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) nextCfg :=
+    immortalFrom_of_reaches base c himmortal (by
+      simpa [nextCfg] using handoff.reaches)
+  rcases CounterControlValidationMortality.validation_reconstructs_of_immortal
+      base c hmortal himmortalNext handoff.nextGrowth handoff.nextSource
+      handoff.nextInstruction handoff.nextRule handoff.outer
+      (Relation.ReflTransGen.refl : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c) nextCfg nextCfg) with
+    ⟨registers, T, hboundary, hcore, hcycle⟩
+  let coreTape := T.move (orient handoff.nextGrowth .left)
+  have hcenter :
+      atLogical handoff.nextGrowth coreTape (layoutEnd registers) =
+        atLogical handoff.nextGrowth T
+          (RegisterLayout.clockBoundary registers) := by
+    rw [show layoutEnd registers =
+        RegisterLayout.clockBoundary registers + 1 by
+      simp [layoutEnd]]
+    exact atLogical_boundaryZero_to_core handoff.nextGrowth T
+      (RegisterLayout.clockBoundary registers)
+  have hbody : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      (CounterControlPrefixInstructionResolution.bodyCfg base c
+        handoff.nextGrowth ⟨handoff.nextSource, registers⟩
+          handoff.nextInstruction coreTape) := by
+    have hrun := handoff.reaches.trans hcycle
+    rw [← hcenter] at hrun
+    change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨resolve base c
+          (bodyEntry handoff.nextGrowth handoff.nextSource
+            handoff.nextInstruction),
+        atLogical handoff.nextGrowth coreTape
+          (layoutEnd registers)⟩ at hrun
+    simpa [CounterControlPrefixInstructionResolution.bodyCfg] using hrun
+  have hinside : current.distance < layoutEnd registers :=
+    handoff.margin registers T hboundary (by
+      simpa [nextCfg] using hcycle)
+  exact
+    CounterControlBodyFirstObstruction.foundMonotoneGuardedEntryOutcome_of_reconstructedBody
+      base c hmortal current handoff.nextGrowth handoff.nextSource
+      handoff.nextInstruction registers coreTape handoff.nextRule hcore hbody
+      hinside himmortal
+
+/-- The small instruction-wide alternative left by outward validation:
+either reach a later complete validation round while preserving its margin,
+or expose the already-guarded cleanup caller at a weakly larger distance. -/
+inductive OutwardInstructionHandoff
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (obligation : OutwardObligation current growth source instruction) :
+    Type where
+  | nextValidation (handoff : NextValidationHandoff current obligation)
+  | nextSearch (next : CounterControlGuardedSearch.GuardedSearch base c)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        (foundCfg current) next.current.cfg)
+      (distance_le : current.distance ≤ next.current.distance)
+
+/-- A concrete statement of the remaining instruction-wide theorem.  In
+contrast with `OutwardContinuationLaw`, its validation branch delegates all
+subsequent reconstruction and mortality arguments to existing APIs. -/
+def OutwardInstructionHandoffLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (_hmortal : ¬ DominoProblem.FixedNonhalting c) : Prop :=
+  ∀ (current : GenuineSearch base c)
+      (growth : Turing.Dir) (source : Nat)
+      (instruction : CounterMachine.Instruction)
+      (_hrule : (source, instruction) ∈ GlobalSourceProgram.program)
+      (obligation : OutwardObligation current growth source instruction),
+    FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
+        (foundCfg current) →
+      Nonempty (OutwardInstructionHandoff current obligation)
+
+/-- The narrower instruction-wide handoff law supplies the exact outward
+continuation law used by arbitrary validation. -/
+theorem outwardContinuationLaw_of_instructionHandoffLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hlaw : OutwardInstructionHandoffLaw base c hmortal) :
+    OutwardContinuationLaw base c hmortal := by
+  intro current growth source instruction hrule obligation himmortal
+  rcases hlaw current growth source instruction hrule obligation
+      himmortal with ⟨handoff⟩
+  cases handoff with
+  | nextValidation next =>
+      exact next.monotone hmortal himmortal
+  | nextSearch next hreaches hdistance =>
+      exact ⟨.nextSearch next hreaches hdistance⟩
+
 /-- An implementation of the exact outward obligation completes the
 validation field required by monotone-entry assembly. -/
 theorem validationContinuation_of_outwardLaw
