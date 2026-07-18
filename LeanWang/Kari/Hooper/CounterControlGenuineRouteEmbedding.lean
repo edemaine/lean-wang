@@ -172,9 +172,20 @@ theorem GenuineRouteEnd.current_foundTape
 
 /-! ## Recovery routes reach a containing logical core -/
 
+/-- The proof-neutral result of reconstructing a logical core from a
+rightward route suffix.  Genuine and guarded callers package the same strict
+geometric containment into different global outcomes. -/
+structure RouteLogicalCertificate
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c) : Type where
+  core : LogicalCore base c
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current) core.cfg
+  inside : current.distance < layoutEnd core.registers
+
 /-- A consecutive rightward guard-free recovery suffix ending at logical
-boundary `4` reconstructs a core which contains the current gap. -/
-theorem logical_of_toFour_endpoint
+boundary `4` reconstructs a neutral core-and-containment certificate. -/
+theorem certificate_of_toFour_endpoint
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
     (current : GenuineSearch base c)
@@ -186,7 +197,7 @@ theorem logical_of_toFour_endpoint
       (.logical growth targetState) route)
     (htargetState : targetState < logicalSpan)
     (hroute : ∃ routeSource : Fin 5, ToFour routeSource route) :
-    Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
+    Nonempty (RouteLogicalCertificate current) := by
   rcases hroute with ⟨routeSource, hroute⟩
   rcases hroute.position progress.suffix.route_eq with
     ⟨i, hcurrent, htail⟩
@@ -249,8 +260,27 @@ theorem logical_of_toFour_endpoint
     rw [hcenter] at hrun
     simpa [core, LogicalCore.cfg, LogicalCore.frame,
       LogicalCore.abstract, prefixLogicalCfg] using hrun
-  exact ⟨FoundMonotoneGuardedEntryOutcome.logical core hreaches
-    hinside.le⟩
+  exact ⟨⟨core, hreaches, hinside⟩⟩
+
+/-- A consecutive rightward guard-free recovery suffix ending at logical
+boundary `4` reaches a core containing the current gap. -/
+theorem logical_of_toFour_endpoint
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current))
+    (growth : Turing.Dir) (source searchSlot directSlot targetState : Nat)
+    (route : List MarkerValidation.Leg)
+    (progress : GenuineRouteEnd current growth source searchSlot directSlot
+      (.logical growth targetState) route)
+    (htargetState : targetState < logicalSpan)
+    (hroute : ∃ routeSource : Fin 5, ToFour routeSource route) :
+    Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
+  rcases certificate_of_toFour_endpoint base c hmortal current himmortal
+      growth source searchSlot directSlot targetState route progress
+      htargetState hroute with ⟨certificate⟩
+  exact ⟨.logical certificate.core certificate.reaches certificate.inside.le⟩
 
 /-- A guard-free increment-recovery caller reaches a containing logical
 core.  The source rule supplies the target-state bound. -/

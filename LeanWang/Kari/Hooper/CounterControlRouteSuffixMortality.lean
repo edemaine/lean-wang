@@ -85,21 +85,6 @@ theorem destinationFree_of_mem_routeCommandsAux
     ⟨address, expected, direction, success, rfl⟩
   simp [ShiftDestinationOccupied]
 
-/-- The compiled target match implies the corresponding raw-command target
-match. -/
-theorem rawTargetMatches_of_compiled
-    (base : Nat) (c : Nat.Partrec.Code)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands)
-    (T : FullTM0.Tape (Symbol numTags))
-    (hmatch : (CounterControlCommandAt.compileRawCommand base c raw hraw).target.Matches
-      T.read) :
-    RawTargetMatches raw T := by
-  rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
-  cases raw <;>
-    simpa [CounterControlCommandAt.compileRawAtTag,
-      compileNavigationAction, Command.target,
-      RawTargetMatches, Target.Matches] using hmatch
-
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
@@ -115,6 +100,21 @@ def RawTargetMatches (raw : RawCommand)
       (Target.anyTag : Target numTags).Matches T.read
   | .markerShift _ expected _ _ _ _ _ =>
       T.read = boundarySymbol expected
+
+/-- The compiled target match implies the corresponding raw-command target
+match. -/
+theorem rawTargetMatches_of_compiled
+    (base : Nat) (c : Nat.Partrec.Code)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hmatch : (CounterControlCommandAt.compileRawCommand base c raw hraw).target.Matches
+      T.read) :
+    RawTargetMatches raw T := by
+  rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
+  cases raw <;>
+    simpa [CounterControlCommandAt.compileRawAtTag,
+      compileNavigationAction, Command.target,
+      RawTargetMatches, Target.Matches] using hmatch
 
 /-- Gap trace after a selected preserving route command has already found
 its target and entered its success reference.  A nonempty tail begins with

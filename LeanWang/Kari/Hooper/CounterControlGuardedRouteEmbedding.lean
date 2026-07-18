@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 import LeanWang.Kari.Hooper.CounterControlGuardedCoordinates
 import LeanWang.Kari.Hooper.CounterControlGuardedParentContinuation
 import LeanWang.Kari.Hooper.CounterControlResumedRouteEmbedding
+import LeanWang.Kari.Hooper.CounterControlGenuineRouteEmbedding
 
 /-!
 # Embedding guarded preserving-route callers
@@ -46,18 +47,15 @@ private instance : Inhabited (Symbol numTags) :=
 
 
 
-/-- A selected guarded route caller, advanced from its exact found state to
-the route's advertised endpoint. -/
-structure GuardedRouteEnd
+/-- A guarded route endpoint is the ordinary endpoint of its underlying
+genuine search. -/
+abbrev GuardedRouteEnd
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GuardedSearch base c)
     (growth : Turing.Dir) (source searchSlot directSlot : Nat)
-    (after : ControlRef) (route : List MarkerValidation.Leg) : Type where
-  suffix : RouteSuffixReached base c growth source searchSlot directSlot
-    after route current.selectedRaw current.foundTape
-  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-    (foundCfg current.current)
-    ⟨resolve base c after, suffix.finish⟩
+    (after : ControlRef) (route : List MarkerValidation.Leg) : Type :=
+  CounterControlGenuineRouteEmbedding.GenuineRouteEnd current.current growth
+    source searchSlot directSlot after route
 
 /-- Advance any guarded selected preserving-route command through the exact
 remaining route suffix. -/
@@ -95,71 +93,6 @@ theorem progressedRoute
     ⟨suffix⟩
   exact ⟨⟨suffix, hsuccess.trans suffix.reaches⟩⟩
 
-/-! ## Exact guarded route coordinates -/
-
-/-- The selected route command reads the boundary named by its retained
-route position at the guarded found tape. -/
-theorem GuardedRouteEnd.current_read
-    {base : Nat} {c : Nat.Partrec.Code}
-    {current : GuardedSearch base c}
-    {growth : Turing.Dir} {source searchSlot directSlot : Nat}
-    {after : ControlRef} {route : List MarkerValidation.Leg}
-    (progress : GuardedRouteEnd current growth source searchSlot directSlot
-      after route) :
-    current.foundTape.read =
-      boundarySymbol progress.suffix.current.target := by
-  have htarget := current.selectedRaw_target_matches_foundTape
-  rw [CounterControlCommandAt.compileRawCommand_spec] at htarget
-  simpa [progress.suffix.raw_eq,
-    CounterControlCommandAt.compileRawAtTag, Command.target,
-    Target.Matches, compileNavigationAction] using htarget
-
-/-- The guarded search is exactly the selected route leg. -/
-theorem GuardedRouteEnd.current_gap
-    {base : Nat} {c : Nat.Partrec.Code}
-    {current : GuardedSearch base c}
-    {growth : Turing.Dir} {source searchSlot directSlot : Nat}
-    {after : ControlRef} {route : List MarkerValidation.Leg}
-    (progress : GuardedRouteEnd current growth source searchSlot directSlot
-      after route) :
-    SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary progress.suffix.current.target).Matches
-      current.current.outer
-      (orient growth progress.suffix.current.direction)
-      current.current.distance := by
-  have hgap := current.current.gap
-  rw [← current.compileRawCommand_selectedRaw,
-    CounterControlCommandAt.compileRawCommand_spec] at hgap
-  simpa [progress.suffix.raw_eq,
-    CounterControlCommandAt.compileRawAtTag, Command.target,
-    Command.searchDirection, compileNavigationAction] using hgap
-
-/-- Resolving the guarded gap reaches `foundTape`, in the selected route
-leg's physical direction. -/
-theorem GuardedRouteEnd.current_foundTape
-    {base : Nat} {c : Nat.Partrec.Code}
-    {current : GuardedSearch base c}
-    {growth : Turing.Dir} {source searchSlot directSlot : Nat}
-    {after : ControlRef} {route : List MarkerValidation.Leg}
-    (progress : GuardedRouteEnd current growth source searchSlot directSlot
-      after route) :
-    current.current.outer.moveN
-      (orient growth progress.suffix.current.direction)
-        current.current.distance = current.foundTape := by
-  have hdirection : orient growth progress.suffix.current.direction =
-      current.direction := by
-    calc
-      orient growth progress.suffix.current.direction =
-          (CounterControlCommandAt.compileRawCommand base c
-            current.selectedRaw current.selectedRaw_mem).searchDirection := by
-        rw [CounterControlCommandAt.compileRawCommand_spec]
-        simp [progress.suffix.raw_eq,
-          CounterControlCommandAt.compileRawAtTag, Command.searchDirection]
-      _ = current.direction := current.selectedRaw_direction_eq
-  exact congrArg
-    (fun direction => current.current.outer.moveN direction
-      current.current.distance) hdirection
-
 /-! ## Recovery routes reach a containing logical core -/
 
 /-- A consecutive rightward guarded recovery suffix ending at logical
@@ -178,70 +111,12 @@ theorem logical_of_toFour_endpoint
     (htargetState : targetState < logicalSpan)
     (hroute : ∃ routeSource : Fin 5, ToFour routeSource route) :
     Nonempty (FoundGuardedParentOutcome current) := by
-  rcases hroute with ⟨routeSource, hroute⟩
-  rcases hroute.position progress.suffix.route_eq with
-    ⟨i, hcurrent, htail⟩
-  have himmortalLogical := FullTM0.ImmortalFrom.of_reaches himmortal
-    progress.reaches
-  change FullTM0.ImmortalFrom
-    (CounterControlNestingBridge.machine base c)
-    ⟨logicalState base c growth targetState, progress.suffix.finish⟩
-      at himmortalLogical
-  rcases CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
-      base c hmortal growth targetState htargetState progress.suffix.finish
-      himmortalLogical with
-    ⟨instruction, registers, coreTape, limit, target, _hrule, hcore,
-      hcoreBefore, hrunway, htarget, hcenter, _hbody⟩
-  let represented : CoreTargetRepresents registers growth limit target
-      coreTape := {
-    toCorePrefixRepresents := {
-      toCoreRepresents := hcore
-      core_before_limit := hcoreBefore
-      runway := hrunway }
-    target_matches := htarget }
-  let core : LogicalCore base c := {
-    growth := growth
-    source := targetState
-    source_lt := htargetState
-    registers := registers
-    tape := coreTape
-    limit := limit
-    target := target
-    represented := represented }
-  have hread : current.foundTape.read = boundarySymbol i.succ := by
-    have hread' := progress.current_read
-    rw [hcurrent] at hread'
-    exact hread'
-  have hfoundBoundary : current.foundTape =
-      atLogical growth coreTape (boundaryOffset registers i.succ) := by
-    exact htail.start_eq hcore hread progress.suffix.tailGaps hcenter
-  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary i.succ).Matches current.current.outer
-      (orient growth .right) current.current.distance := by
-    have hgap' := progress.current_gap
-    rw [hcurrent] at hgap'
-    exact hgap'
-  have hfound : current.current.outer.moveN (orient growth .right)
-        current.current.distance =
-      atLogical growth coreTape (boundaryOffset registers i.succ) := by
-    have hfound' := progress.current_foundTape
-    rw [hcurrent] at hfound'
-    exact hfound'.trans hfoundBoundary
-  have hinside : current.current.distance < layoutEnd registers :=
-    rightGap_distance_lt_layoutEnd hcore i current.current.distance hgap
-      hfound
-  have hreaches : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      (foundCfg current.current) core.cfg := by
-    have hrun := progress.reaches
-    change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-      (foundCfg current.current)
-      ⟨logicalState base c growth targetState,
-        progress.suffix.finish⟩ at hrun
-    rw [hcenter] at hrun
-    simpa [core, LogicalCore.cfg, LogicalCore.frame,
-      LogicalCore.abstract, prefixLogicalCfg] using hrun
-  exact ⟨FoundGuardedParentOutcome.logical core hreaches hinside⟩
+  rcases
+      CounterControlGenuineRouteEmbedding.certificate_of_toFour_endpoint
+        base c hmortal current.current himmortal growth source searchSlot
+        directSlot targetState route progress htargetState hroute with
+    ⟨certificate⟩
+  exact ⟨.logical certificate.core certificate.reaches certificate.inside⟩
 
 /-- A guarded increment-recovery caller reaches a containing logical core.
 The source rule supplies the target-state bound. -/
