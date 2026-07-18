@@ -54,6 +54,7 @@ import LeanWang.Kari.Hooper.CounterControlShiftSemantics
 import LeanWang.Kari.Hooper.CounterControlScheduleSemantics
 import LeanWang.Kari.Hooper.CounterControlRouteSemantics
 import LeanWang.Kari.Hooper.CounterControlCleanupSemantics
+import LeanWang.Kari.Hooper.CounterControlFrameBacking
 
 /-!
 # Hooper's immortality construction
@@ -90,7 +91,8 @@ orientations, exact representation-preserving endpoints for the compiled
 increment and positive-decrement schedules, plus a generic nearby-or-nested
 semantics theorem for compiled
 boundary routes and the complete collision-cleanup chain back to the saved
-command (or its first deeper nested frame),
+command (or its first deeper nested frame), together with an exact backing-tape
+invariant proving that cleanup restores the suspended outer search tape,
 and both directions of the abstract strong-induction core of Hooper's nested
 construction.  The remaining files prove the compiled plan's operational
 semantics and use its shared canonical core to discharge the nesting laws.
