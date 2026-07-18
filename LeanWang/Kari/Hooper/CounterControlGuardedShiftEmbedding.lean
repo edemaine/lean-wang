@@ -224,6 +224,58 @@ theorem ShiftTailBackwardGeometry.transported_blank
   exact shiftStepTape_between direction outer stepDistance back expected gap
     hpositive hback
 
+/-- If a completed shift suffix is centered at a positive logical anchor and
+its first moved boundary remains within the reconstructed core, every blank
+prefix transported beyond that boundary ends before the first obstruction.
+
+Taking `prefixLength = stepDistance - 1` gives the strict guarded bound when
+`stepDistance = current.distance + 1`; taking it equal to the predecessor of
+a genuine distance gives the weak genuine bound. -/
+theorem ShiftTailBackwardGeometry.prefixLength_lt_limit_sub_one_of_anchor
+    {direction growth : Turing.Dir} {labels : List (Fin 5)}
+    {outer finish coreTape : FullTM0.Tape (Symbol numTags)}
+    {stepDistance : Nat} {expected : Fin 5}
+    (geometry : ShiftTailBackwardGeometry direction labels
+      (shiftStepTape direction outer stepDistance expected) finish)
+    (gap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary expected).Matches outer direction stepDistance)
+    (registers : Registers) (limit : Nat) (target : Target numTags)
+    (represented : CoreTargetRepresents registers growth limit target
+      coreTape)
+    (anchor : Nat) (hanchorPositive : 0 < anchor)
+    (hanchor : anchor + geometry.travel ≤ layoutEnd registers)
+    (hdirection : NestingMachine.opposite direction = orient growth .right)
+    (hcenter : finish.move (NestingMachine.opposite direction) =
+      atLogical growth coreTape anchor)
+    (prefixLength : Nat) (hprefix : prefixLength < stepDistance) :
+    prefixLength < limit - 1 := by
+  have hcoreBefore : layoutEnd registers < limit :=
+    represented.core_before_limit
+  let firstObstructionBack := limit - (anchor + geometry.travel)
+  have hbackPositive : 0 < firstObstructionBack := by
+    dsimp [firstObstructionBack]
+    omega
+  have hsum : anchor + geometry.travel + firstObstructionBack = limit := by
+    dsimp [firstObstructionBack]
+    omega
+  by_contra hnot
+  have hlimit : limit - 1 ≤ prefixLength := Nat.le_of_not_gt hnot
+  have hbackLe : firstObstructionBack ≤ prefixLength := by
+    dsimp [firstObstructionBack]
+    omega
+  have hbackLt : firstObstructionBack < stepDistance :=
+    hbackLe.trans_lt hprefix
+  have hblank := geometry.transported_blank gap firstObstructionBack
+    hbackPositive hbackLt
+  rw [hcenter, hdirection] at hblank
+  simp only [orient_eq_orientDirection] at hblank
+  rw [atLogical_moveN_right] at hblank
+  have hcoordinate :
+      anchor + (geometry.travel + firstObstructionBack) = limit := by
+    omega
+  rw [hcoordinate, atLogical_read] at hblank
+  exact represented.target_ne_blank hblank
+
 private theorem decrementOrder_label_ne_zero
     (register : Register) (label : Fin 5)
     (hlabel : label ∈ MarkerShift.decrementOrder register) :
