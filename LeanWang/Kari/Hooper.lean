@@ -40,6 +40,7 @@ import LeanWang.Kari.Hooper.BoundedMarkerContinuation
 import LeanWang.Kari.Hooper.CanonicalInitializerFrame
 import LeanWang.Kari.Hooper.CanonicalInitializerProgramComputable
 import LeanWang.Kari.Hooper.FramedCounterGeometry
+import LeanWang.Kari.Hooper.CounterControlPlan
 
 /-!
 # Hooper's immortality construction
@@ -64,9 +65,9 @@ concrete arbitrary-entry liveness laws for the complete fixed source program,
 a deterministic tagged controller for a finite family of bounded searches,
 an executable uniformly computable tag-sensitive canonical initializer with
 exact framed semantics, framed increment/decrement and collision-cleanup
-geometry,
+geometry, and an executable two-orientation counter-control plan with
+tag-selected initialization,
 and both directions of the abstract strong-induction core of Hooper's nested
-construction.  The remaining files will compile the counter instructions to
-those searches and implement the shared canonical core that discharges the
-nesting laws.
+construction.  The remaining files prove the compiled plan's operational
+semantics and use its shared canonical core to discharge the nesting laws.
 -/
