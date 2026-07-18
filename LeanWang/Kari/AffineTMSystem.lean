@@ -502,58 +502,6 @@ theorem localRules_primrec :
   exact Primrec.list_flatMap Primrec.id
     (Primrec₂.mk (instantiateRule_primrec.comp Primrec.snd))
 
-/-- Computable form of `localRules_primrec`. -/
-theorem localRules_computable :
-    Computable (localRules :
-      Table numSymbols → List (LocalRule numSymbols)) :=
-  localRules_primrec.to_comp
-
-/-! ## Effective compiled-branch containers -/
-
-/-- A compiled affine branch is effectively its four data fields. -/
-def compiledBranchEquiv : CompiledAffineBranch ≃
-    IntegerAffineBranch × List IntVector3 × List IntVector3 × Nat where
-  toFun compiled :=
-    (compiled.branch, compiled.inputs, compiled.outputs, compiled.carryBound)
-  invFun data :=
-    { branch := data.1
-      inputs := data.2.1
-      outputs := data.2.2.1
-      carryBound := data.2.2.2 }
-  left_inv := by
-    intro compiled
-    cases compiled
-    rfl
-  right_inv := by
-    rintro ⟨branch, inputs, outputs, carryBound⟩
-    rfl
-
-instance instPrimcodableCompiledAffineBranch :
-    Primcodable CompiledAffineBranch :=
-  Primcodable.ofEquiv
-    (IntegerAffineBranch × List IntVector3 × List IntVector3 × Nat)
-    compiledBranchEquiv
-
-theorem compiledBranchEquiv_primrec :
-    Primrec compiledBranchEquiv := by
-  simpa [compiledBranchEquiv] using
-    (Primrec.of_equiv (e := compiledBranchEquiv) :
-      Primrec compiledBranchEquiv)
-
-theorem compiledBranchOfTuple_primrec :
-    Primrec compiledBranchEquiv.symm := by
-  simpa using
-    (Primrec.of_equiv_symm (e := compiledBranchEquiv) :
-      Primrec compiledBranchEquiv.symm)
-
-/-- Extracting raw branch data from an integer affine branch is primitive
-recursive. -/
-theorem integerAffineBranchData_primrec :
-    Primrec IntegerAffineBranch.equivTuple := by
-  simpa [IntegerAffineBranch.equivTuple] using
-    (Primrec.of_equiv (e := IntegerAffineBranch.equivTuple) :
-      Primrec IntegerAffineBranch.equivTuple)
-
 /-- Compile every fully specified local rule to an affine branch. -/
 def branches (table : Table numSymbols) : List CompiledAffineBranch :=
   (localRules table).map LocalRule.compiled
@@ -631,13 +579,6 @@ theorem compilerData_primrec :
   unfold compilerData
   exact Primrec.list_map localRules_primrec
     (Primrec₂.mk (localTransducerInput_primrec.comp Primrec.snd))
-
-/-- Computable form of `compilerData_primrec`. -/
-theorem compilerData_computable :
-    Computable (compilerData : Table numSymbols → List
-      (IntegerAffineBranch.BranchData ×
-        List IntVector3 × List IntVector3 × Nat)) :=
-  compilerData_primrec.to_comp
 
 /-- A local rule occurs in the enumeration exactly when its underlying TM0
 rule occurs in the source table. -/
@@ -774,30 +715,15 @@ theorem rawTransducer_eq_transducer (table : Table numSymbols) :
       simp only [List.flatMap_cons, List.map_cons]
       rw [localTransducer_eq spec, ih]
 
-/-- Compiling a finite TM0 table to its affine transducer is primitive
-recursive. -/
-theorem transducer_primrec :
-    Primrec (transducer : Table numSymbols → Transducer) :=
-  rawTransducer_primrec.of_eq rawTransducer_eq_transducer
-
-/-- Computable form of `transducer_primrec`. -/
-theorem transducer_computable :
-    Computable (transducer : Table numSymbols → Transducer) :=
-  transducer_primrec.to_comp
-
 /-- The Wang tiles obtained from the compiled finite transducer. -/
 def tiles (table : Table numSymbols) : TileSet :=
   (transducer table).tiles
 
-/-- The complete finite-table-to-Wang-tiles compiler is primitive recursive. -/
-theorem tiles_primrec :
-    Primrec (tiles : Table numSymbols → TileSet) := by
-  exact (Transducer.tiles_primrec.comp transducer_primrec).of_eq fun _ => rfl
-
-/-- Computable form of `tiles_primrec`. -/
+/-- The complete finite-table-to-Wang-tiles compiler is computable. -/
 theorem tiles_computable :
-    Computable (tiles : Table numSymbols → TileSet) :=
-  tiles_primrec.to_comp
+    Computable (tiles : Table numSymbols → TileSet) := by
+  exact (Transducer.tiles_primrec.comp
+    (rawTransducer_primrec.of_eq rawTransducer_eq_transducer)).to_comp
 
 /-- A transition in the table transducer exposes its source rule, both visible
 side symbols, and the corresponding local affine transducer. -/

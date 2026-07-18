@@ -75,9 +75,6 @@ theorem edgeTuple_primrec : Primrec edgeTuple := by
 theorem toTile_primrec : Primrec toTile :=
   WangTile.ofTuple_primrec.comp edgeTuple_primrec
 
-theorem toTile_computable : Computable toTile :=
-  toTile_primrec.to_comp
-
 theorem toTile_injective : Function.Injective toTile := by
   intro a b h
   cases a
@@ -99,9 +96,6 @@ theorem Transducer.tiles_primrec : Primrec Transducer.tiles := by
   unfold Transducer.tiles
   refine Primrec.list_map Primrec.id ?_
   exact Primrec₂.mk (Transition.toTile_primrec.comp Primrec.snd)
-
-theorem Transducer.tiles_computable : Computable Transducer.tiles :=
-  Transducer.tiles_primrec.to_comp
 
 @[simp]
 theorem Transition.mem_tiles_iff {M : Transducer} {tile : WangTile} :

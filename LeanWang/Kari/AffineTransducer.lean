@@ -722,12 +722,6 @@ theorem transducerData_primrec : Primrec fun p : BranchData ×
     (hinputs.pair (houtputs.pair (IntVector3.bounded_primrec.comp hbound)))
   exact emitTransitionListData_primrec.comp hdata hcandidates
 
-/-- Computable form of `transducerData_primrec`. -/
-theorem transducerData_computable : Computable fun p : BranchData ×
-    List IntVector3 × List IntVector3 × Nat =>
-    transducerData p.1 p.2.1 p.2.2.1 p.2.2.2 :=
-  transducerData_primrec.to_comp
-
 /-- Membership exposes exactly the finite alphabets, bounded carries, and local
 integer equation used by the generator. -/
 theorem mem_transducer_iff (branch : IntegerAffineBranch)
