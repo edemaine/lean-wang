@@ -85,7 +85,7 @@ structure ShiftedAgainst (direction : Turing.Dir) (source : Fin 5)
 
 /-- A marker shift changes only the found cell and its predecessor, so all
 strictly forward cells agree with the tape centered on the old target. -/
-private theorem shiftStepTape_ahead
+theorem shiftStepTape_ahead
     (direction : Turing.Dir)
     (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
     (expected : Fin 5) (k : Nat) (hk : 0 < k) :
@@ -106,7 +106,7 @@ private theorem shiftStepTape_ahead
         FullTM0.Tape.moveN, FullTM0.Tape.offset, FullTM0.Tape.write,
         NestingMachine.opposite, hoffset, hkzero]
 
-private theorem shiftStepTape_read_blank
+theorem shiftStepTape_read_blank
     (direction : Turing.Dir)
     (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
     (expected : Fin 5) :
@@ -156,7 +156,7 @@ private theorem boundaryGap_distance_unique
 
 /-- One paired inward-route leg and outward marker shift advances tape
 agreement to the next boundary. -/
-private theorem ShiftedAgainst.advance
+theorem ShiftedAgainst.advance
     {growth : Turing.Dir} {lower : Fin 4}
     {lowerShifted upper : FullTM0.Tape (Symbol numTags)}
     {routeDistance shiftDistance : Nat}
@@ -227,7 +227,7 @@ private theorem ShiftedAgainst.advance
 /-- Pair an entire retained inward route with the reverse marker-shift
 suffix.  The shifted tape at the source boundary then agrees strictly
 outward with the tape at which that inward route began. -/
-private theorem alignInwardRoute
+theorem alignInwardRoute
     {growth : Turing.Dir} {source target : Fin 5}
     {route : List MarkerValidation.Leg}
     (hroute : ToBoundary source target route)
@@ -270,7 +270,7 @@ private theorem alignInwardRoute
                 tailTrace⟩
 
 /-- Expose the first gap of a nonempty exact marker-shift trace. -/
-private theorem shiftTailGaps_uncons
+theorem shiftTailGaps_uncons
     {direction : Turing.Dir} {expected : Fin 5}
     {remaining : List (Fin 5)}
     {start finish : FullTM0.Tape (Symbol numTags)}
