@@ -144,19 +144,36 @@ theorem seedNodeAt?_eq (x y : Nat) :
     simp only [iterateNodeRefine, refineNodeGrid]
     rfl
 
-def RowInterior (depth offset : Nat) (members : List Nat) : Prop :=
-  ∀ x, 2 * 4 ^ depth < x → x < 6 * 4 ^ depth →
-    (nodeAt depth x (2 * 4 ^ depth + offset)).val ∈ members
+private inductive StripAxis where
+  | row
+  | column
 
-def RowBoundary (depth offset : Nat) (members : List Nat) : Prop :=
-  (nodeAt depth (2 * 4 ^ depth) (2 * 4 ^ depth + offset)).val ∈ members
+private def orientedPoint : StripAxis → Nat → Nat → Nat × Nat
+  | .row, along, fixed => (along, fixed)
+  | .column, along, fixed => (fixed, along)
 
-def ColumnInterior (depth offset : Nat) (members : List Nat) : Prop :=
-  ∀ y, 2 * 4 ^ depth < y → y < 6 * 4 ^ depth →
-    (nodeAt depth (2 * 4 ^ depth + offset) y).val ∈ members
+private def stripNode (axis : StripAxis) (depth offset along : Nat) : Node :=
+  let point := orientedPoint axis along (2 * 4 ^ depth + offset)
+  nodeAt depth point.1 point.2
 
-def ColumnBoundary (depth offset : Nat) (members : List Nat) : Prop :=
-  (nodeAt depth (2 * 4 ^ depth + offset) (2 * 4 ^ depth)).val ∈ members
+private def stripChildPosition (axis : StripAxis)
+    (along fixed : Nat) : Fin 16 :=
+  let point := orientedPoint axis along fixed
+  childPosition point.1 point.2
+
+private def StripInterior (axis : StripAxis)
+    (depth offset : Nat) (members : List Nat) : Prop :=
+  ∀ along, 2 * 4 ^ depth < along → along < 6 * 4 ^ depth →
+    (stripNode axis depth offset along).val ∈ members
+
+private def StripBoundary (axis : StripAxis)
+    (depth offset : Nat) (members : List Nat) : Prop :=
+  (stripNode axis depth offset (2 * 4 ^ depth)).val ∈ members
+
+abbrev RowInterior := StripInterior .row
+abbrev RowBoundary := StripBoundary .row
+abbrev ColumnInterior := StripInterior .column
+abbrev ColumnBoundary := StripBoundary .column
 
 def RowClassified (depth offset : Nat) : Prop :=
   if offset % 2 = 0 then
@@ -174,160 +191,93 @@ def ColumnClassified (depth offset : Nat) : Prop :=
     ColumnInterior depth offset columnOdd ∧
       ColumnBoundary depth offset columnBoundaryOdd
 
-private theorem row_step {depth old child localY : Nat}
-    {oldInterior oldBoundary newInterior newBoundary : List Nat}
-    (oldClassified : RowInterior depth old oldInterior ∧
-      RowBoundary depth old oldBoundary)
-    (childEq : child = 4 * old + localY) (localYBound : localY < 4)
-    (interiorChild : ∀ (node : Node) (localX : Nat),
-      node.val ∈ oldInterior → localX < 4 →
-        (node.child (childPosition localX localY)).val ∈ newInterior)
-    (boundaryChild : ∀ node : Node, node.val ∈ oldBoundary →
-      (node.child (childPosition 0 localY)).val ∈ newBoundary)
-    (boundaryEnters : ∀ (node : Node) (localX : Nat),
-      node.val ∈ oldBoundary → 0 < localX → localX < 4 →
-        (node.child (childPosition localX localY)).val ∈ newInterior) :
-    RowInterior (depth + 1) child newInterior ∧
-      RowBoundary (depth + 1) child newBoundary := by
-  constructor
-  · intro x hxLower hxUpper
-    let parentX := x / 4
-    let localX := x % 4
-    have localXBound : localX < 4 := Nat.mod_lt _ (by decide)
-    have xEq : x = 4 * parentX + localX := by
-      dsimp [parentX, localX]
-      omega
-    have parentLower : 2 * 4 ^ depth ≤ parentX := by
-      simp only [pow_succ] at hxLower
-      omega
-    have parentUpper : parentX < 6 * 4 ^ depth := by
-      simp only [pow_succ] at hxUpper
-      omega
-    have rowDiv : (2 * 4 ^ (depth + 1) + child) / 4 =
-        2 * 4 ^ depth + old := by
-      rw [childEq, pow_succ]
-      omega
-    have rowMod : (2 * 4 ^ (depth + 1) + child) % 4 = localY := by
-      rw [childEq, pow_succ]
-      omega
-    rw [nodeAt_succ, rowDiv]
-    have positionEq : childPosition x (2 * 4 ^ (depth + 1) + child) =
-        childPosition localX localY := by
+private theorem stripNode_succ (axis : StripAxis)
+    {depth old child localFixed : Nat}
+    (childEq : child = 4 * old + localFixed)
+    (localFixedBound : localFixed < 4) (along : Nat) :
+    stripNode axis (depth + 1) child along =
+      (stripNode axis depth old (along / 4)).child
+        (stripChildPosition axis (along % 4) localFixed) := by
+  have fixedDiv : (2 * 4 ^ (depth + 1) + child) / 4 =
+      2 * 4 ^ depth + old := by
+    rw [childEq, pow_succ]
+    omega
+  have fixedMod : (2 * 4 ^ (depth + 1) + child) % 4 = localFixed := by
+    rw [childEq, pow_succ]
+    omega
+  have alongModBound : along % 4 < 4 := Nat.mod_lt _ (by decide)
+  cases axis with
+  | row =>
+      unfold stripNode orientedPoint stripChildPosition
+      rw [nodeAt_succ, fixedDiv]
+      congr 1
       apply Fin.ext
-      simp [childPosition, localX, rowMod,
-        Nat.mod_eq_of_lt localYBound]
-    rw [positionEq]
-    by_cases boundary : parentX = 2 * 4 ^ depth
-    · have localXPositive : 0 < localX := by
-        rw [xEq, boundary] at hxLower
-        simp only [pow_succ] at hxLower
-        omega
-      dsimp [parentX] at boundary
-      apply boundaryEnters _ localX (by
-        rw [boundary]
-        exact oldClassified.2) localXPositive localXBound
-    · exact interiorChild _ localX
-        (oldClassified.1 parentX (by omega) parentUpper) localXBound
-  · unfold RowBoundary at oldClassified ⊢
-    have rowDiv : (2 * 4 ^ (depth + 1) + child) / 4 =
-        2 * 4 ^ depth + old := by
-      rw [childEq, pow_succ]
-      omega
-    have rowMod : (2 * 4 ^ (depth + 1) + child) % 4 = localY := by
-      rw [childEq, pow_succ]
-      omega
-    rw [nodeAt_succ]
-    have xDiv : (2 * 4 ^ (depth + 1)) / 4 = 2 * 4 ^ depth := by
-      rw [pow_succ]
-      omega
-    have xMod : (2 * 4 ^ (depth + 1)) % 4 = 0 := by
-      rw [pow_succ]
-      omega
-    rw [xDiv, rowDiv]
-    have positionEq : childPosition (2 * 4 ^ (depth + 1))
-        (2 * 4 ^ (depth + 1) + child) = childPosition 0 localY := by
+      simp [orientedPoint, childPosition, fixedMod,
+        Nat.mod_eq_of_lt localFixedBound,
+        Nat.mod_eq_of_lt alongModBound]
+  | column =>
+      unfold stripNode orientedPoint stripChildPosition
+      rw [nodeAt_succ, fixedDiv]
+      congr 1
       apply Fin.ext
-      simp [childPosition, xMod, rowMod,
-        Nat.mod_eq_of_lt localYBound]
-    rw [positionEq]
-    exact boundaryChild _ oldClassified.2
+      simp [orientedPoint, childPosition, fixedMod,
+        Nat.mod_eq_of_lt localFixedBound,
+        Nat.mod_eq_of_lt alongModBound]
 
-private theorem column_step {depth old child localX : Nat}
+private theorem strip_step {axis : StripAxis}
+    {depth old child localFixed : Nat}
     {oldInterior oldBoundary newInterior newBoundary : List Nat}
-    (oldClassified : ColumnInterior depth old oldInterior ∧
-      ColumnBoundary depth old oldBoundary)
-    (childEq : child = 4 * old + localX) (localXBound : localX < 4)
-    (interiorChild : ∀ (node : Node) (localY : Nat),
-      node.val ∈ oldInterior → localY < 4 →
-        (node.child (childPosition localX localY)).val ∈ newInterior)
+    (oldClassified : StripInterior axis depth old oldInterior ∧
+      StripBoundary axis depth old oldBoundary)
+    (childEq : child = 4 * old + localFixed)
+    (localFixedBound : localFixed < 4)
+    (interiorChild : ∀ (node : Node) (localAlong : Nat),
+      node.val ∈ oldInterior → localAlong < 4 →
+        (node.child
+          (stripChildPosition axis localAlong localFixed)).val ∈ newInterior)
     (boundaryChild : ∀ node : Node, node.val ∈ oldBoundary →
-      (node.child (childPosition localX 0)).val ∈ newBoundary)
-    (boundaryEnters : ∀ (node : Node) (localY : Nat),
-      node.val ∈ oldBoundary → 0 < localY → localY < 4 →
-        (node.child (childPosition localX localY)).val ∈ newInterior) :
-    ColumnInterior (depth + 1) child newInterior ∧
-      ColumnBoundary (depth + 1) child newBoundary := by
+      (node.child (stripChildPosition axis 0 localFixed)).val ∈ newBoundary)
+    (boundaryEnters : ∀ (node : Node) (localAlong : Nat),
+      node.val ∈ oldBoundary → 0 < localAlong → localAlong < 4 →
+        (node.child
+          (stripChildPosition axis localAlong localFixed)).val ∈ newInterior) :
+    StripInterior axis (depth + 1) child newInterior ∧
+      StripBoundary axis (depth + 1) child newBoundary := by
   constructor
-  · intro y hyLower hyUpper
-    let parentY := y / 4
-    let localY := y % 4
-    have localYBound : localY < 4 := Nat.mod_lt _ (by decide)
-    have yEq : y = 4 * parentY + localY := by
-      dsimp [parentY, localY]
+  · intro along alongLower alongUpper
+    let parentAlong := along / 4
+    let localAlong := along % 4
+    have localAlongBound : localAlong < 4 := Nat.mod_lt _ (by decide)
+    have alongEq : along = 4 * parentAlong + localAlong := by
+      dsimp [parentAlong, localAlong]
       omega
-    have parentLower : 2 * 4 ^ depth ≤ parentY := by
-      simp only [pow_succ] at hyLower
+    have parentLower : 2 * 4 ^ depth ≤ parentAlong := by
+      simp only [pow_succ] at alongLower
       omega
-    have parentUpper : parentY < 6 * 4 ^ depth := by
-      simp only [pow_succ] at hyUpper
+    have parentUpper : parentAlong < 6 * 4 ^ depth := by
+      simp only [pow_succ] at alongUpper
       omega
-    have columnDiv : (2 * 4 ^ (depth + 1) + child) / 4 =
-        2 * 4 ^ depth + old := by
-      rw [childEq, pow_succ]
-      omega
-    have columnMod : (2 * 4 ^ (depth + 1) + child) % 4 = localX := by
-      rw [childEq, pow_succ]
-      omega
-    rw [nodeAt_succ, columnDiv]
-    have positionEq : childPosition (2 * 4 ^ (depth + 1) + child) y =
-        childPosition localX localY := by
-      apply Fin.ext
-      simp [childPosition, localY, columnMod,
-        Nat.mod_eq_of_lt localXBound]
-    rw [positionEq]
-    by_cases boundary : parentY = 2 * 4 ^ depth
-    · have localYPositive : 0 < localY := by
-        rw [yEq, boundary] at hyLower
-        simp only [pow_succ] at hyLower
+    rw [stripNode_succ axis childEq localFixedBound]
+    by_cases boundary : parentAlong = 2 * 4 ^ depth
+    · have localAlongPositive : 0 < localAlong := by
+        rw [alongEq, boundary] at alongLower
+        simp only [pow_succ] at alongLower
         omega
-      dsimp [parentY] at boundary
-      apply boundaryEnters _ localY (by
+      dsimp [parentAlong] at boundary
+      apply boundaryEnters _ localAlong (by
         rw [boundary]
-        exact oldClassified.2) localYPositive localYBound
-    · exact interiorChild _ localY
-        (oldClassified.1 parentY (by omega) parentUpper) localYBound
-  · unfold ColumnBoundary at oldClassified ⊢
-    have columnDiv : (2 * 4 ^ (depth + 1) + child) / 4 =
-        2 * 4 ^ depth + old := by
-      rw [childEq, pow_succ]
-      omega
-    have columnMod : (2 * 4 ^ (depth + 1) + child) % 4 = localX := by
-      rw [childEq, pow_succ]
-      omega
-    rw [nodeAt_succ]
-    have yDiv : (2 * 4 ^ (depth + 1)) / 4 = 2 * 4 ^ depth := by
+        exact oldClassified.2) localAlongPositive localAlongBound
+    · exact interiorChild _ localAlong
+        (oldClassified.1 parentAlong (by omega) parentUpper) localAlongBound
+  · unfold StripBoundary at oldClassified ⊢
+    rw [stripNode_succ axis childEq localFixedBound]
+    have alongDiv : (2 * 4 ^ (depth + 1)) / 4 = 2 * 4 ^ depth := by
       rw [pow_succ]
       omega
-    have yMod : (2 * 4 ^ (depth + 1)) % 4 = 0 := by
+    have alongMod : (2 * 4 ^ (depth + 1)) % 4 = 0 := by
       rw [pow_succ]
       omega
-    rw [columnDiv, yDiv]
-    have positionEq : childPosition (2 * 4 ^ (depth + 1) + child)
-        (2 * 4 ^ (depth + 1)) = childPosition localX 0 := by
-      apply Fin.ext
-      simp [childPosition, columnMod, yMod,
-        Nat.mod_eq_of_lt localXBound]
-    rw [positionEq]
+    rw [alongDiv, alongMod]
     exact boundaryChild _ oldClassified.2
 
 private theorem base_classified : RowClassified 0 2 ∧ ColumnClassified 0 2 := by
@@ -336,29 +286,27 @@ private theorem base_classified : RowClassified 0 2 ∧ ColumnClassified 0 2 := 
     have checked := base_row_interior x (by omega) (by omega)
     rw [seedNodeAt?_eq x 4] at checked
     simp only [optionIn, Option.any_some, decide_eq_true_eq] at checked
-    convert checked using 1
-    all_goals norm_num
+    change (nodeAt 0 x 4).val ∈ rowEven
+    exact checked
   have rowBoundary : RowBoundary 0 2 rowBoundaryEven := by
     have checked := base_row_boundary
     rw [seedNodeAt?_eq 2 4] at checked
     simp only [optionIn, Option.any_some, decide_eq_true_eq] at checked
-    unfold RowBoundary
-    convert checked using 1
-    all_goals norm_num
+    change (nodeAt 0 2 4).val ∈ rowBoundaryEven
+    exact checked
   have columnInterior : ColumnInterior 0 2 columnEven := by
     intro y hyLower hyUpper
     have checked := base_column_interior y (by omega) (by omega)
     rw [seedNodeAt?_eq 4 y] at checked
     simp only [optionIn, Option.any_some, decide_eq_true_eq] at checked
-    convert checked using 1
-    all_goals norm_num
+    change (nodeAt 0 4 y).val ∈ columnEven
+    exact checked
   have columnBoundary : ColumnBoundary 0 2 columnBoundaryEven := by
     have checked := base_column_boundary
     rw [seedNodeAt?_eq 4 2] at checked
     simp only [optionIn, Option.any_some, decide_eq_true_eq] at checked
-    unfold ColumnBoundary
-    convert checked using 1
-    all_goals norm_num
+    change (nodeAt 0 4 2).val ∈ columnBoundaryEven
+    exact checked
   simpa [RowClassified, ColumnClassified] using
     And.intro (And.intro rowInterior rowBoundary)
       (And.intro columnInterior columnBoundary)
@@ -384,8 +332,9 @@ private theorem classified_child {depth old child : Nat}
     have newEven : (4 * old) % 2 = 0 := by omega
     rw [RowClassified, ColumnClassified, if_pos newEven, if_pos newEven]
     constructor
-    · apply row_step (depth := depth) (old := old) (child := 4 * old)
-        (localY := 0) (oldInterior := rowEven)
+    · apply strip_step (axis := .row) (depth := depth) (old := old)
+        (child := 4 * old)
+        (localFixed := 0) (oldInterior := rowEven)
         (oldBoundary := rowBoundaryEven) (newInterior := rowEven)
         (newBoundary := rowBoundaryEven) oldRow rfl (by decide)
       · intro node localX hnode hx
@@ -397,8 +346,9 @@ private theorem classified_child {depth old child : Nat}
       · intro node localX hnode hxLower hxUpper
         apply rowBoundaryEven_enters_zero hnode hxLower hxUpper
         exact childAt?_val node localX 0 hxUpper (by decide)
-    · apply column_step (depth := depth) (old := old) (child := 4 * old)
-        (localX := 0) (oldInterior := columnEven)
+    · apply strip_step (axis := .column) (depth := depth) (old := old)
+        (child := 4 * old)
+        (localFixed := 0) (oldInterior := columnEven)
         (oldBoundary := columnBoundaryEven) (newInterior := columnEven)
         (newBoundary := columnBoundaryEven) oldColumn rfl (by decide)
       · intro node localY hnode hy
@@ -425,8 +375,9 @@ private theorem classified_child {depth old child : Nat}
     rw [RowClassified, ColumnClassified, if_neg newNotEven,
       if_neg newNotEven]
     constructor
-    · apply row_step (depth := depth) (old := old) (child := 4 * old + 1)
-        (localY := 1) (oldInterior := rowEven)
+    · apply strip_step (axis := .row) (depth := depth) (old := old)
+        (child := 4 * old + 1)
+        (localFixed := 1) (oldInterior := rowEven)
         (oldBoundary := rowBoundaryEven) (newInterior := rowOdd)
         (newBoundary := rowBoundaryOdd) oldRow rfl (by decide)
       · intro node localX hnode hx
@@ -438,8 +389,9 @@ private theorem classified_child {depth old child : Nat}
       · intro node localX hnode hxLower hxUpper
         apply rowBoundaryEven_enters_one hnode hxLower hxUpper
         exact childAt?_val node localX 1 hxUpper (by decide)
-    · apply column_step (depth := depth) (old := old) (child := 4 * old + 1)
-        (localX := 1) (oldInterior := columnEven)
+    · apply strip_step (axis := .column) (depth := depth) (old := old)
+        (child := 4 * old + 1)
+        (localFixed := 1) (oldInterior := columnEven)
         (oldBoundary := columnBoundaryEven) (newInterior := columnOdd)
         (newBoundary := columnBoundaryOdd) oldColumn rfl (by decide)
       · intro node localY hnode hy
@@ -468,8 +420,9 @@ private theorem classified_child {depth old child : Nat}
     rw [RowClassified, ColumnClassified, if_neg newNotEven,
       if_neg newNotEven]
     constructor
-    · apply row_step (depth := depth) (old := old) (child := 4 * old + 3)
-        (localY := 3) (oldInterior := rowOdd)
+    · apply strip_step (axis := .row) (depth := depth) (old := old)
+        (child := 4 * old + 3)
+        (localFixed := 3) (oldInterior := rowOdd)
         (oldBoundary := rowBoundaryOdd) (newInterior := rowOdd)
         (newBoundary := rowBoundaryOdd) oldRow rfl (by decide)
       · intro node localX hnode hx
@@ -481,8 +434,9 @@ private theorem classified_child {depth old child : Nat}
       · intro node localX hnode hxLower hxUpper
         apply rowBoundaryOdd_enters_three hnode hxLower hxUpper
         exact childAt?_val node localX 3 hxUpper (by decide)
-    · apply column_step (depth := depth) (old := old) (child := 4 * old + 3)
-        (localX := 3) (oldInterior := columnOdd)
+    · apply strip_step (axis := .column) (depth := depth) (old := old)
+        (child := 4 * old + 3)
+        (localFixed := 3) (oldInterior := columnOdd)
         (oldBoundary := columnBoundaryOdd) (newInterior := columnOdd)
         (newBoundary := columnBoundaryOdd) oldColumn rfl (by decide)
       · intro node localY hnode hy
