@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Kari.Hooper.CounterArithmeticLiveness
 import LeanWang.Kari.Hooper.CounterLiveness
 import LeanWang.Kari.Hooper.GlobalSourceProgram
+import LeanWang.Kari.Hooper.GlobalSourceSemantics
 
 /-!
 # Arbitrary-entry liveness of the global source program
@@ -55,6 +56,15 @@ theorem keyControl_mem_logicalStates (key : SourceKey) :
     controlCode (SourceControl.decodeStateFin key.1)
       (SourceControl.decodeSymbol key.2) ∈ logicalStates :=
   controlCode_mem_logicalStates _ _
+
+/-- The designated encoded source input is already a logical-cycle boundary
+of the global counter program. -/
+theorem canonicalCounterCfg_isLogical (c : Nat.Partrec.Code) :
+    CounterLiveness.IsLogical logicalStates
+      (GlobalSourceSemantics.canonicalCounterCfg c) := by
+  change controlCode (SourceRegisterSemantics.canonical c).state
+      (SourceRegisterSemantics.canonical c).tape.head ∈ logicalStates
+  exact controlCode_mem_logicalStates _ _
 
 private theorem step_of_subprogram
     {small large : Program} (hlarge : Deterministic large)
