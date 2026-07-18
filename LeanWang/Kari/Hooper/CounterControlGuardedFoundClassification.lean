@@ -40,7 +40,7 @@ proofs. -/
 inductive Outcome
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GuardedSearch base c) : Type where
-  | solved (outcome : FoundGuardedParentOutcome current)
+  | solved (outcome : FoundGuardedEscapeOutcome current)
   | validation
       (growth : Turing.Dir) (source : Nat)
       (instruction : CounterMachine.Instruction)
@@ -89,7 +89,7 @@ theorem classify_found
       rcases CounterControlGuardedRouteEmbedding.incrementRecovery_logical_of_rule
           base c hmortal current himmortal growth source register next hrule
           hcommand with ⟨outcome⟩
-      exact ⟨.solved outcome⟩
+      exact ⟨.solved (.parent outcome)⟩
   | cleanup growth source register next hrule hcommand =>
       rcases
           CounterControlGuardedCleanupProgress.found_reaches_larger_guardedSearch_of_cleanup
@@ -97,7 +97,7 @@ theorem classify_found
             (by simpa [GuardedSearch.selectedRaw] using hcommand)
             himmortal with
         ⟨finish, hreach, hdistance⟩
-      exact ⟨.solved (.nextSearch finish hreach hdistance)⟩
+      exact ⟨.solved (.parent (.nextSearch finish hreach hdistance))⟩
   | decrementEntry growth source register ifZero ifPositive hrule hcommand =>
       exact ⟨.decrementEntry growth source register ifZero ifPositive
         hrule hcommand⟩
@@ -108,7 +108,7 @@ theorem classify_found
       rcases CounterControlGuardedRouteEmbedding.zeroRecovery_logical_of_rule
           base c hmortal current himmortal growth source register ifZero
           ifPositive hrule hcommand with ⟨outcome⟩
-      exact ⟨.solved outcome⟩
+      exact ⟨.solved (.parent outcome)⟩
 
 end
 
