@@ -100,6 +100,63 @@ theorem firstIncrementRaw_direction
   simp [firstIncrementRaw, CounterControlCommandAt.compileRawAtTag,
     Command.searchDirection]
 
+/-- Every increment register uses the same collision exit from its first
+boundary-`4` shift.  The exit returns to the cleared old boundary and enters
+cleanup stage `3`. -/
+theorem reaches_cleanup_of_firstIncrementCollision
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hoccupied : ShiftDestinationOccupied
+      (firstIncrementRaw growth source register) T) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (directRef growth source testDirectSlot),
+        exactCollisionTape (firstIncrementRaw growth source register) T⟩
+      ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+        T.write blankSymbol⟩ := by
+  let rule : RawDirectRule :=
+    ⟨growth, directRef growth source testDirectSlot, .nonblank,
+      searchRef growth source cleanupSearchBase, .left⟩
+  have hmem : rule ∈ rawDirectRules := by
+    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      growth hrule
+    change rule ∈ validationRules growth source ++
+      incrementRules growth source next register
+    apply List.mem_append_right
+    simp [rule, incrementRules]
+  have hmatch : rule.read.Matches
+      (exactCollisionTape
+        (firstIncrementRaw growth source register) T).read := by
+    simpa [rule, RawRead.Matches, ShiftDestinationOccupied,
+      firstIncrementRaw, exactCollisionTape] using hoccupied
+  have hrun := CounterControlDirectSemantics.reaches_directRule
+    base c rule hmem
+      (exactCollisionTape (firstIncrementRaw growth source register) T)
+      hmatch
+  have hrun' : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (directRef growth source testDirectSlot),
+        exactCollisionTape (firstIncrementRaw growth source register) T⟩
+      ⟨resolve base c (searchRef growth source cleanupSearchBase),
+        (exactCollisionTape
+          (firstIncrementRaw growth source register) T).move
+            (orient growth .left)⟩ := by
+    simpa [CounterControlNestingBridge.machine,
+      BoundedMarkerProgram.machine, CounterControlPlan.table, rule,
+      CounterControlPlan.resolve] using hrun
+  have htape :
+      (exactCollisionTape
+        (firstIncrementRaw growth source register) T).move
+          (orient growth .left) = T.write blankSymbol := by
+    cases growth <;>
+      funext position <;>
+      simp [exactCollisionTape, firstIncrementRaw, orient,
+        FullTM0.Tape.move, FullTM0.Tape.write]
+  rw [htape] at hrun'
+  simpa [searchRef, CounterControlPlan.resolve] using hrun'
+
 /-- The retained gap of a final outward validation command, for any
 incremented register. -/
 theorem outwardFour_increment_gap
