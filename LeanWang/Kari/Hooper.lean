@@ -57,6 +57,7 @@ import LeanWang.Kari.Hooper.CounterControlRouteSemantics
 import LeanWang.Kari.Hooper.CounterControlCleanupSemantics
 import LeanWang.Kari.Hooper.CounterControlFrameBacking
 import LeanWang.Kari.Hooper.CounterControlSearchSystem
+import LeanWang.Kari.Hooper.CounterControlSearchExecution
 
 /-!
 # Hooper's immortality construction
@@ -99,6 +100,8 @@ command (or its first deeper nested frame), together with an exact backing-tape
 invariant proving that cleanup restores the suspended outer search tape,
 and a concrete simultaneous Hooper search system whose local launch, direct,
 and unwind laws are discharged by the compiled controller,
+with raw-command bridges for applying its forward and converse search
+hypotheses inside instruction-sized executions,
 and both directions of the abstract strong-induction core of Hooper's nested
 construction.  The remaining files prove the compiled plan's operational
 semantics and use its shared canonical core to discharge the nesting laws.
