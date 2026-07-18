@@ -44,6 +44,7 @@ import LeanWang.Kari.Hooper.CanonicalInitializerProgramComputable
 import LeanWang.Kari.Hooper.FramedCounterGeometry
 import LeanWang.Kari.Hooper.CounterControlPlan
 import LeanWang.Kari.Hooper.CounterControlPlanComputable
+import LeanWang.Kari.Hooper.CounterControlAbstractTrace
 import LeanWang.Kari.Hooper.CounterControlWellFormed
 import LeanWang.Kari.Hooper.CounterControlCommandAt
 import LeanWang.Kari.Hooper.CounterControlDeterministic
@@ -89,6 +90,8 @@ exact framed semantics, framed increment/decrement and collision-cleanup
 geometry, an executable two-orientation counter-control plan with
 tag-selected initialization, structurally verified search indexing and table
 determinism whose complete table is primitive recursive in the source code,
+exact logical-state bounds along every abstract trace from the canonical
+counter input,
 an exact bridge taking halted logical counter states to halted compiled
 full-tape configurations,
 command-oriented access to compiled controller blocks, reusable
