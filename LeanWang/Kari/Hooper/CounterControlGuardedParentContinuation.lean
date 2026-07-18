@@ -67,6 +67,19 @@ inductive FoundGuardedParentOutcome
         (foundCfg current.current) next.current.cfg)
       (distance_lt : current.current.distance < next.current.distance)
 
+/-- A found-state strict escape may either already have the structured
+parent outcome above or stop at a strictly larger intermediate genuine
+search (for example the matching outward validation replay). -/
+inductive FoundGuardedEscapeOutcome
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c) : Type where
+  | parent (outcome : FoundGuardedParentOutcome current)
+  | nextSearch (next : GenuineSearch base c)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        (foundCfg current.current) next.cfg)
+      (distance_lt : current.current.distance < next.distance)
+
 /-- Exact finite-continuation obligation for every guarded generated command.
 Search resolution itself is excluded from the law. -/
 def FoundGuardedParentContinuationLaw
@@ -164,6 +177,41 @@ theorem guardedUnnestingLaw_of_foundGuardedParentContinuationLaw
   have himmortalFound := immortalFrom_foundCfg current.current himmortal
   rcases hlaw current himmortalFound with ⟨outcome⟩
   exact guardedUnnests_of_foundOutcome base c hmortal current
+    himmortal outcome
+
+/-- Either form of found-state escape supplies a strict genuine search from
+the guarded entry. -/
+theorem guardedEscapes_of_foundOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) current.current.cfg)
+    (outcome : FoundGuardedEscapeOutcome current) :
+    ∃ next : GenuineSearch base c, GuardedEscapes current next := by
+  cases outcome with
+  | nextSearch next htail hdistance =>
+      have hfound := reaches_foundCfg_of_immortal current.current himmortal
+      exact ⟨next, ⟨hfound.trans htail, hdistance⟩⟩
+  | parent parent =>
+      rcases guardedUnnests_of_foundOutcome base c hmortal current
+          himmortal parent with ⟨next, hnext⟩
+      exact ⟨next.current, ⟨hnext.reaches, hnext.distance_lt⟩⟩
+
+/-- A found-state escape law implies the local strict escape law consumed by
+the alternating global theorem. -/
+theorem guardedEscapeLaw_of_foundContinuationLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hlaw : ∀ current : GuardedSearch base c,
+      FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
+        (foundCfg current.current) →
+        Nonempty (FoundGuardedEscapeOutcome current)) :
+    GuardedEscapeLaw base c := by
+  intro current himmortal
+  have himmortalFound := immortalFrom_foundCfg current.current himmortal
+  rcases hlaw current himmortalFound with ⟨outcome⟩
+  exact guardedEscapes_of_foundOutcome base c hmortal current
     himmortal outcome
 
 /-- A first-entry found-state outcome reaches the stable guarded phase. -/
