@@ -10,8 +10,10 @@ import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate
 /-!
 # Static red-graph certificate generator
 
-This executable is not imported by the proof. It records the search used to
-produce `RedShadeGraphStaticCertificateData.lean`; the generated predecessor
+This executable is not imported by the proof. It records the
+`RedShadeGraphSearch` computation used to produce
+`RedShadeGraphStaticCertificateData.lean`; `RedShadeGraphSearchSoundness`
+contains the reference proof of that search.  The generated predecessor
 forests are checked independently by `RedShadeGraphStaticCertificate`.
 -/
 

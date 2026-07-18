@@ -5,7 +5,11 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate
 
-/-! Generated static predecessor forests for finite red-graph paths. -/
+/-!
+Generated static predecessor forests for finite red-graph paths.  Regenerate
+this file with `RedShadeGraphStaticCertificateGenerator`; the active proof
+checks these instructions without importing the generator or graph search.
+-/
 
 namespace LeanWang
 namespace OllingerRobinson
