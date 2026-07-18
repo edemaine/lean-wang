@@ -318,6 +318,71 @@ theorem selectedBorder_eq_some_iff
                   rw [coarseSelected.trans coarseBorder.symm]
                   exact coarseLift
 
+/-- A selected closing border is exactly a closing boundary of one of the
+contributing frame depths.  The outer border contributes only an opening. -/
+theorem selectedBorder_eq_some_false_iff
+    (level coordinate transverse : Nat) :
+    selectedBorder level coordinate transverse = some false ↔
+      ∃ depth, 1 ≤ depth ∧ depth ≤ level ∧
+        inFrame depth transverse = true ∧
+        coordinate % period depth = frameEndResidue depth := by
+  rw [selectedBorder_eq_some_iff]
+  simp [outerBorder, frameBorder_eq_some_false_iff]
+
+private theorem ownerDepth_le_of_inFrame
+    {level ownerDepth depth transverse : Nat}
+    (owner : depthAt (level - 1) transverse = some ownerDepth)
+    (positive : 1 ≤ depth)
+    (inside : inFrame depth transverse = true) : ownerDepth ≤ depth := by
+  by_contra smaller
+  have withinSearch : depth ≤ level - 1 := by
+    have ownerBound := depthAt_le owner
+    omega
+  have ownerLe := depthAt_le_of_inFrame owner positive withinSearch inside
+  omega
+
+/-- Once the smallest frame containing the transverse coordinate is known,
+every selected frame boundary comes from that depth or a larger one. -/
+theorem selectedBorder_eq_some_iff_of_owner
+    {level ownerDepth coordinate transverse : Nat} {orientation : Bool}
+    (owner : depthAt (level - 1) transverse = some ownerDepth) :
+    selectedBorder level coordinate transverse = some orientation ↔
+      outerBorder coordinate transverse = some orientation ∨
+        ∃ depth, ownerDepth ≤ depth ∧ depth ≤ level ∧
+          frameBorder depth coordinate transverse = some orientation := by
+  rw [selectedBorder_eq_some_iff]
+  constructor
+  · rintro (outer | ⟨depth, positive, bounded, border⟩)
+    · exact Or.inl outer
+    · have inside : inFrame depth transverse = true := by
+        cases orientation with
+        | false => exact ((frameBorder_eq_some_false_iff _ _ _).1 border).1
+        | true => exact ((frameBorder_eq_some_true_iff _ _ _).1 border).1
+      exact Or.inr ⟨depth,
+        ownerDepth_le_of_inFrame owner positive inside,
+        bounded, border⟩
+  · rintro (outer | ⟨depth, ownerLe, bounded, border⟩)
+    · exact Or.inl outer
+    · exact Or.inr ⟨depth, (depthAt_pos owner).trans_le ownerLe,
+        bounded, border⟩
+
+/-- Closing-border normal form relative to the smallest containing frame. -/
+theorem selectedBorder_eq_some_false_iff_of_owner
+    {level ownerDepth coordinate transverse : Nat}
+    (owner : depthAt (level - 1) transverse = some ownerDepth) :
+    selectedBorder level coordinate transverse = some false ↔
+      ∃ depth, ownerDepth ≤ depth ∧ depth ≤ level ∧
+        inFrame depth transverse = true ∧
+        coordinate % period depth = frameEndResidue depth := by
+  rw [selectedBorder_eq_some_false_iff]
+  constructor
+  · rintro ⟨depth, positive, bounded, inside, closing⟩
+    exact ⟨depth, ownerDepth_le_of_inFrame owner positive inside,
+      bounded, inside, closing⟩
+  · rintro ⟨depth, ownerLe, bounded, inside, closing⟩
+    exact ⟨depth, (depthAt_pos owner).trans_le ownerLe,
+      bounded, inside, closing⟩
+
 /-- No selected boundary of any enclosing frame enters the strict interior of
 the smallest frame owning the transverse coordinate. -/
 theorem selectedBorder_eq_none_of_owner_interior
@@ -329,8 +394,8 @@ theorem selectedBorder_eq_none_of_owner_interior
   cases borderEq : selectedBorder level coordinate transverse with
   | none => rfl
   | some orientation =>
-      rcases (selectedBorder_eq_some_iff level coordinate transverse
-        orientation).1 borderEq with outer | frame
+      rcases (selectedBorder_eq_some_iff_of_owner owner).1 borderEq with
+        outer | frame
       · have coordinateOne : coordinate = 1 := by
           unfold outerBorder at outer
           split at outer
@@ -349,19 +414,7 @@ theorem selectedBorder_eq_none_of_owner_interior
         have startLarge : 1 < frameStartResidue depth := by
           simp [frameStartResidue, scale_pos]
         omega
-      · rcases frame with ⟨frameDepth, framePositive, frameBounded, frame⟩
-        have frameInside : inFrame frameDepth transverse = true := by
-          cases orientation with
-          | false =>
-              exact ((frameBorder_eq_some_false_iff _ _ _).1 frame).1
-          | true =>
-              exact ((frameBorder_eq_some_true_iff _ _ _).1 frame).1
-        have depthLeFrame : depth ≤ frameDepth := by
-          by_contra notLe
-          have ownerBound := depthAt_le owner
-          have frameWithinSearch : frameDepth ≤ level - 1 := by omega
-          exact notLe (depthAt_le_of_inFrame owner framePositive
-            frameWithinSearch frameInside)
+      · rcases frame with ⟨frameDepth, depthLeFrame, _, frame⟩
         rcases depthLeFrame.eq_or_lt with equal | less
         · subst frameDepth
           have boundary : onFrameBoundary depth coordinate = true := by
@@ -702,43 +755,32 @@ theorem selectedBorder_ne_some_false_before_frameOpening
     (beforeOpening : candidate < frameOpening depth coordinate) :
     selectedBorder level candidate transverse ≠ some false := by
   intro selected
-  rcases (selectedBorder_eq_some_iff level candidate transverse false).1 selected with
-    outer | frame
-  · unfold outerBorder at outer
-    split at outer <;> simp_all
-  · rcases frame with ⟨frameDepth, framePositive, frameBounded, border⟩
-    have frameData := (frameBorder_eq_some_false_iff
-      frameDepth candidate transverse).1 border
-    have baseLe : frameBase depth coordinate ≤ candidate :=
+  rcases (selectedBorder_eq_some_false_iff_of_owner owner).1 selected with
+    ⟨frameDepth, depthLeFrame, _, _, closing⟩
+  have baseLe : frameBase depth coordinate ≤ candidate :=
       (frameBase_le depth coordinate).trans lower
-    have openingBeforeBlockEnd : frameOpening depth coordinate <
+  have openingBeforeBlockEnd : frameOpening depth coordinate <
         frameBase depth coordinate + period depth := by
       simp only [frameOpening]
       exact Nat.add_lt_add_left
         ((frameStartResidue_lt_frameEndResidue depth).trans
           (frameEndResidue_lt_period depth)) _
-    have candidateMod : candidate % period depth =
+  have candidateMod : candidate % period depth =
         candidate - frameBase depth coordinate :=
       mod_eq_sub_frameBase_of_mem_block baseLe
         (beforeOpening.trans openingBeforeBlockEnd)
-    rcases Nat.lt_trichotomy frameDepth depth with smaller | equal | larger
-    · have frameWithinSearch : frameDepth ≤ level - 1 := by
-        have ownerBound := depthAt_le owner
-        omega
-      have ownerLe := depthAt_le_of_inFrame owner framePositive
-        frameWithinSearch frameData.1
-      omega
-    · subst frameDepth
-      have startBeforeEnd := frameStartResidue_lt_frameEndResidue depth
-      simp only [frameOpening] at beforeOpening
-      omega
-    · have largeResidue : candidate % period depth = 0 :=
-        largeClosing_mod_small larger frameData.2
-      have coordinateBaseLe := frameBase_le depth coordinate
-      have candidateEq : candidate = frameBase depth coordinate := by omega
-      have coordinateEq : coordinate = candidate := by omega
-      rw [← coordinateEq, coordinateClear] at selected
-      simp at selected
+  rcases depthLeFrame.eq_or_lt with equal | larger
+  · subst frameDepth
+    have startBeforeEnd := frameStartResidue_lt_frameEndResidue depth
+    simp only [frameOpening] at beforeOpening
+    omega
+  · have largeResidue : candidate % period depth = 0 :=
+      largeClosing_mod_small larger closing
+    have coordinateBaseLe := frameBase_le depth coordinate
+    have candidateEq : candidate = frameBase depth coordinate := by omega
+    have coordinateEq : coordinate = candidate := by omega
+    rw [← coordinateEq, coordinateClear] at selected
+    simp at selected
 
 theorem selectedBorder_eq_none_after_frameClosing
     {level depth coordinate transverse candidate : Nat}
@@ -749,8 +791,8 @@ theorem selectedBorder_eq_none_after_frameClosing
   cases selected : selectedBorder level candidate transverse with
   | none => rfl
   | some orientation =>
-      rcases (selectedBorder_eq_some_iff level candidate transverse
-        orientation).1 selected with outer | frame
+      rcases (selectedBorder_eq_some_iff_of_owner owner).1 selected with
+        outer | frame
       · have candidateOne : candidate = 1 := by
           unfold outerBorder at outer
           split at outer
@@ -761,13 +803,7 @@ theorem selectedBorder_eq_none_after_frameClosing
           have := scale_pos depth
           omega
         omega
-      · rcases frame with ⟨frameDepth, framePositive, frameBounded, border⟩
-        have frameInside : inFrame frameDepth transverse = true := by
-          cases orientation with
-          | false =>
-              exact ((frameBorder_eq_some_false_iff _ _ _).1 border).1
-          | true =>
-              exact ((frameBorder_eq_some_true_iff _ _ _).1 border).1
+      · rcases frame with ⟨frameDepth, depthLeFrame, _, border⟩
         have frameResidue : candidate % period frameDepth =
               frameStartResidue frameDepth ∨
             candidate % period frameDepth = frameEndResidue frameDepth := by
@@ -789,13 +825,7 @@ theorem selectedBorder_eq_none_after_frameClosing
         have afterEnd : frameEndResidue depth < candidate % period depth := by
           simp only [frameClosing] at afterClosing
           omega
-        rcases Nat.lt_trichotomy frameDepth depth with smaller | equal | larger
-        · have frameWithinSearch : frameDepth ≤ level - 1 := by
-            have ownerBound := depthAt_le owner
-            omega
-          have ownerLe := depthAt_le_of_inFrame owner framePositive
-            frameWithinSearch frameInside
-          omega
+        rcases depthLeFrame.eq_or_lt with equal | larger
         · subst frameDepth
           have startBeforeEnd := frameStartResidue_lt_frameEndResidue depth
           rcases frameResidue with opening | closing <;> omega
@@ -816,24 +846,19 @@ theorem selectedBorder_ne_some_false_of_no_owner
     (coordinate_lt : coordinate < 2 * scale level) :
     selectedBorder level coordinate transverse ≠ some false := by
   intro selected
-  rcases (selectedBorder_eq_some_iff level coordinate transverse false).1 selected with
-    outer | frame
-  · unfold outerBorder at outer
-    split at outer <;> simp_all
-  · rcases frame with ⟨depth, positive, bounded, border⟩
-    have frameData := (frameBorder_eq_some_false_iff
-      depth coordinate transverse).1 border
-    by_cases withinSearch : depth ≤ level - 1
-    · have outside := inFrame_eq_false_of_depthAt_eq_none owner
-        positive withinSearch
-      simp [frameData.1] at outside
-    · have depthEq : depth = level := by omega
-      subst depth
-      have residueLe := Nat.mod_le coordinate (period level)
-      rw [frameData.2] at residueLe
-      simp only [frameEndResidue] at residueLe
-      have := scale_pos level
-      omega
+  rcases (selectedBorder_eq_some_false_iff level coordinate transverse).1
+      selected with ⟨depth, positive, bounded, inside, closing⟩
+  by_cases withinSearch : depth ≤ level - 1
+  · have outside := inFrame_eq_false_of_depthAt_eq_none owner
+      positive withinSearch
+    simp [inside] at outside
+  · have depthEq : depth = level := by omega
+    subst depth
+    have residueLe := Nat.mod_le coordinate (period level)
+    rw [closing] at residueLe
+    simp only [frameEndResidue] at residueLe
+    have := scale_pos level
+    omega
 
 theorem period_dvd_two_mul_scale {depth level : Nat} (hdepth : depth < level) :
     period depth ∣ 2 * scale level :=
