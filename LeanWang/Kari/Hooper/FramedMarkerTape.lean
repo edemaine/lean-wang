@@ -124,6 +124,19 @@ theorem atLogical_apply_offset {numTags : Nat} (growth logicalDirection : Turing
 def layoutEnd (registers : Registers) : Nat :=
   RegisterLayout.clockBoundary registers + 1
 
+theorem layoutEnd_eq (registers : Registers) :
+    layoutEnd registers =
+      registers.left + registers.right + registers.temp +
+        registers.clock + 5 := by
+  simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+
+/-- The clock payload alone is strictly smaller than the complete framed
+layout, independently of the other three register values. -/
+theorem clock_lt_layoutEnd (registers : Registers) :
+    registers.clock < layoutEnd registers := by
+  rw [layoutEnd_eq]
+  omega
+
 /-- Logical coordinate of one labelled boundary.  Boundary `0` is at `1`,
 immediately after the return tag at logical coordinate `0`. -/
 def boundaryOffset (registers : Registers) (label : Fin 5) : Nat :=
