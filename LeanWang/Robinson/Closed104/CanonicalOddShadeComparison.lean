@@ -118,6 +118,133 @@ private theorem canonicalValid_base :
   · intro x y hx hy
     exact valid.vmatch x y (by omega) (by omega)
 
+private noncomputable def localStates (depth blockX blockY : Nat) :
+    Nat → Nat → RedShades.State :=
+  supertileShadeGrid 1
+    (supertileNodeGrid (depth + 2) seedNode blockX blockY)
+
+private theorem baseAgreement (coarse : Nat → Nat → Index)
+    (coarseRoot : coarse 0 0 = 0)
+    (states : Nat → Nat → RedShades.State)
+    (valid : ValidShadeGrid (actualGrid 0 coarse) states)
+    (shaded : CycleShade states 2 6 2 6 .light)
+    (target : Port)
+    (targetWest : 4 ≤ target.x) (targetEast : target.x < 12)
+    (targetSouth : 4 ≤ target.y) (targetNorth : target.y < 12)
+    (targetPresent : portPresent (actualGrid 0 coarse) target = true) :
+    value states target = value (shadeGrid 2) target := by
+  have targetMem : target ∈ portsIn 16 16 :=
+    mem_portsIn (by omega) (by omega)
+  have basePresent : portPresent CanonicalOddShadeBase.indexGrid target = true := by
+    have targetBounds := bounds_of_mem_portsIn targetMem
+    rcases target with ⟨x, y, side⟩
+    cases side <;> simp only [portPresent] <;>
+      rw [base_component_actual coarse coarseRoot x y
+        targetBounds.1 targetBounds.2] <;>
+      exact targetPresent
+  rcases CanonicalOddShadeBase.exists_boundedPath targetMem
+      targetWest targetEast targetSouth targetNorth basePresent with
+    ⟨start, parity, startMem, basePath⟩
+  have actualPath := BoundedPath.congr_of_component_eq
+    (fun x y hx hy => base_component_actual coarse coarseRoot x y hx hy)
+    basePath
+  have actualStart := value_of_cyclePort shaded startMem
+  have actualRelation := actualPath.path.sound valid
+  rw [actualStart] at actualRelation
+  have canonicalPath : BoundedPath (indexGrid 2) 16 16
+      start target parity := by
+    simpa [canonicalIndex_base] using basePath
+  have canonicalStart := value_of_cyclePort
+    CanonicalOddShadeGeometry.rootCycle_light startMem
+  have canonicalRelation :=
+    boundedPath_soundOnRectangle canonicalValid_base canonicalPath
+  rw [canonicalStart] at canonicalRelation
+  exact Related.right_unique actualRelation canonicalRelation
+
+private theorem localValid (depth : Nat) (coarse : Nat → Nat → Index)
+    (coarseRoot : coarse 0 0 = 0) (blockX blockY : Nat)
+    (_blockXLower : scale depth ≤ blockX)
+    (blockXUpper : blockX < 3 * scale depth)
+    (_blockYLower : scale depth ≤ blockY)
+    (blockYUpper : blockY < 3 * scale depth) :
+    ValidShadeRectangle (fineGrid (actualGrid depth coarse blockX blockY))
+      (localStates depth blockX blockY) 8 8 := by
+  have blockXCanonical : blockX < 4 ^ (depth + 2) := by
+    rw [show 4 ^ (depth + 2) = 8 * scale depth by
+      rw [pow_four_add_two]
+      unfold scale
+      omega]
+    omega
+  have blockYCanonical : blockY < 4 ^ (depth + 2) := by
+    rw [show 4 ^ (depth + 2) = 8 * scale depth by
+      rw [pow_four_add_two]
+      unfold scale
+      omega]
+    omega
+  let node := supertileNodeGrid (depth + 2) seedNode blockX blockY
+  have parentEq : node.data.parent = actualGrid depth coarse blockX blockY := by
+    change supertileIndexGrid (depth + 2) seedNode blockX blockY = _
+    change supertileIndexGrid (depth + 2) seedNode blockX blockY =
+      iterateRefine (2 * depth + 4) coarse blockX blockY
+    rw [← show 2 * (depth + 2) = 2 * depth + 4 by omega]
+    exact CanonicalShadeGeometry.supertileIndexGrid_eq_coarse
+      (depth + 2) seedNode coarse
+      (coarseRoot.trans seedNode_parent.symm)
+      blockXCanonical blockYCanonical
+  have canonicalValid := supertile_validShadeRectangle 1 node
+  have localIndexEq : supertileIndexGrid 1 node =
+      fineGrid (actualGrid depth coarse blockX blockY) := by
+    simpa [CanonicalEvenFreeLines.indexGrid] using
+      localGrid_eq node (actualGrid depth coarse blockX blockY) parentEq
+  rw [localIndexEq] at canonicalValid
+  exact canonicalValid
+
+private theorem cycleSourceAgreement (depth : Nat)
+    (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State) (blockX blockY : Nat)
+    (valid : ValidShadeGrid (actualGrid (depth + 1) coarse) states)
+    (shaded : CycleShade states
+      (scale (depth + 1)) (3 * scale (depth + 1))
+      (scale (depth + 1)) (3 * scale (depth + 1)) .light)
+    (_blockXLower : scale depth ≤ blockX)
+    (blockXUpper : blockX < 3 * scale depth)
+    (_blockYLower : scale depth ≤ blockY)
+    (blockYUpper : blockY < 3 * scale depth)
+    (cellCycle : CycleOn (actualGrid (depth + 1) coarse)
+      (4 * blockX + 1) (4 * blockX + 3)
+      (4 * blockY + 1) (4 * blockY + 3)) :
+    value states (translatePort cycleSource (8 * blockX) (8 * blockY)) =
+      value (localStates depth blockX blockY) cycleSource := by
+  have blockXDescendant : blockX < 2 * 4 ^ (depth + 1) := by
+    simp only [scale] at blockXUpper
+    rw [pow_succ]
+    omega
+  have blockYDescendant : blockY < 2 * 4 ^ (depth + 1) := by
+    simp only [scale] at blockYUpper
+    rw [pow_succ]
+    omega
+  have bridge := RedShadeCycleOddDescendants.rootDescendantBridge
+    (depth + 1) coarse blockX blockY
+    blockXDescendant blockYDescendant
+  have bridge' : RedShadeCycleCrossingPaths.OddCycleBridge
+      (actualGrid (depth + 1) coarse)
+      (scale (depth + 1)) (3 * scale (depth + 1))
+      (scale (depth + 1)) (3 * scale (depth + 1))
+      (4 * blockX + 1) (4 * blockX + 3)
+      (4 * blockY + 1) (4 * blockY + 3) := by
+    simpa only [actualGrid, scale, Nat.mul_assoc,
+      Nat.mul_left_comm, Nat.mul_comm] using bridge
+  have actualSource :
+      value states (translatePort cycleSource (8 * blockX) (8 * blockY)) =
+        some .dark := by
+    have result := value_eq_of_oddCycleBridge valid
+      (rootCycle (depth + 1) coarse) shaded cellCycle bridge'
+      (sourceOnCell blockX blockY)
+    simpa [RedShades.Shade.opposite] using result
+  have canonicalSource := CanonicalOddShadeGeometry.cycleSource_dark
+    (supertileNodeGrid (depth + 2) seedNode blockX blockY)
+  exact actualSource.trans canonicalSource.symm
+
 /-- Every live central port agrees with the raw canonical odd assignment. -/
 theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
     (states : Nat → Nat → RedShades.State)
@@ -133,241 +260,43 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
     (targetNorth : target.y < 6 * scale depth)
     (targetPresent : portPresent (actualGrid depth coarse) target = true) :
     value states target = value (shadeGrid (depth + 2)) target := by
-  induction depth generalizing states target with
-  | zero =>
-      have targetMem : target ∈ portsIn 16 16 :=
-        mem_portsIn (by simp [scale] at targetEast ⊢; omega)
-          (by simp [scale] at targetNorth ⊢; omega)
-      have targetWest' : 4 ≤ target.x := by simpa [scale] using targetWest
-      have targetEast' : target.x < 12 := by simpa [scale] using targetEast
-      have targetSouth' : 4 ≤ target.y := by simpa [scale] using targetSouth
-      have targetNorth' : target.y < 12 := by simpa [scale] using targetNorth
-      have basePresent : portPresent CanonicalOddShadeBase.indexGrid target = true := by
-        have targetBounds := bounds_of_mem_portsIn targetMem
-        rcases target with ⟨x, y, side⟩
-        cases side <;> simp only [portPresent] <;>
-          rw [base_component_actual coarse coarseRoot x y
-            targetBounds.1 targetBounds.2] <;>
-          exact targetPresent
-      rcases CanonicalOddShadeBase.exists_boundedPath targetMem
-          targetWest' targetEast' targetSouth' targetNorth' basePresent with
-        ⟨start, parity, startMem, basePath⟩
-      have actualPath := BoundedPath.congr_of_component_eq
-        (fun x y hx hy => base_component_actual coarse coarseRoot x y hx hy)
-        basePath
-      have actualStart := value_of_cyclePort (by simpa [scale] using shaded)
-        startMem
-      have actualRelation := actualPath.path.sound valid
-      rw [actualStart] at actualRelation
-      have canonicalPath : BoundedPath (indexGrid 2) 16 16
-          start target parity := by
-        simpa [canonicalIndex_base] using basePath
-      have canonicalStart := value_of_cyclePort
-        CanonicalOddShadeGeometry.rootCycle_light startMem
-      have canonicalRelation :=
-        boundedPath_soundOnRectangle canonicalValid_base canonicalPath
-      rw [canonicalStart] at canonicalRelation
-      exact Related.right_unique actualRelation canonicalRelation
-  | succ depth ih =>
-      let oldGrid := actualGrid depth coarse
-      let newGrid := actualGrid (depth + 1) coarse
-      have gridEq : iterateRefine 2 oldGrid = newGrid := by
-        dsimp [oldGrid, newGrid, actualGrid]
-        rw [PlaneRedBoards.iterateRefine_add]
-        congr 1
-        omega
-      have validFine : ValidShadeGrid (iterateRefine 2 oldGrid) states := by
-        rw [gridEq]
-        exact valid
-      let coarseStates := RedShadeGraphCoarsening.stateGrid validFine
-      have coarseValid : ValidShadeGrid oldGrid coarseStates :=
-        RedShadeGraphCoarsening.valid validFine
-      have scaleSucc : scale (depth + 1) = 4 * scale depth := by
-        exact scale_succ depth
-      have coarseShaded : CycleShade coarseStates
-          (scale depth) (3 * scale depth)
-          (scale depth) (3 * scale depth) .light := by
-        apply RedShadeGraphCoarsening.cycleShade validFine
-          (rootCycle depth coarse)
-        convert shaded using 1 <;> rw [scaleSucc] <;> omega
-      let blockX := target.x / 8
-      let blockY := target.y / 8
-      let localTarget : Port :=
-        ⟨target.x % 8, target.y % 8, target.side⟩
-      have localTargetX : localTarget.x < 8 := Nat.mod_lt _ (by decide)
-      have localTargetY : localTarget.y < 8 := Nat.mod_lt _ (by decide)
-      have targetEq :
-          translatePort localTarget (8 * blockX) (8 * blockY) = target := by
-        rcases target with ⟨x, y, side⟩
-        simp only [localTarget, blockX, blockY, translatePort]
-        have hx := Nat.mod_add_div x 8
-        have hy := Nat.mod_add_div y 8
-        congr <;> omega
-      have localPresent :
-          portPresent (fineGrid (oldGrid blockX blockY)) localTarget = true := by
-        rw [portPresent_two_block oldGrid blockX blockY localTarget
-          localTargetX localTargetY, gridEq, targetEq]
-        exact targetPresent
-      rcases exists_boundedPath (oldGrid blockX blockY)
-          (mem_portsIn localTargetX localTargetY) localPresent with
-        ⟨source, sourceMem, parity, localPath⟩
-      have actualPath := boundedPath_two_block oldGrid blockX blockY localPath
-      rw [gridEq, targetEq] at actualPath
-      have scalePos : 0 < scale depth := by simp [scale]
-      have blockXLower : scale depth ≤ blockX := by
-        apply (Nat.le_div_iff_mul_le (by decide : 0 < 8)).2
-        rw [scaleSucc] at targetWest
-        omega
-      have blockXUpper : blockX < 3 * scale depth := by
-        apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 8)).2
-        rw [scaleSucc] at targetEast
-        omega
-      have blockYLower : scale depth ≤ blockY := by
-        apply (Nat.le_div_iff_mul_le (by decide : 0 < 8)).2
-        rw [scaleSucc] at targetSouth
-        omega
-      have blockYUpper : blockY < 3 * scale depth := by
-        apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 8)).2
-        rw [scaleSucc] at targetNorth
-        omega
-      have blockXCanonical : blockX < 4 ^ (depth + 2) := by
-        rw [show 4 ^ (depth + 2) = 8 * scale depth by
-          rw [pow_four_add_two]
-          unfold scale
-          omega]
-        omega
-      have blockYCanonical : blockY < 4 ^ (depth + 2) := by
-        rw [show 4 ^ (depth + 2) = 8 * scale depth by
-          rw [pow_four_add_two]
-          unfold scale
-          omega]
-        omega
-      have blockXDescendant : blockX < 2 * 4 ^ (depth + 1) := by
-        simp only [scale] at blockXUpper
-        rw [pow_succ]
-        omega
-      have blockYDescendant : blockY < 2 * 4 ^ (depth + 1) := by
-        simp only [scale] at blockYUpper
-        rw [pow_succ]
-        omega
-      let node := supertileNodeGrid (depth + 2) seedNode blockX blockY
-      have parentEq : node.data.parent = oldGrid blockX blockY := by
-        change supertileIndexGrid (depth + 2) seedNode blockX blockY = _
-        change supertileIndexGrid (depth + 2) seedNode blockX blockY =
-          iterateRefine (2 * depth + 4) coarse blockX blockY
-        rw [← show 2 * (depth + 2) = 2 * depth + 4 by omega]
-        exact CanonicalShadeGeometry.supertileIndexGrid_eq_coarse
-          (depth + 2) seedNode coarse
-          (coarseRoot.trans seedNode_parent.symm)
-          blockXCanonical blockYCanonical
-      have canonicalValid := supertile_validShadeRectangle 1 node
-      have localIndexEq : supertileIndexGrid 1 node =
-          fineGrid (oldGrid blockX blockY) := by
-        simpa [CanonicalEvenFreeLines.indexGrid] using
-          localGrid_eq node (oldGrid blockX blockY) parentEq
-      rw [localIndexEq] at canonicalValid
-      have canonicalRelation :=
-        boundedPath_soundOnRectangle canonicalValid localPath
-      have canonicalTarget := value_succ_block (depth + 2)
-        blockX blockY localTarget localTargetX localTargetY
-      rw [targetEq] at canonicalTarget
-      have finish
-          (sourceValues :
-            value states (translatePort source (8 * blockX) (8 * blockY)) =
-              value (supertileShadeGrid 1 node) source) :
-          value states target = value (shadeGrid (depth + 3)) target := by
-        have actualRelation := actualPath.sound valid
-        have actualRelation' : Related parity
-            (value (supertileShadeGrid 1 node) source) (value states target) := by
-          simpa [sourceValues] using actualRelation
-        have targetRelation : Related parity
-            (value (supertileShadeGrid 1 node) source)
-            (value (shadeGrid (depth + 3)) target) := by
-          rw [canonicalTarget]
-          exact canonicalRelation
-        exact Related.right_unique actualRelation' targetRelation
-      rcases source_cases sourceMem with sourceEq | inherited
-      · subst source
-        have cellCycle : CycleOn newGrid
-            (4 * blockX + 1) (4 * blockX + 3)
-            (4 * blockY + 1) (4 * blockY + 3) := by
-          have cycle := depthTwo_at oldGrid blockX blockY
-          rw [gridEq] at cycle
-          exact cycle
-        have bridge := RedShadeCycleOddDescendants.rootDescendantBridge
-          (depth + 1) coarse blockX blockY
-          blockXDescendant blockYDescendant
-        have bridge' : RedShadeCycleCrossingPaths.OddCycleBridge newGrid
-            (scale (depth + 1)) (3 * scale (depth + 1))
-            (scale (depth + 1)) (3 * scale (depth + 1))
-            (4 * blockX + 1) (4 * blockX + 3)
-            (4 * blockY + 1) (4 * blockY + 3) := by
-          simpa only [newGrid, actualGrid, scale, Nat.mul_assoc,
-            Nat.mul_left_comm, Nat.mul_comm] using bridge
-        have actualSource :
-            value states
-                (translatePort cycleSource (8 * blockX) (8 * blockY)) =
-              some .dark := by
-          have result := value_eq_of_oddCycleBridge valid
-            (rootCycle (depth + 1) coarse) shaded cellCycle bridge'
-            (sourceOnCell blockX blockY)
-          simpa [RedShades.Shade.opposite] using result
-        have canonicalSource := CanonicalOddShadeGeometry.cycleSource_dark node
-        exact finish (actualSource.trans canonicalSource.symm)
-      · rcases inherited with ⟨old, oldMem, oldLocalPresent, sourceEq⟩
-        subst source
-        have oldBounds := bounds_of_mem_portsIn oldMem
-        let oldGlobal := translatePort old (2 * blockX) (2 * blockY)
-        have oldPresent : portPresent oldGrid oldGlobal = true := by
-          rw [← portPresent_old_block oldGrid blockX blockY old
-            oldBounds.1 oldBounds.2]
-          exact oldLocalPresent
-        have oldWest : 2 * scale depth ≤ oldGlobal.x := by
-          dsimp [oldGlobal, translatePort]
-          omega
-        have oldEast : oldGlobal.x < 6 * scale depth := by
-          dsimp [oldGlobal, translatePort]
-          omega
-        have oldSouth : 2 * scale depth ≤ oldGlobal.y := by
-          dsimp [oldGlobal, translatePort]
-          omega
-        have oldNorth : oldGlobal.y < 6 * scale depth := by
-          dsimp [oldGlobal, translatePort]
-          omega
-        have oldAgreement := ih coarseStates coarseValid coarseShaded oldGlobal
-          oldWest oldEast oldSouth oldNorth oldPresent
-        have refinedEq :
-            value states (sparsePort oldGlobal) =
-              value states (refinedPort oldGlobal) :=
-          (livePortPath oldGrid oldGlobal oldPresent).sound validFine
-        have coarseValue :
-            value coarseStates oldGlobal =
-              value states (refinedPort oldGlobal) :=
-          RedShadeGraphCoarsening.value_stateGrid validFine oldGlobal
-        have actualToPrevious :
-            value states (sparsePort oldGlobal) =
-              value (shadeGrid (depth + 2)) oldGlobal :=
-          refinedEq.trans (coarseValue.symm.trans oldAgreement)
-        have canonicalSparse := value_succ_sparse (depth + 2) oldGlobal
-        have sourceGlobalEq :
-            sparsePort oldGlobal =
-              translatePort (sparsePort old) (8 * blockX) (8 * blockY) :=
-          sparsePort_two_block blockX blockY old oldBounds.1 oldBounds.2
-        have canonicalBlock := value_succ_block (depth + 2)
-          blockX blockY (sparsePort old)
-          (sources_inBounds (oldGrid blockX blockY) (sparsePort old)
-            sourceMem).1
-          (sources_inBounds (oldGrid blockX blockY) (sparsePort old)
-            sourceMem).2
-        rw [← sourceGlobalEq] at canonicalBlock
-        have sourceValues :
-            value states
-                (translatePort (sparsePort old) (8 * blockX) (8 * blockY)) =
-              value (supertileShadeGrid 1 node) (sparsePort old) := by
-          rw [← sourceGlobalEq]
-          exact actualToPrevious.trans
-            (canonicalSparse.symm.trans canonicalBlock)
-        exact finish sourceValues
+  apply present_value_eq_of_refinement
+    scale (fun phaseDepth => actualGrid phaseDepth coarse)
+    (fun phaseDepth => shadeGrid (phaseDepth + 2))
+    localStates
+  · exact scale_succ
+  · intro phaseDepth
+    dsimp [actualGrid]
+    rw [PlaneRedBoards.iterateRefine_add]
+    congr 1
+    omega
+  · exact fun phaseDepth => rootCycle phaseDepth coarse
+  · intro baseStates baseValid baseShaded baseTarget baseWest baseEast
+      baseSouth baseNorth basePresent
+    simpa [scale] using baseAgreement coarse coarseRoot baseStates
+      baseValid baseShaded baseTarget baseWest baseEast baseSouth baseNorth
+      basePresent
+  · intro phaseDepth blockX blockY blockXLower blockXUpper
+      blockYLower blockYUpper
+    exact localValid phaseDepth coarse coarseRoot blockX blockY
+      blockXLower blockXUpper blockYLower blockYUpper
+  · intro phaseDepth blockX blockY port portX portY
+    exact value_succ_block (phaseDepth + 2) blockX blockY
+      port portX portY
+  · intro phaseDepth port
+    exact value_succ_sparse (phaseDepth + 2) port
+  · intro phaseDepth phaseStates blockX blockY phaseValid phaseShaded
+      blockXLower blockXUpper blockYLower blockYUpper cellCycle
+    exact cycleSourceAgreement phaseDepth coarse phaseStates blockX blockY
+      phaseValid phaseShaded blockXLower blockXUpper blockYLower
+      blockYUpper cellCycle
+  · exact valid
+  · exact shaded
+  · exact targetWest
+  · exact targetEast
+  · exact targetSouth
+  · exact targetNorth
+  · exact targetPresent
 
 private theorem index_canonical_eq (depth : Nat)
     (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0)
