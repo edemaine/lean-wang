@@ -254,8 +254,13 @@ theorem shadeGrid_succ_block (level : Nat) (root : Node)
   have hyMod : ((8 * blockY + localY) / 2) % 4 = localY / 2 := by omega
   have hxQuarter : (8 * blockX + localX) % 2 = localX % 2 := by omega
   have hyQuarter : (8 * blockY + localY) % 2 = localY % 2 := by omega
+  have hxHalf : localX / 2 % 4 = localX / 2 :=
+    Nat.mod_eq_of_lt (by omega)
+  have hyHalf : localY / 2 % 4 = localY / 2 :=
+    Nat.mod_eq_of_lt (by omega)
   simp [supertileNodeGrid, iterateNodeRefine, refineNodeGrid, fineNode,
-    childPosition, hxDiv, hyDiv, hxMod, hyMod, hxQuarter, hyQuarter]
+    childPosition, hxDiv, hyDiv, hxMod, hyMod, hxQuarter, hyQuarter,
+    hxHalf, hyHalf]
 
 /-- The newly created local cell-cycle source is light after the canonical
 global shade flip. -/

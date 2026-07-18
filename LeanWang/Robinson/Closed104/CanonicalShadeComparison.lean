@@ -27,7 +27,8 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoard
   RedShadeGraphSearchSoundness RedShadeGraphTranslation
   RedShadeCycleConnectivity RedShadeCycleBridgeComposition
   RedShadeCycleEvenDescendants OrientedRedBoardTranslations
-  ShadedSubstitution CanonicalEvenFreeLines CanonicalShadeGeometry
+  ShadedSubstitution CanonicalFreeLineCoordinates CanonicalEvenFreeLines
+  CanonicalShadeGeometry ShadedPlaneSignalGrid
 
 set_option maxRecDepth 20000
 
@@ -403,6 +404,200 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
           exact actualToPrevious.trans
             (canonicalSparse.symm.trans canonicalBlock)
         exact finish sourceValues
+
+private theorem portPresent_canonical_eq (depth : Nat)
+    (coarse : Nat → Nat → Index) (root : Node)
+    (rootEq : coarse 0 0 = root.data.parent) (port : Port)
+    (portEast : port.x < 8 * scale depth)
+    (portNorth : port.y < 8 * scale depth) :
+    portPresent (indexGrid root (depth + 1)) port =
+      portPresent (actualGrid depth coarse) port := by
+  have xBound : port.x / 2 < 4 ^ (depth + 1) := by
+    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
+    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
+      Nat.mul_left_comm] using portEast
+  have yBound : port.y / 2 < 4 ^ (depth + 1) := by
+    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
+    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
+      Nat.mul_left_comm] using portNorth
+  have indexEq :
+      indexGrid root (depth + 1) (port.x / 2) (port.y / 2) =
+        actualGrid depth coarse (port.x / 2) (port.y / 2) := by
+    simpa [indexGrid, actualGrid] using
+      (supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
+        xBound yBound)
+  rcases port with ⟨x, y, side⟩
+  cases side <;> simp only [portPresent, componentAt] <;> rw [indexEq]
+
+/-- The comparison extends to absent ports: validity forces both assignments
+to use `none` whenever the common unshaded geometry has no red port. -/
+theorem value_eq (depth : Nat) (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State) (root : Node)
+    (coarseRoot : coarse 0 0 = 0) (rootParent : root.data.parent = 0)
+    (valid : ValidShadeGrid (actualGrid depth coarse) states)
+    (shaded : CycleShade states
+      (scale depth) (3 * scale depth)
+      (scale depth) (3 * scale depth) .light)
+    (target : Port)
+    (targetWest : 2 * scale depth ≤ target.x)
+    (targetEast : target.x < 6 * scale depth)
+    (targetSouth : 2 * scale depth ≤ target.y)
+    (targetNorth : target.y < 6 * scale depth) :
+    value states target = value (shadeGrid root (depth + 1)) target := by
+  by_cases present : portPresent (actualGrid depth coarse) target = true
+  · exact present_value_eq depth coarse states root coarseRoot rootParent
+      valid shaded target targetWest targetEast targetSouth targetNorth present
+  · have scalePos : 0 < scale depth := pow_pos (by decide) _
+    have canonicalBounds : PortInBounds target
+        (2 * 4 ^ (depth + 1)) (2 * 4 ^ (depth + 1)) := by
+      constructor <;>
+        rw [pow_succ] <;>
+        simp only [scale] at targetEast targetNorth ⊢ <;>
+        omega
+    have canonicalValid := validRectangle (depth + 1) root
+    have actualSome :=
+      RedShadeGraphCoarsening.value_isSome_eq_portPresent valid target
+    have canonicalSome :=
+      RedShadeGraphColoring.value_isSome_eq_portPresent
+        canonicalValid target canonicalBounds
+    have rootEq : coarse 0 0 = root.data.parent :=
+      coarseRoot.trans rootParent.symm
+    have presentEq := portPresent_canonical_eq depth coarse root rootEq target
+      (by omega) (by omega)
+    rw [presentEq] at canonicalSome
+    have absent : portPresent (actualGrid depth coarse) target = false := by
+      exact Bool.eq_false_of_not_eq_true present
+    rw [absent] at actualSome canonicalSome
+    cases actualValue : value states target <;>
+      cases canonicalValue : value (shadeGrid root (depth + 1)) target <;>
+      simp_all
+
+/-- Complete quarter-state agreement in the central square. -/
+theorem state_eq (depth : Nat) (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State) (root : Node)
+    (coarseRoot : coarse 0 0 = 0) (rootParent : root.data.parent = 0)
+    (valid : ValidShadeGrid (actualGrid depth coarse) states)
+    (shaded : CycleShade states
+      (scale depth) (3 * scale depth)
+      (scale depth) (3 * scale depth) .light)
+    (x y : Nat)
+    (xWest : 2 * scale depth ≤ x) (xEast : x < 6 * scale depth)
+    (ySouth : 2 * scale depth ≤ y) (yNorth : y < 6 * scale depth) :
+    states x y = shadeGrid root (depth + 1) x y := by
+  apply RedShades.State.ext
+  · simpa [value] using value_eq depth coarse states root coarseRoot
+      rootParent valid shaded ⟨x, y, .west⟩ xWest xEast ySouth yNorth
+  · simpa [value] using value_eq depth coarse states root coarseRoot
+      rootParent valid shaded ⟨x, y, .east⟩ xWest xEast ySouth yNorth
+  · simpa [value] using value_eq depth coarse states root coarseRoot
+      rootParent valid shaded ⟨x, y, .south⟩ xWest xEast ySouth yNorth
+  · simpa [value] using value_eq depth coarse states root coarseRoot
+      rootParent valid shaded ⟨x, y, .north⟩ xWest xEast ySouth yNorth
+
+private theorem componentAt_canonical_eq (depth : Nat)
+    (coarse : Nat → Nat → Index) (root : Node)
+    (rootEq : coarse 0 0 = root.data.parent) (x y : Nat)
+    (xEast : x < 8 * scale depth) (yNorth : y < 8 * scale depth) :
+    componentAt (indexGrid root (depth + 1)) x y =
+      componentAt (actualGrid depth coarse) x y := by
+  have xBound : x / 2 < 4 ^ (depth + 1) := by
+    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
+    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
+      Nat.mul_left_comm] using xEast
+  have yBound : y / 2 < 4 ^ (depth + 1) := by
+    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
+    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
+      Nat.mul_left_comm] using yNorth
+  have indexEq :
+      indexGrid root (depth + 1) (x / 2) (y / 2) =
+        actualGrid depth coarse (x / 2) (y / 2) := by
+    simpa [indexGrid, actualGrid] using
+      (supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
+        xBound yBound)
+  simp only [componentAt]
+  rw [indexEq]
+
+/-- Every coordinate in the canonical family is a free row in the arbitrary
+light-root shade assignment. -/
+theorem coordinate_isFreeRow (depth : Nat)
+    (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State) (root : Node)
+    (coarseRoot : coarse 0 0 = 0) (rootParent : root.data.parent = 0)
+    (valid : ValidShadeGrid (actualGrid depth coarse) states)
+    (shaded : CycleShade states
+      (scale depth) (3 * scale depth)
+      (scale depth) (3 * scale depth) .light)
+    {row : Nat} (rowMem : row ∈ coordinates depth) :
+    IsFreeRow (actualGrid depth coarse) states
+      (scale depth) (3 * scale depth) row := by
+  have canonicalFree :=
+    CanonicalEvenFreeLines.coordinate_isFreeRow root depth rowMem
+  have rowBounds := mem_coordinates_bounds depth rowMem
+  have rootEq : coarse 0 0 = root.data.parent :=
+    coarseRoot.trans rootParent.symm
+  intro quarterX westBound eastBound
+  have scalePos : 0 < scale depth := pow_pos (by decide) _
+  have xWest : 2 * scale depth ≤ quarterX := by
+    unfold quarterWest at westBound
+    omega
+  have xEast : quarterX < 6 * scale depth := by
+    unfold quarterEast at eastBound
+    omega
+  have ySouth : 2 * scale depth ≤ row := by
+    unfold quarterSouth at rowBounds
+    simp only [scale] at rowBounds ⊢
+    omega
+  have yNorth : row < 6 * scale depth := by
+    unfold quarterNorth at rowBounds
+    simp only [scale] at rowBounds ⊢
+    omega
+  have stateAgreement := state_eq depth coarse states root coarseRoot
+    rootParent valid shaded quarterX row xWest xEast ySouth yNorth
+  have componentAgreement := componentAt_canonical_eq depth coarse root rootEq
+    quarterX row (by omega) (by omega)
+  rw [← componentAgreement, stateAgreement]
+  exact canonicalFree quarterX westBound eastBound
+
+/-- Every coordinate in the canonical family is a free column in the
+arbitrary light-root shade assignment. -/
+theorem coordinate_isFreeColumn (depth : Nat)
+    (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State) (root : Node)
+    (coarseRoot : coarse 0 0 = 0) (rootParent : root.data.parent = 0)
+    (valid : ValidShadeGrid (actualGrid depth coarse) states)
+    (shaded : CycleShade states
+      (scale depth) (3 * scale depth)
+      (scale depth) (3 * scale depth) .light)
+    {column : Nat} (columnMem : column ∈ coordinates depth) :
+    IsFreeColumn (actualGrid depth coarse) states
+      (scale depth) (3 * scale depth) column := by
+  have canonicalFree :=
+    CanonicalEvenFreeLines.coordinate_isFreeColumn root depth columnMem
+  have columnBounds := mem_coordinates_bounds depth columnMem
+  have rootEq : coarse 0 0 = root.data.parent :=
+    coarseRoot.trans rootParent.symm
+  intro quarterY southBound northBound
+  have scalePos : 0 < scale depth := pow_pos (by decide) _
+  have xWest : 2 * scale depth ≤ column := by
+    unfold quarterSouth at columnBounds
+    simp only [scale] at columnBounds ⊢
+    omega
+  have xEast : column < 6 * scale depth := by
+    unfold quarterNorth at columnBounds
+    simp only [scale] at columnBounds ⊢
+    omega
+  have ySouth : 2 * scale depth ≤ quarterY := by
+    unfold quarterSouth at southBound
+    omega
+  have yNorth : quarterY < 6 * scale depth := by
+    unfold quarterNorth at northBound
+    omega
+  have stateAgreement := state_eq depth coarse states root coarseRoot
+    rootParent valid shaded column quarterY xWest xEast ySouth yNorth
+  have componentAgreement := componentAt_canonical_eq depth coarse root rootEq
+    column quarterY (by omega) (by omega)
+  rw [← componentAgreement, stateAgreement]
+  exact canonicalFree quarterY southBound northBound
 
 end CanonicalShadeComparison
 end Closed104

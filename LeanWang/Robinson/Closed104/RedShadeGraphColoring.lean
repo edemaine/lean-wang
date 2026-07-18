@@ -111,6 +111,23 @@ theorem boundedPath_soundOnRectangle
   | trans firstPath secondPath firstIH secondIH =>
       exact Related.trans firstIH secondIH
 
+/-- A finite valid assignment carries a shade exactly on the ports present in
+the underlying unshaded geometry. -/
+theorem value_isSome_eq_portPresent
+    {indexGrid : Nat → Nat → Index}
+    {stateGrid : Nat → Nat → RedShades.State} {width height : Nat}
+    (valid : ValidShadeRectangle indexGrid stateGrid width height)
+    (port : Port) (bounds : PortInBounds port width height) :
+    (value stateGrid port).isSome = portPresent indexGrid port := by
+  rcases port with ⟨x, y, side⟩
+  have allowed := valid.allowed x y bounds.1 bounds.2
+  unfold RedShades.locallyAllowed at allowed
+  change RedShades.allowedFor (componentAt indexGrid x y) (quadrantAt x y)
+    (stateGrid x y) = true at allowed
+  simp only [RedShades.allowedFor, Bool.and_eq_true, decide_eq_true_eq,
+    RedShades.optionPresent] at allowed
+  cases side <;> simp only [value, portPresent] <;> aesop
+
 end RedShadeGraphColoring
 end Closed104
 end Figure13Layers
