@@ -3,16 +3,17 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Closed104.ShadedCarrierBorderFactorSupertiles
 import LeanWang.Robinson.Closed104.ShadedCarrierHierarchy
+import LeanWang.Robinson.Closed104.ShadedSignalRectangle
+import LeanWang.Robinson.Closed104.ShadedSubstitutionSupertiles
 
 /-!
 # Executable finite hierarchy formula for the selected shaded borders
 
 The selected border is the outer opening or a boundary from one of the
-finitely many frame depths present at the requested level.  A finite
-extended-patch invariant connects this arithmetic formula to the sixteen-state
-substitution factor.
+finitely many frame depths present at the requested level. A finite
+extended-patch invariant connects this arithmetic formula directly to the
+reachable decorated substitution nodes.
 -/
 
 namespace LeanWang
@@ -21,8 +22,36 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedCarrierBorderHierarchy
 
-open ShadedCarrierHierarchy ShadedCarrierBorderFactor
-open ShadedCarrierBorderFactorSupertiles
+open Signals.FreeCellLocal ShadedCarrierHierarchy ShadedSubstitution
+
+/-- The four row-border and four column-border observations in one `2 x 2`
+quarter block, in row-major order. -/
+abbrev BorderPatch := List (Option Bool)
+
+def emptyPatch : BorderPatch := List.replicate 8 none
+
+def patchData (data : DecoratedData) : BorderPatch :=
+  let indexGrid : Nat → Nat → Index := fun _ _ => data.parent
+  let shadeGrid : Nat → Nat → RedShades.State := fun x y =>
+    data.block.at (x % 2) (y % 2)
+  let rows := (List.range 2).flatMap fun y => (List.range 2).map fun x =>
+    ShadedSignalRectangle.horizontalInteriorCode <|
+      ShadedSignals.selectedVerticalFor
+        (componentAt indexGrid x y) (quadrantAt x y) (shadeGrid x y)
+  let columns := (List.range 2).flatMap fun y => (List.range 2).map fun x =>
+    ShadedSignalRectangle.verticalInteriorCode <|
+      ShadedSignals.selectedHorizontalFor
+        (componentAt indexGrid x y) (quadrantAt x y) (shadeGrid x y)
+  rows ++ columns
+
+def nodePatch (node : Nat) : BorderPatch :=
+  ((modelData node).map patchData).getD emptyPatch
+
+def horizontalOutput (node x y : Nat) : Option Bool :=
+  (nodePatch node)[x + 2 * y]?.getD none
+
+def verticalOutput (node x y : Nat) : Option Bool :=
+  (nodePatch node)[4 + x + 2 * y]?.getD none
 
 def ceilDivFour (coordinate : Nat) : Nat := (coordinate + 3) / 4
 
@@ -63,7 +92,7 @@ def selectedBorder (level coordinate transverse : Nat) : Option Bool :=
   Fin.findSome? (borderCandidate coordinate transverse : Fin (level + 1) → _)
 
 /-- A `3 x 3` row-border patch followed by the transposed `3 x 3`
-column-border patch.  The one-cell halo makes refinement local. -/
+column-border patch. The one-cell halo makes refinement local. -/
 abbrev ExtendedPatch := List (Option Bool)
 
 def extendedPatch (level blockX blockY : Nat) : ExtendedPatch :=
@@ -76,7 +105,7 @@ def extendedPatch (level blockX blockY : Nat) : ExtendedPatch :=
 def patchEntry (patch : ExtendedPatch) (index : Nat) : Option Bool :=
   patch[index]?.getD none
 
-/-- Forget the one-cell halo and return the factor's `2 x 2` visible patch. -/
+/-- Forget the one-cell halo and return the node's `2 x 2` visible patch. -/
 def visiblePatch (patch : ExtendedPatch) : BorderPatch :=
   [patchEntry patch 0, patchEntry patch 1,
     patchEntry patch 3, patchEntry patch 4,
@@ -115,15 +144,24 @@ theorem liftBorder_eight_mul_add (block offset : Nat)
       cases orientation <;>
         simp [liftBorder, Nat.add_mod, Nat.mul_mod]
 
+/-- Finite recursion state: the actual decorated node, coordinate parities,
+and the arithmetic border patch around it. -/
 structure State where
-  classId : Nat
+  node : Nat
   blockXParity : Nat
   blockYParity : Nat
   patch : ExtendedPatch
 deriving DecidableEq, Repr
 
+/-- Executable decorated-node index generated below one root node. -/
+def generatedNode : Nat → Nat → Nat → Nat → Nat
+  | 0, rootNode, _, _ => rootNode
+  | level + 1, rootNode, x, y =>
+      (childNode (generatedNode level rootNode (x / 4) (y / 4))
+        (x % 4 + 4 * (y % 4))).getD 0
+
 def state (level blockX blockY : Nat) : State where
-  classId := generatedClass level 15 blockX blockY
+  node := generatedNode level (encodeNode false 0) blockX blockY
   blockXParity := blockX % 2
   blockYParity := blockY % 2
   patch := extendedPatch level blockX blockY
@@ -157,38 +195,34 @@ def refinePatch (candidate : State) (childX childY : Nat) : ExtendedPatch :=
   rows ++ columns
 
 def refineState (candidate : State) (childX childY : Nat) : State where
-  classId := childClass candidate.classId (childX + 4 * childY)
+  node := (childNode candidate.node (childX + 4 * childY)).getD 0
   blockXParity := childX % 2
   blockYParity := childY % 2
   patch := refinePatch candidate childX childY
 
-/-- The complete finite state set already appears in the level-two
-supertile. -/
-def states : List State :=
-  ((List.range 16).flatMap fun blockY =>
-    (List.range 16).map fun blockX => state 2 blockX blockY).eraseDups
+def stateChildren (candidate : State) : List State :=
+  (List.range 4).flatMap fun childY =>
+    (List.range 4).map fun childX => refineState candidate childX childY
+
+def closureAux : Nat → List State → List State → List State
+  | 0, _, visited => visited
+  | _ + 1, [], visited => visited
+  | fuel + 1, candidate :: queue, visited =>
+      if candidate ∈ visited then closureAux fuel queue visited
+      else closureAux fuel (queue ++ stateChildren candidate) (candidate :: visited)
+
+/-- Complete finite state closure below the concrete seed. -/
+def states : List State := closureAux 10000 [state 0 0 0] []
 
 def stateValid (candidate : State) : Bool :=
-  candidate.classId < 16 &&
-    candidate.blockXParity < 2 && candidate.blockYParity < 2 &&
-    decide (visiblePatch candidate.patch = classPatch candidate.classId)
+  decide (candidate.node ∈ reachable) &&
+    decide (visiblePatch candidate.patch = nodePatch candidate.node)
 
-def statesValid : Bool :=
-  decide (states.length = 25) && states.all stateValid
-
-def refinementValid : Bool :=
-  (List.range 16).all fun blockY =>
-    (List.range 16).all fun blockX =>
-      (List.range 4).all fun childY =>
-        (List.range 4).all fun childX =>
-          state 3 (4 * blockX + childX) (4 * blockY + childY) =
-            refineState (state 2 blockX blockY) childX childY
+def statesValid : Bool := states.all stateValid
 
 def closedValid : Bool :=
   states.all fun candidate =>
-    (List.range 4).all fun childY =>
-      (List.range 4).all fun childX =>
-        refineState candidate childX childY ∈ states
+    (stateChildren candidate).all fun child => child ∈ states
 
 end ShadedCarrierBorderHierarchy
 end Closed104

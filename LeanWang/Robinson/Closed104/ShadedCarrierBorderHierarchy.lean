@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchyCertificate
 import LeanWang.Robinson.Closed104.ShadedCarrierBorderGeometry
+import LeanWang.Robinson.Closed104.ShadedSubstitutionPlane
 import Mathlib.Tactic.IntervalCases
 
 /-!
@@ -20,10 +21,87 @@ namespace Figure13Layers
 namespace Closed104
 namespace ShadedCarrierBorderHierarchy
 
-open ShadedCarrierHierarchy ShadedCarrierBorderFactor
-open ShadedCarrierBorderFactorSupertiles
+open Signals.FreeCellLocal ShadedCarrierHierarchy
 open ShadedCarrierBorderGeometry
 open ShadedSubstitution ShadedSubstitutionPlane
+
+theorem generatedNode_eq_supertileNodeGrid
+    (level : Nat) (root : Node) (x y : Nat) :
+    generatedNode level root x y = supertileNodeGrid level root x y := by
+  induction level generalizing x y with
+  | zero => rfl
+  | succ level inductionHypothesis =>
+      simp only [generatedNode, supertileNodeGrid, iterateNodeRefine,
+        refineNodeGrid]
+      rw [inductionHypothesis]
+      change (childNode (supertileNodeGrid level root (x / 4) (y / 4))
+          (childPosition x y)).getD 0 =
+        ((supertileNodeGrid level root (x / 4) (y / 4)).child
+          (childPosition x y) : Nat)
+      simpa [childPosition] using congrArg (fun child => child.getD 0)
+        (Node.childNode_child
+          (supertileNodeGrid level root (x / 4) (y / 4))
+          (childPosition x y))
+
+theorem generatedNode_seed_eq_supertileNodeGrid
+    (level x y : Nat) :
+    generatedNode level (encodeNode false 0) x y =
+      supertileNodeGrid level seedNode x y := by
+  exact generatedNode_eq_supertileNodeGrid level seedNode x y
+
+theorem horizontalOutput_node (node : Node) (x y : Nat)
+    (hx : x < 2) (hy : y < 2) :
+    horizontalOutput node x y =
+      ShadedSignalRectangle.horizontalInteriorCode
+        (ShadedSignals.selectedVerticalFor
+          (componentAt (fun _ _ => node.data.parent) x y)
+          (quadrantAt x y) (node.data.block.at x y)) := by
+  rw [horizontalOutput, nodePatch, Node.modelData_data]
+  have xCases : x = 0 ∨ x = 1 := by omega
+  have yCases : y = 0 ∨ y = 1 := by omega
+  rcases xCases with rfl | rfl <;> rcases yCases with rfl | rfl <;>
+    simp [patchData, List.range_succ, componentAt, quadrantAt, ShadeBlock.at]
+
+theorem verticalOutput_node (node : Node) (x y : Nat)
+    (hx : x < 2) (hy : y < 2) :
+    verticalOutput node x y =
+      ShadedSignalRectangle.verticalInteriorCode
+        (ShadedSignals.selectedHorizontalFor
+          (componentAt (fun _ _ => node.data.parent) x y)
+          (quadrantAt x y) (node.data.block.at x y)) := by
+  rw [verticalOutput, nodePatch, Node.modelData_data]
+  have xCases : x = 0 ∨ x = 1 := by omega
+  have yCases : y = 0 ∨ y = 1 := by omega
+  rcases xCases with rfl | rfl <;> rcases yCases with rfl | rfl <;>
+    simp [patchData, List.range_succ, componentAt, quadrantAt, ShadeBlock.at]
+
+theorem rowInterior_eq_horizontalOutput
+    (level : Nat) (root : Node) (x y : Nat) :
+    rowInterior level root x y =
+      horizontalOutput
+        (supertileNodeGrid level root (x / 2) (y / 2))
+        (x % 2) (y % 2) := by
+  have output := horizontalOutput_node
+    (supertileNodeGrid level root (x / 2) (y / 2))
+    (x % 2) (y % 2) (Nat.mod_lt _ (by decide))
+      (Nat.mod_lt _ (by decide))
+  simpa [rowInterior, ShadedSignalRectangle.horizontalInterior,
+    componentAt, supertileIndexGrid, supertileShadeGrid,
+    supertileBlockGrid, quadrantAt, Nat.mod_mod] using output.symm
+
+theorem columnInterior_eq_verticalOutput
+    (level : Nat) (root : Node) (x y : Nat) :
+    columnInterior level root x y =
+      verticalOutput
+        (supertileNodeGrid level root (x / 2) (y / 2))
+        (x % 2) (y % 2) := by
+  have output := verticalOutput_node
+    (supertileNodeGrid level root (x / 2) (y / 2))
+    (x % 2) (y % 2) (Nat.mod_lt _ (by decide))
+      (Nat.mod_lt _ (by decide))
+  simpa [columnInterior, ShadedSignalRectangle.verticalInterior,
+    componentAt, supertileIndexGrid, supertileShadeGrid,
+    supertileBlockGrid, quadrantAt, Nat.mod_mod] using output.symm
 
 /-- Splitting the direct finite formula at depth one recovers the local
 substitution recurrence used by the finite-state factor. -/
@@ -211,22 +289,8 @@ theorem extendedPatch_succ (level blockX blockY childX childY : Nat)
       selectedBorder_eq_refinedColumnBorder_y_zero,
       hchildX, hchildY, List.range_succ]
 
-theorem generatedClass_succ_child
-    (level blockX blockY childX childY : Nat)
-    (hchildX : childX < 4) (hchildY : childY < 4) :
-    generatedClass (level + 1) 15
-        (4 * blockX + childX) (4 * blockY + childY) =
-      childClass (generatedClass level 15 blockX blockY)
-        (childX + 4 * childY) := by
-  have divX : (4 * blockX + childX) / 4 = blockX := by omega
-  have divY : (4 * blockY + childY) / 4 = blockY := by omega
-  have modX : (4 * blockX + childX) % 4 = childX := by omega
-  have modY : (4 * blockY + childY) % 4 = childY := by omega
-  simp [generatedClass, ShadedSubstitution.childPosition,
-    divX, divY, modX, modY]
-
 @[ext] theorem State.ext {left right : State}
-    (classId : left.classId = right.classId)
+    (node : left.node = right.node)
     (blockXParity : left.blockXParity = right.blockXParity)
     (blockYParity : left.blockYParity = right.blockYParity)
     (patch : left.patch = right.patch) : left = right := by
@@ -240,20 +304,23 @@ theorem state_succ (level blockX blockY childX childY : Nat)
         (4 * blockX + childX) (4 * blockY + childY) =
       refineState (state level blockX blockY) childX childY := by
   apply State.ext
-  · exact generatedClass_succ_child level blockX blockY childX childY
-      hchildX hchildY
+  · have divX : (4 * blockX + childX) / 4 = blockX := by omega
+    have divY : (4 * blockY + childY) / 4 = blockY := by omega
+    have modX : (4 * blockX + childX) % 4 = childX := by omega
+    have modY : (4 * blockY + childY) % 4 = childY := by omega
+    simp [state, refineState, generatedNode, divX, divY, modX, modY]
   · simp [state, refineState, Nat.add_mod, Nat.mul_mod]
   · simp [state, refineState, Nat.add_mod, Nat.mul_mod]
   · exact extendedPatch_succ level blockX blockY childX childY
       hchildX hchildY
 
-theorem visiblePatch_eq_classPatch_of_mem {candidate : State}
+theorem visiblePatch_eq_nodePatch_of_mem {candidate : State}
     (member : candidate ∈ states) :
-    visiblePatch candidate.patch = classPatch candidate.classId := by
+    visiblePatch candidate.patch = nodePatch candidate.node := by
   have valid := statesValid_eq_true
-  simp only [statesValid, Bool.and_eq_true, List.all_eq_true,
-    stateValid, decide_eq_true_eq] at valid
-  exact (valid.2 candidate member).2
+  simp only [statesValid, List.all_eq_true, stateValid, Bool.and_eq_true,
+    decide_eq_true_eq] at valid
+  exact (valid candidate member).2
 
 theorem refineState_mem_of_mem {candidate : State}
     (member : candidate ∈ states) (childX childY : Nat)
@@ -261,7 +328,10 @@ theorem refineState_mem_of_mem {candidate : State}
     refineState candidate childX childY ∈ states := by
   have closed := closedValid_eq_true
   simp only [closedValid, List.all_eq_true, decide_eq_true_eq] at closed
-  exact closed candidate member childY (by simpa) childX (by simpa)
+  apply closed candidate member
+  simp only [stateChildren, List.mem_flatMap, List.mem_map]
+  exact ⟨childY, by simpa using hchildY,
+    childX, by simpa using hchildX, rfl⟩
 
 theorem state_mem (level blockX blockY : Nat)
     (hblockX : blockX < 4 ^ level) (hblockY : blockY < 4 ^ level) :
@@ -296,21 +366,22 @@ theorem state_mem (level blockX blockY : Nat)
         omega
       simpa [decomposeX, decomposeY] using childMember
 
-theorem visiblePatch_state_eq_classPatch
+theorem visiblePatch_state_eq_nodePatch
     (level blockX blockY : Nat)
     (hblockX : blockX < 4 ^ level) (hblockY : blockY < 4 ^ level) :
     visiblePatch (extendedPatch level blockX blockY) =
-      classPatch (generatedClass level 15 blockX blockY) := by
-  simpa [state] using visiblePatch_eq_classPatch_of_mem
+      nodePatch (supertileNodeGrid level seedNode blockX blockY) := by
+  have patch := visiblePatch_eq_nodePatch_of_mem
     (state_mem level blockX blockY hblockX hblockY)
+  simpa [state, generatedNode_seed_eq_supertileNodeGrid] using patch
 
-theorem horizontalOutput_generatedClass_eq_selectedBorder
+theorem horizontalOutput_node_eq_selectedBorder
     (level blockX blockY x y : Nat)
     (hblockX : blockX < 4 ^ level) (hblockY : blockY < 4 ^ level)
     (hx : x < 2) (hy : y < 2) :
-    horizontalOutput (generatedClass level 15 blockX blockY) x y =
+    horizontalOutput (supertileNodeGrid level seedNode blockX blockY) x y =
       selectedBorder level (2 * blockX + x) (2 * blockY + y) := by
-  have patchEquality := visiblePatch_state_eq_classPatch
+  have patchEquality := visiblePatch_state_eq_nodePatch
     level blockX blockY hblockX hblockY
   have entryEquality := congrArg
     (fun patch => patchEntry patch (x + 2 * y)) patchEquality
@@ -319,13 +390,13 @@ theorem horizontalOutput_generatedClass_eq_selectedBorder
       List.range_succ] at entryEquality <;>
     simpa [horizontalOutput] using entryEquality.symm
 
-theorem verticalOutput_generatedClass_eq_selectedBorder
+theorem verticalOutput_node_eq_selectedBorder
     (level blockX blockY x y : Nat)
     (hblockX : blockX < 4 ^ level) (hblockY : blockY < 4 ^ level)
     (hx : x < 2) (hy : y < 2) :
-    verticalOutput (generatedClass level 15 blockX blockY) x y =
+    verticalOutput (supertileNodeGrid level seedNode blockX blockY) x y =
       selectedBorder level (2 * blockY + y) (2 * blockX + x) := by
-  have patchEquality := visiblePatch_state_eq_classPatch
+  have patchEquality := visiblePatch_state_eq_nodePatch
     level blockX blockY hblockX hblockY
   have entryEquality := congrArg
     (fun patch => patchEntry patch (4 + x + 2 * y)) patchEquality
@@ -343,14 +414,13 @@ theorem rowInterior_seed_eq_selectedBorder
   have blockYBound : y / 2 < 4 ^ level := by omega
   have localXBound : x % 2 < 2 := Nat.mod_lt _ (by decide)
   have localYBound : y % 2 < 2 := Nat.mod_lt _ (by decide)
-  rw [rowInterior_eq_horizontalOutput,
-    classOf_seed_supertileNodeGrid]
+  rw [rowInterior_eq_horizontalOutput]
   calc
-    horizontalOutput (generatedClass level 15 (x / 2) (y / 2))
+    horizontalOutput (supertileNodeGrid level seedNode (x / 2) (y / 2))
           (x % 2) (y % 2) =
         selectedBorder level
           (2 * (x / 2) + x % 2) (2 * (y / 2) + y % 2) :=
-      horizontalOutput_generatedClass_eq_selectedBorder level
+      horizontalOutput_node_eq_selectedBorder level
         (x / 2) (y / 2) (x % 2) (y % 2)
         blockXBound blockYBound localXBound localYBound
     _ = selectedBorder level x y := by
@@ -368,14 +438,13 @@ theorem columnInterior_seed_eq_selectedBorder
   have blockYBound : y / 2 < 4 ^ level := by omega
   have localXBound : x % 2 < 2 := Nat.mod_lt _ (by decide)
   have localYBound : y % 2 < 2 := Nat.mod_lt _ (by decide)
-  rw [columnInterior_eq_verticalOutput,
-    classOf_seed_supertileNodeGrid]
+  rw [columnInterior_eq_verticalOutput]
   calc
-    verticalOutput (generatedClass level 15 (x / 2) (y / 2))
+    verticalOutput (supertileNodeGrid level seedNode (x / 2) (y / 2))
           (x % 2) (y % 2) =
         selectedBorder level
           (2 * (y / 2) + y % 2) (2 * (x / 2) + x % 2) :=
-      verticalOutput_generatedClass_eq_selectedBorder level
+      verticalOutput_node_eq_selectedBorder level
         (x / 2) (y / 2) (x % 2) (y % 2)
         blockXBound blockYBound localXBound localYBound
     _ = selectedBorder level y x := by

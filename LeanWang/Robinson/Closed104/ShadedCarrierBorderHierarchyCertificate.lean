@@ -5,9 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.ShadedCarrierBorderHierarchyData
 
-/-!
-# Certificate for the finite selected-border hierarchy
--/
+/-! Native certificate for the finite concrete-node border hierarchy. -/
 
 namespace LeanWang
 namespace OllingerRobinson
@@ -17,10 +15,6 @@ namespace ShadedCarrierBorderHierarchy
 
 set_option linter.style.nativeDecide false in
 theorem statesValid_eq_true : statesValid = true := by
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem refinementValid_eq_true : refinementValid = true := by
   native_decide
 
 set_option linter.style.nativeDecide false in
