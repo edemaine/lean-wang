@@ -483,7 +483,7 @@ theorem bodyRouteEnd_of_immortal
         with ⟨finish, trace, reaches⟩
       refine ⟨⟨finish, .cons ⟨3, .left⟩ [⟨2, .left⟩, ⟨1, .left⟩]
         suffix.progress.suffix.finish finish trace, ?_, reaches⟩⟩
-      exact CounterControlGuardedDecrementEntry.routeGaps_finish_read trace
+      exact CounterControlDecrementEntry.routeGaps_finish_read trace
         (by simp)
   | right =>
       let entryRule : RawDirectRule :=
@@ -523,7 +523,7 @@ theorem bodyRouteEnd_of_immortal
         with ⟨finish, trace, reaches⟩
       refine ⟨⟨finish, .cons ⟨3, .left⟩ [⟨2, .left⟩]
         suffix.progress.suffix.finish finish trace, ?_, reaches⟩⟩
-      exact CounterControlGuardedDecrementEntry.routeGaps_finish_read trace
+      exact CounterControlDecrementEntry.routeGaps_finish_read trace
         (by simp)
   | temp =>
       let entryRule : RawDirectRule :=
@@ -563,7 +563,7 @@ theorem bodyRouteEnd_of_immortal
         with ⟨finish, trace, reaches⟩
       refine ⟨⟨finish, .cons ⟨3, .left⟩ []
         suffix.progress.suffix.finish finish trace, ?_, reaches⟩⟩
-      exact CounterControlGuardedDecrementEntry.routeGaps_finish_read trace
+      exact CounterControlDecrementEntry.routeGaps_finish_read trace
         (by simp)
 
 /-- If the original outward caller found the boundary where the decrement

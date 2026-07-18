@@ -7,6 +7,7 @@ import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutward
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardIncrement
 import LeanWang.Kari.Hooper.CounterControlGuardedCleanupProgress
+import LeanWang.Kari.Hooper.CounterControlRouteRoundtrip
 
 /-!
 # Cleanup handoffs for outward-validation increment collisions
@@ -31,6 +32,7 @@ open CounterControlGenuineValidation
 open CounterControlCleanupSuffixGeometry
 open CounterControlExactCommandContinuation
 open CounterControlCommandContinuationMortality
+open CounterControlRouteRoundtrip
 
 noncomputable section
 
@@ -131,58 +133,6 @@ theorem InwardRayEq.clearedBehind
   exact hread
 
 /-! ## Reversing one retained outward gap -/
-
-private theorem move_move_opposite
-    (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir) :
-    (T.move direction).move (NestingMachine.opposite direction) = T := by
-  funext position
-  cases direction <;>
-    simp [NestingMachine.opposite, FullTM0.Tape.move]
-
-private theorem reverseGap_of_source_boundary
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {distance : Nat} {found source : Fin 5}
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary found).Matches T direction distance)
-    (hsource : (T.move (NestingMachine.opposite direction)).read =
-      boundarySymbol source) :
-    SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary source).Matches
-      ((T.moveN direction distance).move
-        (NestingMachine.opposite direction))
-      (NestingMachine.opposite direction) distance := by
-  constructor
-  · intro i hi
-    let j := distance - i - 1
-    have hj : j < distance := by
-      dsimp [j]
-      omega
-    have hblank := hgap.blank hj
-    cases direction with
-    | left =>
-        simp only [NestingMachine.opposite,
-          FullTM0.Tape.move_apply_delta, FullTM0.Tape.moveN_apply,
-          FullTM0.Tape.offset_left, FullTM0.Tape.offset_right,
-          FullTM0.Tape.delta_right] at hblank ⊢
-        rw [show -(j : Int) = (i : Int) + 1 - (distance : Int) by
-          dsimp [j]
-          omega] at hblank
-        exact hblank
-    | right =>
-        simp only [NestingMachine.opposite,
-          FullTM0.Tape.move_apply_delta, FullTM0.Tape.moveN_apply,
-          FullTM0.Tape.offset_left, FullTM0.Tape.offset_right,
-          FullTM0.Tape.delta_left] at hblank ⊢
-        rw [show (j : Int) = -(i : Int) - 1 + (distance : Int) by
-          dsimp [j]
-          omega] at hblank
-        exact hblank
-  · cases direction <;>
-      simpa [Target.Matches, FullTM0.Tape.read,
-        NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_left,
-        FullTM0.Tape.delta_right] using hsource
 
 /-- After the found endpoint is cleared and the head departs back toward the
 source, the preserved outward gap is an exact inward gap of the same length. -/

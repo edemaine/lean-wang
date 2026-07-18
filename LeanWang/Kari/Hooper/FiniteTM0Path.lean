@@ -364,6 +364,23 @@ theorem reaches_append_right_of_source_disjoint
     (fun hleft => hdisjoint hleft hright)]
   exact hstep
 
+/-- Every finite path through the right table survives a prefix whose source
+states are absent from the right table's source set. -/
+theorem reaches_append_right_of_source_separate
+    (first second : FiniteTM0.Table numSymbols)
+    (hseparate : ∀ state,
+      state ∈ FiniteTM0.sourceStates second →
+      state ∉ FiniteTM0.sourceStates first)
+    {start finish :
+      FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State}
+    (hreach : FullTM0.Reaches (FiniteTM0.machine second) start finish) :
+    FullTM0.Reaches (FiniteTM0.machine (first ++ second)) start finish := by
+  apply reaches_append_right_of_source_disjoint first second
+  · rw [List.disjoint_left]
+    intro state hfirst hsecond
+    exact hseparate state hsecond hfirst
+  · exact hreach
+
 /-! ## Exact guarded execution -/
 
 /-- The exact tape-level meaning of a guarded instruction list. -/

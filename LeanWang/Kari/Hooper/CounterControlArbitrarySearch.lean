@@ -179,45 +179,6 @@ theorem SearchGap.prepend_moveN {Gamma : Type u}
 
 /-! ## Private bounded scans inside the complete controller -/
 
-/-- A path through a right-hand table survives a source-disjoint prefix. -/
-private theorem reaches_append_right_of_source_disjoint {numSymbols : Nat}
-    (first second : FiniteTM0.Table numSymbols)
-    (hdisjoint : ∀ state,
-      state ∈ FiniteTM0.sourceStates second →
-      state ∉ FiniteTM0.sourceStates first)
-    {start finish :
-      FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State}
-    (hreach : FullTM0.Reaches (FiniteTM0.machine second) start finish) :
-    FullTM0.Reaches (FiniteTM0.machine (first ++ second)) start finish := by
-  apply Relation.ReflTransGen.mono ?_ hreach
-  intro current next hstep
-  have hright : current.q ∈ FiniteTM0.sourceStates second := by
-    by_contra hsource
-    have hnone := FiniteTM0.machine_eq_none_of_state_not_mem
-      hsource current.tape.read
-    have hstepNone :
-        FullTM0.step (FiniteTM0.machine second) current = none := by
-      unfold FullTM0.step
-      rw [hnone]
-      rfl
-    rw [hstepNone] at hstep
-    simp at hstep
-  have hlookup :
-      FiniteTM0.lookupAction first current.q current.tape.read = none := by
-    cases hfirst : FiniteTM0.lookupAction first current.q current.tape.read with
-    | none => rfl
-    | some result =>
-        exfalso
-        apply hdisjoint current.q hright
-        rcases result with ⟨target, action⟩
-        have hrule := FiniteTM0.rule_mem_of_lookupAction_eq_some hfirst
-        exact List.mem_map.mpr
-          ⟨FiniteTM0.Rule.mk current.q current.tape.read target action,
-            hrule, rfl⟩
-  simp only [FullTM0.step, FiniteTM0.machine_apply,
-    FiniteTM0Program.lookupAction_append, hlookup]
-  exact hstep
-
 /-- A guarded sequence of blank scan moves in one selected command is also
 an execution of the complete counter controller. -/
 theorem scan_moves_reaches
@@ -260,7 +221,7 @@ theorem scan_moves_reaches
       ⟨commandOffset + progress, T⟩
       ⟨commandOffset + (progress + distance),
         T.moveN command.searchDirection distance⟩ := by
-    have hlift := reaches_append_right_of_source_disjoint
+    have hlift := FiniteTM0Path.reaches_append_right_of_source_separate
       (continuationTable radius commandOffset
         (coreEntry base radius (commands base c)) command)
       (privateControllerTable radius commandOffset command)

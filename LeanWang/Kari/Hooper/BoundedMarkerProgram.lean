@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Kari.Hooper.NestingMachine
+import LeanWang.Kari.Hooper.FiniteTM0Path
 
 /-!
 # Tagged bounded searches for finite marker programs
@@ -1410,53 +1411,6 @@ theorem private_continuation_source_disjoint {numTags : Nat}
     rw [hresume]
     simp [resumeState]
 
-private theorem step_append_of_state_not_mem_left {numSymbols : Nat}
-    (first second : FiniteTM0.Table numSymbols)
-    (cfg : FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State)
-    (hsource : cfg.q ∉ FiniteTM0.sourceStates first) :
-    FullTM0.step (FiniteTM0.machine (first ++ second)) cfg =
-      FullTM0.step (FiniteTM0.machine second) cfg := by
-  have hlookup :
-      FiniteTM0.lookupAction first cfg.q (cfg.tape 0) = none := by
-    cases h : FiniteTM0.lookupAction first cfg.q (cfg.tape 0) with
-    | none => rfl
-    | some result =>
-        rcases result with ⟨target, action⟩
-        exfalso
-        apply hsource
-        have hrule := FiniteTM0.rule_mem_of_lookupAction_eq_some h
-        exact List.mem_map.mpr
-          ⟨FiniteTM0.Rule.mk cfg.q (cfg.tape 0) target action,
-            hrule, rfl⟩
-  simp only [FullTM0.step, FiniteTM0.machine, FullTM0.Tape.read_eq]
-  rw [FiniteTM0Program.lookupAction_append, hlookup]
-
-private theorem reaches_append_right_of_source_disjoint {numSymbols : Nat}
-    (first second : FiniteTM0.Table numSymbols)
-    (hdisjoint : ∀ state,
-      state ∈ FiniteTM0.sourceStates second →
-      state ∉ FiniteTM0.sourceStates first)
-    {start finish :
-      FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State}
-    (hreach : FullTM0.Reaches (FiniteTM0.machine second) start finish) :
-    FullTM0.Reaches (FiniteTM0.machine (first ++ second)) start finish := by
-  apply Relation.ReflTransGen.mono ?_ hreach
-  intro current next hstep
-  have hright : current.q ∈ FiniteTM0.sourceStates second := by
-    by_contra hsource
-    have hnone := FiniteTM0.machine_eq_none_of_state_not_mem
-      hsource current.tape.read
-    have hstepNone :
-        FullTM0.step (FiniteTM0.machine second) current = none := by
-      unfold FullTM0.step
-      rw [hnone]
-      rfl
-    rw [hstepNone] at hstep
-    simp at hstep
-  rw [step_append_of_state_not_mem_left first second current
-    (hdisjoint current.q hright)]
-  exact hstep
-
 /-- Native tagged-tape reachability through a complete selected command up to
 its found-state handoff. -/
 theorem command_reaches_found_native {numTags : Nat}
@@ -1470,7 +1424,7 @@ theorem command_reaches_found_native {numTags : Nat}
       ⟨entryState radius offset, T⟩
       ⟨foundState radius offset,
         T.moveN command.searchDirection distance⟩ := by
-  exact reaches_append_right_of_source_disjoint
+  exact FiniteTM0Path.reaches_append_right_of_source_separate
     (continuationTable radius offset sharedCore command)
     (privateControllerTable radius offset command)
     (private_continuation_source_disjoint radius offset sharedCore command)
@@ -1567,7 +1521,7 @@ theorem commandTables_reaches_of_at {numTags : Nat}
   | head offset command commands =>
       exact FiniteTM0Program.reaches_append_left _ _ hreach
   | tail offset commandOffset first command commands hat ih =>
-      apply reaches_append_right_of_source_disjoint
+      apply FiniteTM0Path.reaches_append_right_of_source_separate
         (commandTable radius offset sharedCore first)
         (commandTables radius sharedCore
           (offset + blockWidth radius) commands)
@@ -1740,7 +1694,7 @@ theorem command_reaches_core_native {numTags : Nat}
       ⟨sharedCore, taggedFrameTapeNative radius command T⟩ := by
   have hprivate := private_reaches_launch_native radius offset command T
     distance hgap hfar
-  have hprivate' := reaches_append_right_of_source_disjoint
+  have hprivate' := FiniteTM0Path.reaches_append_right_of_source_separate
     (continuationTable radius offset sharedCore command)
     (privateControllerTable radius offset command)
     (private_continuation_source_disjoint radius offset sharedCore command)

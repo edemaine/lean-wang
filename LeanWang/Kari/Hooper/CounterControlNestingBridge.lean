@@ -50,56 +50,6 @@ def nestedCfg (base : Nat) (c : Nat.Partrec.Code)
       (FramedMarkerTape.initializeTape c command outer)
       (CanonicalInitializer.span c)⟩
 
-/-- A step owned by the right table of an append is unchanged when its source
-state is absent from the left table. -/
-private theorem step_append_right_of_source_not_mem {numSymbols : Nat}
-    (first second : FiniteTM0.Table numSymbols)
-    (cfg : FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State)
-    (hsource : cfg.q ∉ FiniteTM0.sourceStates first) :
-    FullTM0.step (FiniteTM0.machine (first ++ second)) cfg =
-      FullTM0.step (FiniteTM0.machine second) cfg := by
-  have hlookup :
-      FiniteTM0.lookupAction first cfg.q (cfg.tape 0) = none := by
-    cases h : FiniteTM0.lookupAction first cfg.q (cfg.tape 0) with
-    | none => rfl
-    | some result =>
-        rcases result with ⟨target, action⟩
-        exfalso
-        apply hsource
-        have hrule := FiniteTM0.rule_mem_of_lookupAction_eq_some h
-        exact List.mem_map.mpr
-          ⟨FiniteTM0.Rule.mk cfg.q (cfg.tape 0) target action,
-            hrule, rfl⟩
-  simp only [FullTM0.step, FiniteTM0.machine, FullTM0.Tape.read_eq]
-  rw [FiniteTM0Program.lookupAction_append, hlookup]
-
-/-- Executions of the right table lift through a source-disjoint left table. -/
-private theorem reaches_append_right_of_source_disjoint {numSymbols : Nat}
-    (first second : FiniteTM0.Table numSymbols)
-    (hdisjoint : ∀ state,
-      state ∈ FiniteTM0.sourceStates second →
-      state ∉ FiniteTM0.sourceStates first)
-    {start finish :
-      FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State}
-    (hreach : FullTM0.Reaches (FiniteTM0.machine second) start finish) :
-    FullTM0.Reaches (FiniteTM0.machine (first ++ second)) start finish := by
-  apply Relation.ReflTransGen.mono ?_ hreach
-  intro current next hstep
-  have hright : current.q ∈ FiniteTM0.sourceStates second := by
-    by_contra hsource
-    have hnone := FiniteTM0.machine_eq_none_of_state_not_mem
-      hsource current.tape.read
-    have hstepNone :
-        FullTM0.step (FiniteTM0.machine second) current = none := by
-      unfold FullTM0.step
-      rw [hnone]
-      rfl
-    rw [hstepNone] at hstep
-    simp at hstep
-  rw [step_append_right_of_source_not_mem first second current
-    (hdisjoint current.q hright)]
-  exact hstep
-
 /-- The initializer table runs inside the complete controller table.  This is
 the state-allocation bridge: initializer sources begin at the shared core
 entry, strictly after every bounded-controller source. -/
@@ -114,7 +64,7 @@ theorem initializer_reaches_in_machine
         (BoundedMarkerProgram.controllerTable base
             (CanonicalInitializer.radius c) (commands base c) ++
           initializerTable base c)) start finish := by
-    apply reaches_append_right_of_source_disjoint
+    apply FiniteTM0Path.reaches_append_right_of_source_separate
       (BoundedMarkerProgram.controllerTable base
         (CanonicalInitializer.radius c) (commands base c))
       (initializerTable base c)

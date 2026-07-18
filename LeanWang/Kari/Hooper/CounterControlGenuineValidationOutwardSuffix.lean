@@ -110,29 +110,6 @@ theorem Suffix.tailGaps
       suffix.progress.suffix.finish :=
   suffix.progress.suffix.tailGaps
 
-/-- Expose the first found tape of a nonempty route trace. -/
-private theorem routeGaps_uncons
-    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
-    (rest : List MarkerValidation.Leg)
-    (outer finish : FullTM0.Tape (Symbol numTags))
-    (htrace : CounterControlValidationMortality.RouteGaps growth
-      (leg :: rest) outer finish) :
-    ∃ distance,
-      SearchGap (fun symbol => symbol = blankSymbol)
-        (Target.boundary leg.target).Matches outer
-        (orient growth leg.direction) distance ∧
-      RouteTailGaps growth rest
-        (outer.moveN (orient growth leg.direction) distance) finish := by
-  cases rest with
-  | nil =>
-      cases htrace with
-      | last _ _ distance gap =>
-          exact ⟨distance, gap, .nil _⟩
-  | cons next rest =>
-      cases htrace with
-      | cons _ _ _ _ distance gap finish tail =>
-          exact ⟨distance, gap, .cons next rest _ finish tail⟩
-
 /-- A consecutive outward suffix ending at boundary `4` is centered on that
 boundary at its final tape. -/
 private theorem toFour_finish_read

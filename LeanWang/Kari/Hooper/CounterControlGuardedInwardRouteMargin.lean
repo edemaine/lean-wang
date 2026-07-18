@@ -78,29 +78,6 @@ theorem routeToDecrementStart_toBoundary (register : Register) :
   | temp => exact .step 3 (.here 3)
   | clock => exact .here 4
 
-/-- Expose the first found tape of a nonempty preserving-route trace. -/
-theorem routeGaps_uncons
-    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
-    (rest : List MarkerValidation.Leg)
-    (outer finish : FullTM0.Tape (Symbol numTags))
-    (htrace : CounterControlValidationMortality.RouteGaps growth
-      (leg :: rest) outer finish) :
-    ∃ distance,
-      SearchGap (fun symbol => symbol = blankSymbol)
-        (Target.boundary leg.target).Matches outer
-        (orient growth leg.direction) distance ∧
-      RouteTailGaps growth rest
-        (outer.moveN (orient growth leg.direction) distance) finish := by
-  cases rest with
-  | nil =>
-      cases htrace with
-      | last _ _ distance gap =>
-          exact ⟨distance, gap, .nil _⟩
-  | cons next rest =>
-      cases htrace with
-      | cons _ _ _ _ distance gap finish tail =>
-          exact ⟨distance, gap, .cons next rest _ finish tail⟩
-
 /-- A successful inward route ending on a canonical boundary started on its
 corresponding canonical source boundary. -/
 theorem ToBoundary.start_eq

@@ -28,7 +28,7 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem move_move_opposite
+theorem move_move_opposite
     (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir) :
     (T.move direction).move (NestingMachine.opposite direction) = T := by
   funext position

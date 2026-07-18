@@ -37,6 +37,7 @@ open CounterControlCommandContinuationMortality
 open CounterControlGenuineValidation
 open CounterControlGenuineValidationOutward
 open CounterControlGenuineValidationOutwardSuffix
+open CounterControlRouteSuffixMortality
 open CounterControlGuardedSearch
 open CounterControlGuardedSearch.GuardedSearch
 open CounterControlGuardedShiftCompletion
@@ -551,27 +552,6 @@ theorem shiftedAgainst_retreat
       _ = (lowerOriginal.moveN (orient growth .left) k).read := by
         rw [show routeDistance + 1 + k = (routeDistance + 1) + k by omega,
           ← FullTM0.Tape.moveN_add, outwardFound_moveN_left]
-
-theorem routeGaps_uncons
-    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
-    (rest : List MarkerValidation.Leg)
-    (outer finish : FullTM0.Tape (Symbol numTags))
-    (htrace : CounterControlValidationMortality.RouteGaps growth
-      (leg :: rest) outer finish) :
-    ∃ distance,
-      SearchGap (fun symbol => symbol = blankSymbol)
-        (Target.boundary leg.target).Matches outer
-        (orient growth leg.direction) distance ∧
-      CounterControlRouteSuffixMortality.RouteTailGaps growth rest
-        (outer.moveN (orient growth leg.direction) distance) finish := by
-  cases rest with
-  | nil =>
-      cases htrace with
-      | last _ _ distance gap => exact ⟨distance, gap, .nil _⟩
-  | cons next rest =>
-      cases htrace with
-      | cons _ _ _ _ distance gap finish tail =>
-          exact ⟨distance, gap, .cons next rest _ finish tail⟩
 
 /-! ## Splitting a consecutive outward route -/
 

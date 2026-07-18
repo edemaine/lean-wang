@@ -7,6 +7,7 @@ import LeanWang.Kari.Hooper.CounterControlGuardedCoordinates
 import LeanWang.Kari.Hooper.CounterControlGuardedParentContinuation
 import LeanWang.Kari.Hooper.CounterControlGeneratedSearchGap
 import LeanWang.Kari.Hooper.CounterControlValidationMortality
+import LeanWang.Kari.Hooper.CounterControlRouteRoundtrip
 
 /-!
 # Replaying an inward validation search outwards
@@ -31,6 +32,7 @@ open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedSearch
 open CounterControlCommandContinuationMortality
 open CounterControlExactCommandContinuation
+open CounterControlRouteRoundtrip
 
 noncomputable section
 
@@ -204,13 +206,6 @@ theorem reverseBoundaryGap_distance_ge
   rw [hboundary] at hblank
   exact blankSymbol_ne_boundarySymbol replayTarget hblank.symm
 
-private theorem move_move_opposite
-    (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir) :
-    (T.move direction).move (NestingMachine.opposite direction) = T := by
-  funext position
-  cases direction <;>
-    simp [NestingMachine.opposite, FullTM0.Tape.move]
-
 private theorem reverseGap_continue
     (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir)
     (distance : Nat) :
@@ -224,52 +219,6 @@ private theorem reverseGap_continue
     simp [NestingMachine.opposite, FullTM0.Tape.moveN,
       FullTM0.Tape.offset, FullTM0.Tape.move] <;>
     congr 1 <;> ring
-
-private theorem reverseGap_of_source_boundary
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {distance : Nat} {found source : Fin 5}
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary found).Matches T direction distance)
-    (hsource : (T.move (NestingMachine.opposite direction)).read =
-      boundarySymbol source) :
-    SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary source).Matches
-      ((T.moveN direction distance).move
-        (NestingMachine.opposite direction))
-      (NestingMachine.opposite direction) distance := by
-  constructor
-  · intro i hi
-    let j := distance - i - 1
-    have hj : j < distance := by
-      dsimp [j]
-      omega
-    have hsum : j + i + 1 = distance := by
-      dsimp [j]
-      omega
-    have hsumInt : (j : Int) + (i : Int) + 1 = (distance : Int) := by
-      exact_mod_cast hsum
-    have hblank := hgap.blank hj
-    cases direction with
-    | left =>
-      simp only [NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_right] at hblank ⊢
-      rw [show -(j : Int) = (i : Int) + 1 + -(distance : Int) by omega]
-        at hblank
-      exact hblank
-    | right =>
-      simp only [NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_left] at hblank ⊢
-      rw [show (j : Int) = -(i : Int) + -1 + (distance : Int) by omega]
-        at hblank
-      exact hblank
-  · cases direction <;>
-      simpa [Target.Matches, FullTM0.Tape.read,
-        NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_left,
-        FullTM0.Tape.delta_right] using hsource
 
 /-- A preserving search followed later by its reverse has the same distance,
 and the two one-cell departures finish immediately beyond the original

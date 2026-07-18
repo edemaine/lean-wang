@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 import LeanWang.Kari.Hooper.CounterControlValidationMortality
 import LeanWang.Kari.Hooper.CounterControlCoreRunway
 import LeanWang.Kari.Hooper.CounterControlOpenMortality
+import LeanWang.Kari.Hooper.CounterControlRouteRoundtrip
 
 /-!
 # Round-trip geometry of validation
@@ -27,6 +28,7 @@ open BoundedMarkerProgram FramedMarkerTape
 open CounterControlPlan CounterControlInstructionSemantics
 open CounterControlBridge
 open CounterControlValidationMortality
+open CounterControlRouteRoundtrip
 
 noncomputable section
 
@@ -107,54 +109,6 @@ private theorem read_return_of_gap
   cases direction <;>
     simpa [NestingMachine.opposite, FullTM0.Tape.read,
       FullTM0.Tape.move] using hmarked
-
-/-- A preserving gap can be traversed in reverse when the symbol immediately
-behind its original search head is the desired return marker. -/
-private theorem reverseGap_of_source_boundary
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {distance : Nat} {found source : Fin 5}
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary found).Matches T direction distance)
-    (hsource : (T.move (NestingMachine.opposite direction)).read =
-      boundarySymbol source) :
-    SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary source).Matches
-      ((T.moveN direction distance).move
-        (NestingMachine.opposite direction))
-      (NestingMachine.opposite direction) distance := by
-  constructor
-  · intro i hi
-    let j := distance - i - 1
-    have hj : j < distance := by
-      dsimp [j]
-      omega
-    have hsum : j + i + 1 = distance := by
-      dsimp [j]
-      omega
-    have hsumInt : (j : Int) + (i : Int) + 1 = (distance : Int) := by
-      exact_mod_cast hsum
-    have hblank := hgap.blank hj
-    cases direction with
-    | left =>
-      simp only [NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_right] at hblank ⊢
-      rw [show -(j : Int) = (i : Int) + 1 + -(distance : Int) by omega]
-        at hblank
-      exact hblank
-    | right =>
-      simp only [NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_left] at hblank ⊢
-      rw [show (j : Int) = -(i : Int) + -1 + (distance : Int) by omega]
-        at hblank
-      exact hblank
-  · cases direction <;>
-      simpa [Target.Matches, FullTM0.Tape.read,
-        NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_left,
-        FullTM0.Tape.delta_right] using hsource
 
 /-- The outward half of a successful full validation trace retraces the four
 inward preserving gaps exactly.  Hence the trace finishes on the boundary-`4`

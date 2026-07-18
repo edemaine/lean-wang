@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlResumedRouteProgress
 import LeanWang.Kari.Hooper.CounterControlValidationRoundtrip
+import LeanWang.Kari.Hooper.CounterControlRouteRoundtrip
 
 /-!
 # Embedding resumed preserving-route callers
@@ -58,41 +59,8 @@ private theorem reverseGap_of_source_boundary
     cases direction <;>
       simpa [NestingMachine.opposite, FullTM0.Tape.read,
         FullTM0.Tape.move] using hsource
-  constructor
-  · intro i hi
-    let j := distance - i - 1
-    have hj : j < distance := by
-      dsimp [j]
-      omega
-    have hsum : j + i + 1 = distance := by
-      dsimp [j]
-      omega
-    have hsumInt : (j : Int) + (i : Int) + 1 = (distance : Int) := by
-      exact_mod_cast hsum
-    have hblank := hgap.blank hj
-    cases direction with
-    | left =>
-        simp only [NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-          FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-          FullTM0.Tape.offset_right, FullTM0.Tape.delta_right,
-          FullTM0.Tape.delta_left] at hblank ⊢
-        rw [show -(j : Int) = (i : Int) + 1 + -(distance : Int) by omega]
-          at hblank
-        exact hblank
-    | right =>
-        simp only [NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-          FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-          FullTM0.Tape.offset_right, FullTM0.Tape.delta_left,
-          FullTM0.Tape.delta_right] at hblank ⊢
-        rw [show (j : Int) = -(i : Int) + -1 + (distance : Int) by omega]
-          at hblank
-        exact hblank
-  · cases direction <;>
-      simpa [Target.Matches, FullTM0.Tape.read,
-        NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
-        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
-        FullTM0.Tape.offset_right, FullTM0.Tape.delta_left,
-        FullTM0.Tape.delta_right] using hbehind
+  exact CounterControlRouteRoundtrip.reverseGap_of_source_boundary
+    hgap hbehind
 
 /-- The tape before a rightward leg is forced to be the canonical preceding
 boundary once the found tape is anchored at the canonical next boundary. -/
@@ -254,30 +222,6 @@ theorem routeFromZero_toFour (register : Register) :
   | right => exact ⟨1, .step 1 (.step 2 (.step 3 .four))⟩
   | temp => exact ⟨2, .step 2 (.step 3 .four)⟩
   | clock => exact ⟨3, .step 3 .four⟩
-
-/-- Expose the first found tape of a nonempty route trace, retaining the
-remaining trace in the found-state form used by `RouteTailGaps`. -/
-private theorem routeGaps_uncons
-    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
-    (rest : List MarkerValidation.Leg)
-    (outer finish : FullTM0.Tape (Symbol numTags))
-    (htrace : CounterControlValidationMortality.RouteGaps growth
-      (leg :: rest) outer finish) :
-    ∃ distance,
-      SearchGap (fun symbol => symbol = blankSymbol)
-        (Target.boundary leg.target).Matches outer
-        (orient growth leg.direction) distance ∧
-      RouteTailGaps growth rest
-        (outer.moveN (orient growth leg.direction) distance) finish := by
-  cases rest with
-  | nil =>
-      cases htrace with
-      | last _ _ distance gap =>
-          exact ⟨distance, gap, .nil _⟩
-  | cons next rest =>
-      cases htrace with
-      | cons _ _ _ _ distance gap finish tail =>
-          exact ⟨distance, gap, .cons next rest _ finish tail⟩
 
 /-- A successful consecutive tail ending on canonical boundary `4` started
 on the corresponding canonical boundary. -/

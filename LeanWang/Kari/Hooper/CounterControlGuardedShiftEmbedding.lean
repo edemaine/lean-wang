@@ -591,36 +591,6 @@ theorem decrementShift_distance_lt_layoutEnd
     cases growth <;> rfl
   rcases shiftTailGaps_backwardGeometry suffix.tailGaps with
     ⟨geometry⟩
-  have hcurrentMem : suffix.position.current ∈
-      MarkerShift.decrementOrder register := by
-    have heq := congrArg
-      (fun labels : List (Fin 5) => suffix.position.current ∈ labels)
-      suffix.position.labels_eq
-    exact heq.mpr (by simp)
-  have hcurrentNe : suffix.position.current ≠ 0 :=
-    decrementOrder_label_ne_zero register suffix.position.current hcurrentMem
-  have hremaining : ∀ label ∈ suffix.position.remaining,
-      label ≠ (0 : Fin 5) := by
-    intro label hlabel
-    apply decrementOrder_label_ne_zero register label
-    have heq := congrArg (fun labels : List (Fin 5) => label ∈ labels)
-      suffix.position.labels_eq
-    exact heq.mpr (by simp [hlabel])
-  have hstartRead :
-      ((current.shiftedParentBacking suffix.position.current).move
-        (NestingMachine.opposite (orient growth .right))).read =
-          boundarySymbol suffix.position.current := by
-    have hread := suffix.handoff.destination_boundary
-    rw [hdirection] at hread
-    exact hread
-  have hstartAvoid :
-      ((current.shiftedParentBacking suffix.position.current).move
-        (NestingMachine.opposite (orient growth .right))).read ≠
-          boundarySymbol 0 := by
-    rw [hstartRead]
-    intro heq
-    exact hcurrentNe
-      ((boundarySymbol_injective suffix.position.current 0).mp heq)
   have hfinishEq :
       suffix.finish.move
           (NestingMachine.opposite (orient growth .right)) =
@@ -643,13 +613,8 @@ theorem decrementShift_distance_lt_layoutEnd
     simp only [orient_eq_orientDirection]
     rw [atLogical_moveN_left, atLogical_read]
     simpa using hcore.boundary (0 : Fin 5)
-  have htravel : geometry.travel < layoutEnd registers - 1 := by
-    by_contra hnot
-    have hle : layoutEnd registers - 1 ≤ geometry.travel :=
-      Nat.le_of_not_gt hnot
-    have havoid := geometry.avoids (0 : Fin 5) hstartAvoid hremaining
-      (layoutEnd registers - 1) hle
-    exact havoid hboundaryZero
+  have htravel := decrementShift_travel_lt_layoutEnd_sub_one current growth
+    source register suffix registers coreTape hcore hcenter geometry
   by_contra hnot
   have hdistance : layoutEnd registers ≤ current.current.distance :=
     Nat.le_of_not_gt hnot

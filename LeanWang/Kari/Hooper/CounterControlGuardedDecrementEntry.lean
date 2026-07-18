@@ -39,15 +39,6 @@ private instance : Inhabited (Symbol numTags) :=
 
 /-! ## Shared route and test handoff -/
 
-/-- Compatibility wrapper for the shared route endpoint read theorem. -/
-theorem routeGaps_finish_read
-    {growth : Turing.Dir} {route : List MarkerValidation.Leg}
-    {outer finish : FullTM0.Tape (Symbol numTags)}
-    (trace : RouteGaps growth route outer finish)
-    (hne : route ≠ []) :
-    finish.read = boundarySymbol ((route.getLast hne).target) :=
-  CounterControlDecrementEntry.routeGaps_finish_read trace hne
-
 /-- Tape after a guarded route's test rule moves into the register gap. -/
 abbrev branchTape
     {base : Nat} {c : Nat.Partrec.Code}
