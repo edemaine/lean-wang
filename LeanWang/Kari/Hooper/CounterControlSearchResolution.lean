@@ -162,183 +162,6 @@ theorem machine_reaches_boundary_preserve_or_halts
 
 /-! ## Resolving marker routes -/
 
-/-- Extract the concrete search gap of one route leg and bound its length by
-the active outer-search distance. -/
-private theorem legExecutesAt_depart_below
-    {growth : Turing.Dir} {T : FullTM0.Tape (Symbol numTags)}
-    {leg : MarkerValidation.Leg} {source finish limit : Nat}
-    (h : LegExecutesAt growth T leg source finish)
-    (hsource : source < limit) (hfinish : finish < limit) :
-    ∃ distance,
-      distance < limit ∧
-      SearchGap (fun symbol => symbol = blankSymbol)
-        (Target.boundary leg.target).Matches
-        ((atLogical growth T source).move (orient growth leg.direction))
-        (orient growth leg.direction) distance ∧
-      ((atLogical growth T source).move
-          (orient growth leg.direction)).moveN
-          (orient growth leg.direction) distance =
-        atLogical growth T finish := by
-  cases hdirection : leg.direction with
-  | right =>
-      rw [LegExecutesAt, hdirection] at h
-      rcases h with ⟨distance, hgap, hfinishEq⟩
-      refine ⟨distance, by omega, ?_, ?_⟩
-      · simpa only [orient_eq_orientDirection,
-          atLogical_move_right] using hgap
-      · rw [orient_eq_orientDirection, atLogical_move_right,
-          atLogical_moveN_right, hfinishEq]
-        apply congrArg (atLogical growth T)
-        omega
-  | left =>
-      rw [LegExecutesAt, hdirection] at h
-      rcases h with ⟨distance, hsourceEq, hgap⟩
-      refine ⟨distance, by omega, ?_, ?_⟩
-      · rw [hsourceEq, orient_eq_orientDirection,
-          atLogical_move_left]
-        exact hgap
-      · rw [hsourceEq, orient_eq_orientDirection,
-          atLogical_move_left, atLogical_moveN_left]
-
-/-- Once the route's entry rule has entered its first search, every leg
-resolves in sequence.  A halting later leg is pulled back across all earlier
-successful legs. -/
-private theorem searches_reach_or_halt_at
-    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
-    (hshort : ShortResolves base c limit) (growth : Turing.Dir)
-    (counterState searchSlot directSlot : Nat) (after : ControlRef)
-    (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
-    (T : FullTM0.Tape (Symbol numTags)) (source finish : Nat)
-    (hexec : RouteExecutesWithin growth T limit (first :: rest)
-      source finish)
-    (hcommands : ∀ raw,
-      raw ∈ routeCommandsAux growth counterState searchSlot directSlot
-          after (first :: rest) →
-        raw ∈ rawCommands)
-    (hcontinuations : ∀ rule,
-      rule ∈ routeContinuationRules growth counterState searchSlot
-          directSlot (first :: rest) →
-        rule ∈ rawDirectRules) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
-          (atLogical growth T source).move
-            (orient growth first.direction)⟩
-        ⟨resolve base c after, atLogical growth T finish⟩ ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
-          (atLogical growth T source).move
-            (orient growth first.direction)⟩ := by
-  induction rest generalizing first source finish searchSlot directSlot with
-  | nil =>
-      cases hexec with
-      | cons _ _ _ middle _ hsource hfirst hrest =>
-        cases hrest with
-        | nil _ hmiddle =>
-          rcases legExecutesAt_depart_below hfirst hsource hmiddle with
-            ⟨distance, hdistance, hgap, hfound⟩
-          let raw : RawCommand :=
-            .boundaryNavigation ⟨growth, counterState, searchSlot⟩
-              first.target first.direction after .preserve
-          have hroute : raw ∈ routeCommandsAux growth counterState
-              searchSlot directSlot after [first] := by
-            simp [raw, routeCommandsAux]
-          have hraw : raw ∈ rawCommands := hcommands raw hroute
-          have hrun := machine_reaches_boundary_preserve_or_halts
-            base c limit hshort ⟨growth, counterState, searchSlot⟩
-            first.target first.direction after hraw
-            ((atLogical growth T source).move
-              (orient growth first.direction)) distance hdistance hgap
-          rw [hfound] at hrun
-          exact hrun
-  | cons next tail ih =>
-      cases hexec with
-      | cons _ _ _ middle _ hsource hfirst hrest =>
-        have hmiddle := RouteExecutesWithin.start_lt hrest
-        rcases legExecutesAt_depart_below hfirst hsource hmiddle with
-          ⟨distance, hdistance, hgap, hfound⟩
-        let handoff : ControlRef :=
-          directRef growth counterState directSlot
-        let raw : RawCommand :=
-          .boundaryNavigation ⟨growth, counterState, searchSlot⟩
-            first.target first.direction handoff .preserve
-        let continuation : RawDirectRule :=
-          ⟨growth, handoff, .boundary first.target,
-            searchRef growth counterState (searchSlot + 1), next.direction⟩
-        have hroute : raw ∈ routeCommandsAux growth counterState
-            searchSlot directSlot after (first :: next :: tail) := by
-          simp [raw, handoff, routeCommandsAux]
-        have hraw : raw ∈ rawCommands := hcommands raw hroute
-        have hcontinuationRoute : continuation ∈
-            routeContinuationRules growth counterState searchSlot
-              directSlot (first :: next :: tail) := by
-          simp [continuation, handoff, routeContinuationRules,
-            routeContinuationRulesFrom]
-        have hcontinuation : continuation ∈ rawDirectRules :=
-          hcontinuations continuation hcontinuationRoute
-        have hsearch := machine_reaches_boundary_preserve_or_halts
-          base c limit hshort ⟨growth, counterState, searchSlot⟩
-          first.target first.direction handoff hraw
-          ((atLogical growth T source).move
-            (orient growth first.direction)) distance hdistance hgap
-        rcases hsearch with hsearch | hhalts
-        · have hsearch' : FullTM0.Reaches
-              (CounterControlNestingBridge.machine base c)
-              ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
-                (atLogical growth T source).move
-                  (orient growth first.direction)⟩
-              ⟨resolve base c handoff, atLogical growth T middle⟩ := by
-            rw [hfound] at hsearch
-            exact hsearch
-          have hmatch : continuation.read.Matches
-              (atLogical growth T middle).read := by
-            change (atLogical growth T middle).read =
-              boundarySymbol first.target
-            change (Target.boundary first.target).Matches
-              (atLogical growth T middle).read
-            rw [← hfound]
-            simpa [FullTM0.Tape.moveN, FullTM0.Tape.read] using hgap.marked
-          have hdirectLocal :=
-            CounterControlDirectSemantics.reaches_directRule base c
-              continuation hcontinuation (atLogical growth T middle) hmatch
-          have hdirect : FullTM0.Reaches
-              (CounterControlNestingBridge.machine base c)
-              ⟨resolve base c handoff, atLogical growth T middle⟩
-              ⟨searchState base c
-                  ⟨growth, counterState, searchSlot + 1⟩,
-                (atLogical growth T middle).move
-                  (orient growth next.direction)⟩ := by
-            simpa [CounterControlNestingBridge.machine,
-              BoundedMarkerProgram.machine, CounterControlPlan.table,
-              continuation, handoff, searchRef,
-              CounterControlPlan.resolve] using hdirectLocal
-          have hcommandsTail : ∀ command,
-              command ∈ routeCommandsAux growth counterState
-                  (searchSlot + 1) (directSlot + 1) after (next :: tail) →
-                command ∈ rawCommands := by
-            intro command hcommand
-            apply hcommands command
-            exact List.mem_cons_of_mem _ hcommand
-          have hcontinuationsTail : ∀ rule,
-              rule ∈ routeContinuationRules growth counterState
-                  (searchSlot + 1) (directSlot + 1) (next :: tail) →
-                rule ∈ rawDirectRules := by
-            intro rule hrule
-            apply hcontinuations rule
-            simp only [routeContinuationRules, routeContinuationRulesFrom,
-              List.mem_cons]
-            exact Or.inr hrule
-          have htail := ih
-            (first := next) (source := middle) (finish := finish)
-            (searchSlot := searchSlot + 1)
-            (directSlot := directSlot + 1) hrest hcommandsTail
-            hcontinuationsTail
-          have hprefix := hsearch'.trans hdirect
-          rcases htail with hsuccess | htailHalts
-          · exact Or.inl (hprefix.trans hsuccess)
-          · exact Or.inr
-              (FullTM0.HaltsFrom.of_reaches hprefix htailHalts)
-        · exact Or.inr hhalts
-
 /-- Compile a nonempty marker route under the shorter-search resolution
 hypothesis.  The route reaches its advertised continuation, or the complete
 controller halts from the route's original logical configuration. -/
@@ -369,45 +192,16 @@ theorem route_reaches_or_halts_at
         ⟨resolve base c after, atLogical growth T finishPosition⟩ ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨resolve base c source, atLogical growth T sourcePosition⟩ := by
-  let entry : RawDirectRule :=
-    ⟨growth, source, .boundary sourceBoundary,
-      searchRef growth counterState searchSlot, first.direction⟩
-  have hentryRoute : entry ∈
-      routeEntryRules growth counterState source sourceBoundary searchSlot
-        (first :: rest) := by
-    simp [entry, routeEntryRules]
-  have hentry : entry ∈ rawDirectRules := by
-    apply hrules entry
-    exact List.mem_append_left _ hentryRoute
-  have hmatch : entry.read.Matches
-      (atLogical growth T sourcePosition).read := by
-    change (atLogical growth T sourcePosition).read =
-      boundarySymbol sourceBoundary
-    exact hsource
-  have hentryLocal := CounterControlDirectSemantics.reaches_directRule
-    base c entry hentry (atLogical growth T sourcePosition) hmatch
-  have hentryReach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c source, atLogical growth T sourcePosition⟩
-      ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
-        (atLogical growth T sourcePosition).move
-          (orient growth first.direction)⟩ := by
-    simpa [CounterControlNestingBridge.machine, BoundedMarkerProgram.machine,
-      CounterControlPlan.table, entry, searchRef,
-      CounterControlPlan.resolve] using hentryLocal
-  have hcontinuations : ∀ rule,
-      rule ∈ routeContinuationRules growth counterState searchSlot
-          directSlot (first :: rest) →
-        rule ∈ rawDirectRules := by
-    intro rule hrule
-    apply hrules rule
-    exact List.mem_append_right _ hrule
-  have hsearches := searches_reach_or_halt_at base c limit hshort growth
-    counterState searchSlot directSlot after first rest T sourcePosition
-    finishPosition hexec hcommands hcontinuations
-  rcases hsearches with hsuccess | hhalts
-  · exact Or.inl (hentryReach.trans hsuccess)
-  · exact Or.inr (FullTM0.HaltsFrom.of_reaches hentryReach hhalts)
+  exact route_reaches_with_failure_at base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    FullTM0.HaltsFrom.of_reaches
+    (by
+      intro address expected direction success hraw outer distance hdistance
+        hgap
+      exact machine_reaches_boundary_preserve_or_halts base c limit hshort
+        address expected direction success hraw outer distance hdistance hgap)
+    growth counterState searchSlot directSlot source after sourceBoundary
+    first rest T sourcePosition finishPosition hsource hexec hcommands hrules
 
 end
 
