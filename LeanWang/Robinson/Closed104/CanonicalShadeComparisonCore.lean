@@ -385,8 +385,8 @@ structure PhaseComparison
   actualValid : ValidShadeGrid actualGrid actualStates
   canonicalValid : ValidShadeRectangle canonicalGrid canonicalStates extent extent
   extent_large : 8 * scale ≤ extent
-  portPresent_eq : ∀ port, port.x < 8 * scale → port.y < 8 * scale →
-    portPresent canonicalGrid port = portPresent actualGrid port
+  component_eq : ∀ x y, x < 8 * scale → y < 8 * scale →
+    componentAt canonicalGrid x y = componentAt actualGrid x y
   present_value_eq : ∀ port,
     2 * scale ≤ port.x → port.x < 6 * scale →
     2 * scale ≤ port.y → port.y < 6 * scale →
@@ -394,6 +394,20 @@ structure PhaseComparison
     value actualStates port = value canonicalStates port
 
 namespace PhaseComparison
+
+/-- Common component geometry determines which ports are present. -/
+theorem portPresent_eq
+    {actualGrid canonicalGrid : Nat → Nat → Index}
+    {actualStates canonicalStates : Nat → Nat → RedShades.State}
+    {scale extent : Nat}
+    (comparison : PhaseComparison actualGrid canonicalGrid
+      actualStates canonicalStates scale extent)
+    (port : Port) (portEast : port.x < 8 * scale)
+    (portNorth : port.y < 8 * scale) :
+    portPresent canonicalGrid port = portPresent actualGrid port := by
+  rcases port with ⟨x, y, side⟩
+  cases side <;> simp only [portPresent] <;>
+    rw [comparison.component_eq x y portEast portNorth]
 
 /-- Agreement on live ports extends to absent ports through common geometry. -/
 theorem value_eq
@@ -497,8 +511,6 @@ theorem isFreeLine
     {scale extent line : Nat} (axis : FreeAxis)
     (comparison : PhaseComparison actualGrid canonicalGrid
       actualStates canonicalStates scale extent)
-    (componentEq : ∀ x y, x < 8 * scale → y < 8 * scale →
-      componentAt canonicalGrid x y = componentAt actualGrid x y)
     (canonicalFree : axis.IsFreeLine
       canonicalGrid canonicalStates scale (3 * scale) line)
     (lineLower : 2 * scale ≤ line) (lineUpper : line < 6 * scale) :
@@ -512,7 +524,7 @@ theorem isFreeLine
       unfold quarterWest at lower <;> unfold quarterEast at upper <;> omega
   rcases locationBounds with ⟨xLower, xUpper, yLower, yUpper⟩
   have stateAgreement := comparison.state_eq xLower xUpper yLower yUpper
-  have componentAgreement := componentEq location.1 location.2
+  have componentAgreement := comparison.component_eq location.1 location.2
     (by omega) (by omega)
   change axis.Clear
     (componentAt actualGrid location.1 location.2)
@@ -520,6 +532,23 @@ theorem isFreeLine
     (actualStates location.1 location.2)
   rw [← componentAgreement, stateAgreement]
   exact canonicalFree transverse lower upper
+
+/-- Transfer every member of a canonical family of free lines. -/
+theorem isFreeLine_of_mem
+    {actualGrid canonicalGrid : Nat → Nat → Index}
+    {actualStates canonicalStates : Nat → Nat → RedShades.State}
+    {scale extent : Nat}
+    (comparison : PhaseComparison actualGrid canonicalGrid
+      actualStates canonicalStates scale extent)
+    (axis : FreeAxis) (coordinates : List Nat)
+    (bounds : ∀ {line}, line ∈ coordinates →
+      2 * scale ≤ line ∧ line < 6 * scale)
+    (canonicalFree : ∀ {line}, line ∈ coordinates →
+      axis.IsFreeLine canonicalGrid canonicalStates scale (3 * scale) line)
+    {line : Nat} (lineMem : line ∈ coordinates) :
+    axis.IsFreeLine actualGrid actualStates scale (3 * scale) line :=
+  comparison.isFreeLine axis (canonicalFree lineMem)
+    (bounds lineMem).1 (bounds lineMem).2
 
 end PhaseComparison
 

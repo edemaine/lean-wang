@@ -263,17 +263,6 @@ private theorem index_canonical_eq (depth : Nat)
   exact supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
     xBound yBound
 
-private theorem portPresent_canonical_eq (depth : Nat)
-    (coarse : Nat → Nat → Index) (root : Node)
-    (rootEq : coarse 0 0 = root.data.parent) (port : Port)
-    (portEast : port.x < 8 * scale depth)
-    (portNorth : port.y < 8 * scale depth) :
-    portPresent (indexGrid root (depth + 1)) port =
-      portPresent (actualGrid depth coarse) port := by
-  rcases port with ⟨x, y, side⟩
-  cases side <;> simp only [portPresent, componentAt] <;>
-    rw [index_canonical_eq depth coarse root rootEq x y portEast portNorth]
-
 /-- The even phase packages live-port agreement and common geometry. -/
 theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
     (states : Nat → Nat → RedShades.State) (root : Node)
@@ -289,27 +278,19 @@ theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
     actualValid := valid
     canonicalValid := validRectangle (depth + 1) root
     extent_large := ?_
-    portPresent_eq := ?_
+    component_eq := ?_
     present_value_eq := ?_
   }
   · rw [pow_succ]
     simp only [scale]
     omega
-  · intro port portEast portNorth
-    exact portPresent_canonical_eq depth coarse root
-      (coarseRoot.trans rootParent.symm) port portEast portNorth
+  · intro x y xEast yNorth
+    simp only [componentAt]
+    rw [index_canonical_eq depth coarse root
+      (coarseRoot.trans rootParent.symm) x y xEast yNorth]
   · intro port portWest portEast portSouth portNorth portPresent
     exact present_value_eq depth coarse states root coarseRoot rootParent
       valid shaded port portWest portEast portSouth portNorth portPresent
-
-private theorem componentAt_canonical_eq (depth : Nat)
-    (coarse : Nat → Nat → Index) (root : Node)
-    (rootEq : coarse 0 0 = root.data.parent) (x y : Nat)
-    (xEast : x < 8 * scale depth) (yNorth : y < 8 * scale depth) :
-    componentAt (indexGrid root (depth + 1)) x y =
-      componentAt (actualGrid depth coarse) x y := by
-  simp only [componentAt]
-  rw [index_canonical_eq depth coarse root rootEq x y xEast yNorth]
 
 private theorem coordinate_isFreeLine
     (axis : PhaseComparison.FreeAxis) (depth : Nat)
@@ -323,28 +304,22 @@ private theorem coordinate_isFreeLine
     {line : Nat} (lineMem : line ∈ coordinates depth) :
     axis.IsFreeLine (actualGrid depth coarse) states
       (scale depth) (3 * scale depth) line := by
-  have canonicalFree : axis.IsFreeLine
-      (indexGrid root (depth + 1)) (shadeGrid root (depth + 1))
-      (scale depth) (3 * scale depth) line := by
+  apply (comparison depth coarse states root coarseRoot rootParent valid shaded).isFreeLine_of_mem
+    axis (coordinates depth)
+  · intro selected selectedMem
+    have selectedBounds := mem_coordinates_bounds depth selectedMem
+    constructor
+    · unfold quarterSouth at selectedBounds
+      simp only [scale] at selectedBounds ⊢
+      omega
+    · unfold quarterNorth at selectedBounds
+      simp only [scale] at selectedBounds ⊢
+      omega
+  · intro selected selectedMem
     cases axis
-    · exact CanonicalEvenFreeLines.coordinate_isFreeRow root depth lineMem
-    · exact CanonicalEvenFreeLines.coordinate_isFreeColumn root depth lineMem
-  have lineBounds := mem_coordinates_bounds depth lineMem
-  have rootEq : coarse 0 0 = root.data.parent :=
-    coarseRoot.trans rootParent.symm
-  have lineLower : 2 * scale depth ≤ line := by
-    unfold quarterSouth at lineBounds
-    simp only [scale] at lineBounds ⊢
-    omega
-  have lineUpper : line < 6 * scale depth := by
-    unfold quarterNorth at lineBounds
-    simp only [scale] at lineBounds ⊢
-    omega
-  exact (comparison depth coarse states root coarseRoot rootParent valid shaded).isFreeLine
-      axis
-      (fun x y hx hy => componentAt_canonical_eq depth coarse root rootEq
-        x y hx hy)
-      canonicalFree lineLower lineUpper
+    · exact CanonicalEvenFreeLines.coordinate_isFreeRow root depth selectedMem
+    · exact CanonicalEvenFreeLines.coordinate_isFreeColumn root depth selectedMem
+  · exact lineMem
 
 /-- Every coordinate in the canonical family is a free row in the arbitrary
 light-root shade assignment. -/

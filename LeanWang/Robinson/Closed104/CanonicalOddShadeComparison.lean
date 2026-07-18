@@ -323,16 +323,6 @@ private theorem index_canonical_eq (depth : Nat)
     (depth + 2) seedNode coarse
     (coarseRoot.trans seedNode_parent.symm) xBound yBound
 
-private theorem portPresent_canonical_eq (depth : Nat)
-    (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0)
-    (port : Port) (portEast : port.x < 8 * scale depth)
-    (portNorth : port.y < 8 * scale depth) :
-    portPresent (indexGrid (depth + 2)) port =
-      portPresent (actualGrid depth coarse) port := by
-  rcases port with ⟨x, y, side⟩
-  cases side <;> simp only [portPresent, componentAt] <;>
-    rw [index_canonical_eq depth coarse coarseRoot x y portEast portNorth]
-
 /-- The odd phase packages live-port agreement and common geometry. -/
 theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
     (states : Nat → Nat → RedShades.State)
@@ -348,27 +338,18 @@ theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
     actualValid := valid
     canonicalValid := CanonicalOddShadeGeometry.validRectangle (depth + 2)
     extent_large := ?_
-    portPresent_eq := ?_
+    component_eq := ?_
     present_value_eq := ?_
   }
   · rw [pow_four_add_two]
     simp only [scale]
     omega
-  · intro port portEast portNorth
-    exact portPresent_canonical_eq depth coarse coarseRoot
-      port portEast portNorth
+  · intro x y xEast yNorth
+    simp only [componentAt]
+    rw [index_canonical_eq depth coarse coarseRoot x y xEast yNorth]
   · intro port portWest portEast portSouth portNorth portPresent
     exact present_value_eq depth coarse states coarseRoot valid shaded
       port portWest portEast portSouth portNorth portPresent
-
-private theorem componentAt_canonical_eq (depth : Nat)
-    (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0)
-    (x y : Nat) (xEast : x < 8 * scale depth)
-    (yNorth : y < 8 * scale depth) :
-    componentAt (indexGrid (depth + 2)) x y =
-      componentAt (actualGrid depth coarse) x y := by
-  simp only [componentAt]
-  rw [index_canonical_eq depth coarse coarseRoot x y xEast yNorth]
 
 private theorem coordinate_isFreeLine
     (axis : PhaseComparison.FreeAxis) (depth : Nat)
@@ -382,28 +363,25 @@ private theorem coordinate_isFreeLine
     {line : Nat} (lineMem : line ∈ coordinates depth) :
     axis.IsFreeLine (actualGrid depth coarse) states
       (scale depth) (3 * scale depth) line := by
-  have canonicalFree : axis.IsFreeLine
-      (indexGrid (depth + 2)) (shadeGrid (depth + 2))
-      (scale depth) (3 * scale depth) line := by
+  apply (comparison depth coarse states coarseRoot valid shaded).isFreeLine_of_mem
+    axis (coordinates depth)
+  · intro selected selectedMem
+    have selectedBounds := mem_coordinates_bounds depth selectedMem
+    constructor
+    · unfold quarterSouth at selectedBounds
+      simp only [scale] at selectedBounds ⊢
+      omega
+    · unfold quarterNorth at selectedBounds
+      simp only [scale] at selectedBounds ⊢
+      omega
+  · intro selected selectedMem
     rw [show 3 * scale depth = 6 * 4 ^ depth by
       unfold scale
       omega]
     cases axis
-    · exact CanonicalOddFreeLines.coordinate_isFreeRow depth lineMem
-    · exact CanonicalOddFreeLines.coordinate_isFreeColumn depth lineMem
-  have lineBounds := mem_coordinates_bounds depth lineMem
-  have lineLower : 2 * scale depth ≤ line := by
-    unfold quarterSouth at lineBounds
-    simp only [scale] at lineBounds ⊢
-    omega
-  have lineUpper : line < 6 * scale depth := by
-    unfold quarterNorth at lineBounds
-    simp only [scale] at lineBounds ⊢
-    omega
-  exact (comparison depth coarse states coarseRoot valid shaded).isFreeLine axis
-    (fun x y hx hy => componentAt_canonical_eq depth coarse coarseRoot
-      x y hx hy)
-    canonicalFree lineLower lineUpper
+    · exact CanonicalOddFreeLines.coordinate_isFreeRow depth selectedMem
+    · exact CanonicalOddFreeLines.coordinate_isFreeColumn depth selectedMem
+  · exact lineMem
 
 theorem coordinate_isFreeRow (depth : Nat)
     (coarse : Nat → Nat → Index)
