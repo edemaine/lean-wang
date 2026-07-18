@@ -39,11 +39,9 @@ theorem exists_boundedPath {target : Port}
     exact List.mem_of_find?_eq_some route
   have current := List.find?_some route
   simp only [decide_eq_true_eq] at current
-  have evaluated := evaluate_of_mem_evaluated routeMem
-  have sourceMem := origin_mem_sources_of_evaluate evaluated
-  have path := boundedPath_of_evaluate evaluated
-  refine ⟨state.origin, state.parity, sourceMem, ?_⟩
-  simpa only [current] using path
+  have sound := sound_of_mem_evaluated routeMem
+  refine ⟨state.origin, state.parity, sound.1, ?_⟩
+  simpa only [current] using sound.2
 
 end CanonicalOddShadeBase
 end Closed104

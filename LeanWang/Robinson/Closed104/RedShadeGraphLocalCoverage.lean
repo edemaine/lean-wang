@@ -76,11 +76,9 @@ theorem exists_boundedPath
     exact List.mem_of_find?_eq_some route
   have current := List.find?_some route
   simp only [decide_eq_true_eq] at current
-  have evaluated := evaluate_of_mem_evaluated routeMem
-  have sourceMem := origin_mem_sources_of_evaluate evaluated
-  have path := boundedPath_of_evaluate evaluated
-  refine ⟨state.origin, sourceMem, state.parity, ?_⟩
-  simpa only [current] using path
+  have sound := sound_of_mem_evaluated routeMem
+  refine ⟨state.origin, sound.1, state.parity, ?_⟩
+  simpa only [current] using sound.2
 
 theorem base_exists_boundedPath {target : Port}
     (targetMem : target ∈ portsIn 8 8)
@@ -101,12 +99,11 @@ theorem base_exists_boundedPath {target : Port}
     exact List.mem_of_find?_eq_some route
   have current := List.find?_some route
   simp only [decide_eq_true_eq] at current
-  have evaluated := evaluate_of_mem_evaluated routeMem
-  have sourceMem := origin_mem_sources_of_evaluate evaluated
+  have sound := sound_of_mem_evaluated routeMem
+  have sourceMem := sound.1
   simp only [List.mem_singleton] at sourceMem
   refine ⟨state.parity, ?_⟩
-  have path := boundedPath_of_evaluate evaluated
-  simpa only [sourceMem, current] using path
+  simpa only [sourceMem, current] using sound.2
 
 /-- Translate a bounded local route into the corresponding macrocell. -/
 theorem boundedPath_two_block

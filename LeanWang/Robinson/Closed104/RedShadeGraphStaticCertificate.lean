@@ -37,181 +37,186 @@ deriving DecidableEq, Repr
 def inBounds (port : Port) (width height : Nat) : Bool :=
   port.x < width && port.y < height
 
-def evaluate (indexGrid : Nat → Nat → Index) (width height : Nat)
-    (sources : List Port) (instructions : List Instruction) :
-    (index : Nat) → Option State
-  | index =>
-      match instructions[index]? with
+def evaluateInstruction (indexGrid : Nat → Nat → Index) (width height : Nat)
+    (sources : List Port) (states : Array (Option State)) :
+    Instruction → Option State
+  | .root sourceIndex =>
+      match sources[sourceIndex]? with
       | none => none
-      | some (.root sourceIndex) =>
-          match sources[sourceIndex]? with
-          | none => none
-          | some source =>
-              if inBounds source width height then
-                some ⟨source, source, false⟩
-              else none
-      | some (.step previous move) =>
-          if previous < index then
-            match evaluate indexGrid width height sources instructions previous with
-            | none => none
-            | some state =>
-                if move.first = state.current &&
-                    move.valid indexGrid && inBounds move.second width height then
-                  some ⟨state.origin, move.second,
-                    Bool.xor state.parity move.parity⟩
-                else none
+      | some source =>
+          if inBounds source width height then
+            some ⟨source, source, false⟩
           else none
-termination_by index => index
+  | .step previous move =>
+      match states[previous]? with
+      | some (some state) =>
+          if move.first = state.current &&
+              move.valid indexGrid && inBounds move.second width height then
+            some ⟨state.origin, move.second,
+              Bool.xor state.parity move.parity⟩
+          else none
+      | _ => none
 
-theorem boundedPath_of_evaluate
-    {indexGrid : Nat → Nat → Index} {width height : Nat}
-    {sources : List Port} {instructions : List Instruction}
-    {index : Nat} {state : State}
-    (evaluated : evaluate indexGrid width height sources instructions index =
-      some state) :
+def evaluateInto (indexGrid : Nat → Nat → Index) (width height : Nat)
+    (sources : List Port) :
+    Array (Option State) → List Instruction → Array (Option State)
+  | states, [] => states
+  | states, instruction :: instructions =>
+      evaluateInto indexGrid width height sources
+        (states.push (evaluateInstruction indexGrid width height sources states
+          instruction)) instructions
+
+def evaluateAll (indexGrid : Nat → Nat → Index) (width height : Nat)
+    (sources : List Port) (instructions : List Instruction) :
+    Array (Option State) :=
+  evaluateInto indexGrid width height sources #[] instructions
+
+abbrev StateSound (indexGrid : Nat → Nat → Index) (width height : Nat)
+    (sources : List Port) (state : State) : Prop :=
+  state.origin ∈ sources ∧
     BoundedPath indexGrid width height
-      state.origin state.current state.parity := by
-  induction index using Nat.strong_induction_on generalizing state with
-  | h index ih =>
-      cases instructionEq : instructions[index]? with
-      | none => simp [evaluate, instructionEq] at evaluated
-      | some instruction =>
-          cases instruction with
-          | root sourceIndex =>
-              cases sourceEq : sources[sourceIndex]? with
-              | none => simp [evaluate, instructionEq, sourceEq] at evaluated
-              | some source =>
-                  by_cases bounded : inBounds source width height = true
-                  · simp [evaluate, instructionEq, sourceEq, bounded] at evaluated
-                    subst state
-                    apply BoundedPath.refl
-                    simpa [PortInBounds, inBounds, Bool.and_eq_true] using bounded
-                  · simp [evaluate, instructionEq, sourceEq, bounded] at evaluated
-          | step previous move =>
-              by_cases previousLt : previous < index
-              · cases previousEvaluated :
-                    evaluate indexGrid width height sources instructions previous with
-                | none =>
-                    simp [evaluate, instructionEq, previousLt,
-                      previousEvaluated] at evaluated
-                | some previousState =>
-                    by_cases valid :
-                        (move.first = previousState.current &&
-                          move.valid indexGrid &&
-                          inBounds move.second width height) = true
-                    · simp [evaluate, instructionEq, previousLt,
-                        previousEvaluated, valid] at evaluated
-                      subst state
-                      simp only [Bool.and_eq_true, decide_eq_true_eq] at valid
-                      have previousPath :=
-                        ih previous previousLt previousEvaluated
-                      have link := move.link_of_valid valid.1.2
-                      rw [valid.1.1] at link
-                      have nextBounds :
-                          PortInBounds move.second width height := by
-                        simpa [PortInBounds, inBounds, Bool.and_eq_true]
-                          using valid.2
-                      exact BoundedPath.trans previousPath
-                        (BoundedPath.ofLink link previousPath.second_inBounds
-                          nextBounds)
-                    · simp [evaluate, instructionEq, previousLt,
-                        previousEvaluated, valid] at evaluated
-              · simp [evaluate, instructionEq, previousLt] at evaluated
+      state.origin state.current state.parity
 
-theorem origin_mem_sources_of_evaluate
+abbrev StatesSound (indexGrid : Nat → Nat → Index) (width height : Nat)
+    (sources : List Port) (states : Array (Option State)) : Prop :=
+  ∀ (index : Nat) (state : State), states[index]? = some (some state) →
+    StateSound indexGrid width height sources state
+
+theorem evaluateInstruction_sound
     {indexGrid : Nat → Nat → Index} {width height : Nat}
-    {sources : List Port} {instructions : List Instruction}
-    {index : Nat} {state : State}
-    (evaluated : evaluate indexGrid width height sources instructions index =
-      some state) :
-    state.origin ∈ sources := by
-  induction index using Nat.strong_induction_on generalizing state with
-  | h index ih =>
-      cases instructionEq : instructions[index]? with
-      | none => simp [evaluate, instructionEq] at evaluated
-      | some instruction =>
-          cases instruction with
-          | root sourceIndex =>
-              cases sourceEq : sources[sourceIndex]? with
-              | none => simp [evaluate, instructionEq, sourceEq] at evaluated
-              | some source =>
-                  by_cases bounded : inBounds source width height = true
-                  · simp [evaluate, instructionEq, sourceEq, bounded] at evaluated
-                    subst state
-                    exact List.mem_of_getElem? sourceEq
-                  · simp [evaluate, instructionEq, sourceEq, bounded] at evaluated
-          | step previous move =>
-              by_cases previousLt : previous < index
-              · cases previousEvaluated :
-                    evaluate indexGrid width height sources instructions previous with
-                | none =>
-                    simp [evaluate, instructionEq, previousLt,
-                      previousEvaluated] at evaluated
-                | some previousState =>
-                    by_cases valid :
-                        (move.first = previousState.current &&
-                          move.valid indexGrid &&
-                          inBounds move.second width height) = true
-                    · simp [evaluate, instructionEq, previousLt,
-                        previousEvaluated, valid] at evaluated
-                      subst state
-                      exact ih previous previousLt
-                        (state := previousState) previousEvaluated
-                    · simp [evaluate, instructionEq, previousLt,
-                        previousEvaluated, valid] at evaluated
-              · simp [evaluate, instructionEq, previousLt] at evaluated
+    {sources : List Port} {states : Array (Option State)}
+    (statesSound : StatesSound indexGrid width height sources states)
+    {instruction : Instruction} {state : State}
+    (evaluated : evaluateInstruction indexGrid width height sources states
+      instruction = some state) :
+    StateSound indexGrid width height sources state := by
+  cases instruction with
+  | root sourceIndex =>
+      cases sourceEq : sources[sourceIndex]? with
+      | none => simp [evaluateInstruction, sourceEq] at evaluated
+      | some source =>
+          by_cases bounded : inBounds source width height = true
+          · simp only [evaluateInstruction, sourceEq, bounded, ↓reduceIte,
+              Option.some.injEq] at evaluated
+            subst state
+            refine ⟨List.mem_of_getElem? sourceEq,
+              BoundedPath.refl (indexGrid := indexGrid) (width := width)
+                (height := height) source ?_⟩
+            simpa [PortInBounds, inBounds, Bool.and_eq_true] using bounded
+          · simp [evaluateInstruction, sourceEq, bounded] at evaluated
+  | step previous move =>
+      cases previousEq : states[previous]? with
+      | none => simp [evaluateInstruction, previousEq] at evaluated
+      | some previousOption =>
+          cases previousOption with
+          | none => simp [evaluateInstruction, previousEq] at evaluated
+          | some previousState =>
+              by_cases valid :
+                  (move.first = previousState.current &&
+                    move.valid indexGrid &&
+                    inBounds move.second width height) = true
+              · simp only [evaluateInstruction, previousEq, valid, ↓reduceIte,
+                  Option.some.injEq] at evaluated
+                subst state
+                rcases statesSound previous previousState previousEq with
+                  ⟨sourceMem, previousPath⟩
+                simp only [Bool.and_eq_true, decide_eq_true_eq] at valid
+                have link := move.link_of_valid valid.1.2
+                rw [valid.1.1] at link
+                have nextBounds :
+                    PortInBounds move.second width height := by
+                  simpa [PortInBounds, inBounds, Bool.and_eq_true]
+                    using valid.2
+                exact ⟨sourceMem, BoundedPath.trans previousPath
+                  (BoundedPath.ofLink link previousPath.second_inBounds
+                    nextBounds)⟩
+              · simp [evaluateInstruction, previousEq, valid] at evaluated
+
+theorem statesSound_push
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {sources : List Port} {states : Array (Option State)}
+    (statesSound : StatesSound indexGrid width height sources states)
+    {next : Option State}
+    (nextSound : ∀ state, next = some state →
+      StateSound indexGrid width height sources state) :
+    StatesSound indexGrid width height sources (states.push next) := by
+  intro index state evaluated
+  rw [Array.getElem?_push] at evaluated
+  split at evaluated
+  · rename_i indexEq
+    subst index
+    simp only [Option.some.injEq] at evaluated
+    exact nextSound state evaluated
+  · exact statesSound index state evaluated
+
+theorem evaluateInto_sound
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {sources : List Port} {states : Array (Option State)}
+    (statesSound : StatesSound indexGrid width height sources states)
+    (instructions : List Instruction) :
+    StatesSound indexGrid width height sources
+      (evaluateInto indexGrid width height sources states instructions) := by
+  induction instructions generalizing states with
+  | nil => simpa [evaluateInto] using statesSound
+  | cons instruction instructions ih =>
+      simp only [evaluateInto]
+      apply ih
+      apply statesSound_push statesSound
+      intro state evaluated
+      exact evaluateInstruction_sound statesSound evaluated
+
+theorem evaluateAll_sound
+    {indexGrid : Nat → Nat → Index} {width height : Nat}
+    {sources : List Port} {instructions : List Instruction} :
+    StatesSound indexGrid width height sources
+      (evaluateAll indexGrid width height sources instructions) := by
+  apply evaluateInto_sound
+  intro index state evaluated
+  simp at evaluated
 
 def evaluated (indexGrid : Nat → Nat → Index) (width height : Nat)
     (sources : List Port) (instructions : List Instruction) :
     List (Nat × State) :=
-  (List.range instructions.length).filterMap fun index =>
-    (evaluate indexGrid width height sources instructions index).map
-      (fun state => (index, state))
+  let states := evaluateAll indexGrid width height sources instructions
+  (List.range states.size).filterMap fun index =>
+    states[index]?.join.map fun state => (index, state)
 
-theorem evaluate_of_mem_evaluated
+theorem sound_of_mem_evaluated
     {indexGrid : Nat → Nat → Index} {width height : Nat}
     {sources : List Port} {instructions : List Instruction}
     {index : Nat} {state : State}
     (member : (index, state) ∈
       evaluated indexGrid width height sources instructions) :
-    evaluate indexGrid width height sources instructions index = some state := by
+    StateSound indexGrid width height sources state := by
   unfold evaluated at member
   rw [List.mem_filterMap] at member
   rcases member with ⟨candidateIndex, _, candidate⟩
   cases candidateEq :
-      evaluate indexGrid width height sources instructions candidateIndex with
+      (evaluateAll indexGrid width height sources instructions)[candidateIndex]? with
   | none => simp [candidateEq] at candidate
-  | some candidateState =>
-      simp [candidateEq] at candidate
-      rcases candidate with ⟨rfl, rfl⟩
-      exact candidateEq
+  | some candidateOption =>
+      cases candidateOption with
+      | none => simp [candidateEq] at candidate
+      | some candidateState =>
+          simp only [candidateEq, Option.join, Option.map] at candidate
+          rcases candidate with ⟨rfl, rfl⟩
+          exact evaluateAll_sound index state candidateEq
 
 def route? (indexGrid : Nat → Nat → Index) (width height : Nat)
     (sources : List Port) (instructions : List Instruction)
     (accept : State → Bool) : Option (Nat × State) :=
-  (List.range instructions.length).findSome? fun index =>
-    (evaluate indexGrid width height sources instructions index).bind fun state =>
-      if accept state then some (index, state) else none
+  (evaluated indexGrid width height sources instructions).find? fun entry =>
+    accept entry.2
 
-theorem evaluate_eq_of_route?
+theorem mem_evaluated_of_route?
     {indexGrid : Nat → Nat → Index} {width height : Nat}
     {sources : List Port} {instructions : List Instruction}
     {accept : State → Bool} {index : Nat} {state : State}
     (found : route? indexGrid width height sources instructions accept =
       some (index, state)) :
-    evaluate indexGrid width height sources instructions index = some state := by
+    (index, state) ∈ evaluated indexGrid width height sources instructions := by
   unfold route? at found
-  rw [List.findSome?_eq_some_iff] at found
-  rcases found with ⟨_, candidateIndex, _, _, candidateFound, _⟩
-  cases candidateEq :
-      evaluate indexGrid width height sources instructions candidateIndex with
-  | none => simp [candidateEq] at candidateFound
-  | some candidate =>
-      by_cases accepted : accept candidate = true
-      · simp [candidateEq, accepted] at candidateFound
-        rcases candidateFound with ⟨rfl, rfl⟩
-        exact candidateEq
-      · simp [candidateEq, accepted] at candidateFound
+  exact List.mem_of_find?_eq_some found
 
 theorem accept_of_route?
     {indexGrid : Nat → Nat → Index} {width height : Nat}
@@ -221,17 +226,7 @@ theorem accept_of_route?
       some (index, state)) :
     accept state = true := by
   unfold route? at found
-  rw [List.findSome?_eq_some_iff] at found
-  rcases found with ⟨_, candidateIndex, _, _, candidateFound, _⟩
-  cases candidateEq :
-      evaluate indexGrid width height sources instructions candidateIndex with
-  | none => simp [candidateEq] at candidateFound
-  | some candidate =>
-      by_cases accepted : accept candidate = true
-      · simp [candidateEq, accepted] at candidateFound
-        rcases candidateFound with ⟨rfl, rfl⟩
-        exact accepted
-      · simp [candidateEq, accepted] at candidateFound
+  simpa using List.find?_some found
 
 theorem boundedPath_of_route?
     {indexGrid : Nat → Nat → Index} {width height : Nat}
@@ -241,7 +236,7 @@ theorem boundedPath_of_route?
       some (index, state)) :
     BoundedPath indexGrid width height
       state.origin state.current state.parity := by
-  exact boundedPath_of_evaluate (evaluate_eq_of_route? found)
+  exact (sound_of_mem_evaluated (mem_evaluated_of_route? found)).2
 
 end RedShadeGraphStaticCertificate
 end Closed104
