@@ -1050,6 +1050,11 @@ inductive OutwardInstructionHandoff
     {instruction : CounterMachine.Instruction}
     (obligation : OutwardObligation current growth source instruction) :
     Type where
+  | logical (core : CounterControlParentEmbedding.LogicalCore base c)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        (foundCfg current) core.cfg)
+      (inside : current.distance ≤ layoutEnd core.registers)
   | nextValidation (handoff : NextValidationHandoff current obligation)
   | nextSearch (next : CounterControlGuardedSearch.GuardedSearch base c)
       (reaches : FullTM0.Reaches
@@ -1083,6 +1088,8 @@ theorem outwardContinuationLaw_of_instructionHandoffLaw
   rcases hlaw current growth source instruction hrule obligation
       himmortal with ⟨handoff⟩
   cases handoff with
+  | logical core hreaches hinside =>
+      exact ⟨.logical core hreaches hinside⟩
   | nextValidation next =>
       exact next.monotone hmortal himmortal
   | nextSearch next hreaches hdistance =>
