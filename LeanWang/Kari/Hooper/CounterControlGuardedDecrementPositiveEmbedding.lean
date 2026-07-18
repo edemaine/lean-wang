@@ -62,6 +62,14 @@ theorem shiftAfter_label_ne_zero (source label : Fin 5)
     (hlabel : label ∈ shiftAfter source) : label ≠ 0 := by
   fin_cases source <;> fin_cases label <;> simp_all [shiftAfter]
 
+private theorem toBoundary_source_ne_zero
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToBoundary source target route) (htarget : target ≠ 0) :
+    source ≠ 0 := by
+  induction hroute with
+  | here => exact htarget
+  | step i _ _ => exact Fin.succ_ne_zero i
+
 /-! ## Tape agreement after matching route and shift steps -/
 
 /-- A shifted boundary tape agrees with the corresponding pre-shift tape
@@ -260,6 +268,272 @@ private theorem alignInwardRoute
                 lowerAgreement.advance originalRead routeGap shiftGap
                   shiftPositive,
                 tailTrace⟩
+
+/-- Expose the first gap of a nonempty exact marker-shift trace. -/
+private theorem shiftTailGaps_uncons
+    {direction : Turing.Dir} {expected : Fin 5}
+    {remaining : List (Fin 5)}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (trace : ShiftTailGaps direction (expected :: remaining) start finish) :
+    ∃ distance,
+      SearchGap (fun symbol => symbol = blankSymbol)
+        (Target.boundary expected).Matches start direction distance ∧
+      0 < distance ∧
+      ShiftTailGaps direction remaining
+        (shiftStepTape direction start distance expected) finish := by
+  cases trace with
+  | cons _ _ _ distance gap positive _ tail =>
+      exact ⟨distance, gap, positive, tail⟩
+
+/-- The branch handoff selects the first command of the decrement-shift
+schedule, so the retained suffix consists exactly of the labels after the
+tested boundary. -/
+private theorem positivePosition_eq
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GuardedSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (entry : PositiveSearchHandoff current growth source register
+      ifZero ifPositive)
+    (suffix : DecrementShiftSuffixReached entry.next growth source register) :
+    suffix.position.current =
+        MarkerSchedule.decrementStartBoundary register ∧
+      suffix.position.remaining = shiftAfter
+        (MarkerSchedule.decrementStartBoundary register) := by
+  have hraw := entry.selectedRaw_eq.symm.trans suffix.position.raw_eq
+  have hlength : suffix.position.before.length = 0 := by
+    have hslot := congrArg (fun raw : RawCommand => raw.address.slot) hraw
+    simp [positiveFirstRaw, RawCommand.address] at hslot
+    exact List.length_eq_zero_iff.mpr hslot
+  have hbefore : suffix.position.before = [] :=
+    List.length_eq_zero_iff.mp hlength
+  have hlabels := suffix.position.labels_eq
+  rw [hbefore] at hlabels
+  simp only [List.nil_append] at hlabels
+  cases register with
+  | left =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary, shiftAfter] using
+          hlabels.2.symm⟩
+  | right =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary, shiftAfter] using
+          hlabels.2.symm⟩
+  | temp =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary, shiftAfter] using
+          hlabels.2.symm⟩
+  | clock =>
+      simp [MarkerShift.decrementOrder] at hlabels
+      exact ⟨hlabels.1.symm, by
+        simpa [MarkerSchedule.decrementStartBoundary, shiftAfter] using
+          hlabels.2⟩
+
+/-- The first positive marker shift is based one cell inward from the
+completed decrement-entry route.  Its successful tape is therefore the
+initial shifted-against witness at the tested boundary. -/
+private theorem positiveInitialAgreement
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GuardedSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (entry : PositiveSearchHandoff current growth source register
+      ifZero ifPositive)
+    (suffix : DecrementShiftSuffixReached entry.next growth source register)
+    (hcurrent : suffix.position.current =
+      MarkerSchedule.decrementStartBoundary register) :
+    ShiftedAgainst (orient growth .right)
+      (MarkerSchedule.decrementStartBoundary register)
+      (entry.next.shiftedParentBacking suffix.position.current)
+      entry.route.route.suffix.finish := by
+  have hdirection : entry.next.direction = orient growth .right := by
+    have hdirection := entry.next.selectedRaw_direction_eq
+    rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+      at hdirection
+    rw [entry.selectedRaw_eq] at hdirection
+    exact hdirection.symm
+  have hrestore : entry.next.parentOuter.moveN
+      (orient growth .right) 1 = entry.route.route.suffix.finish := by
+    have hmove := entry.next.parentOuter_moveN_one
+    rw [hdirection, entry.outer_eq] at hmove
+    cases growth <;>
+      simpa [CounterControlGuardedDecrementEntry.branchTape, orient,
+        FullTM0.Tape.move] using hmove
+  refine ⟨suffix.handoff.source_blank, ?_, ?_⟩
+  · have hdestination := suffix.handoff.destination_boundary
+    rw [hdirection] at hdestination
+    simpa only [hcurrent] using hdestination
+  · intro k hk
+    rw [hcurrent]
+    unfold GuardedSearch.shiftedParentBacking
+    rw [hdirection, entry.distance_eq]
+    simp only [Nat.zero_add]
+    rw [shiftStepTape_ahead _ _ _ _ k hk, hrestore]
+
+/-- Looking back from a guarded found target through any positive part of
+its recovered parent gap still reads blank. -/
+private theorem foundTape_opposite_moveN_read_blank
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c) (k : Nat)
+    (hk : 0 < k) (hle : k ≤ current.current.distance + 1) :
+    (current.foundTape.moveN
+      (NestingMachine.opposite current.direction) k).read = blankSymbol := by
+  let parentDistance := current.current.distance + 1
+  have hindex : parentDistance - k < parentDistance := by
+    dsimp [parentDistance]
+    omega
+  have hblank := current.parentGap.blank hindex
+  have hcast : ((parentDistance - k : Nat) : Int) =
+      (parentDistance : Int) - (k : Int) := by
+    dsimp [parentDistance] at ⊢
+    omega
+  rw [current.foundTape_eq_parentMoveN]
+  cases hdirection : current.direction <;>
+    simp [hdirection, NestingMachine.opposite, FullTM0.Tape.moveN,
+      FullTM0.Tape.offset, parentDistance, hcast]
+      at hblank ⊢ <;>
+    convert hblank using 1 <;> ring_nf
+
+/-- Any completed outward shift suffix beginning at a nonzero boundary stays
+strictly short of canonical boundary `0`. -/
+private theorem alignedShift_travel_lt_layoutEnd_sub_one
+    {growth : Turing.Dir} {source : Fin 5} {labels : List (Fin 5)}
+    {start finish coreTape : FullTM0.Tape (Symbol numTags)}
+    (startBoundary :
+      (start.move
+        (NestingMachine.opposite (orient growth .right))).read =
+          boundarySymbol source)
+    (sourceNe : source ≠ 0)
+    (labelsNe : ∀ label ∈ labels, label ≠ (0 : Fin 5))
+    (geometry : ShiftTailBackwardGeometry (orient growth .right)
+      labels start finish)
+    (registers : Registers)
+    (hcore : CoreRepresents registers growth coreTape)
+    (hcenter : finish.move (orient growth .left) =
+      atLogical growth coreTape (layoutEnd registers)) :
+    geometry.travel < layoutEnd registers - 1 := by
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hstartAvoid :
+      (start.move
+        (NestingMachine.opposite (orient growth .right))).read ≠
+          boundarySymbol 0 := by
+    rw [startBoundary]
+    intro heq
+    exact sourceNe ((boundarySymbol_injective source 0).mp heq)
+  have hfinishEq : finish.move
+        (NestingMachine.opposite (orient growth .right)) =
+      atLogical growth coreTape (layoutEnd registers) := by
+    rw [hopposite]
+    exact hcenter
+  have hendPositive : 1 < layoutEnd registers := by
+    simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+  have hboundaryZero :
+      ((finish.move
+          (NestingMachine.opposite (orient growth .right))).moveN
+            (NestingMachine.opposite (orient growth .right))
+            (layoutEnd registers - 1)).read = boundarySymbol 0 := by
+    rw [hfinishEq, hopposite]
+    have hend : layoutEnd registers =
+        1 + (layoutEnd registers - 1) := by omega
+    conv_lhs =>
+      enter [1, 1]
+      rw [hend]
+    simp only [orient_eq_orientDirection]
+    rw [atLogical_moveN_left, atLogical_read]
+    simpa using hcore.boundary (0 : Fin 5)
+  by_contra hnot
+  have hle : layoutEnd registers - 1 ≤ geometry.travel :=
+    Nat.le_of_not_gt hnot
+  have havoid := geometry.avoids (0 : Fin 5) hstartAvoid labelsNe
+    (layoutEnd registers - 1) hle
+  exact havoid hboundaryZero
+
+/-! ## Comparing the original caller with the reconstructed endpoint -/
+
+/-- The completed positive branch contains the original decrement-entry
+caller, not merely the distance-zero shift search produced by the branch. -/
+theorem positiveOriginal_distance_lt_layoutEnd
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GuardedSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (handoff : PositiveLogicalHandoff current growth source register
+      ifZero ifPositive)
+    (endpoint : DecrementPositiveCenteredEnd handoff.entry.next growth source
+      register ifZero ifPositive handoff.direct) :
+    current.current.distance < layoutEnd endpoint.core.registers := by
+  rcases positivePosition_eq handoff.entry handoff.direct.suffix with
+    ⟨hshiftCurrent, hshiftRemaining⟩
+  rcases (routeToDecrementStart_toBoundary register).position
+      handoff.entry.route.route.suffix.route_eq with
+    ⟨i, hrouteCurrent, hrouteTail⟩
+  have hrouteRead : current.foundTape.read =
+      boundarySymbol i.castSucc := by
+    have hread := handoff.entry.route.route.current_read
+    rw [hrouteCurrent] at hread
+    exact hread
+  have hinitial := positiveInitialAgreement handoff.entry
+    handoff.direct.suffix hshiftCurrent
+  have hshiftTrace := handoff.direct.suffix.tailGaps
+  rw [hshiftRemaining] at hshiftTrace
+  rcases alignInwardRoute hrouteTail hrouteRead
+      handoff.entry.route.route.suffix.tailGaps hinitial hshiftTrace with
+    ⟨aligned, agreement, alignedTrace⟩
+  rw [shiftAfter_castSucc i] at alignedTrace
+  rcases shiftTailGaps_uncons alignedTrace with
+    ⟨shiftDistance, shiftGap, shiftPositive, tailTrace⟩
+  have hdirection : current.direction = orient growth .left := by
+    have hdirection := current.selectedRaw_direction_eq
+    rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+      at hdirection
+    rw [handoff.entry.route.route.suffix.raw_eq, hrouteCurrent]
+      at hdirection
+    exact hdirection.symm
+  have hopposite : NestingMachine.opposite (orient growth .left) =
+      orient growth .right := by
+    cases growth <;> rfl
+  have hdistance : current.current.distance + 1 < shiftDistance := by
+    by_contra hnot
+    have hle : shiftDistance ≤ current.current.distance + 1 :=
+      Nat.le_of_not_gt hnot
+    have hblank := foundTape_opposite_moveN_read_blank current shiftDistance
+      shiftPositive hle
+    rw [hdirection, hopposite] at hblank
+    have hmarked : (aligned.moveN (orient growth .right)
+        shiftDistance).read = boundarySymbol i.succ := by
+      simpa [Target.Matches, FullTM0.Tape.read_moveN] using shiftGap.marked
+    have hfoundMarked :=
+      (agreement.ahead shiftDistance shiftPositive).symm.trans hmarked
+    exact blankSymbol_ne_boundarySymbol i.succ
+      (hblank.symm.trans hfoundMarked)
+  have hsourceNe : i.castSucc ≠ (0 : Fin 5) := by
+    apply toBoundary_source_ne_zero hrouteTail
+    cases register <;> decide
+  rcases shiftTailGaps_backwardGeometry tailTrace with ⟨tailGeometry⟩
+  let geometry := tailGeometry.prepend shiftGap shiftPositive
+  have hlabelsNe : ∀ label ∈ i.succ :: shiftAfter i.succ,
+      label ≠ (0 : Fin 5) := by
+    intro label hlabel
+    simp only [List.mem_cons] at hlabel
+    rcases hlabel with rfl | hlabel
+    · exact Fin.succ_ne_zero i
+    · exact shiftAfter_label_ne_zero i.succ label hlabel
+  have hcenter : handoff.direct.suffix.finish.move
+        (orient growth .left) =
+      atLogical growth endpoint.core.tape
+        (layoutEnd endpoint.core.registers) := by
+    simpa [decrementPositiveTape] using endpoint.center
+  have htravel := alignedShift_travel_lt_layoutEnd_sub_one
+    agreement.destination hsourceNe hlabelsNe geometry endpoint.core.registers
+    endpoint.core_represents hcenter
+  have htravelEq : geometry.travel =
+      tailGeometry.travel + shiftDistance := rfl
+  omega
 
 end
 
