@@ -4,7 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutward
+import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
 import LeanWang.Kari.Hooper.CounterControlGuardedIncrementEmbedding
+import LeanWang.Kari.Hooper.CounterControlGuardedDecrementPositiveEmbedding
 
 /-!
 # Final outward validation followed by an arbitrary increment
@@ -33,12 +35,15 @@ open CounterControlExactCommandContinuation
 open CounterControlCommandContinuationMortality
 open CounterControlGenuineValidation
 open CounterControlGenuineValidationOutward
+open CounterControlGenuineValidationOutwardSuffix
 open CounterControlGuardedSearch
 open CounterControlGuardedSearch.GuardedSearch
 open CounterControlGuardedShiftCompletion
 open CounterControlGuardedShiftEmbedding
 open CounterControlGuardedIncrementEmbedding
+open CounterControlGuardedDecrementPositiveEmbedding
 open CounterControlResumedShiftCoordinates
+open CounterControlResumedRouteEmbedding
 
 noncomputable section
 
@@ -294,6 +299,352 @@ theorem immediateIncrementShift_direction
   rw [CounterControlGenuineDecrementEntry.immediateSearch_direction]
   exact firstIncrementRaw_direction base c growth source register _
 
+/-! ## Immediate entry from a completed outward suffix -/
+
+def bodyIncrementShift
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4) : GenuineSearch base c :=
+  let hmem := firstIncrementRaw_mem growth source next register hrule
+  CounterControlGenuineDecrementEntry.immediateSearch base c
+    (firstIncrementRaw growth source register) hmem T (by
+      rw [firstIncrementRaw_target]
+      simpa [Target.Matches] using hread)
+
+@[simp] theorem bodyIncrementShift_cfg
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4) :
+    (bodyIncrementShift base c growth source next register hrule T hread).cfg =
+      ⟨searchState base c ⟨growth, source, bodySearchBase⟩, T⟩ := by
+  simp [bodyIncrementShift,
+    CounterControlGenuineDecrementEntry.immediateSearch_cfg,
+    firstIncrementRaw, RawCommand.address]
+
+@[simp] theorem bodyIncrementShift_selectedRaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4) :
+    (bodyIncrementShift base c growth source next register hrule T
+      hread).selectedRaw = firstIncrementRaw growth source register := by
+  simp [bodyIncrementShift,
+    CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw]
+
+@[simp] theorem bodyIncrementShift_outer
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4) :
+    (bodyIncrementShift base c growth source next register hrule T
+      hread).outer = T := rfl
+
+@[simp] theorem bodyIncrementShift_distance
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4) :
+    (bodyIncrementShift base c growth source next register hrule T
+      hread).distance = 0 := rfl
+
+theorem bodyIncrementShift_direction
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4) :
+    (bodyIncrementShift base c growth source next register hrule T
+      hread).direction = orient growth .left := by
+  unfold bodyIncrementShift
+  rw [CounterControlGenuineDecrementEntry.immediateSearch_direction]
+  exact firstIncrementRaw_direction base c growth source register _
+
+def guardedBodyIncrement
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4)
+    (hblank : (T.move (orient growth .right)).read = blankSymbol) :
+    GuardedSearch base c := by
+  let shift := bodyIncrementShift base c growth source next register hrule T
+    hread
+  refine ⟨shift, ?_⟩
+  change (shift.outer.move
+    (NestingMachine.opposite shift.direction)).read = blankSymbol
+  rw [bodyIncrementShift_direction, bodyIncrementShift_outer]
+  have hopposite : NestingMachine.opposite (orient growth .left) =
+      orient growth .right := by cases growth <;> rfl
+  rw [hopposite]
+  exact hblank
+
+@[simp] theorem guardedBodyIncrement_current
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4)
+    (hblank : (T.move (orient growth .right)).read = blankSymbol) :
+    (guardedBodyIncrement base c growth source next register hrule T hread
+      hblank).current =
+      bodyIncrementShift base c growth source next register hrule T hread :=
+  rfl
+
+/-! ## Mirrored route/shift alignment -/
+
+private theorem outwardFound_moveN_left
+    (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))
+    (distance : Nat) :
+    (((T.move (orient growth .right)).moveN
+      (orient growth .right) distance).moveN
+        (orient growth .left) (distance + 1)) = T := by
+  funext position
+  cases growth <;>
+    simp [orient, FullTM0.Tape.move, FullTM0.Tape.moveN,
+      FullTM0.Tape.offset] <;>
+    congr 1 <;> omega
+
+private theorem boundaryGap_distance_unique_early
+    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
+    {first second : Nat} {target : Fin 5}
+    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches T direction first)
+    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches T direction second) :
+    first = second := by
+  by_contra hne
+  rcases lt_or_gt_of_ne hne with hlt | hlt
+  · have hblank := hsecond.blank hlt
+    have hmarked := hfirst.marked
+    rw [show T (FullTM0.Tape.offset direction first) =
+        boundarySymbol target by simpa [Target.Matches] using hmarked]
+      at hblank
+    exact blankSymbol_ne_boundarySymbol target hblank.symm
+  · have hblank := hfirst.blank hlt
+    have hmarked := hsecond.marked
+    rw [show T (FullTM0.Tape.offset direction second) =
+        boundarySymbol target by simpa [Target.Matches] using hmarked]
+      at hblank
+    exact blankSymbol_ne_boundarySymbol target hblank.symm
+
+/-- Mirrored counterpart of decrement's `ShiftedAgainst.advance`: pair one
+rightward validation leg with the following leftward increment shift. -/
+theorem shiftedAgainst_retreat
+    {growth : Turing.Dir} {lower : Fin 4}
+    {shiftedUpper lowerOriginal : FullTM0.Tape (Symbol numTags)}
+    {routeDistance shiftDistance : Nat}
+    (agreement : ShiftedAgainst (orient growth .left) lower.succ
+      shiftedUpper
+      ((lowerOriginal.move (orient growth .right)).moveN
+        (orient growth .right) routeDistance))
+    (lowerRead : lowerOriginal.read = boundarySymbol lower.castSucc)
+    (routeGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary lower.succ).Matches
+      (lowerOriginal.move (orient growth .right))
+      (orient growth .right) routeDistance)
+    (shiftGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary lower.castSucc).Matches shiftedUpper
+      (orient growth .left) shiftDistance)
+    (shiftPositive : 0 < shiftDistance) :
+    ShiftedAgainst (orient growth .left) lower.castSucc
+      (shiftStepTape (orient growth .left) shiftedUpper shiftDistance
+        lower.castSucc) lowerOriginal := by
+  have hdistance : shiftDistance = routeDistance + 1 := by
+    apply boundaryGap_distance_unique_early shiftGap
+    constructor
+    · intro k hk
+      by_cases hkzero : k = 0
+      · subst k
+        simpa [FullTM0.Tape.read_moveN] using agreement.blank
+      · have hpositive : 0 < k := by omega
+        have hahead := agreement.ahead k hpositive
+        have hroute :
+            ((((lowerOriginal.move (orient growth .right)).moveN
+              (orient growth .right) routeDistance).moveN
+                (orient growth .left) k).read) = blankSymbol := by
+          have hkle : k ≤ routeDistance := by omega
+          have hindex : routeDistance - k < routeDistance := by omega
+          have hblank := routeGap.blank hindex
+          have hcast : ((routeDistance - k : Nat) : Int) =
+              (routeDistance : Int) - (k : Int) := by omega
+          cases growth <;>
+            simp [orient, FullTM0.Tape.move, FullTM0.Tape.moveN,
+              FullTM0.Tape.offset, hcast] at hblank ⊢ <;>
+            convert hblank using 1 <;> ring_nf
+        simpa [FullTM0.Tape.read_moveN] using hahead.trans hroute
+    · have hread : (shiftedUpper.moveN (orient growth .left)
+          (routeDistance + 1)).read = boundarySymbol lower.castSucc := by
+        rw [agreement.ahead (routeDistance + 1) (by omega),
+          outwardFound_moveN_left, lowerRead]
+      simpa [Target.Matches, FullTM0.Tape.read_moveN] using hread
+  subst shiftDistance
+  refine ⟨CounterControlGuardedDecrementPositiveEmbedding.shiftStepTape_read_blank
+    _ _ _ _, ?_, ?_⟩
+  · exact CounterControlGuardedShiftEmbedding.shiftStepTape_destination
+      _ _ _ _
+  · intro k hk
+    rw [CounterControlGuardedDecrementPositiveEmbedding.shiftStepTape_ahead
+      _ _ _ _ k hk]
+    calc
+      ((shiftedUpper.moveN (orient growth .left)
+          (routeDistance + 1)).moveN
+            (orient growth .left) k).read =
+          (shiftedUpper.moveN (orient growth .left)
+            (routeDistance + 1 + k)).read := by
+              rw [FullTM0.Tape.moveN_add]
+      _ = ((((lowerOriginal.move (orient growth .right)).moveN
+            (orient growth .right) routeDistance).moveN
+              (orient growth .left) (routeDistance + 1 + k)).read) :=
+        agreement.ahead _ (by omega)
+      _ = (lowerOriginal.moveN (orient growth .left) k).read := by
+        rw [show routeDistance + 1 + k = (routeDistance + 1) + k by omega,
+          ← FullTM0.Tape.moveN_add, outwardFound_moveN_left]
+
+theorem routeGaps_uncons
+    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
+    (rest : List MarkerValidation.Leg)
+    (outer finish : FullTM0.Tape (Symbol numTags))
+    (htrace : CounterControlValidationMortality.RouteGaps growth
+      (leg :: rest) outer finish) :
+    ∃ distance,
+      SearchGap (fun symbol => symbol = blankSymbol)
+        (Target.boundary leg.target).Matches outer
+        (orient growth leg.direction) distance ∧
+      CounterControlRouteSuffixMortality.RouteTailGaps growth rest
+        (outer.moveN (orient growth leg.direction) distance) finish := by
+  cases rest with
+  | nil =>
+      cases htrace with
+      | last _ _ distance gap => exact ⟨distance, gap, .nil _⟩
+  | cons next rest =>
+      cases htrace with
+      | cons _ _ _ _ distance gap finish tail =>
+          exact ⟨distance, gap, .cons next rest _ finish tail⟩
+
+theorem descendingTo_uncons_of_le_aux
+    {current : Fin 5} {labels : List (Fin 5)} {last : Fin 5}
+    (schedule : DescendingTo current labels last) (lower : Fin 4)
+    (hcurrent : current = lower.succ)
+    (hlast : (last : Nat) ≤ (lower : Nat)) :
+    ∃ remaining, labels = lower.castSucc :: remaining ∧
+      DescendingTo lower.castSucc remaining last := by
+  cases schedule with
+  | done label =>
+      have hle : (lower.succ : Nat) ≤ (lower : Nat) := by
+        simpa [hcurrent] using hlast
+      simp at hle
+  | step i tail =>
+      have hi : i = lower := by
+        apply Fin.ext
+        have heq := congrArg Fin.val hcurrent
+        simpa using heq
+      subst i
+      exact ⟨_, rfl, tail⟩
+
+theorem descendingTo_uncons_of_le
+    (lower : Fin 4) {labels : List (Fin 5)} {last : Fin 5}
+    (schedule : DescendingTo lower.succ labels last)
+    (hlast : (last : Nat) ≤ (lower : Nat)) :
+    ∃ remaining, labels = lower.castSucc :: remaining ∧
+      DescendingTo lower.castSucc remaining last :=
+  descendingTo_uncons_of_le_aux schedule lower rfl hlast
+
+/-- Pair a retained outward validation route with the reverse prefix of a
+descending increment schedule.  The result stops at the route's source
+boundary and retains the unconsumed lower shifts. -/
+theorem alignOutwardRoute
+    {growth : Turing.Dir} {source last : Fin 5}
+    {route : List MarkerValidation.Leg} {labels : List (Fin 5)}
+    (hroute : ToFour source route)
+    {originalStart routeFinish shiftedStart shiftFinish :
+      FullTM0.Tape (Symbol numTags)}
+    (originalRead : originalStart.read = boundarySymbol source)
+    (routeTrace : CounterControlRouteSuffixMortality.RouteTailGaps growth
+      route originalStart routeFinish)
+    (initial : ShiftedAgainst (orient growth .left) 4
+      shiftedStart routeFinish)
+    (shiftTrace : ShiftTailGaps (orient growth .left) labels
+      shiftedStart shiftFinish)
+    (schedule : DescendingTo 4 labels last)
+    (hlast : (last : Nat) ≤ (source : Nat)) :
+    ∃ shifted remaining,
+      ShiftedAgainst (orient growth .left) source shifted originalStart ∧
+      ShiftTailGaps (orient growth .left) remaining shifted shiftFinish ∧
+      DescendingTo source remaining last := by
+  induction hroute generalizing originalStart routeFinish shiftedStart labels with
+  | four =>
+      cases routeTrace
+      exact ⟨shiftedStart, labels, initial, shiftTrace, schedule⟩
+  | step i tail ih =>
+      cases routeTrace with
+      | cons _ _ originalStart routeFinish trace =>
+          rcases routeGaps_uncons growth ⟨i.succ, .right⟩ _ _ _ trace with
+            ⟨routeDistance, routeGap, remainingRoute⟩
+          let found :=
+            ((originalStart.move (orient growth .right)).moveN
+              (orient growth .right) routeDistance)
+          have foundRead : found.read = boundarySymbol i.succ := by
+            change (Target.boundary i.succ).Matches found.read
+            simpa [found, FullTM0.Tape.read_moveN] using routeGap.marked
+          have hstepLe : (i.castSucc : Nat) ≤ (i.succ : Nat) := by
+            simp
+          have hlastUpper : (last : Nat) ≤ (i.succ : Nat) :=
+            hlast.trans hstepLe
+          rcases ih foundRead remainingRoute initial shiftTrace schedule
+              hlastUpper with
+            ⟨shiftedUpper, upperRemaining, upperAgreement, upperTrace,
+              upperSchedule⟩
+          rcases descendingTo_uncons_of_le i upperSchedule hlast with
+            ⟨lowerRemaining, hupperRemaining, lowerSchedule⟩
+          rw [hupperRemaining] at upperTrace
+          cases upperTrace with
+          | cons _ _ _ shiftDistance shiftGap shiftPositive _ lowerTrace =>
+              let shiftedLower := shiftStepTape (orient growth .left)
+                shiftedUpper shiftDistance i.castSucc
+              have lowerAgreement : ShiftedAgainst (orient growth .left)
+                  i.castSucc shiftedLower originalStart :=
+                shiftedAgainst_retreat upperAgreement originalRead routeGap
+                  shiftGap shiftPositive
+              exact ⟨shiftedLower, lowerRemaining, lowerAgreement,
+                lowerTrace, lowerSchedule⟩
+
+/-- The first successful boundary-`4` shift agrees on its whole inward ray
+with the boundary-`4` tape delivered by validation. -/
+theorem firstIncrementAgreement
+    (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags)) :
+    ShiftedAgainst (orient growth .left) 4
+      (shiftStepTape (orient growth .left)
+        (T.move (orient growth .right)) 1 4) T := by
+  refine ⟨CounterControlGuardedDecrementPositiveEmbedding.shiftStepTape_read_blank
+    _ _ _ _, ?_, ?_⟩
+  · exact CounterControlGuardedShiftEmbedding.shiftStepTape_destination
+      _ _ _ _
+  · intro k hk
+    rw [CounterControlGuardedDecrementPositiveEmbedding.shiftStepTape_ahead
+      _ _ _ _ k hk]
+    have hrestore :
+        (T.move (orient growth .right)).moveN (orient growth .left) 1 = T := by
+      funext position
+      cases growth <;>
+        simp [orient, FullTM0.Tape.move, FullTM0.Tape.moveN,
+          FullTM0.Tape.offset]
+    rw [hrestore]
+
 /-- A position witness for the selected immediate shift is necessarily the
 head of the compiled schedule. -/
 theorem immediateIncrementShift_position
@@ -512,15 +863,15 @@ private theorem shiftStepTape_reverseGap
 old final-validation gap, and canonical recovery places that whole search
 inside the reconstructed layout. -/
 theorem outwardGap_lt_layoutEnd_of_incrementTail
-    (growth : Turing.Dir)
+    (growth : Turing.Dir) (i : Fin 4)
     (start finish coreTape : FullTM0.Tape (Symbol numTags))
     (oldDistance : Nat) (remaining : List (Fin 5)) (last : Fin 5)
     (registers : Registers)
     (trace : ShiftTailGaps (orient growth .left)
-      ((3 : Fin 5) :: remaining) start finish)
-    (schedule : DescendingTo (3 : Fin 5) remaining last)
+      (i.castSucc :: remaining) start finish)
+    (schedule : DescendingTo i.castSucc remaining last)
     (hstartRead : (start.move (orient growth .right)).read =
-      boundarySymbol 4)
+      boundarySymbol i.succ)
     (holdBlank : ∀ back ≤ oldDistance,
       (start.moveN (orient growth .left) back).read = blankSymbol)
     (hcore : CoreRepresents registers growth coreTape)
@@ -529,42 +880,44 @@ theorem outwardGap_lt_layoutEnd_of_incrementTail
     oldDistance < layoutEnd registers := by
   cases trace with
   | cons _ _ _ distance gap positive _ tail =>
-      let shifted := shiftStepTape (orient growth .left) start distance 3
+      let shifted := shiftStepTape (orient growth .left) start distance
+        i.castSucc
       have hopposite : NestingMachine.opposite (orient growth .left) =
           orient growth .right := by
         cases growth <;> rfl
       have hshiftedRead :
-          (shifted.move (orient growth .right)).read = boundarySymbol 3 := by
+          (shifted.move (orient growth .right)).read =
+            boundarySymbol i.castSucc := by
         have hread :=
           CounterControlGuardedShiftEmbedding.shiftStepTape_destination
-            (orient growth .left) start distance 3
+            (orient growth .left) start distance i.castSucc
         rw [hopposite] at hread
         simpa [shifted] using hread
       rcases descendingShift_canonicalBackwardGeometry schedule tail
           hshiftedRead hcore hfinish with ⟨suffix⟩
       have hsource :
           (start.move (NestingMachine.opposite
-            (orient growth .left))).read = boundarySymbol 4 := by
+            (orient growth .left))).read = boundarySymbol i.succ := by
         rw [hopposite]
         exact hstartRead
       have hreverse := shiftStepTape_reverseGap (orient growth .left)
-        start distance 3 4 gap positive hsource
+        start distance i.castSucc i.succ gap positive hsource
       have hcanonical : SearchGap
           (fun symbol => symbol = blankSymbol)
-          (Target.boundary (4 : Fin 5)).Matches
+          (Target.boundary i.succ).Matches
           ((shifted.move (orient growth .right)).move
             (orient growth .right))
-          (orient growth .right) (RegisterLayout.values registers 3) := by
+          (orient growth .right) (RegisterLayout.values registers i) := by
         constructor
         · intro k hk
           have hahead := suffix.ahead (k + 1)
-          have hcoordinate : boundaryOffset registers (3 : Fin 5) +
-              (k + 1) = firstGapOffset registers (3 : Fin 4) + k := by
+          have hcoordinate : boundaryOffset registers i.castSucc +
+              (k + 1) = firstGapOffset registers i + k := by
             simp [boundaryOffset, firstGapOffset]
             omega
           have hcoordinateInt :
-              (boundaryOffset registers (3 : Fin 5) : Int) + (k + 1) =
-                firstGapOffset registers (3 : Fin 4) + k := by
+              (boundaryOffset registers i.castSucc : Int) + (k + 1) =
+                firstGapOffset registers i + k := by
             exact_mod_cast hcoordinate
           change (((shifted.move (orient growth .right)).moveN
             (orient growth .right) (k + 1)).read) = _ at hahead
@@ -572,13 +925,13 @@ theorem outwardGap_lt_layoutEnd_of_incrementTail
               (((shifted.move (orient growth .right)).moveN
                 (orient growth .right) (k + 1)).read) =
                   logicalTape growth coreTape
-                    (firstGapOffset registers (3 : Fin 4) + k) := by
+                    (firstGapOffset registers i + k) := by
             calc
               _ = logicalTape growth coreTape
-                  ((boundaryOffset registers (3 : Fin 5) : Int) +
+                  ((boundaryOffset registers i.castSucc : Int) +
                     (k + 1)) := hahead
               _ = logicalTape growth coreTape
-                  (firstGapOffset registers (3 : Fin 4) + k) := by
+                  (firstGapOffset registers i + k) := by
                     congr 1
           have hblankRead :
               ((((shifted.move (orient growth .right)).move
@@ -589,57 +942,57 @@ theorem outwardGap_lt_layoutEnd_of_incrementTail
                     (orient growth .right) (k + 1)).read) := by
                       rw [FullTM0.Tape.move_moveN]
               _ = logicalTape growth coreTape
-                    (firstGapOffset registers (3 : Fin 4) + k) := hahead'
-              _ = blankSymbol := hcore.gap_blank (3 : Fin 4) k hk
+                    (firstGapOffset registers i + k) := hahead'
+              _ = blankSymbol := hcore.gap_blank i k hk
           simpa only [FullTM0.Tape.read_moveN] using hblankRead
         · have hahead := suffix.ahead
-              (RegisterLayout.values registers 3 + 1)
-          have hcoordinate : boundaryOffset registers (3 : Fin 5) +
-              (RegisterLayout.values registers 3 + 1) =
-                boundaryOffset registers (4 : Fin 5) := by
+              (RegisterLayout.values registers i + 1)
+          have hcoordinate : boundaryOffset registers i.castSucc +
+              (RegisterLayout.values registers i + 1) =
+                boundaryOffset registers i.succ := by
             simp [boundaryOffset, CounterLayout.boundaryPos_succ]
             omega
           change (((shifted.move (orient growth .right)).moveN
             (orient growth .right)
-            (RegisterLayout.values registers 3 + 1)).read) = _ at hahead
+            (RegisterLayout.values registers i + 1)).read) = _ at hahead
           have hahead' :
               (((shifted.move (orient growth .right)).moveN
                 (orient growth .right)
-                (RegisterLayout.values registers 3 + 1)).read) =
+                (RegisterLayout.values registers i + 1)).read) =
                   logicalTape growth coreTape
-                    (boundaryOffset registers (4 : Fin 5)) := by
+                    (boundaryOffset registers i.succ) := by
             calc
               _ = logicalTape growth coreTape
-                  ((boundaryOffset registers (3 : Fin 5) : Int) +
-                    (RegisterLayout.values registers 3 + 1)) := hahead
+                  ((boundaryOffset registers i.castSucc : Int) +
+                    (RegisterLayout.values registers i + 1)) := hahead
               _ = logicalTape growth coreTape
-                  (boundaryOffset registers (4 : Fin 5)) := by
+                  (boundaryOffset registers i.succ) := by
                     congr 1
                     exact_mod_cast hcoordinate
-          rw [hcore.boundary (4 : Fin 5)] at hahead'
+          rw [hcore.boundary i.succ] at hahead'
           have hmarkedRead :
               ((((shifted.move (orient growth .right)).move
                 (orient growth .right)).moveN (orient growth .right)
-                (RegisterLayout.values registers 3)).read) =
-                  boundarySymbol 4 := by
+                (RegisterLayout.values registers i)).read) =
+                  boundarySymbol i.succ := by
             calc
               _ = (((shifted.move (orient growth .right)).moveN
                     (orient growth .right)
-                    (RegisterLayout.values registers 3 + 1)).read) := by
+                    (RegisterLayout.values registers i + 1)).read) := by
                       rw [FullTM0.Tape.move_moveN]
-              _ = boundarySymbol 4 := hahead'
+              _ = boundarySymbol i.succ := hahead'
           simpa [Target.Matches, FullTM0.Tape.read_moveN] using hmarkedRead
       have hreverse' : SearchGap (fun symbol => symbol = blankSymbol)
-          (Target.boundary (4 : Fin 5)).Matches
+          (Target.boundary i.succ).Matches
           ((shifted.move (orient growth .right)).move
             (orient growth .right))
           (orient growth .right) (distance - 1) := by
         rw [hopposite] at hreverse
         simpa [shifted] using hreverse
       have hdistanceSub : distance - 1 =
-          RegisterLayout.values registers 3 :=
+          RegisterLayout.values registers i :=
         boundaryGap_distance_unique hreverse' hcanonical
-      have hdistance : distance = RegisterLayout.values registers 3 + 1 := by
+      have hdistance : distance = RegisterLayout.values registers i + 1 := by
         omega
       have holdLt : oldDistance < distance := by
         by_contra hnot
@@ -648,16 +1001,16 @@ theorem outwardGap_lt_layoutEnd_of_incrementTail
         have hmarked := gap.marked
         have hboundary :
             (start.moveN (orient growth .left) distance).read =
-              boundarySymbol 3 := by
+              boundarySymbol i.castSucc := by
           simpa [FullTM0.Tape.read_moveN, Target.Matches] using hmarked
         rw [hblank] at hboundary
-        exact blankSymbol_ne_boundarySymbol 3 hboundary
+        exact blankSymbol_ne_boundarySymbol i.castSucc hboundary
       rw [hdistance] at holdLt
-      have hlayout : RegisterLayout.values registers 3 + 1 <
+      have hlayout : RegisterLayout.values registers i + 1 <
           layoutEnd registers := by
-        simp [layoutEnd, RegisterLayout.clockBoundary_eq,
-          RegisterLayout.values]
-        omega
+        fin_cases i <;>
+          simp [layoutEnd, RegisterLayout.clockBoundary_eq,
+            RegisterLayout.values] <;> omega
       exact holdLt.trans hlayout
 
 private theorem immortalFrom_of_reaches
@@ -801,7 +1154,7 @@ theorem outwardFour_nonclockIncrement_logical
         simpa [incrementAfterShiftTape] using centered.shift_center
       have hinside : current.distance <
           layoutEnd centered.core.registers :=
-        outwardGap_lt_layoutEnd_of_incrementTail growth
+        outwardGap_lt_layoutEnd_of_incrementTail growth (3 : Fin 4)
           (guarded.shiftedParentBacking 4) completed.finish centered.core.tape
           current.distance later
           (MarkerSchedule.decrementStartBoundary register)
