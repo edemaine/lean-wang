@@ -184,7 +184,7 @@ theorem addFixed_reaches (register : Register) (amount offset : Nat)
 /-- The semantic transfer proof depends only on the two advertised lookup
 entries.  This version lets multiplication and division embed a transfer loop
 inside their larger dense programs. -/
-private theorem transfer_reaches_of_lookup
+theorem transfer_reaches_of_lookup
     {program : Program} {entry work exit : State}
     {source target : Register}
     (hentry : lookupInstruction program entry =
@@ -330,7 +330,7 @@ private theorem multiplyResult_after_loop
     simp_all [multiplyResult, addResult, Registers.get, Registers.set,
       Registers.decrement] <;> omega
 
-private theorem lookup_multiply_entry
+theorem lookup_multiply_entry
     {target temp : Register} {factor offset : Nat} (hfactor : 0 < factor) :
     lookupInstruction
         ((multiplyFixedBlock target temp factor).instantiate offset) offset =
@@ -341,7 +341,7 @@ private theorem lookup_multiply_entry
       (instruction := multiplyFixedInstruction target temp factor)
       (show 0 < factor + 3 by omega))
 
-private theorem lookup_multiply_add
+theorem lookup_multiply_add
     {target temp : Register} {factor offset i : Nat}
     (hi : i < factor) :
     lookupInstruction
@@ -358,7 +358,7 @@ private theorem lookup_multiply_add
       (width := factor + 3) (offset := offset)
       (instruction := multiplyFixedInstruction target temp factor) hlocal)
 
-private theorem lookup_multiply_transfer_entry
+theorem lookup_multiply_transfer_entry
     {target temp : Register} {factor offset : Nat} :
     lookupInstruction
         ((multiplyFixedBlock target temp factor).instantiate offset)
@@ -372,7 +372,7 @@ private theorem lookup_multiply_transfer_entry
       (instruction := multiplyFixedInstruction target temp factor)
       (show factor + 1 < factor + 3 by omega))
 
-private theorem lookup_multiply_transfer_work
+theorem lookup_multiply_transfer_work
     {target temp : Register} {factor offset : Nat} :
     lookupInstruction
         ((multiplyFixedBlock target temp factor).instantiate offset)
@@ -641,7 +641,7 @@ theorem divideCleanResult_get_temp
     (divideCleanResult target temp divisor registers).get temp = 0 := by
   simp [divideCleanResult, Registers.get_set_other _ (Ne.symm hne)]
 
-private theorem lookup_divide_main
+theorem lookup_divide_main
     {target temp : Register} {divisor offset state : Nat}
     (hstate : state < divisor) :
     lookupInstruction
@@ -658,7 +658,7 @@ private theorem lookup_divide_main
       (width := divisionWidth divisor) (offset := offset)
       (instruction := divideFixedInstruction target temp divisor) hsource)
 
-private theorem lookup_divide_group
+theorem lookup_divide_group
     {target temp : Register} {divisor offset : Nat} (hdivisor : 0 < divisor) :
     lookupInstruction
         ((divideFixedBlock target temp divisor).instantiate offset)
@@ -672,7 +672,7 @@ private theorem lookup_divide_group
       (width := divisionWidth divisor) (offset := offset)
       (instruction := divideFixedInstruction target temp divisor) hsource)
 
-private theorem lookup_divide_transfer_entry
+theorem lookup_divide_transfer_entry
     {target temp : Register} {divisor offset remainder : Nat}
     (hremainder : remainder < divisor) :
     lookupInstruction
@@ -716,7 +716,7 @@ private theorem lookup_divide_transfer_entry
   rw [hinstruction] at hlookup
   exact hlookup
 
-private theorem lookup_divide_transfer_work
+theorem lookup_divide_transfer_work
     {target temp : Register} {divisor offset remainder : Nat}
     (hremainder : remainder < divisor) :
     lookupInstruction
@@ -785,7 +785,7 @@ theorem subtractResult_get_other {register other : Register}
     (subtractResult register amount registers).get other = registers.get other := by
   simp [subtractResult, Registers.get_set_other registers hne]
 
-private theorem subtractResult_decrement
+theorem subtractResult_decrement
     (register : Register) (amount : Nat) (registers : Registers)
     (hbound : amount + 1 ≤ registers.get register) :
     subtractResult register amount (registers.decrement register) =
