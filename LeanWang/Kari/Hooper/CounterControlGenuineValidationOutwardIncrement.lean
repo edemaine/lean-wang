@@ -432,6 +432,53 @@ theorem bodyIncrementShift_position
     simp [MarkerShift.incrementOrder, incrementRemaining] at hlabels ⊢ <;>
     aesop
 
+/-- The first successful shift entered from a completed validation suffix
+is the pure one-cell outward move used by `firstIncrementAgreement`. -/
+theorem guardedBodyIncrement_shiftedParentBacking
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hread : T.read = boundarySymbol 4)
+    (hblank : (T.move (orient growth .right)).read = blankSymbol)
+    (expected : Fin 5) :
+    (guardedBodyIncrement base c growth source next register hrule T hread
+      hblank).shiftedParentBacking expected =
+      shiftStepTape (orient growth .left)
+        (T.move (orient growth .right)) 1 expected := by
+  let shift := bodyIncrementShift base c growth source next register hrule T
+    hread
+  let guarded := guardedBodyIncrement base c growth source next register
+    hrule T hread hblank
+  have hshiftDirection : shift.direction = orient growth .left :=
+    bodyIncrementShift_direction base c growth source next register hrule T
+      hread
+  have hopposite : NestingMachine.opposite (orient growth .left) =
+      orient growth .right := by
+    cases growth <;> rfl
+  unfold GuardedSearch.shiftedParentBacking GuardedSearch.parentOuter
+  change shiftStepTape guarded.direction
+      (guarded.current.outer.move
+        (NestingMachine.opposite guarded.direction))
+      (guarded.current.distance + 1) expected = _
+  rw [show guarded.direction = shift.direction by rfl]
+  rw [show guarded.current = shift by rfl]
+  rw [hshiftDirection, hopposite]
+  dsimp [shift]
+
+private theorem outwardFound_moveN_left
+    (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))
+    (distance : Nat) :
+    (((T.move (orient growth .right)).moveN
+      (orient growth .right) distance).moveN
+        (orient growth .left) (distance + 1)) = T := by
+  funext position
+  cases growth <;>
+    simp [orient, FullTM0.Tape.move, FullTM0.Tape.moveN,
+      FullTM0.Tape.offset] <;>
+    congr 1 <;> omega
+
 /-- Mirrored counterpart of decrement's `ShiftedAgainst.advance`: pair one
 rightward validation leg with the following leftward increment shift. -/
 theorem shiftedAgainst_retreat
@@ -1035,6 +1082,27 @@ theorem firstShift_reverse_blank
         rw [← hblank]
         apply congrArg outer
         omega
+
+/-- Looking inward from the endpoint of an outward exact gap reads blank
+at every positive distance through the old origin. -/
+theorem outwardFound_reverse_blank
+    (direction : Turing.Dir)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance back : Nat)
+    (target : Fin 5)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches outer direction distance)
+    (hpositive : 0 < back) (hback : back ≤ distance) :
+    (((outer.moveN direction distance).moveN
+      (NestingMachine.opposite direction) back).read) = blankSymbol := by
+  let index := distance - back
+  have hindex : index < distance := by
+    dsimp [index]
+    omega
+  have hblank := hgap.blank hindex
+  cases direction <;>
+    simp [NestingMachine.opposite, FullTM0.Tape.read,
+      FullTM0.Tape.moveN, FullTM0.Tape.offset, index] at hblank ⊢ <;>
+    rw [← hblank] <;> congr 1 <;> omega
 
 /-- Reverse the first remaining shifted gap.  This is the one-step geometry
 used inside the generic canonical backward theorem, exposed here because the
