@@ -58,6 +58,31 @@ theorem moveN_then_opposite_sub
       FullTM0.Tape.offset] <;>
     congr 1 <;> omega
 
+/-- A labelled boundary cannot occur at two different first-blank
+distances from the same tape. -/
+theorem boundaryGap_distance_unique
+    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
+    {first second : Nat} {target : Fin 5}
+    (firstGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches T direction first)
+    (secondGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches T direction second) :
+    first = second := by
+  by_contra hne
+  rcases lt_or_gt_of_ne hne with hlt | hlt
+  · have hblank := secondGap.blank hlt
+    have hmarked := firstGap.marked
+    rw [show T (FullTM0.Tape.offset direction first) =
+        boundarySymbol target by
+      simpa [Target.Matches] using hmarked] at hblank
+    exact blankSymbol_ne_boundarySymbol target hblank.symm
+  · have hblank := firstGap.blank hlt
+    have hmarked := secondGap.marked
+    rw [show T (FullTM0.Tape.offset direction second) =
+        boundarySymbol target by
+      simpa [Target.Matches] using hmarked] at hblank
+    exact blankSymbol_ne_boundarySymbol target hblank.symm
+
 /-- If a new boundary-centered tape agrees inward with the endpoint of an
 old outward blank gap, recentering the new tape at the old gap's origin
 reconstructs an exact gap of the same length. -/
@@ -151,6 +176,116 @@ theorem found_inward_read_blank
   rw [hsub, found_eq] at hmove
   rw [hmove]
   simpa only [FullTM0.Tape.read_moveN] using gap.blank forward_lt
+
+/-- Moving an upper boundary one cell outward preserves the entire inward
+ray at the preceding boundary.  The old rightward route gap supplies the
+missing comparison between the cleared old upper cell and the canonical
+gap, while distance uniqueness identifies the new gap length. -/
+theorem lowerBoundary_inwardAgreement_of_shiftedUpper
+    {registers : Registers} {growth : Turing.Dir} {lower : Fin 4}
+    {coreTape lowerTape oldUpper clearedUpper :
+      FullTM0.Tape (Symbol numTags)}
+    {distance : Nat}
+    (core : CoreRepresents registers growth coreTape)
+    (lower_read : lowerTape.read = boundarySymbol lower.castSucc)
+    (routeGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary lower.succ).Matches
+      (lowerTape.move (orient growth .right))
+      (orient growth .right) distance)
+    (oldUpper_eq :
+      (lowerTape.move (orient growth .right)).moveN
+        (orient growth .right) distance = oldUpper)
+    (cleared_blank : clearedUpper.read = blankSymbol)
+    (agreement : ∀ back, 0 < back →
+      (clearedUpper.moveN (orient growth .left) back).read =
+        (oldUpper.moveN (orient growth .left) back).read)
+    (cleared_canonical : clearedUpper =
+      atLogical growth coreTape (lastGapOffset registers lower)) :
+    ∀ back,
+      ((atLogical growth coreTape
+          (boundaryOffset registers lower.castSucc)).moveN
+        (orient growth .left) back).read =
+      (lowerTape.moveN (orient growth .left) back).read := by
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have oldUpper_from_lower :
+      lowerTape.moveN (orient growth .right) (distance + 1) = oldUpper := by
+    rw [← FullTM0.Tape.move_moveN]
+    exact oldUpper_eq
+  have oldUpper_back_to_lower :
+      oldUpper.moveN (orient growth .left) (distance + 1) = lowerTape := by
+    rw [← oldUpper_from_lower, ← hopposite]
+    exact CanonicalInitializerProgram.moveN_opposite lowerTape
+      (orient growth .right) (distance + 1)
+  have enlargedGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary lower.castSucc).Matches clearedUpper
+      (orient growth .left) (distance + 1) := by
+    constructor
+    · intro back hback
+      by_cases hzero : back = 0
+      · subst back
+        simpa [FullTM0.Tape.read, FullTM0.Tape.offset] using
+          cleared_blank
+      · have hpositive : 0 < back := Nat.pos_of_ne_zero hzero
+        have hle : back ≤ distance := by omega
+        have holdBlank := found_inward_read_blank routeGap oldUpper_eq
+          hpositive hle
+        rw [hopposite] at holdBlank
+        have hagreement := agreement back hpositive
+        simpa only [FullTM0.Tape.read_moveN] using
+          hagreement.trans holdBlank
+    · have hagreement := agreement (distance + 1) (by omega)
+      have holdRead :
+          (oldUpper.moveN (orient growth .left) (distance + 1)).read =
+            boundarySymbol lower.castSucc := by
+        rw [oldUpper_back_to_lower, lower_read]
+      simpa only [Target.Matches, FullTM0.Tape.read_moveN] using
+        hagreement.trans holdRead
+  have canonicalGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary lower.castSucc).Matches clearedUpper
+      (orient growth .left) (RegisterLayout.values registers lower) := by
+    have hcanonical := core.searchGap_adjacent_left lower
+    rw [← CounterControlBridge.orient_eq_orientDirection] at hcanonical
+    rw [cleared_canonical]
+    change SearchGap (fun symbol => symbol = blankSymbol)
+      (fun symbol => symbol = boundarySymbol lower.castSucc)
+      (atLogical growth coreTape (lastGapOffset registers lower))
+      (orient growth .left) (RegisterLayout.values registers lower)
+    exact hcanonical
+  have hdistance : distance + 1 = RegisterLayout.values registers lower :=
+    boundaryGap_distance_unique enlargedGap canonicalGap
+  have cleared_back_to_lower :
+      clearedUpper.moveN (orient growth .left)
+          (RegisterLayout.values registers lower) =
+        atLogical growth coreTape
+          (boundaryOffset registers lower.castSucc) := by
+    rw [cleared_canonical]
+    rw [show lastGapOffset registers lower =
+        boundaryOffset registers lower.castSucc +
+          RegisterLayout.values registers lower by
+      simp [lastGapOffset, boundaryOffset,
+        CounterLayout.boundaryPos_succ]
+      omega]
+    simp only [CounterControlBridge.orient_eq_orientDirection]
+    exact atLogical_moveN_left growth coreTape
+      (boundaryOffset registers lower.castSucc)
+      (RegisterLayout.values registers lower)
+  intro back
+  calc
+    ((atLogical growth coreTape
+        (boundaryOffset registers lower.castSucc)).moveN
+      (orient growth .left) back).read =
+        (clearedUpper.moveN (orient growth .left)
+          (RegisterLayout.values registers lower + back)).read := by
+      rw [← FullTM0.Tape.moveN_add, cleared_back_to_lower]
+    _ = (oldUpper.moveN (orient growth .left)
+          (RegisterLayout.values registers lower + back)).read :=
+      agreement _ (by rw [← hdistance]; omega)
+    _ = (oldUpper.moveN (orient growth .left)
+          ((distance + 1) + back)).read := by rw [hdistance]
+    _ = (lowerTape.moveN (orient growth .left) back).read := by
+      rw [← FullTM0.Tape.moveN_add, oldUpper_back_to_lower]
 
 /-- A positive canonical anchor followed inward to the old found endpoint
 retains the old gap margin as soon as boundary `0` is absent along the
