@@ -36,6 +36,7 @@ import LeanWang.Kari.Hooper.BasicLemma
 import LeanWang.Kari.Hooper.BasicLemmaConverse
 import LeanWang.Kari.Hooper.NestingMachine
 import LeanWang.Kari.Hooper.BoundedMarkerProgram
+import LeanWang.Kari.Hooper.BoundedMarkerContinuation
 import LeanWang.Kari.Hooper.CanonicalInitializerFrame
 import LeanWang.Kari.Hooper.CanonicalInitializerProgramComputable
 
