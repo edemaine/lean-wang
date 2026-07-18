@@ -30,12 +30,11 @@ open ShadedCarrierConcreteRoles
 open ShadedCarrierHierarchyAddressing
 open ShadedSubstitution
 open ShadedSubstitutionPlane
-open RedShadeGraphRefinement
 open Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
-theorem quadrantAt_eq_northeast_iff (x y : Nat) :
+private theorem quadrantAt_eq_northeast_iff (x y : Nat) :
     quadrantAt x y = .northeast ↔ x % 2 = 1 ∧ y % 2 = 1 := by
   have xCases : x % 2 = 0 ∨ x % 2 = 1 := by omega
   have yCases : y % 2 = 0 ∨ y % 2 = 1 := by omega
@@ -43,33 +42,28 @@ theorem quadrantAt_eq_northeast_iff (x y : Nat) :
       simp [quadrantAt, Quadrant.ofBits, hx, hy]
 
 /-- Fine quarter coordinate of an inherited northeast quarter. -/
-def liftCoordinate (coordinate : Nat) : Nat := 4 * coordinate - 3
+private def liftCoordinate (coordinate : Nat) : Nat := 4 * coordinate - 3
 
-theorem liftCoordinate_pos {coordinate : Nat} (positive : 0 < coordinate) :
-    0 < liftCoordinate coordinate := by
-  unfold liftCoordinate
-  omega
-
-theorem ceilDivFour_liftCoordinate
+private theorem ceilDivFour_liftCoordinate
     {coordinate : Nat} (positive : 0 < coordinate) :
     ShadedCarrierBorderHierarchy.ceilDivFour (liftCoordinate coordinate) =
       coordinate := by
   exact ceilDivFour_four_mul_sub_three coordinate positive
 
-theorem liftCoordinate_mod_four
+private theorem liftCoordinate_mod_four
     {coordinate : Nat} (positive : 0 < coordinate) :
     liftCoordinate coordinate % 4 = 1 := by
   unfold liftCoordinate
   omega
 
-theorem inFrame_succ_liftCoordinate
+private theorem inFrame_succ_liftCoordinate
     (depth : Nat) {coordinate : Nat} (positive : 0 < coordinate) :
     inFrame (depth + 1) (liftCoordinate coordinate) =
       inFrame depth coordinate := by
   rw [inFrame_succ_iff_ceilDivFour,
     ceilDivFour_liftCoordinate positive]
 
-theorem liftCoordinate_centerResidue
+private theorem liftCoordinate_centerResidue
     {depth coordinate : Nat} (positive : 0 < coordinate)
     (center : coordinate % period depth = 2 * scale depth + 1) :
     liftCoordinate coordinate % period (depth + 1) =
@@ -104,7 +98,7 @@ theorem liftCoordinate_centerResidue
 
 /-- For coordinates at residue one modulo four, inherited positive-depth
 frames shift up by one depth and no new depth-one owner is introduced. -/
-theorem depthAt_liftCoordinate
+private theorem depthAt_liftCoordinate
     (bound coordinate : Nat) (positive : 0 < coordinate)
     (modOne : coordinate % 4 = 1) :
     depthAt (bound + 1) (liftCoordinate coordinate) =
@@ -139,7 +133,7 @@ theorem depthAt_liftCoordinate
           by_cases inside : inFrame (bound + 1) coordinate <;>
             simp [inside]
 
-theorem onFrameBoundary_eq_false_of_liftCoordinate
+private theorem onFrameBoundary_eq_false_of_liftCoordinate
     {depth coordinate : Nat} (depthPositive : 0 < depth)
     (coordinatePositive : 0 < coordinate)
     (modOne : coordinate % 4 = 1)
@@ -171,7 +165,7 @@ theorem onFrameBoundary_eq_false_of_liftCoordinate
     rw [periodZero, modOne] at zeroResidue
     contradiction
 
-theorem horizontalCarrier_of_liftCoordinate
+private theorem horizontalCarrier_of_liftCoordinate
     {level x y : Nat} (levelPositive : 0 < level)
     (xPositive : 0 < x) (yPositive : 0 < y)
     (xMod : x % 4 = 1) (yMod : y % 4 = 1)
@@ -195,7 +189,7 @@ theorem horizontalCarrier_of_liftCoordinate
         simpa [inFrame_succ_liftCoordinate depth xPositive] using fineData.1
       simpa [isHorizontalCarrier, owner] using coarseData
 
-theorem verticalCarrier_of_liftCoordinate
+private theorem verticalCarrier_of_liftCoordinate
     {level x y : Nat} (levelPositive : 0 < level)
     (xPositive : 0 < x) (yPositive : 0 < y)
     (xMod : x % 4 = 1) (yMod : y % 4 = 1)
@@ -206,7 +200,7 @@ theorem verticalCarrier_of_liftCoordinate
     horizontalCarrier_of_liftCoordinate levelPositive yPositive xPositive
       yMod xMod fineCarrier
 
-theorem depthAt_eq_one_of_center_one
+private theorem depthAt_eq_one_of_center_one
     {bound coordinate : Nat} (boundPositive : 0 < bound)
     (center : coordinate % period 1 = 2 * scale 1 + 1) :
     depthAt bound coordinate = some 1 := by
@@ -366,7 +360,7 @@ private theorem indexZero_crossing_centered :
 
 /-- The distinguished marker quarter of every concrete seed supertile has
 logical address zero in the recursive carrier hierarchy. -/
-theorem corner_point_zero
+private theorem corner_point_zero
     (level : Nat) (i j : Fin (side level))
     (corner : ShadedSignals.routedScaffold.role
       (tileRectangle level seedNode i j) = .corner) :
@@ -427,7 +421,7 @@ theorem corner_point_zero
 
 /-- Canonical seed supertiles, equipped with their recursive integer carrier
 addresses. -/
-def seedSquareAddressing (level : Nat) :
+private def seedSquareAddressing (level : Nat) :
     RoutedPointedCarrierAddressing.SquareAddressing
       ShadedSignals.routedScaffold (side level) :=
   squareAddressingOfHierarchy

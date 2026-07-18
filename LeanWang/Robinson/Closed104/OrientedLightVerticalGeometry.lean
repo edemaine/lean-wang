@@ -32,7 +32,7 @@ variable {indexGrid : Nat -> Nat -> Index}
   {stateGrid : Nat -> Nat -> RedShades.State}
   {west east south north : Nat}
 
-theorem ValidShadeGrid.horizontal_south_has_negative_weightAt
+private theorem ValidShadeGrid.horizontal_south_has_negative_weightAt
     (valid : ValidShadeGrid indexGrid stateGrid) {x y : Nat}
     (hselected : ShadedSignals.selectedHorizontalFor
       (componentAt indexGrid x y) (quadrantAt x y) (stateGrid x y) =
@@ -43,7 +43,7 @@ theorem ValidShadeGrid.horizontal_south_has_negative_weightAt
     horizontal_south_has_negative_weight _ _ _
       (valid.allowed x y) hselected
 
-theorem ValidShadeGrid.horizontal_north_has_positive_weightAt
+private theorem ValidShadeGrid.horizontal_north_has_positive_weightAt
     (valid : ValidShadeGrid indexGrid stateGrid) {x y : Nat}
     (hselected : ShadedSignals.selectedHorizontalFor
       (componentAt indexGrid x y) (quadrantAt x y) (stateGrid x y) =
@@ -67,7 +67,7 @@ private theorem faceHeight_step_up {scan position : Nat}
   congr 2
   omega
 
-theorem CycleShade.nearest_above_selected_north
+private theorem CycleShade.nearest_above_selected_north
     (shaded : CycleShade stateGrid west east south north .light)
     (cycle : CycleOn indexGrid west east south north)
     (valid : ValidShadeGrid indexGrid stateGrid)
@@ -125,7 +125,7 @@ theorem CycleShade.nearest_above_selected_north
       (by rcases scanEq with h | h <;> omega)
       (row := boundary) (by omega) hboundaryNorth
 
-theorem CycleShade.nearest_below_selected_south
+private theorem CycleShade.nearest_below_selected_south
     (shaded : CycleShade stateGrid west east south north .light)
     (cycle : CycleOn indexGrid west east south north)
     (valid : ValidShadeGrid indexGrid stateGrid)

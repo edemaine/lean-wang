@@ -47,12 +47,12 @@ private theorem followerTablesCorrect : ∀ left right : Index,
       WangTile.VMatches (tile (components left)) (tile (components right))) := by
   native_decide
 
-theorem mem_hFollowersAt_iff (left right : Index) :
+private theorem mem_hFollowersAt_iff (left right : Index) :
     right ∈ followersAt hFollowerTable left ↔
       WangTile.HMatches (tile (components left)) (tile (components right)) :=
   (followerTablesCorrect left right).1
 
-theorem mem_vFollowersAt_iff (lower upper : Index) :
+private theorem mem_vFollowersAt_iff (lower upper : Index) :
     upper ∈ followersAt vFollowerTable lower ↔
       WangTile.VMatches (tile (components lower)) (tile (components upper)) :=
   (followerTablesCorrect lower upper).2
@@ -70,7 +70,7 @@ def compatibleRows (table : List (List Index)) : Nat → List (List Index)
       indices.flatMap fun first =>
         (rowTailsAfter table first n).map fun tail => first :: tail
 
-theorem cons_mem_rowTailsAfter
+private theorem cons_mem_rowTailsAfter
     {table : List (List Index)} {left right : Index}
     {n : Nat} {tail : List Index}
     (hright : right ∈ followersAt table left)
@@ -78,7 +78,7 @@ theorem cons_mem_rowTailsAfter
     right :: tail ∈ rowTailsAfter table left (n + 1) := by
   simp [rowTailsAfter, hright, htail]
 
-theorem cons_mem_compatibleRows
+private theorem cons_mem_compatibleRows
     {table : List (List Index)} {first : Index}
     {n : Nat} {tail : List Index}
     (hfirst : first ∈ indices)
@@ -156,7 +156,7 @@ theorem mem_northCentralRows_iff {row : List Index} :
         (components (rowCell row 2)).1 = .b := by
   simp [northCentralRows]
 
-theorem mem_centralRowPairs_iff {middle : List Index × List Index} :
+private theorem mem_centralRowPairs_iff {middle : List Index × List Index} :
     middle ∈ centralRowPairs ↔
       middle.1 ∈ southCentralRows ∧
         middle.2 ∈ northCentralRows ∧
@@ -164,7 +164,7 @@ theorem mem_centralRowPairs_iff {middle : List Index × List Index} :
   rcases middle with ⟨south, north⟩
   simp [centralRowPairs]
 
-theorem centralRowPairExtendable_eq_true_iff
+private theorem centralRowPairExtendable_eq_true_iff
     {middle : List Index × List Index} :
     centralRowPairExtendable middle = true ↔
       (∃ south ∈ fourRows,
@@ -173,7 +173,7 @@ theorem centralRowPairExtendable_eq_true_iff
         rowsVCompatible vFollowerTable middle.2 north = true) := by
   simp [centralRowPairExtendable, List.any_eq_true]
 
-theorem mem_extendableCentralRowPairs_iff
+private theorem mem_extendableCentralRowPairs_iff
     {middle : List Index × List Index} :
     middle ∈ extendableCentralRowPairs ↔
       middle ∈ centralRowPairs ∧ centralRowPairExtendable middle = true := by
@@ -219,40 +219,29 @@ theorem mem_centerParentCandidates_iff {middle : List Index × List Index}
       childIndexBlock parent = centralIndexBlock middle := by
   simp [centerParentCandidates, parentIndexBlocks, indices]
 
-def badExtendableCentralRowPairs : List (List Index × List Index) :=
-  extendableCentralRowPairs.filter fun middle =>
-    (centerParentCandidates middle).isEmpty
-
 def nonUniqueExtendableCentralRowPairs : List (List Index × List Index) :=
   extendableCentralRowPairs.filter fun middle =>
     decide ((centerParentCandidates middle).length ≠ 1)
 
-def diagnostics : Nat × Nat × Nat × Nat × Nat :=
+def diagnostics : Nat × Nat × Nat × Nat :=
   (indices.length, fourRows.length, centralRowPairs.length,
-    extendableCentralRowPairs.length, badExtendableCentralRowPairs.length)
+    extendableCentralRowPairs.length)
 
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem auditCorrect :
-    diagnostics = (104, 5440, 468, 328, 0) ∧
-      badExtendableCentralRowPairs = [] ∧
+    diagnostics = (104, 5440, 468, 328) ∧
       nonUniqueExtendableCentralRowPairs = [] := by
   native_decide
 
-theorem diagnostics_eq : diagnostics = (104, 5440, 468, 328, 0) :=
+theorem diagnostics_eq : diagnostics = (104, 5440, 468, 328) :=
   auditCorrect.1
 
-/-- Proposition 8's finite test: every extendable well-behaved center is a
-substitution image. -/
-theorem badExtendableCentralRowPairs_eq_nil :
-    badExtendableCentralRowPairs = [] :=
-  auditCorrect.2.1
-
-theorem nonUniqueExtendableCentralRowPairs_eq_nil :
+private theorem nonUniqueExtendableCentralRowPairs_eq_nil :
     nonUniqueExtendableCentralRowPairs = [] :=
-  auditCorrect.2.2
+  auditCorrect.2
 
-theorem centerParentCandidates_length_eq_one
+private theorem centerParentCandidates_length_eq_one
     {middle : List Index × List Index}
     (hmiddle : middle ∈ extendableCentralRowPairs) :
     (centerParentCandidates middle).length = 1 := by

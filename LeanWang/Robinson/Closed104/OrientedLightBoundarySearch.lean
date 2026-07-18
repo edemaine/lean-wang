@@ -20,7 +20,7 @@ namespace Closed104
 namespace OrientedLightBoundarySearch
 
 /-- A finite run of zero-weight steps leaves an integer potential unchanged. -/
-theorem potential_eq_of_zero_steps
+private theorem potential_eq_of_zero_steps
     {potential weight : Nat -> Int} {start finish : Nat}
     (startLeFinish : start <= finish)
     (step : forall position, start < position -> position <= finish ->
@@ -40,7 +40,7 @@ theorem potential_eq_of_zero_steps
       omega
 
 /-- A nearest `-1` step above a unit-height point contradicts positivity. -/
-theorem negative_step_after_false
+private theorem negative_step_after_false
     {potential weight : Nat -> Int} {start boundary : Nat}
     (startBoundary : start < boundary)
     (startHeight : potential start = 1)
@@ -61,7 +61,7 @@ theorem negative_step_after_false
 
 /-- A nearest `+1` step below a unit-height point contradicts positivity at
 the preceding point. -/
-theorem positive_step_before_false
+private theorem positive_step_before_false
     {potential weight : Nat -> Int} {boundary finish : Nat}
     (boundaryFinish : boundary <= finish)
     (finishHeight : potential finish = 1)
@@ -82,7 +82,7 @@ theorem positive_step_before_false
 
 /-- A weight seen on either side of a coordinate can be represented on the
 primary side of that coordinate or its predecessor. -/
-structure AdjacentWeightWitness
+private structure AdjacentWeightWitness
     (primary secondary : Nat → Nat → Int)
     (coordinate position : Nat) (weight : Int) where
   scan : Nat
@@ -92,7 +92,7 @@ structure AdjacentWeightWitness
     primary coordinate other = 0 → secondary coordinate other = 0 →
       primary scan other = 0
 
-noncomputable def adjacentWeightWitness
+private noncomputable def adjacentWeightWitness
     {primary secondary : Nat → Nat → Int}
     {coordinate position : Nat} {weight : Int}
     (coordinatePositive : 0 < coordinate)
@@ -221,7 +221,7 @@ theorem selected_before_eq_of_positive_rejected
           witness.boundaryWeight
           (positiveBefore witness.scan witness.scan_eq)
 
-theorem exists_first_after
+private theorem exists_first_after
     {P : Nat -> Prop} {start finish : Nat}
     (hstart : start < finish) (hfinish : P finish) :
     exists first, start < first /\ first <= finish /\ P first /\
@@ -247,7 +247,7 @@ theorem exists_first_after
   dsimp [distance] at hvalueFirst
   omega
 
-theorem exists_last_before
+private theorem exists_last_before
     {P : Nat -> Prop} {first finish : Nat}
     (hfirst : first < finish) (hfirstP : P first) :
     exists last, first <= last /\ last < finish /\ P last /\

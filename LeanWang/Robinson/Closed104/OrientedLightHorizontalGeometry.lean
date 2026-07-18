@@ -3,7 +3,9 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Closed104.OrientedLightVerticalGeometry
+import LeanWang.Robinson.Closed104.OrientedLightFreeHeight
+import LeanWang.Robinson.Closed104.OrientedLightBoundarySearch
+import LeanWang.Robinson.Closed104.ShadedObstructionGeometry
 
 /-!
 # Horizontal nearest-boundary geometry from light-wire height
@@ -30,7 +32,7 @@ variable {indexGrid : Nat -> Nat -> Index}
   {stateGrid : Nat -> Nat -> RedShades.State}
   {west east south north : Nat}
 
-theorem ValidShadeGrid.vertical_west_has_negative_weightAt
+private theorem ValidShadeGrid.vertical_west_has_negative_weightAt
     (valid : ValidShadeGrid indexGrid stateGrid) {x y : Nat}
     (hselected : ShadedSignals.selectedVerticalFor
       (componentAt indexGrid x y) (quadrantAt x y) (stateGrid x y) =
@@ -41,7 +43,7 @@ theorem ValidShadeGrid.vertical_west_has_negative_weightAt
     vertical_west_has_negative_weight _ _ _
       (valid.allowed x y) hselected
 
-theorem ValidShadeGrid.vertical_east_has_positive_weightAt
+private theorem ValidShadeGrid.vertical_east_has_positive_weightAt
     (valid : ValidShadeGrid indexGrid stateGrid) {x y : Nat}
     (hselected : ShadedSignals.selectedVerticalFor
       (componentAt indexGrid x y) (quadrantAt x y) (stateGrid x y) =
@@ -70,7 +72,7 @@ private theorem faceHeight_step_right
     at difference
   omega
 
-theorem CycleShade.nearest_right_selected_east
+private theorem CycleShade.nearest_right_selected_east
     (shaded : CycleShade stateGrid west east south north .light)
     (cycle : CycleOn indexGrid west east south north)
     (valid : ValidShadeGrid indexGrid stateGrid)
@@ -128,7 +130,7 @@ theorem CycleShade.nearest_right_selected_east
       (by rcases scanEq with h | h <;> omega)
       (by rcases scanEq with h | h <;> omega)
 
-theorem CycleShade.nearest_left_selected_west
+private theorem CycleShade.nearest_left_selected_west
     (shaded : CycleShade stateGrid west east south north .light)
     (cycle : CycleOn indexGrid west east south north)
     (valid : ValidShadeGrid indexGrid stateGrid)
