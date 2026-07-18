@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlGuardedShiftCompletion
 import LeanWang.Kari.Hooper.CounterControlGuardedParentContinuation
+import LeanWang.Kari.Hooper.CounterControlLogicalLimitContinuation
 import LeanWang.Kari.Hooper.CounterControlResumedRouteEmbedding
 
 /-!
@@ -30,6 +31,7 @@ open CounterControlGuardedParentContinuation
 open CounterControlParentContinuation CounterControlParentEmbedding
 open CounterControlResumedShiftCoordinates
 open CounterControlGuardedShiftCompletion
+open CounterControlLogicalLimitContinuation
 
 noncomputable section
 
@@ -288,6 +290,165 @@ theorem ShiftTailBackwardGeometry.prefixLength_lt_limit_sub_one_of_anchor
     omega
   rw [hcoordinate, atLogical_read] at hblank
   exact represented.target_ne_blank hblank
+
+/-! ## Empty-route increment shifts -/
+
+/-- A shift trace with no labels cannot change its tape. -/
+theorem shiftTailGaps_finish_eq_start_of_labels_eq_nil
+    {direction : Turing.Dir} {labels : List (Fin 5)}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (trace : ShiftTailGaps direction labels start finish)
+    (hlabels : labels = []) :
+    finish = start := by
+  subst labels
+  cases trace
+  rfl
+
+/-- The empty increment-recovery route is the singleton clock shift.  At its
+logical endpoint, the guarded caller's blank prefix therefore lies strictly
+before the reconstructed core's first obstruction. -/
+private theorem incrementLogical_distance_lt_limit_sub_one
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (direct : IncrementDirectHandoff current growth source register next)
+    (hroute : AnchoredCounterGeometry.routeFromIncrement register = [])
+    (registers : Registers) (limit : Nat) (target : Target numTags)
+    (coreTape : FullTM0.Tape (Symbol numTags))
+    (represented : CoreTargetRepresents registers growth limit target
+      coreTape)
+    (hcenter : incrementAfterShiftTape direct.suffix =
+      atLogical growth coreTape (layoutEnd registers)) :
+    current.current.distance < limit - 1 := by
+  have hregister : register = .clock := by
+    cases register <;>
+      simp_all [AnchoredCounterGeometry.routeFromIncrement]
+  subst register
+  have hdirection : current.direction = orient growth .left := by
+    have hdirection := current.selectedRaw_direction_eq
+    rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+      at hdirection
+    rw [direct.suffix.position.raw_eq] at hdirection
+    exact hdirection.symm
+  have hopposite : NestingMachine.opposite (orient growth .left) =
+      orient growth .right := by
+    cases growth <;> rfl
+  have hlength := congrArg List.length
+    direct.suffix.position.labels_eq
+  simp [MarkerShift.incrementOrder] at hlength
+  have hremainingLength :
+      direct.suffix.position.remaining.length = 0 := by
+    omega
+  have hremaining : direct.suffix.position.remaining = [] :=
+    List.length_eq_zero_iff.mp hremainingLength
+  have hfinish : direct.suffix.finish =
+      current.shiftedParentBacking direct.suffix.position.current :=
+    shiftTailGaps_finish_eq_start_of_labels_eq_nil
+      direct.suffix.tailGaps hremaining
+  have hshifted :
+      current.shiftedParentBacking direct.suffix.position.current =
+        shiftStepTape (orient growth .left) current.parentOuter
+          (current.current.distance + 1)
+          direct.suffix.position.current := by
+    unfold GuardedSearch.shiftedParentBacking
+    rw [hdirection]
+  let geometry : ShiftTailBackwardGeometry (orient growth .left) []
+      (shiftStepTape (orient growth .left) current.parentOuter
+        (current.current.distance + 1)
+        direct.suffix.position.current)
+      direct.suffix.finish := ⟨0, by
+    intro back
+    rw [hfinish, hshifted]
+    simp, by
+    intro forbidden hstart _ back hback
+    have hbackZero : back = 0 := by omega
+    subst back
+    simpa [hfinish, hshifted] using hstart⟩
+  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary direct.suffix.position.current).Matches
+      current.parentOuter (orient growth .left)
+      (current.current.distance + 1) := by
+    have hgap := current.parentGap
+    rw [← current.compileRawCommand_selectedRaw,
+      CounterControlCommandAt.compileRawCommand_spec] at hgap
+    rw [hdirection] at hgap
+    simpa [direct.suffix.position.raw_eq,
+      CounterControlCommandAt.compileRawAtTag, Command.target,
+      Command.searchDirection] using hgap
+  have hcenter' :
+      direct.suffix.finish.move
+          (NestingMachine.opposite (orient growth .left)) =
+        atLogical growth coreTape (layoutEnd registers) := by
+    rw [hopposite]
+    simpa [incrementAfterShiftTape] using hcenter
+  apply geometry.prefixLength_lt_limit_sub_one_of_anchor hgap registers
+    limit target represented (layoutEnd registers)
+  · simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+  · simp [geometry]
+  · exact hopposite
+  · exact hcenter'
+  · omega
+
+/-- A completed guarded increment whose recovery route is empty (necessarily
+the clock increment) reaches a strictly larger guarded caller after logical
+reconstruction and cleanup. -/
+theorem incrementLogical_foundGuardedEscapeOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (direct : IncrementDirectHandoff current growth source register next)
+    (hroute : AnchoredCounterGeometry.routeFromIncrement register = []) :
+    Nonempty (FoundGuardedEscapeOutcome current) := by
+  have hlogical := direct.reachesLogical_of_route_eq_nil hroute
+  have himmortalLogical : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      ⟨logicalState base c growth next,
+        incrementAfterShiftTape direct.suffix⟩ := by
+    rw [FullTM0.HaltsFrom.immortalFrom_iff_not]
+    intro hhalts
+    rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal
+    exact himmortal (FullTM0.HaltsFrom.of_reaches hlogical hhalts)
+  change FullTM0.ImmortalFrom
+    (CounterControlNestingBridge.machine base c)
+    ⟨logicalState base c growth next,
+      incrementAfterShiftTape direct.suffix⟩ at himmortalLogical
+  rcases CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
+      base c hmortal growth next direct.target_lt
+      (incrementAfterShiftTape direct.suffix) himmortalLogical with
+    ⟨instruction, registers, coreTape, limit, target, _hrule, hcore,
+      hcoreBefore, hrunway, htarget, hcenter, _hbody⟩
+  let represented : CoreTargetRepresents registers growth limit target
+      coreTape := {
+    toCorePrefixRepresents := {
+      toCoreRepresents := hcore
+      core_before_limit := hcoreBefore
+      runway := hrunway }
+    target_matches := htarget }
+  let core : LogicalCore base c := {
+    growth := growth
+    source := next
+    source_lt := direct.target_lt
+    registers := registers
+    tape := coreTape
+    limit := limit
+    target := target
+    represented := represented }
+  have hdistance : current.current.distance < limit - 1 :=
+    incrementLogical_distance_lt_limit_sub_one current growth source
+      register next direct hroute registers limit target coreTape represented
+      hcenter
+  have hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current) core.cfg := by
+    rw [hcenter] at hlogical
+    simpa [core, LogicalCore.cfg, LogicalCore.frame,
+      LogicalCore.abstract, prefixLogicalCfg] using hlogical
+  exact foundGuardedEscapeOutcome_of_logicalLimit base c hmortal current core
+    hreaches hdistance himmortal
 
 private theorem decrementOrder_label_ne_zero
     (register : Register) (label : Fin 5)
