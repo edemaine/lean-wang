@@ -16,6 +16,7 @@ import LeanWang.Kari.Hooper.SourceControl
 import LeanWang.Kari.Hooper.SourceProgram
 import LeanWang.Kari.Hooper.SourceRegisterSemantics
 import LeanWang.Kari.Hooper.GlobalSourceProgram
+import LeanWang.Kari.Hooper.GlobalSourceSemantics
 import LeanWang.Kari.Hooper.CounterLiveness
 import LeanWang.Kari.Hooper.SearchGeometry
 import LeanWang.Kari.Hooper.CounterLayout
