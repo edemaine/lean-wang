@@ -51,13 +51,14 @@ theorem install_openRepresents_of_blankRay
       hpast]
     simpa using hblank position
 
-/-- The initializer path is enabled after an exhausted scan of an infinite
-blank ray.  Unlike the framed theorem, this statement needs no outer target. -/
-theorem instructions_executes_of_blankRay
+/-- The initializer path is enabled whenever the complete private scan
+prefix is blank.  No outer target is needed. -/
+theorem instructions_executes_of_blankPrefix
     (c : Nat.Partrec.Code) (command : Command numTags)
     (outer : FullTM0.Tape (Symbol numTags))
-    (hblank : BlankRay (fun symbol => symbol = blankSymbol) outer
-      command.searchDirection) :
+    (hblank : ∀ position ≤
+      NestingMachine.bound (CanonicalInitializer.radius c),
+      (outer.moveN command.searchDirection position).read = blankSymbol) :
     FiniteTM0Path.Executes
       (CanonicalInitializerProgram.instructions c command.searchDirection
         command.returnTag)
@@ -69,7 +70,7 @@ theorem instructions_executes_of_blankRay
   let prefixLength := NestingMachine.bound (CanonicalInitializer.radius c)
   have hfarBlank :
       (outer.moveN command.searchDirection prefixLength).read = blankSymbol := by
-    simpa [FullTM0.Tape.read] using hblank prefixLength
+    exact hblank prefixLength (by simp [prefixLength])
   have hcleared :
       ((outer.moveN command.searchDirection prefixLength).write
           (tagSymbol command.returnTag)).write blankSymbol =
@@ -88,7 +89,8 @@ theorem instructions_executes_of_blankRay
           blankSymbol := by
     intro i hi
     have hle : i ≤ prefixLength := Nat.le_of_lt hi
-    have hsource := hblank (prefixLength - i)
+    have hsource := hblank (prefixLength - i) (by
+      simp [prefixLength])
     cases hdirection : command.searchDirection with
     | left =>
         rw [hdirection] at hsource
@@ -112,13 +114,146 @@ theorem instructions_executes_of_blankRay
   rw [CanonicalInitializerProgram.moveN_opposite] at hretreat
   have hprefixBlank : ∀ position ≤ CanonicalInitializer.span c,
       (outer.moveN command.searchDirection position).read = blankSymbol := by
-    intro position _hposition
-    simpa [FullTM0.Tape.read] using hblank position
+    intro position hposition
+    apply hblank position
+    exact hposition.trans (by
+      simp [CanonicalInitializer.radius, NestingMachine.bound])
   have hplace := CanonicalInitializerProgram.placement_executes c
     command.searchDirection command.returnTag outer hprefixBlank
   rw [hcleared]
   simpa [CanonicalInitializerProgram.instructions, prefixLength] using
     CanonicalInitializerProgram.executes_append hretreat hplace
+
+/-- Infinite blank rays supply the finite blank prefix required by the
+initializer. -/
+theorem instructions_executes_of_blankRay
+    (c : Nat.Partrec.Code) (command : Command numTags)
+    (outer : FullTM0.Tape (Symbol numTags))
+    (hblank : BlankRay (fun symbol => symbol = blankSymbol) outer
+      command.searchDirection) :
+    FiniteTM0Path.Executes
+      (CanonicalInitializerProgram.instructions c command.searchDirection
+        command.returnTag)
+      (((outer.moveN command.searchDirection
+          (NestingMachine.bound (CanonicalInitializer.radius c))).write
+            (tagSymbol command.returnTag)).write blankSymbol)
+      (CanonicalInitializerProgram.resultTape c command.searchDirection
+        command.returnTag outer) := by
+  apply instructions_executes_of_blankPrefix c command outer
+  intro position _hposition
+  simpa [FullTM0.Tape.read] using hblank position
+
+/-- Tape installed by the shared initializer after the selected search has
+exhausted its private scan. -/
+def initializedTape (base : Nat) (c : Nat.Partrec.Code) (search : Search)
+    (outer : FullTM0.Tape (Symbol numTags)) :
+    FullTM0.Tape (Symbol numTags) :=
+  FramedMarkerTape.install (CanonicalInitializer.registers c)
+    (command base c search).searchDirection
+    (command base c search).returnTag outer
+
+/-- Exact canonical logical endpoint of a completed selected initializer. -/
+def initializedCfg (base : Nat) (c : Nat.Partrec.Code) (search : Search)
+    (outer : FullTM0.Tape (Symbol numTags)) :
+    FullTM0.Cfg (Symbol numTags) FiniteTM0.State :=
+  ⟨canonicalEntry base c (command base c search).searchDirection,
+    FramedMarkerTape.atLogical (command base c search).searchDirection
+      (initializedTape base c search outer) (CanonicalInitializer.span c)⟩
+
+/-- A blank private-scan prefix is sufficient to carry an exact launch
+through tag dispatch and canonical initialization. -/
+theorem launch_reaches_initialized_of_blankPrefix
+    (base : Nat) (c : Nat.Partrec.Code) (search : Search)
+    (outer : FullTM0.Tape (Symbol numTags))
+    (hblank : ∀ position ≤
+      NestingMachine.bound (CanonicalInitializer.radius c),
+      (outer.moveN (command base c search).searchDirection position).read =
+        blankSymbol) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (exhaustedLaunchCfg base c search outer)
+      (initializedCfg base c search outer) := by
+  let radius := CanonicalInitializer.radius c
+  let commandOffset := CounterControlSearchSystem.commandOffset base c search
+  let selected := command base c search
+  let bound := NestingMachine.bound radius
+  let launchTape := outer.moveN selected.searchDirection bound
+  have hat : CommandAt radius base commandOffset selected (commands base c) := by
+    simpa [radius, commandOffset, selected, command,
+      CounterControlSearchSystem.commandOffset] using
+      (CounterControlWellFormed.compileCommand_commandAt base c search)
+  have hlaunchBlank : launchTape.read = blankSymbol := by
+    simpa [launchTape, selected, bound, radius] using
+      hblank (NestingMachine.bound (CanonicalInitializer.radius c))
+        (Nat.le_refl _)
+  have hcontinuationLocal :=
+    BoundedMarkerProgram.continuation_reaches_core_native radius commandOffset
+      (BoundedMarkerProgram.coreEntry base radius (commands base c)) selected
+      launchTape hlaunchBlank
+  have hcontinuation :=
+    BoundedMarkerContinuation.machine_reaches_of_continuation
+      (coreTable base c) hat hcontinuationLocal
+  have htoCore : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (exhaustedLaunchCfg base c search outer)
+      ⟨controllerCoreEntry base c,
+        launchTape.write (tagSymbol selected.returnTag)⟩ := by
+    simpa [exhaustedLaunchCfg, launchTape, selected, commandOffset, radius,
+      bound, CounterControlNestingBridge.machine,
+      controllerCoreEntry_eq base c] using hcontinuation
+  have hexec : FiniteTM0Path.Executes
+      (CanonicalInitializerProgram.instructions c selected.searchDirection
+        selected.returnTag)
+      ((launchTape.write (tagSymbol selected.returnTag)).write blankSymbol)
+      (CanonicalInitializerProgram.resultTape c selected.searchDirection
+        selected.returnTag outer) := by
+    simpa [launchTape, selected, bound, radius] using
+      instructions_executes_of_blankPrefix c selected outer (by
+        simpa [selected] using hblank)
+  have hgrowth : initializerGrowth selected.returnTag =
+      selected.searchDirection := by
+    dsimp [selected, command]
+    rw [compileCommand_returnTag]
+    exact (compileCommand_searchDirection base c search).symm
+  have hinitializerLocal : FullTM0.Reaches
+      (FiniteTM0.machine (initializerTable base c))
+      ⟨controllerCoreEntry base c,
+        launchTape.write (tagSymbol selected.returnTag)⟩
+      ⟨initializerExitFor base c selected.returnTag,
+        CanonicalInitializerProgram.resultTape c selected.searchDirection
+          selected.returnTag outer⟩ := by
+    apply CanonicalInitializerProgram.table_reaches_exit
+      (controllerCoreEntry base c) c initializerGrowth
+      (initializerExitFor base c) selected.returnTag
+    · simp
+    · rw [hgrowth]
+      exact hexec
+    · simp [CanonicalInitializerProgram.resultTape]
+  have hinitializer :=
+    CounterControlNestingBridge.initializer_reaches_in_machine base c
+      hinitializerLocal
+  have hprefixBlank : ∀ position ≤ CanonicalInitializer.span c,
+      (outer.moveN selected.searchDirection position).read = blankSymbol := by
+    intro position hposition
+    apply hblank position
+    exact hposition.trans (by
+      simp [CanonicalInitializer.radius, NestingMachine.bound])
+  have hresult :
+      CanonicalInitializerProgram.resultTape c selected.searchDirection
+          selected.returnTag outer =
+        FramedMarkerTape.atLogical selected.searchDirection
+          (initializedTape base c search outer)
+          (CanonicalInitializer.span c) := by
+    simpa [initializedTape, selected] using
+      (CanonicalInitializerFrame.resultTape_eq_atLogical_install c
+        selected.searchDirection selected.returnTag outer hprefixBlank)
+  have htarget : initializedCfg base c search outer =
+      ⟨initializerExitFor base c selected.returnTag,
+        CanonicalInitializerProgram.resultTape c selected.searchDirection
+          selected.returnTag outer⟩ := by
+    simp [initializedCfg, selected, initializerExitFor, hgrowth, hresult]
+  have hinitializer' := hinitializer
+  rw [← htarget] at hinitializer'
+  exact htoCore.trans hinitializer'
 
 /-- From the exact launch state of a blank-ray search, the complete linked
 machine reaches the canonical target-free open logical configuration. -/
