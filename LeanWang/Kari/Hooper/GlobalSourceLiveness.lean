@@ -325,7 +325,7 @@ theorem compileAction_entry_reaches_logical
 
 /-! ## Whole-program cycle laws -/
 
-private theorem canonical_not_source_of_machine_none
+theorem canonical_not_source_of_machine_none
     (key : SourceKey)
     (hmachine : SourceMachine.machine
       (SourceControl.decodeStateFin key.1)
@@ -352,6 +352,24 @@ private theorem canonical_not_source_of_machine_none
     have hspanOffset : controlSpan ≤ actionOffset other :=
       Nat.le_add_right controlSpan (keyIndex other * actionStride)
     exact (Nat.not_lt_of_ge (hspanOffset.trans hprivate.1)) hcontrol
+
+/-- A canonical counter configuration whose represented source transition is
+undefined is terminal in the compiled global counter program. -/
+theorem step_logical_eq_none_of_registerStep_none
+    (cfg : SourceControl.RegisterCfg) (clock : Nat)
+    (hterminal : SourceControl.registerStep cfg = none) :
+    step program
+      ⟨controlCode cfg.state cfg.tape.head,
+        logicalRegisters cfg.tape clock⟩ = none := by
+  have hmachine : SourceMachine.machine cfg.state cfg.tape.head = none := by
+    simpa [SourceControl.registerStep] using hterminal
+  let key : SourceKey :=
+    (SourceControl.encodeStateFin cfg.state,
+      SourceControl.encodeSymbol cfg.tape.head)
+  apply step_eq_none_of_state_not_mem
+  have hnot := canonical_not_source_of_machine_none key (by
+    simpa [key] using hmachine)
+  simpa [key] using hnot
 
 /-- Every logical boundary either executes one complete source action and
 ticks the clock, or is a genuine source halt. -/

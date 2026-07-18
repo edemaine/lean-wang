@@ -20,6 +20,7 @@ import LeanWang.Kari.Hooper.GlobalSourceProgram
 import LeanWang.Kari.Hooper.GlobalSourceSemantics
 import LeanWang.Kari.Hooper.CounterLiveness
 import LeanWang.Kari.Hooper.GlobalSourceLiveness
+import LeanWang.Kari.Hooper.GlobalSourceMortality
 import LeanWang.Kari.Hooper.SearchGeometry
 import LeanWang.Kari.Hooper.CounterLayout
 import LeanWang.Kari.Hooper.RegisterLayout
@@ -77,6 +78,8 @@ anchors, concrete finite-table marker programs with
 independently directed searches and shifts,
 relocatable and reflectable finite tables, a verified finite-table linker,
 concrete arbitrary-entry liveness laws for the complete fixed source program,
+and a designated finite execution to a genuine counter-program halt whenever
+the fixed source computation is mortal,
 a deterministic, uniformly primitive-recursive tagged controller for a finite
 family of bounded searches,
 an executable uniformly computable tag-sensitive canonical initializer with
