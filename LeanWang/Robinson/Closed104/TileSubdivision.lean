@@ -215,31 +215,25 @@ theorem subdivideTileAt_primrec :
   have hnH : Primrec
       (fun p : WangTile × Quadrant => horizontalEdgeColor (x p) (t p).n) :=
     horizontalEdgeColor_primrec₂.comp hx (WangTile.n_primrec.comp ht)
-  have hnI : Primrec
+  have hHorizontalInternal : Primrec
       (fun p : WangTile × Quadrant => internalHorizontalColor (t p) (x p)) :=
     internalHorizontalColor_primrec₂.comp ht hx
-  have hn : Primrec nFn := Primrec.cond hy hnH hnI
-  have hsI : Primrec
-      (fun p : WangTile × Quadrant => internalHorizontalColor (t p) (x p)) :=
-    internalHorizontalColor_primrec₂.comp ht hx
+  have hn : Primrec nFn := Primrec.cond hy hnH hHorizontalInternal
   have hsH : Primrec
       (fun p : WangTile × Quadrant => horizontalEdgeColor (x p) (t p).s) :=
     horizontalEdgeColor_primrec₂.comp hx (WangTile.s_primrec.comp ht)
-  have hs : Primrec sFn := Primrec.cond hy hsI hsH
+  have hs : Primrec sFn := Primrec.cond hy hHorizontalInternal hsH
   have heV : Primrec
       (fun p : WangTile × Quadrant => verticalEdgeColor (y p) (t p).e) :=
     verticalEdgeColor_primrec₂.comp hy (WangTile.e_primrec.comp ht)
-  have heI : Primrec
+  have hVerticalInternal : Primrec
       (fun p : WangTile × Quadrant => internalVerticalColor (t p) (y p)) :=
     internalVerticalColor_primrec₂.comp ht hy
-  have he : Primrec eFn := Primrec.cond hx heV heI
-  have hwI : Primrec
-      (fun p : WangTile × Quadrant => internalVerticalColor (t p) (y p)) :=
-    internalVerticalColor_primrec₂.comp ht hy
+  have he : Primrec eFn := Primrec.cond hx heV hVerticalInternal
   have hwV : Primrec
       (fun p : WangTile × Quadrant => verticalEdgeColor (y p) (t p).w) :=
     verticalEdgeColor_primrec₂.comp hy (WangTile.w_primrec.comp ht)
-  have hw : Primrec wFn := Primrec.cond hx hwI hwV
+  have hw : Primrec wFn := Primrec.cond hx hVerticalInternal hwV
   have htuple : Primrec
       (fun p : WangTile × Quadrant => (nFn p, sFn p, eFn p, wFn p)) :=
     Primrec.pair hn (Primrec.pair hs (Primrec.pair he hw))
@@ -285,49 +279,35 @@ theorem subdivideTileAt_mem_subdivideTileSet {T : TileSet} {t : WangTile}
   rw [subdivideTile]
   exact List.mem_map.2 ⟨q, Quadrant.mem_all q, rfl⟩
 
-theorem hMatches_southwest_southeast (t : WangTile) :
+theorem hMatches_west_east (t : WangTile) (y : Bool) :
     WangTile.HMatches
-      (subdivideTileAt t .southwest) (subdivideTileAt t .southeast) :=
-  rfl
+      (subdivideTileAt t (Quadrant.ofBits (false, y)))
+      (subdivideTileAt t (Quadrant.ofBits (true, y))) := by
+  cases y <;> rfl
 
-theorem hMatches_northwest_northeast (t : WangTile) :
-    WangTile.HMatches
-      (subdivideTileAt t .northwest) (subdivideTileAt t .northeast) :=
-  rfl
-
-theorem vMatches_southwest_northwest (t : WangTile) :
+theorem vMatches_south_north (t : WangTile) (x : Bool) :
     WangTile.VMatches
-      (subdivideTileAt t .southwest) (subdivideTileAt t .northwest) :=
-  rfl
+      (subdivideTileAt t (Quadrant.ofBits (x, false)))
+      (subdivideTileAt t (Quadrant.ofBits (x, true))) := by
+  cases x <;> rfl
 
-theorem vMatches_southeast_northeast (t : WangTile) :
-    WangTile.VMatches
-      (subdivideTileAt t .southeast) (subdivideTileAt t .northeast) :=
-  rfl
-
-theorem hMatches_northeast_northwest_of_hMatches {left right : WangTile}
+theorem hMatches_east_west_of_hMatches {left right : WangTile} (y : Bool)
     (h : WangTile.HMatches left right) :
     WangTile.HMatches
-      (subdivideTileAt left .northeast) (subdivideTileAt right .northwest) := by
-  simpa [WangTile.HMatches, subdivideTileAt, verticalEdgeColor] using h
+      (subdivideTileAt left (Quadrant.ofBits (true, y)))
+      (subdivideTileAt right (Quadrant.ofBits (false, y))) := by
+  cases y <;>
+    simpa [WangTile.HMatches, subdivideTileAt, verticalEdgeColor,
+      Quadrant.ofBits] using h
 
-theorem hMatches_southeast_southwest_of_hMatches {left right : WangTile}
-    (h : WangTile.HMatches left right) :
-    WangTile.HMatches
-      (subdivideTileAt left .southeast) (subdivideTileAt right .southwest) := by
-  simpa [WangTile.HMatches, subdivideTileAt, verticalEdgeColor] using h
-
-theorem vMatches_northwest_southwest_of_vMatches {lower upper : WangTile}
+theorem vMatches_north_south_of_vMatches {lower upper : WangTile} (x : Bool)
     (h : WangTile.VMatches lower upper) :
     WangTile.VMatches
-      (subdivideTileAt lower .northwest) (subdivideTileAt upper .southwest) := by
-  simpa [WangTile.VMatches, subdivideTileAt, horizontalEdgeColor] using h
-
-theorem vMatches_northeast_southeast_of_vMatches {lower upper : WangTile}
-    (h : WangTile.VMatches lower upper) :
-    WangTile.VMatches
-      (subdivideTileAt lower .northeast) (subdivideTileAt upper .southeast) := by
-  simpa [WangTile.VMatches, subdivideTileAt, horizontalEdgeColor] using h
+      (subdivideTileAt lower (Quadrant.ofBits (x, true)))
+      (subdivideTileAt upper (Quadrant.ofBits (x, false))) := by
+  cases x <;>
+    simpa [WangTile.VMatches, subdivideTileAt, horizontalEdgeColor,
+      Quadrant.ofBits] using h
 
 set_option linter.flexible false in
 theorem hMatches_subdivideTileAt_iff
@@ -532,40 +512,20 @@ theorem validPlaneTiling_subdivideTileSet_of_validPlaneTiling {T : TileSet}
         intParityBit_eq_false_of_emod_eq_zero hx0
       have hbit' : intParityBit (p.1 + 1) = true :=
         intParityBit_succ_eq_true_of_emod_eq_zero hx0
-      rcases Int.emod_two_eq_zero_or_one p.2 with hy0 | hy1
-      · have hybit : intParityBit p.2 = false :=
-          intParityBit_eq_false_of_emod_eq_zero hy0
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hybit, Quadrant.ofBits] using
-          hMatches_southwest_southeast ((x (p.1 / 2, p.2 / 2)).1)
-      · have hybit : intParityBit p.2 = true :=
-          intParityBit_eq_true_of_emod_eq_one hy1
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hybit, Quadrant.ofBits] using
-          hMatches_northwest_northeast ((x (p.1 / 2, p.2 / 2)).1)
+      simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+        hbit'] using hMatches_west_east
+          ((x (p.1 / 2, p.2 / 2)).1) (intParityBit p.2)
     · have hdiv : (p.1 + 1) / 2 = p.1 / 2 + 1 :=
         succ_div_two_of_emod_eq_one hx1
       have hbit : intParityBit p.1 = true :=
         intParityBit_eq_true_of_emod_eq_one hx1
       have hbit' : intParityBit (p.1 + 1) = false :=
         intParityBit_succ_eq_false_of_emod_eq_one hx1
-      rcases Int.emod_two_eq_zero_or_one p.2 with hy0 | hy1
-      · have hybit : intParityBit p.2 = false :=
-          intParityBit_eq_false_of_emod_eq_zero hy0
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hybit, Quadrant.ofBits] using
-          hMatches_southeast_southwest_of_hMatches
-            (left := (x (p.1 / 2, p.2 / 2)).1)
-            (right := (x (p.1 / 2 + 1, p.2 / 2)).1)
-            (hx.1 (p.1 / 2, p.2 / 2))
-      · have hybit : intParityBit p.2 = true :=
-          intParityBit_eq_true_of_emod_eq_one hy1
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hybit, Quadrant.ofBits] using
-          hMatches_northeast_northwest_of_hMatches
-            (left := (x (p.1 / 2, p.2 / 2)).1)
-            (right := (x (p.1 / 2 + 1, p.2 / 2)).1)
-            (hx.1 (p.1 / 2, p.2 / 2))
+      simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+        hbit'] using hMatches_east_west_of_hMatches
+          (left := (x (p.1 / 2, p.2 / 2)).1)
+          (right := (x (p.1 / 2 + 1, p.2 / 2)).1)
+          (intParityBit p.2) (hx.1 (p.1 / 2, p.2 / 2))
   · intro p
     rcases Int.emod_two_eq_zero_or_one p.2 with hy0 | hy1
     · have hdiv : (p.2 + 1) / 2 = p.2 / 2 :=
@@ -574,40 +534,20 @@ theorem validPlaneTiling_subdivideTileSet_of_validPlaneTiling {T : TileSet}
         intParityBit_eq_false_of_emod_eq_zero hy0
       have hbit' : intParityBit (p.2 + 1) = true :=
         intParityBit_succ_eq_true_of_emod_eq_zero hy0
-      rcases Int.emod_two_eq_zero_or_one p.1 with hx0 | hx1
-      · have hxbit : intParityBit p.1 = false :=
-          intParityBit_eq_false_of_emod_eq_zero hx0
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hxbit, Quadrant.ofBits] using
-          vMatches_southwest_northwest ((x (p.1 / 2, p.2 / 2)).1)
-      · have hxbit : intParityBit p.1 = true :=
-          intParityBit_eq_true_of_emod_eq_one hx1
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hxbit, Quadrant.ofBits] using
-          vMatches_southeast_northeast ((x (p.1 / 2, p.2 / 2)).1)
+      simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+        hbit'] using vMatches_south_north
+          ((x (p.1 / 2, p.2 / 2)).1) (intParityBit p.1)
     · have hdiv : (p.2 + 1) / 2 = p.2 / 2 + 1 :=
         succ_div_two_of_emod_eq_one hy1
       have hbit : intParityBit p.2 = true :=
         intParityBit_eq_true_of_emod_eq_one hy1
       have hbit' : intParityBit (p.2 + 1) = false :=
         intParityBit_succ_eq_false_of_emod_eq_one hy1
-      rcases Int.emod_two_eq_zero_or_one p.1 with hx0 | hx1
-      · have hxbit : intParityBit p.1 = false :=
-          intParityBit_eq_false_of_emod_eq_zero hx0
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hxbit, Quadrant.ofBits] using
-          vMatches_northwest_southwest_of_vMatches
-            (lower := (x (p.1 / 2, p.2 / 2)).1)
-            (upper := (x (p.1 / 2, p.2 / 2 + 1)).1)
-            (hx.2 (p.1 / 2, p.2 / 2))
-      · have hxbit : intParityBit p.1 = true :=
-          intParityBit_eq_true_of_emod_eq_one hx1
-        simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
-          hbit', hxbit, Quadrant.ofBits] using
-          vMatches_northeast_southeast_of_vMatches
-            (lower := (x (p.1 / 2, p.2 / 2)).1)
-            (upper := (x (p.1 / 2, p.2 / 2 + 1)).1)
-            (hx.2 (p.1 / 2, p.2 / 2))
+      simpa [subdividedPlaneTiling, macroPoint, pointQuadrant, hdiv, hbit,
+        hbit'] using vMatches_north_south_of_vMatches
+          (lower := (x (p.1 / 2, p.2 / 2)).1)
+          (upper := (x (p.1 / 2, p.2 / 2 + 1)).1)
+          (intParityBit p.1) (hx.2 (p.1 / 2, p.2 / 2))
 
 theorem tilesPlane_subdivideTileSet_of_tilesPlane {T : TileSet} :
     TilesPlane T → TilesPlane (subdivideTileSet T) := by

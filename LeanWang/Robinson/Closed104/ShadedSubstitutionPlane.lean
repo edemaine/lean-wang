@@ -52,33 +52,17 @@ theorem quarter_hmatch (level : Nat) (root : Node) (x y : Nat)
     have parentMatch :=
       (supertileNodeGrid_compatible level root).hmatch
         (x / 2) (y / 2) hxParent hyParent |>.1
-    have hyCases : y % 2 = 0 ∨ y % 2 = 1 := by omega
-    rcases hyCases with hyZero | hyOne
-    · simpa [Quarters.quarterTile, supertileIndexGrid, quadrantAt,
-        Quadrant.ofBits,
-        hboundary, hnextDiv, hnextMod, hyZero] using
-        TileSubdivision.hMatches_southeast_southwest_of_hMatches parentMatch
-    · simpa [Quarters.quarterTile, supertileIndexGrid, quadrantAt,
-        Quadrant.ofBits,
-        hboundary, hnextDiv, hnextMod, hyOne] using
-        TileSubdivision.hMatches_northeast_northwest_of_hMatches parentMatch
+    simpa [Quarters.quarterTile, supertileIndexGrid, quadrantAt,
+      hboundary, hnextDiv, hnextMod] using
+      TileSubdivision.hMatches_east_west_of_hMatches
+        (y % 2 == 1) parentMatch
   · have hxZero : x % 2 = 0 := by omega
     have hnextDiv : (x + 1) / 2 = x / 2 := by omega
     have hnextMod : (x + 1) % 2 = 1 := by omega
-    have hyCases : y % 2 = 0 ∨ y % 2 = 1 := by omega
-    rcases hyCases with hyZero | hyOne
-    · simpa [Quarters.quarterTile, quadrantAt, Quadrant.ofBits,
-        hxZero, hnextDiv,
-        hnextMod, hyZero] using
-        TileSubdivision.hMatches_southwest_southeast
-          (tile (components
-            (supertileIndexGrid level root (x / 2) (y / 2))))
-    · simpa [Quarters.quarterTile, quadrantAt, Quadrant.ofBits,
-        hxZero, hnextDiv,
-        hnextMod, hyOne] using
-        TileSubdivision.hMatches_northwest_northeast
-          (tile (components
-            (supertileIndexGrid level root (x / 2) (y / 2))))
+    simpa [Quarters.quarterTile, quadrantAt, hxZero, hnextDiv, hnextMod] using
+      TileSubdivision.hMatches_west_east
+        (tile (components (supertileIndexGrid level root (x / 2) (y / 2))))
+        (y % 2 == 1)
 
 /-- The corrected quarter tiles match vertically in every bounded substitution
 supertile. -/
@@ -100,33 +84,17 @@ theorem quarter_vmatch (level : Nat) (root : Node) (x y : Nat)
     have parentMatch :=
       (supertileNodeGrid_compatible level root).vmatch
         (x / 2) (y / 2) hxParent hyParent |>.1
-    have hxCases : x % 2 = 0 ∨ x % 2 = 1 := by omega
-    rcases hxCases with hxZero | hxOne
-    · simpa [Quarters.quarterTile, supertileIndexGrid, quadrantAt,
-        Quadrant.ofBits,
-        hboundary, hnextDiv, hnextMod, hxZero] using
-        TileSubdivision.vMatches_northwest_southwest_of_vMatches parentMatch
-    · simpa [Quarters.quarterTile, supertileIndexGrid, quadrantAt,
-        Quadrant.ofBits,
-        hboundary, hnextDiv, hnextMod, hxOne] using
-        TileSubdivision.vMatches_northeast_southeast_of_vMatches parentMatch
+    simpa [Quarters.quarterTile, supertileIndexGrid, quadrantAt,
+      hboundary, hnextDiv, hnextMod] using
+      TileSubdivision.vMatches_north_south_of_vMatches
+        (x % 2 == 1) parentMatch
   · have hyZero : y % 2 = 0 := by omega
     have hnextDiv : (y + 1) / 2 = y / 2 := by omega
     have hnextMod : (y + 1) % 2 = 1 := by omega
-    have hxCases : x % 2 = 0 ∨ x % 2 = 1 := by omega
-    rcases hxCases with hxZero | hxOne
-    · simpa [Quarters.quarterTile, quadrantAt, Quadrant.ofBits,
-        hyZero, hnextDiv,
-        hnextMod, hxZero] using
-        TileSubdivision.vMatches_southwest_northwest
-          (tile (components
-            (supertileIndexGrid level root (x / 2) (y / 2))))
-    · simpa [Quarters.quarterTile, quadrantAt, Quadrant.ofBits,
-        hyZero, hnextDiv,
-        hnextMod, hxOne] using
-        TileSubdivision.vMatches_southeast_northeast
-          (tile (components
-            (supertileIndexGrid level root (x / 2) (y / 2))))
+    simpa [Quarters.quarterTile, quadrantAt, hyZero, hnextDiv, hnextMod] using
+      TileSubdivision.vMatches_south_north
+        (tile (components (supertileIndexGrid level root (x / 2) (y / 2))))
+        (x % 2 == 1)
 
 /-- Side length, in quarter tiles, of a level-`level` shaded supertile. -/
 def side (level : Nat) : Nat := 2 * 4 ^ level
