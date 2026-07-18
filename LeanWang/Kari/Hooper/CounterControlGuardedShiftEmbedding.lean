@@ -128,6 +128,75 @@ structure ShiftTailBackwardGeometry
         (NestingMachine.opposite direction) back).read ≠
           boundarySymbol forbidden
 
+/-- Prepending one exact shifted gap to a suffix geometry adds precisely the
+gap distance to its retained backward travel. -/
+def ShiftTailBackwardGeometry.prepend
+    {direction : Turing.Dir} {expected : Fin 5}
+    {remaining : List (Fin 5)}
+    {outer finish : FullTM0.Tape (Symbol numTags)} {distance : Nat}
+    (gap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary expected).Matches outer direction distance)
+    (positive : 0 < distance)
+    (tail : ShiftTailBackwardGeometry direction remaining
+      (shiftStepTape direction outer distance expected) finish) :
+    ShiftTailBackwardGeometry direction (expected :: remaining)
+      outer finish := by
+  let shifted := shiftStepTape direction outer distance expected
+  refine ⟨tail.travel + distance, ?_, ?_⟩
+  · intro back
+    calc
+      (((finish.move (NestingMachine.opposite direction)).moveN
+            (NestingMachine.opposite direction)
+            (tail.travel + distance + back)).read) =
+          (((shifted.move (NestingMachine.opposite direction)).moveN
+            (NestingMachine.opposite direction)
+            (distance + back)).read) := by
+        simpa [shifted, Nat.add_assoc] using tail.behind (distance + back)
+      _ = (((outer.move (NestingMachine.opposite direction)).moveN
+            (NestingMachine.opposite direction) back).read) := by
+        exact shiftStepTape_behind direction outer distance back expected
+          positive
+  · intro forbidden hstart hlabels back hback
+    have hexpected : expected ≠ forbidden :=
+      hlabels expected (by simp)
+    have hremaining : ∀ label ∈ remaining, label ≠ forbidden := by
+      intro label hlabel
+      exact hlabels label (by simp [hlabel])
+    have hshifted :
+        (shifted.move (NestingMachine.opposite direction)).read ≠
+          boundarySymbol forbidden := by
+      rw [shiftStepTape_destination]
+      intro heq
+      exact hexpected
+        ((boundarySymbol_injective expected forbidden).mp heq)
+    by_cases hprefix : back ≤ tail.travel
+    · exact tail.avoids forbidden hshifted hremaining back hprefix
+    · let localBack := back - tail.travel
+      have hlocalPositive : 0 < localBack := by
+        dsimp [localBack]
+        omega
+      have hlocal : localBack ≤ distance := by
+        dsimp [localBack]
+        omega
+      have hbackEq : back = tail.travel + localBack := by
+        dsimp [localBack]
+        omega
+      rw [hbackEq, tail.behind localBack]
+      by_cases hstrict : localBack < distance
+      · rw [shiftStepTape_between direction outer distance localBack
+            expected gap hlocalPositive hstrict]
+        exact blankSymbol_ne_boundarySymbol forbidden
+      · have heq : localBack = distance := by omega
+        have hreturn :
+            ((shifted.move (NestingMachine.opposite direction)).moveN
+                (NestingMachine.opposite direction) distance).read =
+              (outer.move
+                (NestingMachine.opposite direction)).read := by
+          simpa [shifted] using
+            shiftStepTape_behind direction outer distance 0 expected positive
+        rw [heq, hreturn]
+        exact hstart
+
 /-- Every exact shift trace has its backward coordinate summary. -/
 theorem shiftTailGaps_backwardGeometry
     {direction : Turing.Dir} {labels : List (Fin 5)}
@@ -145,63 +214,7 @@ theorem shiftTailGaps_backwardGeometry
         simpa using hstart
   | cons expected remaining outer distance gap positive finish tail ih =>
       rcases ih with ⟨geometry⟩
-      let shifted := shiftStepTape direction outer distance expected
-      refine ⟨⟨geometry.travel + distance, ?_, ?_⟩⟩
-      · intro back
-        calc
-          (((finish.move (NestingMachine.opposite direction)).moveN
-                (NestingMachine.opposite direction)
-                (geometry.travel + distance + back)).read) =
-              (((shifted.move (NestingMachine.opposite direction)).moveN
-                (NestingMachine.opposite direction)
-                (distance + back)).read) := by
-            simpa [shifted, Nat.add_assoc] using
-              geometry.behind (distance + back)
-          _ = (((outer.move (NestingMachine.opposite direction)).moveN
-                (NestingMachine.opposite direction) back).read) := by
-            exact shiftStepTape_behind direction outer distance back expected
-              positive
-      · intro forbidden hstart hlabels back hback
-        have hexpected : expected ≠ forbidden :=
-          hlabels expected (by simp)
-        have hremaining : ∀ label ∈ remaining, label ≠ forbidden := by
-          intro label hlabel
-          exact hlabels label (by simp [hlabel])
-        have hshifted :
-            (shifted.move (NestingMachine.opposite direction)).read ≠
-              boundarySymbol forbidden := by
-          rw [shiftStepTape_destination]
-          intro heq
-          exact hexpected
-            ((boundarySymbol_injective expected forbidden).mp heq)
-        by_cases hprefix : back ≤ geometry.travel
-        · exact geometry.avoids forbidden hshifted hremaining back hprefix
-        · let localBack := back - geometry.travel
-          have hlocalPositive : 0 < localBack := by
-            dsimp [localBack]
-            omega
-          have hlocal : localBack ≤ distance := by
-            dsimp [localBack]
-            omega
-          have hbackEq : back = geometry.travel + localBack := by
-            dsimp [localBack]
-            omega
-          rw [hbackEq, geometry.behind localBack]
-          by_cases hstrict : localBack < distance
-          · rw [shiftStepTape_between direction outer distance localBack
-                expected gap hlocalPositive hstrict]
-            exact blankSymbol_ne_boundarySymbol forbidden
-          · have heq : localBack = distance := by omega
-            have hreturn :
-                ((shifted.move (NestingMachine.opposite direction)).moveN
-                    (NestingMachine.opposite direction) distance).read =
-                  (outer.move
-                    (NestingMachine.opposite direction)).read := by
-              simpa [shifted] using
-                shiftStepTape_behind direction outer distance 0 expected
-                  positive
-            rw [heq, hreturn]
-            exact hstart
+      exact ⟨geometry.prepend gap positive⟩
 
 /-- A blank cell between the preceding moved boundary and the first boundary
 of a suffix remains blank at the corresponding backward coordinate of the
