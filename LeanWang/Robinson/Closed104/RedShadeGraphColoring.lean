@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Closed104.RedShadeGraphSearchSoundness
+import LeanWang.Robinson.Closed104.RedShadeGraphBoundedPath
 
 /-!
 # Finite red-shade rectangles
@@ -18,7 +18,7 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeGraphColoring
 
-open Signals.FreeCellLocal RedShadeGraph RedShadeGraphSearchSoundness
+open Signals.FreeCellLocal RedShadeGraph RedShadeGraphBoundedPath
 
 /-- The finite analogue of `ValidShadeGrid`. -/
 structure ValidShadeRectangle (indexGrid : Nat → Nat → Index)

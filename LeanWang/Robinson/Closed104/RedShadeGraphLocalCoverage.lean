@@ -3,9 +3,9 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Closed104.RedShadeGraphLocalCoverageData
-import LeanWang.Robinson.Closed104.RedShadeGraphSearchSoundness
+import LeanWang.Robinson.Closed104.RedShadeGraphLocalCoverageCheck
 import LeanWang.Robinson.Closed104.RedShadeGraphTranslation
+import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate
 import LeanWang.Robinson.Closed104.SignalFreeCellEmbedding
 
 /-!
@@ -22,19 +22,12 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeGraphLocalCoverage
 
-open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphRefinement RedShadeGraphSearch
-  RedShadeGraphSearchSoundness RedShadeGraphTranslation RefinementTranslation
+open RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoundedPath
+  RedShadeGraphRefinement RedShadeGraphStaticCertificate
+  RedShadeGraphTranslation RefinementTranslation
   Signals.FreeCellLocal Signals.FreeCellEmbedding
 
 set_option maxRecDepth 20000
-
-set_option linter.style.nativeDecide false in
-theorem allParentsCovered_eq_true : allParentsCovered = true := by
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem baseCovered_eq_true : baseCovered = true := by
-  native_decide
 
 theorem parentCovered_eq_true (parent : Index) : parentCovered parent = true := by
   have checked : ∀ candidate ∈ List.finRange 104,
@@ -77,19 +70,18 @@ theorem exists_boundedPath
   have targetChecked := checked target targetMem
   simp only [targetCovered, targetPresent, if_true,
     Option.isSome_iff_exists] at targetChecked
-  rcases targetChecked with ⟨node, route⟩
-  have nodeMem : node ∈ nodes parent := by
+  rcases targetChecked with ⟨⟨index, state⟩, route⟩
+  have routeMem : (index, state) ∈ routes parent := by
+    unfold routeNode? at route
     exact List.mem_of_find?_eq_some route
-  have current : node.current = target := by
-    have accepted := List.find?_some route
-    exact of_decide_eq_true accepted
-  have sound := exploreFast_bounded_sound (sources_inBounds parent) nodeMem
-  refine ⟨node.origin, sound.1, node.parity, ?_⟩
-  simpa [current] using sound.2
+  have current := List.find?_some route
+  simp only [decide_eq_true_eq] at current
+  have evaluated := evaluate_of_mem_evaluated routeMem
+  have sourceMem := origin_mem_sources_of_evaluate evaluated
+  have path := boundedPath_of_evaluate evaluated
+  refine ⟨state.origin, sourceMem, state.parity, ?_⟩
+  simpa only [current] using path
 
-set_option maxHeartbeats 1000000 in
--- Replaying the fixed search certificate needs deeper normalization than the
--- default heartbeat allowance.
 theorem base_exists_boundedPath {target : Port}
     (targetMem : target ∈ portsIn 8 8)
     (targetWest : 2 ≤ target.x) (targetEast : target.x < 6)
@@ -102,25 +94,19 @@ theorem base_exists_boundedPath {target : Port}
   simp only [baseTargetCovered, targetWest, targetEast, targetSouth, targetNorth,
     targetPresent, decide_true, Bool.true_and, if_true]
     at targetChecked
-  cases pathResult : basePath? target with
-  | none => simp [pathResult] at targetChecked
-  | some result =>
-      rcases result with ⟨parity, moves⟩
-      unfold basePath? at pathResult
-      cases searchResult : baseSearch target with
-      | none => simp [searchResult] at pathResult
-      | some result =>
-          rcases result with ⟨finish, foundParity, foundMoves⟩
-          simp only [searchResult] at pathResult
-          split at pathResult
-          · rename_i finishEq
-            subst finish
-            simp only [Option.some.injEq, Prod.mk.injEq] at pathResult
-            rcases pathResult with ⟨rfl, rfl⟩
-            refine ⟨foundParity, ?_⟩
-            apply search_bounded_sound
-            simpa only [baseSearch] using searchResult
-          · simp at pathResult
+  simp only [Option.isSome_iff_exists] at targetChecked
+  rcases targetChecked with ⟨⟨index, state⟩, route⟩
+  have routeMem : (index, state) ∈ baseRoutes := by
+    unfold baseRoute? routeNode? at route
+    exact List.mem_of_find?_eq_some route
+  have current := List.find?_some route
+  simp only [decide_eq_true_eq] at current
+  have evaluated := evaluate_of_mem_evaluated routeMem
+  have sourceMem := origin_mem_sources_of_evaluate evaluated
+  simp only [List.mem_singleton] at sourceMem
+  refine ⟨state.parity, ?_⟩
+  have path := boundedPath_of_evaluate evaluated
+  simpa only [sourceMem, current] using path
 
 /-- Translate a bounded local route into the corresponding macrocell. -/
 theorem boundedPath_two_block

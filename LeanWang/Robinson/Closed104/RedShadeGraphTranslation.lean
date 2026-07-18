@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraph
-import LeanWang.Robinson.Closed104.RedShadeGraphRefinementAudit
-import LeanWang.Robinson.Closed104.RedShadeGraphSearchSoundness
+import LeanWang.Robinson.Closed104.RedShadeGraphBoundedPath
+import LeanWang.Robinson.Closed104.RedShadeGraphRefinementGeometry
 import LeanWang.Robinson.Closed104.RefinementTranslation
 
 /-!
@@ -18,7 +18,7 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeGraphTranslation
 
-open RedCycles RedShadeGraph RedShadeGraphSearchSoundness
+open RedCycles RedShadeGraph RedShadeGraphBoundedPath
   RedShadeGraphRefinement RefinementTranslation Signals.FreeCellLocal
 
 theorem link_congr_of_component_eq

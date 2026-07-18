@@ -25,7 +25,7 @@ namespace CanonicalShadeComparison
 open OrientedRedCycles RedCycles RedShades RedShadePaths RedShadeCycles
   RedShadeGraph RedShadeGraphBoards
   RedShadeGraphColoring RedShadeGraphLocalCoverage RedShadeGraphRefinement
-  RedShadeGraphSearchSoundness RedShadeGraphTranslation
+  RedShadeGraphBoundedPath RedShadeGraphTranslation
   RedShadeCycleConnectivity RedShadeCycleBridgeComposition
   RedShadeCycleEvenDescendants OrientedRedBoardTranslations
   ShadedSubstitution CanonicalFreeLineCoordinates CanonicalEvenFreeLines

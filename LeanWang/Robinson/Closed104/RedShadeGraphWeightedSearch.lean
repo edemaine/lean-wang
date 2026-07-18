@@ -20,7 +20,8 @@ namespace Figure13Layers
 namespace Closed104
 namespace RedShadeGraphWeightedSearch
 
-open RedShadeGraph RedShadeGraphSearch RedShadeGraphSearchSoundness
+open RedShadeGraph RedShadeGraphBoundedPath RedShadeGraphSearch
+  RedShadeGraphSearchSoundness
 
 structure WeightedStart where
   port : Port

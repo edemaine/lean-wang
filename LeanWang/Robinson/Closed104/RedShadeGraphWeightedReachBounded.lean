@@ -14,7 +14,8 @@ namespace Closed104
 namespace RedShadeGraphWeightedReachBounded
 
 open RedShadeGraph RedShadeGraphCertificate RedShadeGraphSearch
-  RedShadeGraphSearchSoundness RedShadeGraphWeightedSearch
+  RedShadeGraphBoundedPath RedShadeGraphSearchSoundness
+  RedShadeGraphWeightedSearch
 
 def BoundedSoundReachFromWeighted (indexGrid : Nat → Nat → Index)
     (width height : Nat) (starts : List WeightedStart) (node : ReachNode) : Prop :=

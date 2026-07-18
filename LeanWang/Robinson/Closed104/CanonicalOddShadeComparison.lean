@@ -19,7 +19,7 @@ namespace CanonicalOddShadeComparison
 open OrientedRedCycles RedCycles RedShades RedShadePaths RedShadeCycles
   RedShadeGraph RedShadeGraphBoards RedShadeGraphColoring
   RedShadeGraphLocalCoverage RedShadeGraphRefinement
-  RedShadeGraphSearchSoundness RedShadeGraphTranslation
+  RedShadeGraphBoundedPath RedShadeGraphTranslation
   RedShadeCycleConnectivity
   RedShadeCycleOddDescendants OrientedRedBoardTranslations
   RefinementTranslation Signals.FreeCellLocal ShadedSubstitution

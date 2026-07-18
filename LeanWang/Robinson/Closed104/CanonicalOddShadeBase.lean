@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.CanonicalOddShadeBaseCheck
-import LeanWang.Robinson.Closed104.RedShadeGraphSearchSoundness
+import LeanWang.Robinson.Closed104.RedShadeGraphStaticCertificate
 
 /-! Soundness interface for the finite odd comparison base. -/
 
@@ -15,13 +15,8 @@ namespace Closed104
 namespace CanonicalOddShadeBase
 
 open RedCycles RedShadePaths RedShadeCycles RedShadeGraph
-  RedShadeGraphLocalCoverage RedShadeGraphSearch RedShadeGraphSearchSoundness
-
-theorem cyclePorts_inBounds {port : Port} (hport : port ∈ cyclePorts) :
-    PortInBounds port 16 16 := by
-  rw [cyclePorts] at hport
-  simp only [List.mem_cons, List.not_mem_nil, or_false] at hport
-  rcases hport with rfl | rfl | rfl | rfl <;> constructor <;> simp
+  RedShadeGraphBoundedPath RedShadeGraphLocalCoverage
+  RedShadeGraphStaticCertificate
 
 /-- Every live port in the central base square has a bounded path from the
 odd root cycle, with a certificate-selected parity. -/
@@ -35,16 +30,20 @@ theorem exists_boundedPath {target : Port}
         BoundedPath indexGrid 16 16 start target parity := by
   have covered := List.all_eq_true.1 complete_eq_true target targetMem
   simp only [targetCovered, targetWest, targetEast, targetSouth, targetNorth,
-    targetPresent, decide_true, Bool.true_and, if_true, List.any_eq_true]
+    targetPresent, decide_true, Bool.true_and, if_true,
+    Option.isSome_iff_exists]
       at covered
-  rcases covered with ⟨node, hnode, current⟩
-  have sound := exploreFast_bounded_sound
-    (fun port hport => cyclePorts_inBounds hport) hnode
-  refine ⟨node.origin, node.parity, sound.1, ?_⟩
-  have currentEq : node.current = target := of_decide_eq_true current
-  have path := sound.2
-  rw [currentEq] at path
-  exact path
+  rcases covered with ⟨⟨index, state⟩, route⟩
+  have routeMem : (index, state) ∈ routes := by
+    unfold baseRoute? at route
+    exact List.mem_of_find?_eq_some route
+  have current := List.find?_some route
+  simp only [decide_eq_true_eq] at current
+  have evaluated := evaluate_of_mem_evaluated routeMem
+  have sourceMem := origin_mem_sources_of_evaluate evaluated
+  have path := boundedPath_of_evaluate evaluated
+  refine ⟨state.origin, state.parity, sourceMem, ?_⟩
+  simpa only [current] using path
 
 end CanonicalOddShadeBase
 end Closed104
