@@ -382,8 +382,9 @@ def NestsDuringCleanup (base : Nat) (c : Nat.Partrec.Code)
         (initializeTape c (compileRawCommand base c raw hraw) outer)
 
 /-- Starting just after the collision handoff has moved back onto erased
-boundary `4`, the four generated erase commands reach the saved return tag,
-unless one of their register-gap searches launches an exact deeper frame. -/
+boundary `4`, the four generated erase commands reach the directional return
+state while scanning the adjacent saved tag, unless one of their register-gap
+searches launches an exact deeper frame. -/
 theorem machine_reaches_cleanup_return_or_nests
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
@@ -394,7 +395,7 @@ theorem machine_reaches_cleanup_return_or_nests
         ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
           atLogical spec.growth (afterFour spec T)
             (layoutEnd spec.registers)⟩
-        ⟨controllerReturn base c, atLogical spec.growth
+        ⟨controllerReturn base c spec.growth, atLogical spec.growth
           (afterZero spec T) 0⟩ ∨
       NestsDuringCleanup base c spec.growth source
         ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
@@ -414,11 +415,7 @@ theorem machine_reaches_cleanup_return_or_nests
       (.erase (some .left))
   let rawZero : RawCommand :=
     .boundaryNavigation ⟨spec.growth, source, cleanupSearchBase + 3⟩ 0 .left
-      (searchRef spec.growth source (cleanupSearchBase + 4))
-      (.erase (some .left))
-  let rawTagCommand : RawCommand :=
-    .tagNavigation ⟨spec.growth, source, cleanupSearchBase + 4⟩ .left
-      .sharedReturn
+      (.sharedReturn spec.growth) (.erase (some .left))
   have hcleanupThree : rawThree ∈ cleanupCommands spec.growth source := by
     simp [rawThree, cleanupCommands]
   have hcleanupTwo : rawTwo ∈ cleanupCommands spec.growth source := by
@@ -427,13 +424,10 @@ theorem machine_reaches_cleanup_return_or_nests
     simp [rawOne, cleanupCommands]
   have hcleanupZero : rawZero ∈ cleanupCommands spec.growth source := by
     simp [rawZero, cleanupCommands]
-  have hcleanupTag : rawTagCommand ∈ cleanupCommands spec.growth source := by
-    simp [rawTagCommand, cleanupCommands]
   have hrawThree := hcommands rawThree hcleanupThree
   have hrawTwo := hcommands rawTwo hcleanupTwo
   have hrawOne := hcommands rawOne hcleanupOne
   have hrawZero := hcommands rawZero hcleanupZero
-  have hrawTag := hcommands rawTagCommand hcleanupTag
   have hrunThree :=
     CounterControlNavigationSemantics.machine_reaches_boundary_erase_or_nests
       base c ⟨spec.growth, source, cleanupSearchBase⟩ 3 .left
@@ -550,8 +544,7 @@ theorem machine_reaches_cleanup_return_or_nests
         have hrunZero :=
           CounterControlNavigationSemantics.machine_reaches_boundary_erase_or_nests
             base c ⟨spec.growth, source, cleanupSearchBase + 3⟩ 0 .left
-            (searchRef spec.growth source (cleanupSearchBase + 4))
-            (some .left) hrawZero
+            (.sharedReturn spec.growth) (some .left) hrawZero
             (atLogical spec.growth (afterOne spec T)
               (lastGapOffset spec.registers 0))
             (RegisterLayout.values spec.registers 0) (cleanupGap_zero h)
@@ -562,8 +555,7 @@ theorem machine_reaches_cleanup_return_or_nests
                   ⟨spec.growth, source, cleanupSearchBase + 3⟩,
                 atLogical spec.growth (afterOne spec T)
                   (lastGapOffset spec.registers 0)⟩
-              ⟨searchState base c
-                  ⟨spec.growth, source, cleanupSearchBase + 4⟩,
+              ⟨controllerReturn base c spec.growth,
                 atLogical spec.growth (afterZero spec T) 0⟩ := by
             simp only at hzero
             have hstart : lastGapOffset spec.registers 0 =
@@ -581,26 +573,8 @@ theorem machine_reaches_cleanup_return_or_nests
               erase_departLeft_atLogical] at hzero
             simpa [rawZero, searchRef, CounterControlPlan.resolve,
               afterZero, clearBoundary] using hzero
-          have hrunTag :=
-            CounterControlNavigationSemantics.machine_reaches_tag_or_nests
-              base c ⟨spec.growth, source, cleanupSearchBase + 4⟩ .left
-              .sharedReturn hrawTag
-              (atLogical spec.growth (afterZero spec T) 0) 0
-              (cleanupGap_tag h)
-          rcases hrunTag with htag | htagFar
-          · left
-            have htag' : FullTM0.Reaches
-                (CounterControlNestingBridge.machine base c)
-                ⟨searchState base c
-                    ⟨spec.growth, source, cleanupSearchBase + 4⟩,
-                  atLogical spec.growth (afterZero spec T) 0⟩
-                ⟨controllerReturn base c,
-                  atLogical spec.growth (afterZero spec T) 0⟩ := by
-              simpa [rawTagCommand, CounterControlPlan.resolve] using htag
-            exact hthree'.trans (htwo'.trans (hone'.trans
-              (hzero'.trans htag')))
-          · rcases htagFar with ⟨hfar, -⟩
-            omega
+          left
+          exact hthree'.trans (htwo'.trans (hone'.trans hzero'))
         · right
           rcases hzeroFar with ⟨hfar, hreach, hframe⟩
           exact ⟨rawZero, hcleanupZero, hrawZero,
@@ -633,14 +607,15 @@ theorem machine_reaches_cleanup_return_or_nests
 /-! ## The shared return dispatcher -/
 
 /-- The complete linked table contains the return rule selected by every
-physical tag.  It clears that tag and enters the corresponding command-local
-resume state. -/
+physical tag at the return state matching that command's search direction.
+It clears the tag and enters the corresponding command-local resume state. -/
 theorem machine_sharedReturn_reaches_resume
     (base : Nat) (c : Nat.Partrec.Code) (tag : Fin numTags)
     (U : FullTM0.Tape (Symbol numTags))
     (hread : U.read = tagSymbol tag) :
     FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-      ⟨controllerReturn base c, U⟩
+      ⟨controllerReturn base c
+          (compileCommand base c tag).searchDirection, U⟩
       ⟨resumeState (CanonicalInitializer.radius c)
           (searchState base c (rawCommands.get tag).address),
         U.write blankSymbol⟩ := by
@@ -653,7 +628,8 @@ theorem machine_sharedReturn_reaches_resume
       FiniteTM0.lookupAction
           (returnTable (CanonicalInitializer.radius c)
             (controllerReturn base c) base (commands base c))
-          (controllerReturn base c) (tagSymbol tag) =
+          (controllerReturn base c command.searchDirection)
+          (tagSymbol tag) =
         some (resumeState (CanonicalInitializer.radius c) offset,
           .write blankSymbol) := by
     simpa [command, compileCommand_returnTag] using
@@ -664,33 +640,41 @@ theorem machine_sharedReturn_reaches_resume
     (CanonicalInitializer.radius c) (controllerReturn base c) base
     (commands base c) (commands_returnTags_nodup base c)
   have hreturnMem :
-      FiniteTM0.Rule.mk (controllerReturn base c) (tagSymbol tag)
+      FiniteTM0.Rule.mk (controllerReturn base c command.searchDirection)
+          (tagSymbol tag)
           (resumeState (CanonicalInitializer.radius c) offset)
           (.write blankSymbol) ∈
         returnTable (CanonicalInitializer.radius c)
           (controllerReturn base c) base (commands base c) :=
     (FiniteTM0.lookupAction_eq_some_iff_of_deterministic hreturnDet).1
       hlookupLocal
+  have hreturnStateEq :
+      BoundedMarkerProgram.returnState base
+          (CanonicalInitializer.radius c) (commands base c) =
+        controllerReturn base c := by
+    funext growth
+    exact controllerReturn_eq base c growth
   have htableMem :
-      FiniteTM0.Rule.mk (controllerReturn base c) (tagSymbol tag)
+      FiniteTM0.Rule.mk (controllerReturn base c command.searchDirection)
+          (tagSymbol tag)
           (resumeState (CanonicalInitializer.radius c) offset)
           (.write blankSymbol) ∈ CounterControlPlan.table base c := by
     unfold CounterControlPlan.table BoundedMarkerProgram.table
       BoundedMarkerProgram.controllerTable
     simp only [List.mem_append]
     exact Or.inl (Or.inr (by
-      simpa only [controllerReturn_eq] using hreturnMem))
+      simpa only [hreturnStateEq] using hreturnMem))
   have hlookup :
       FiniteTM0.lookupAction (CounterControlPlan.table base c)
-          (controllerReturn base c) (tagSymbol tag) =
+          (controllerReturn base c command.searchDirection) (tagSymbol tag) =
         some (resumeState (CanonicalInitializer.radius c) offset,
           .write blankSymbol) :=
-    (FiniteTM0.lookupAction_eq_some_iff_of_deterministic
+      (FiniteTM0.lookupAction_eq_some_iff_of_deterministic
       (CounterControlDeterministic.table_deterministic base c)).2 htableMem
   apply Relation.ReflTransGen.single
   change FullTM0.step
       (FiniteTM0.machine (CounterControlPlan.table base c))
-      ⟨controllerReturn base c, U⟩ =
+      ⟨controllerReturn base c command.searchDirection, U⟩ =
     some ⟨resumeState (CanonicalInitializer.radius c) offset,
       U.write blankSymbol⟩
   simp only [FullTM0.step]
@@ -703,6 +687,8 @@ theorem machine_reaches_cleanup_resume_or_nests
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
     (h : Represents spec T)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hcommands : ∀ raw, raw ∈ cleanupCommands spec.growth source →
       raw ∈ rawCommands) :
     FullTM0.Reaches (CounterControlNestingBridge.machine base c)
@@ -745,12 +731,12 @@ theorem machine_reaches_cleanup_resume_or_nests
       spec.returnTag (atLogical spec.growth (afterZero spec T) 0) hread
     have hdispatch' : FullTM0.Reaches
         (CounterControlNestingBridge.machine base c)
-        ⟨controllerReturn base c,
+        ⟨controllerReturn base c spec.growth,
           atLogical spec.growth (afterZero spec T) 0⟩
         ⟨resumeState (CanonicalInitializer.radius c)
             (searchState base c (rawCommands.get spec.returnTag).address),
           atLogical spec.growth (afterTag spec T) 0⟩ := by
-      simpa [afterTag, atLogical_write] using hdispatch
+      simpa [hreturnDirection, afterTag, atLogical_write] using hdispatch
     exact hreturn.trans hdispatch'
   · exact Or.inr hnests
 
@@ -1021,6 +1007,8 @@ theorem machine_reaches_cleanupTape_resume_or_nests
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
     (h : Represents spec T)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hcommands : ∀ raw, raw ∈ cleanupCommands spec.growth source →
       raw ∈ rawCommands) :
     FullTM0.Reaches (CounterControlNestingBridge.machine base c)
@@ -1036,7 +1024,8 @@ theorem machine_reaches_cleanupTape_resume_or_nests
           atLogical spec.growth (afterFour spec T)
             (layoutEnd spec.registers)⟩ := by
   simpa only [afterTag_eq_cleanupTape h] using
-    machine_reaches_cleanup_resume_or_nests base c source h hcommands
+    machine_reaches_cleanup_resume_or_nests base c source h
+      hreturnDirection hcommands
 
 /-! ## Entering cleanup from the collision handoff -/
 
@@ -1054,6 +1043,8 @@ theorem machine_reaches_collision_cleanup_or_nests
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
     (h : Represents spec T)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hcollision : layoutEnd spec.registers + 1 = spec.outerDistance)
     (hentry : cleanupEntryRule spec.growth source ∈ rawDirectRules)
     (hcommands : ∀ raw, raw ∈ cleanupCommands spec.growth source →
@@ -1105,7 +1096,7 @@ theorem machine_reaches_collision_cleanup_or_nests
     simpa [cleanupEntryRule, searchRef, CounterControlPlan.resolve] using
       hentryRunLocal
   rcases machine_reaches_cleanupTape_resume_or_nests base c source h
-      hcommands with hresume | hnests
+      hreturnDirection hcommands with hresume | hnests
   · exact Or.inl (hentryRun.trans hresume)
   · right
     rcases hnests with ⟨raw, hcleanup, hraw, outer, distance, hfar,
