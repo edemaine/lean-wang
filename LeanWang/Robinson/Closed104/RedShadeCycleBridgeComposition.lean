@@ -99,6 +99,31 @@ theorem odd_trans_odd
   simpa [Bool.xor_assoc] using
     Path.trans firstPath (Path.trans middlePath secondPath)
 
+/-- An odd bridge followed by an even bridge remains odd. -/
+theorem odd_trans_even
+    {grid : Nat → Nat → Index}
+    {firstWest firstEast firstSouth firstNorth : Nat}
+    {middleWest middleEast middleSouth middleNorth : Nat}
+    {lastWest lastEast lastSouth lastNorth : Nat}
+    (middle : CycleOn grid middleWest middleEast middleSouth middleNorth)
+    (first : OddCycleBridge grid
+      firstWest firstEast firstSouth firstNorth
+      middleWest middleEast middleSouth middleNorth)
+    (second : EvenCycleBridge grid
+      middleWest middleEast middleSouth middleNorth
+      lastWest lastEast lastSouth lastNorth) :
+    OddCycleBridge grid
+      firstWest firstEast firstSouth firstNorth
+      lastWest lastEast lastSouth lastNorth := by
+  rcases first with ⟨firstPort, middleEntry, firstOnCycle,
+    entryOnCycle, firstPath⟩
+  rcases second with ⟨middleExit, lastPort, exitOnCycle,
+    lastOnCycle, secondPath⟩
+  have middlePath := onCycle_connected middle entryOnCycle exitOnCycle
+  refine ⟨firstPort, lastPort, firstOnCycle, lastOnCycle, ?_⟩
+  simpa [Bool.xor_assoc] using
+    Path.trans firstPath (Path.trans middlePath secondPath)
+
 /-- Two successive corner descendants are evenly bridged to their ancestor. -/
 theorem twoCornerBridge
     (grid : Nat → Nat → Index) {level : Nat} (hlevel : 2 ≤ level)
