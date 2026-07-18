@@ -7,6 +7,7 @@ import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardSuffix
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardDecrement
 import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardDecrementClock
 import LeanWang.Kari.Hooper.CounterControlOutwardGapTransport
+import LeanWang.Kari.Hooper.CounterControlRouteRoundtrip
 
 /-!
 # Arbitrary outward validation suffix followed by a decrement
@@ -53,6 +54,303 @@ private theorem immortalFrom_of_reaches
   rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
   intro hhalts
   exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
+
+/-! ## Reversing the retained outward route -/
+
+private theorem routeTail_nil_finish
+    {growth : Turing.Dir}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (trace : RouteTailGaps growth [] start finish) : finish = start := by
+  cases trace
+  rfl
+
+private theorem toFour_uncons
+    {boundary : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToFour boundary route) (hne : boundary ≠ 4) :
+    ∃ i : Fin 4, ∃ rest,
+      boundary = i.castSucc ∧
+      route = ⟨i.succ, .right⟩ :: rest ∧ ToFour i.succ rest := by
+  cases hroute with
+  | four => exact False.elim (hne rfl)
+  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
+
+private theorem toFour_nil_of_eq_four
+    {boundary : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToFour boundary route) (heq : boundary = 4) : route = [] := by
+  cases hroute with
+  | four => rfl
+  | step i tail =>
+      have hval := congrArg Fin.val heq
+      simp at hval
+      omega
+
+private theorem toFour_four
+    {route : List MarkerValidation.Leg} (hroute : ToFour 4 route) :
+    route = [] :=
+  toFour_nil_of_eq_four hroute rfl
+
+private theorem toFour_three
+    {route : List MarkerValidation.Leg} (hroute : ToFour 3 route) :
+    route = [⟨4, .right⟩] := by
+  rcases toFour_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (3 : Fin 4) := by
+    apply Fin.ext
+    exact (congrArg Fin.val hi).symm
+  subst i
+  have hnil : rest = [] := by
+    apply toFour_four
+    simpa using hrest
+  rw [hrouteEq, hnil]
+  rfl
+
+private theorem toFour_two
+    {route : List MarkerValidation.Leg} (hroute : ToFour 2 route) :
+    route = [⟨3, .right⟩, ⟨4, .right⟩] := by
+  rcases toFour_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (2 : Fin 4) := by
+    apply Fin.ext
+    exact (congrArg Fin.val hi).symm
+  subst i
+  have htail : rest = [⟨4, .right⟩] := by
+    apply toFour_three
+    simpa using hrest
+  rw [hrouteEq, htail]
+  rfl
+
+private theorem toFour_one
+    {route : List MarkerValidation.Leg} (hroute : ToFour 1 route) :
+    route = [⟨2, .right⟩, ⟨3, .right⟩, ⟨4, .right⟩] := by
+  rcases toFour_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (1 : Fin 4) := by
+    apply Fin.ext
+    exact (congrArg Fin.val hi).symm
+  subst i
+  have htail : rest = [⟨3, .right⟩, ⟨4, .right⟩] := by
+    apply toFour_two
+    simpa using hrest
+  rw [hrouteEq, htail]
+  rfl
+
+private theorem toBoundary_uncons
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary source target
+      route)
+    (hne : source ≠ target) :
+    ∃ i : Fin 4, ∃ rest,
+      source = i.succ ∧
+      route = ⟨i.castSucc, .left⟩ :: rest ∧
+      CounterControlGuardedInwardRouteMargin.ToBoundary i.castSucc target
+        rest := by
+  cases hroute with
+  | here => exact False.elim (hne rfl)
+  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
+
+private theorem toBoundary_target_le
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary source target
+      route) : (target : Nat) ≤ (source : Nat) := by
+  induction hroute with
+  | here => exact Nat.le_refl _
+  | step i tail ih =>
+      exact ih.trans (by simp)
+
+private theorem toBoundary_nil_of_eq
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary source target
+      route)
+    (heq : source = target) : route = [] := by
+  cases hroute with
+  | here => rfl
+  | step i tail =>
+      have hle := toBoundary_target_le tail
+      have hval := congrArg Fin.val heq
+      simp at hval hle
+      omega
+
+private theorem toBoundary_four_four
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 4 route) :
+    route = [] :=
+  toBoundary_nil_of_eq hroute rfl
+
+private theorem toBoundary_four_three
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 3 route) :
+    route = [⟨3, .left⟩] := by
+  rcases toBoundary_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (3 : Fin 4) := by
+    have hval := congrArg Fin.val hi
+    apply Fin.ext
+    simp at hval ⊢
+    omega
+  subst i
+  have hnil : rest = [] := by
+    apply toBoundary_nil_of_eq hrest
+    rfl
+  rw [hrouteEq, hnil]
+  rfl
+
+private theorem toBoundary_four_two
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 2 route) :
+    route = [⟨3, .left⟩, ⟨2, .left⟩] := by
+  rcases toBoundary_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (3 : Fin 4) := by
+    have hval := congrArg Fin.val hi
+    apply Fin.ext
+    simp at hval ⊢
+    omega
+  subst i
+  rcases toBoundary_uncons hrest (by decide) with
+    ⟨j, tail, hj, hrestEq, htail⟩
+  have hj' : j = (2 : Fin 4) := by
+    have hval := congrArg Fin.val hj
+    apply Fin.ext
+    simp at hval ⊢
+    omega
+  subst j
+  have hnil : tail = [] := by
+    apply toBoundary_nil_of_eq htail
+    rfl
+  rw [hrouteEq, hrestEq, hnil]
+  rfl
+
+private theorem toBoundary_four_one
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 1 route) :
+    route = [⟨3, .left⟩, ⟨2, .left⟩, ⟨1, .left⟩] := by
+  rcases toBoundary_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (3 : Fin 4) := by
+    have hval := congrArg Fin.val hi
+    apply Fin.ext
+    simp at hval ⊢
+    omega
+  subst i
+  rcases toBoundary_uncons hrest (by decide) with
+    ⟨j, tail, hj, hrestEq, htail⟩
+  have hj' : j = (2 : Fin 4) := by
+    have hval := congrArg Fin.val hj
+    apply Fin.ext
+    simp at hval ⊢
+    omega
+  subst j
+  rcases toBoundary_uncons htail (by decide) with
+    ⟨k, final, hk, htailEq, hfinal⟩
+  have hk' : k = (1 : Fin 4) := by
+    have hval := congrArg Fin.val hk
+    apply Fin.ext
+    simp at hval ⊢
+    omega
+  subst k
+  have hnil : final = [] := by
+    apply toBoundary_nil_of_eq hfinal
+    rfl
+  rw [hrouteEq, hrestEq, htailEq, hnil]
+  rfl
+
+/-- Cancel one outward preserving gap against the first leg of a later
+inward route, retaining the inward tail at the original source tape. -/
+private theorem cancelRouteLeg
+    {growth : Turing.Dir} {source target : Fin 5}
+    {rest : List MarkerValidation.Leg}
+    {lower upper finish : FullTM0.Tape (Symbol numTags)}
+    {distance : Nat}
+    (lower_read : lower.read = boundarySymbol source)
+    (outwardGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches
+      (lower.move (orient growth .right)) (orient growth .right) distance)
+    (upper_eq :
+      (lower.move (orient growth .right)).moveN
+        (orient growth .right) distance = upper)
+    (inward : RouteTailGaps growth
+      (⟨source, .left⟩ :: rest) upper finish) :
+    RouteTailGaps growth rest lower finish := by
+  rcases inward.uncons with ⟨reverseDistance, reverseGap, tail⟩
+  let returned :=
+    (upper.move (orient growth .left)).moveN
+      (orient growth .left) reverseDistance
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hreverse : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary source).Matches
+      ((((lower.move (orient growth .right)).moveN
+          (orient growth .right) distance).move
+        (NestingMachine.opposite (orient growth .right))))
+      (NestingMachine.opposite (orient growth .right)) reverseDistance := by
+    rw [hopposite, upper_eq]
+    exact reverseGap
+  have hreturned : returned = lower := by
+    apply CounterControlRouteRoundtrip.reverseRouteLeg_found_eq lower_read
+      outwardGap hreverse
+    dsimp [returned]
+    rw [← upper_eq, hopposite]
+  change RouteTailGaps growth rest returned finish at tail
+  rwa [hreturned] at tail
+
+/-- Reverse a retained suffix from boundary `3` through boundary `4`. -/
+private theorem roundtripFromThree
+    {growth : Turing.Dir}
+    {rest : List MarkerValidation.Leg}
+    {start top finish : FullTM0.Tape (Symbol numTags)}
+    (start_read : start.read = boundarySymbol 3)
+    (outward : RouteTailGaps growth [⟨4, .right⟩] start top)
+    (inward : RouteTailGaps growth (⟨3, .left⟩ :: rest) top finish) :
+    RouteTailGaps growth rest start finish := by
+  rcases outward.uncons with ⟨distance, gap, tail⟩
+  have htop := routeTail_nil_finish tail
+  apply cancelRouteLeg start_read gap htop.symm inward
+
+/-- Reverse a retained suffix from boundary `2` through boundary `4`. -/
+private theorem roundtripFromTwo
+    {growth : Turing.Dir}
+    {rest : List MarkerValidation.Leg}
+    {start top finish : FullTM0.Tape (Symbol numTags)}
+    (start_read : start.read = boundarySymbol 2)
+    (outward : RouteTailGaps growth
+      [⟨3, .right⟩, ⟨4, .right⟩] start top)
+    (inward : RouteTailGaps growth
+      (⟨3, .left⟩ :: ⟨2, .left⟩ :: rest) top finish) :
+    RouteTailGaps growth rest start finish := by
+  rcases outward.uncons with ⟨distance, gap, tail⟩
+  let found :=
+    (start.move (orient growth .right)).moveN
+      (orient growth .right) distance
+  have found_read : found.read = boundarySymbol 3 := by
+    simpa [found, FullTM0.Tape.read_moveN, Target.Matches] using gap.marked
+  have returned := roundtripFromThree found_read tail inward
+  change RouteTailGaps growth (⟨2, .left⟩ :: rest) found finish
+    at returned
+  apply cancelRouteLeg start_read gap rfl returned
+
+/-- Reverse a retained suffix from boundary `1` through boundary `4`. -/
+private theorem roundtripFromOne
+    {growth : Turing.Dir}
+    {rest : List MarkerValidation.Leg}
+    {start top finish : FullTM0.Tape (Symbol numTags)}
+    (start_read : start.read = boundarySymbol 1)
+    (outward : RouteTailGaps growth
+      [⟨2, .right⟩, ⟨3, .right⟩, ⟨4, .right⟩] start top)
+    (inward : RouteTailGaps growth
+      (⟨3, .left⟩ :: ⟨2, .left⟩ :: ⟨1, .left⟩ :: rest)
+      top finish) :
+    RouteTailGaps growth rest start finish := by
+  rcases outward.uncons with ⟨distance, gap, tail⟩
+  let found :=
+    (start.move (orient growth .right)).moveN
+      (orient growth .right) distance
+  have found_read : found.read = boundarySymbol 2 := by
+    simpa [found, FullTM0.Tape.read_moveN, Target.Matches] using gap.marked
+  have returned := roundtripFromTwo found_read tail inward
+  change RouteTailGaps growth (⟨1, .left⟩ :: rest) found finish
+    at returned
+  apply cancelRouteLeg start_read gap rfl returned
 
 /-- Exact preserving route from the boundary-`4` body entry to the boundary
 immediately after the selected register.  For the clock this route is empty.
@@ -279,6 +577,105 @@ theorem bodyRouteEnd_of_immortal
         suffix.progress.suffix.finish finish trace, ?_, reaches⟩⟩
       exact CounterControlGuardedDecrementEntry.routeGaps_finish_read trace
         (by simp)
+
+/-- If the original outward caller found the boundary where the decrement
+body route ends, the outward and inward preserving routes cancel exactly.
+-/
+theorem BodyRouteEnd.finish_eq_current_of_boundary_eq
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    (route : BodyRouteEnd current growth source register ifZero ifPositive
+      suffix)
+    (hboundary : suffix.index.succ =
+      MarkerSchedule.decrementStartBoundary register) :
+    route.finish = current.foundTape := by
+  generalize hindex : suffix.index = index
+  fin_cases index
+  · have hregister : register = .left := by
+      cases register <;>
+        simp_all [MarkerSchedule.decrementStartBoundary]
+    subst register
+    have htoFour : ToFour 1 suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_one htoFour
+    have hout := suffix.tailGaps
+    rw [hremaining] at hout
+    have hrouteExact := toBoundary_four_one
+      (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+        .left)
+    have hin' := route.tailGaps
+    rw [hrouteExact] at hin'
+    have hin : RouteTailGaps growth
+        [⟨3, .left⟩, ⟨2, .left⟩, ⟨1, .left⟩]
+        suffix.progress.suffix.finish route.finish := by
+      exact hin'
+    have hread : current.foundTape.read = boundarySymbol 1 := by
+      simpa [hindex] using suffix.current_read
+    exact routeTail_nil_finish (roundtripFromOne hread hout hin)
+  · have hregister : register = .right := by
+      cases register <;>
+        simp_all [MarkerSchedule.decrementStartBoundary]
+    subst register
+    have htoFour : ToFour 2 suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_two htoFour
+    have hout := suffix.tailGaps
+    rw [hremaining] at hout
+    have hrouteExact := toBoundary_four_two
+      (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+        .right)
+    have hin' := route.tailGaps
+    rw [hrouteExact] at hin'
+    have hin : RouteTailGaps growth [⟨3, .left⟩, ⟨2, .left⟩]
+        suffix.progress.suffix.finish route.finish := by
+      exact hin'
+    have hread : current.foundTape.read = boundarySymbol 2 := by
+      simpa [hindex] using suffix.current_read
+    exact routeTail_nil_finish (roundtripFromTwo hread hout hin)
+  · have hregister : register = .temp := by
+      cases register <;>
+        simp_all [MarkerSchedule.decrementStartBoundary]
+    subst register
+    have htoFour : ToFour 3 suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_three htoFour
+    have hout := suffix.tailGaps
+    rw [hremaining] at hout
+    have hrouteExact := toBoundary_four_three
+      (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+        .temp)
+    have hin' := route.tailGaps
+    rw [hrouteExact] at hin'
+    have hin : RouteTailGaps growth [⟨3, .left⟩]
+        suffix.progress.suffix.finish route.finish := by
+      exact hin'
+    have hread : current.foundTape.read = boundarySymbol 3 := by
+      simpa [hindex] using suffix.current_read
+    exact routeTail_nil_finish (roundtripFromThree hread hout hin)
+  · have hregister : register = .clock := by
+      cases register <;>
+        simp_all [MarkerSchedule.decrementStartBoundary]
+    subst register
+    have htoFour : ToFour 4 suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_four htoFour
+    have hout := suffix.tailGaps
+    rw [hremaining] at hout
+    have htop : suffix.progress.suffix.finish = current.foundTape :=
+      routeTail_nil_finish hout
+    have hrouteExact := toBoundary_four_four
+      (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+        .clock)
+    have hin' := route.tailGaps
+    rw [hrouteExact] at hin'
+    have hin : RouteTailGaps growth [] suffix.progress.suffix.finish
+        route.finish := by
+      exact hin'
+    exact (routeTail_nil_finish hin).trans htop
 
 /-- Tape scanned by the two-way decrement branch after the test moves one
 cell inward from the boundary after the selected register. -/
@@ -779,6 +1176,41 @@ theorem ZeroSearchEntry.centeredEnd_of_immortal
     simpa [core, LogicalCore.cfg, LogicalCore.frame,
       LogicalCore.abstract, prefixLogicalCfg] using hrun
   exact ⟨⟨core, hcore, hrouteFinish, hreaches⟩⟩
+
+/-- Zero recovery changes no marker.  Reverse its body route to recover
+canonical boundary `4`, then reverse the retained validation suffix to put
+the original found boundary at its canonical coordinate. -/
+theorem ZeroCenteredEnd.distance_lt_layoutEnd
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    {entry : ZeroSearchEntry current growth source register ifZero ifPositive
+      suffix}
+    (endpoint : ZeroCenteredEnd current growth source register ifZero
+      ifPositive suffix entry) :
+    current.distance < layoutEnd endpoint.core.registers := by
+  have hbodyStart : suffix.progress.suffix.finish =
+      atLogical growth endpoint.core.tape
+        (boundaryOffset endpoint.core.registers 4) := by
+    exact
+      (CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+        register).start_eq endpoint.core_represents suffix.finish_read
+          entry.route.tailGaps endpoint.route_finish
+  have hboundaryFour : suffix.progress.suffix.finish =
+      atLogical growth endpoint.core.tape
+        (layoutEnd endpoint.core.registers) := by
+    simpa [boundaryOffset_four] using hbodyStart
+  have hcurrentFound : current.foundTape =
+      atLogical growth endpoint.core.tape
+        (boundaryOffset endpoint.core.registers suffix.index.succ) := by
+    exact suffix.remaining_toFour.start_eq endpoint.core_represents
+      suffix.current_read suffix.tailGaps hboundaryFour
+  exact rightGap_distance_lt_layoutEnd endpoint.core_represents suffix.index
+    current.distance suffix.current_gap
+      (suffix.current_foundTape.trans hcurrentFound)
 
 end
 
