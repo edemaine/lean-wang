@@ -27,6 +27,7 @@ import LeanWang.Kari.Hooper.MarkerTape
 import LeanWang.Kari.Hooper.MarkerShift
 import LeanWang.Kari.Hooper.MarkerMachine
 import LeanWang.Kari.Hooper.FiniteTM0Program
+import LeanWang.Kari.Hooper.FiniteTM0Mirror
 import LeanWang.Kari.Hooper.MarkerProgram
 import LeanWang.Kari.Hooper.MarkerChain
 import LeanWang.Kari.Hooper.MarkerSchedule
@@ -49,9 +50,10 @@ semantics, a four-register counter-program layer, its
 exact finite five-boundary marker tape, collision-free suffix shifts for every
 counter operation together with exact chained increment schedules, concrete
 finite-table marker programs with independently directed searches and shifts,
-relocatable fixed arithmetic blocks, a verified finite-table linker, concrete
-arbitrary-entry liveness laws for the complete fixed source program, and the
-abstract strong-induction core of Hooper's nested bounded-search construction.
+relocatable and reflectable finite tables, a verified finite-table linker,
+concrete arbitrary-entry liveness laws for the complete fixed source program,
+and the abstract strong-induction core of Hooper's nested bounded-search
+construction.
 The remaining files will compile the counter instructions to bounded marker
 searches and connect those searches to the liveness laws.
 -/
