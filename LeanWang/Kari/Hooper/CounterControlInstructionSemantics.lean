@@ -4190,12 +4190,14 @@ theorem machine_reaches_decrementPositiveInstruction_solved
 /-! ## Solved cleanup of a collided frame -/
 
 /-- Under the simultaneous-induction hypothesis, all four boundary erasures
-and the final tag search complete without stopping at an intermediate nested
-frame. -/
+complete without stopping at an intermediate nested frame; the final erase
+departs directly onto the adjacent tag at the directional return state. -/
 theorem machine_reaches_cleanup_resume_solved
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
     (h : Represents spec T)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hshort : ShortSearches base c spec.outerDistance)
     (hcommands : ∀ raw, raw ∈ cleanupCommands spec.growth source →
       raw ∈ rawCommands) :
@@ -4221,11 +4223,7 @@ theorem machine_reaches_cleanup_resume_solved
       (.erase (some .left))
   let rawZero : RawCommand :=
     .boundaryNavigation ⟨spec.growth, source, cleanupSearchBase + 3⟩ 0 .left
-      (searchRef spec.growth source (cleanupSearchBase + 4))
-      (.erase (some .left))
-  let rawTagCommand : RawCommand :=
-    .tagNavigation ⟨spec.growth, source, cleanupSearchBase + 4⟩ .left
-      .sharedReturn
+      (.sharedReturn spec.growth) (.erase (some .left))
   have hrawThree : rawThree ∈ rawCommands := hcommands rawThree (by
     simp [rawThree, cleanupCommands])
   have hrawTwo : rawTwo ∈ rawCommands := hcommands rawTwo (by
@@ -4234,8 +4232,6 @@ theorem machine_reaches_cleanup_resume_solved
     simp [rawOne, cleanupCommands])
   have hrawZero : rawZero ∈ rawCommands := hcommands rawZero (by
     simp [rawZero, cleanupCommands])
-  have hrawTag : rawTagCommand ∈ rawCommands := hcommands rawTagCommand (by
-    simp [rawTagCommand, cleanupCommands])
   have hthreeDistance : RegisterLayout.values spec.registers 3 + 1 <
       spec.outerDistance := by
     have hcore := spec.core_before_target
@@ -4251,8 +4247,6 @@ theorem machine_reaches_cleanup_resume_solved
   have hzeroDistance : RegisterLayout.values spec.registers 0 <
       spec.outerDistance :=
     registerValue_lt_outerDistance h (0 : Fin 4)
-  have htagDistance : 0 < spec.outerDistance :=
-    Nat.zero_lt_of_lt spec.core_before_target
   have hthree := machine_reaches_boundary_erase_solved base c
     spec.outerDistance hshort
     ⟨spec.growth, source, cleanupSearchBase⟩ 3 .left
@@ -4378,7 +4372,7 @@ theorem machine_reaches_cleanup_resume_solved
   have hzero := machine_reaches_boundary_erase_solved base c
     spec.outerDistance hshort
     ⟨spec.growth, source, cleanupSearchBase + 3⟩ 0 .left
-    (searchRef spec.growth source (cleanupSearchBase + 4)) (some .left)
+    (.sharedReturn spec.growth) (some .left)
     hrawZero
     (atLogical spec.growth (afterOne spec T)
       (lastGapOffset spec.registers 0))
@@ -4390,8 +4384,7 @@ theorem machine_reaches_cleanup_resume_solved
           ⟨spec.growth, source, cleanupSearchBase + 3⟩,
         atLogical spec.growth (afterOne spec T)
           (lastGapOffset spec.registers 0)⟩
-      ⟨searchState base c
-          ⟨spec.growth, source, cleanupSearchBase + 4⟩,
+      ⟨controllerReturn base c spec.growth,
         atLogical spec.growth (afterZero spec T) 0⟩ := by
     have hstart : lastGapOffset spec.registers 0 =
         1 + RegisterLayout.values spec.registers 0 := by
@@ -4409,18 +4402,6 @@ theorem machine_reaches_cleanup_resume_solved
       erase_departLeft_atLogical] at hzero
     simpa [rawZero, searchRef, CounterControlPlan.resolve,
       afterZero, clearBoundary] using hzero
-  have htag := machine_reaches_tag_solved base c spec.outerDistance hshort
-    ⟨spec.growth, source, cleanupSearchBase + 4⟩ .left .sharedReturn
-    hrawTag (atLogical spec.growth (afterZero spec T) 0) 0 htagDistance
-    (cleanupGap_tag h)
-  have htag' : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨searchState base c
-          ⟨spec.growth, source, cleanupSearchBase + 4⟩,
-        atLogical spec.growth (afterZero spec T) 0⟩
-      ⟨controllerReturn base c,
-        atLogical spec.growth (afterZero spec T) 0⟩ := by
-    simpa [rawTagCommand, CounterControlPlan.resolve] using htag
   have hread : (atLogical spec.growth (afterZero spec T) 0).read =
       tagSymbol spec.returnTag := by
     rw [atLogical_read]
@@ -4451,14 +4432,14 @@ theorem machine_reaches_cleanup_resume_solved
     spec.returnTag (atLogical spec.growth (afterZero spec T) 0) hread
   have hdispatch' : FullTM0.Reaches
       (CounterControlNestingBridge.machine base c)
-      ⟨controllerReturn base c,
+      ⟨controllerReturn base c spec.growth,
         atLogical spec.growth (afterZero spec T) 0⟩
       ⟨resumeState (CanonicalInitializer.radius c)
           (searchState base c (rawCommands.get spec.returnTag).address),
         atLogical spec.growth (afterTag spec T) 0⟩ := by
-    simpa [afterTag, atLogical_write] using hdispatch
+    simpa [hreturnDirection, afterTag, atLogical_write] using hdispatch
   exact hthree'.trans (htwo'.trans (hone'.trans
-    (hzero'.trans (htag'.trans hdispatch'))))
+    (hzero'.trans hdispatch')))
 
 /-- Exact backed-frame cleanup endpoint: after erasing the five boundaries
 and the return tag, the suspended outer tape is restored extensionally. -/
@@ -4466,6 +4447,8 @@ theorem machine_reaches_cleanup_outer_solved
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
     (hback : BackedBy spec T outer)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hshort : ShortSearches base c spec.outerDistance)
     (hcommands : ∀ raw, raw ∈ cleanupCommands spec.growth source →
       raw ∈ rawCommands) :
@@ -4477,7 +4460,7 @@ theorem machine_reaches_cleanup_outer_solved
             (searchState base c
               (rawCommands.get spec.returnTag).address), outer⟩ := by
   have hrun := machine_reaches_cleanup_resume_solved base c source
-    hback.represents hshort hcommands
+    hback.represents hreturnDirection hshort hcommands
   rw [afterTag_eq_outer hback] at hrun
   simpa [atLogical] using hrun
 
@@ -4487,6 +4470,8 @@ theorem machine_reaches_collisionCleanup_solved
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
     (hback : BackedBy spec T outer)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hcollision : layoutEnd spec.registers + 1 = spec.outerDistance)
     (hshort : ShortSearches base c spec.outerDistance)
     (hentry : cleanupEntryRule spec.growth source ∈ rawDirectRules)
@@ -4536,7 +4521,8 @@ theorem machine_reaches_collisionCleanup_solved
     simpa [cleanupEntryRule, searchRef, CounterControlPlan.resolve] using
       hentryRunLocal
   exact hentryRun.trans
-    (machine_reaches_cleanup_outer_solved base c source hback hshort hcommands)
+    (machine_reaches_cleanup_outer_solved base c source hback
+      hreturnDirection hshort hcommands)
 
 /-! ## The outward-collision branch of increment -/
 
@@ -4645,6 +4631,8 @@ theorem machine_reaches_incrementCollisionInstruction_solved
     {spec : Spec numTags}
     {T outer : FullTM0.Tape (Symbol numTags)}
     (hback : BackedBy spec T outer)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hcollision : layoutEnd spec.registers + 1 = spec.outerDistance)
     (hshort : ShortSearches base c spec.outerDistance) :
     FullTM0.Reaches (CounterControlNestingBridge.machine base c)
@@ -4683,7 +4671,7 @@ theorem machine_reaches_incrementCollisionInstruction_solved
     apply command_mem_rawCommands_of_rule spec.growth hrule
     simp [commandsForRule, incrementCommands, hraw]
   have hcleanup := machine_reaches_collisionCleanup_solved base c source
-    hback hcollision hshort hentry hcleanupCommands
+    hback hreturnDirection hcollision hshort hentry hcleanupCommands
   have hvalidation' : FullTM0.Reaches
       (CounterControlNestingBridge.machine base c)
       ⟨logicalState base c spec.growth source,
@@ -4786,6 +4774,13 @@ theorem machine_reaches_validationAfterFirst_solved
         simpa only [MarkerValidation.sweep] using hraw))
   simpa [searchRef, CounterControlPlan.resolve] using hrun
 
+/-- Data-level evidence that the abstract successor has reached the saved
+outer target.  The `Type` wrapper keeps the equality available when
+eliminating an `AbstractStepReached` proof. -/
+structure AbstractStepCollision (next : CounterMachine.Cfg)
+    (spec : Spec numTags) : Type where
+  hitsTarget : layoutEnd next.registers = spec.outerDistance
+
 /-- Exact result of one defined abstract counter step.  Each constructor
 exposes the mandatory positive first transition and the remaining concrete
 execution separately. -/
@@ -4808,6 +4803,7 @@ inductive AbstractStepReached
         nextTape outer) :
       AbstractStepReached base c source next spec T outer
   | boundary
+      (collision : AbstractStepCollision next spec)
       (first : FullTM0.Cfg (Symbol numTags) FiniteTM0.State)
       (firstStep : FullTM0.step (CounterControlNestingBridge.machine base c)
         ⟨logicalState base c spec.growth source,
@@ -4831,6 +4827,8 @@ theorem machine_reaches_abstractStep_solved
     {spec : Spec numTags}
     {T outer : FullTM0.Tape (Symbol numTags)}
     (hback : BackedBy spec T outer)
+    (hreturnDirection :
+      (compileCommand base c spec.returnTag).searchDirection = spec.growth)
     (hstep : CounterMachine.step GlobalSourceProgram.program
       ⟨source, spec.registers⟩ = some next)
     (hshort : ShortSearches base c spec.outerDistance) :
@@ -4928,8 +4926,9 @@ theorem machine_reaches_abstractStep_solved
           apply command_mem_rawCommands_of_rule spec.growth hrule
           simp [commandsForRule, incrementCommands, hraw']
         have hcleanup := machine_reaches_collisionCleanup_solved base c
-          source hback hcollision hshort hentry hcleanupCommands
-        exact .boundary first hfirst
+          source hback hreturnDirection hcollision hshort hentry
+          hcleanupCommands
+        exact .boundary ⟨by simpa using hcollision⟩ first hfirst
           (hvalidation.trans (hcollisionRun.trans hcleanup))
   | decrementZero register ifZero ifPositive hlookup hzero hnext =>
       subst next
