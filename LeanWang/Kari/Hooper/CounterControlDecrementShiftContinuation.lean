@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlGuardedShiftEmbedding
 import LeanWang.Kari.Hooper.CounterControlPositiveGuarding
+import LeanWang.Kari.Hooper.CounterControlZeroGuarding
 
 /-!
 # Completed decrement-shift continuations
@@ -26,6 +27,7 @@ open CounterControlGlobalUnnesting CounterControlGuardedSearch
 open CounterControlParentContinuation
 open CounterControlGuardedParentContinuation
 open CounterControlGuardedShiftCompletion
+open CounterControlResumedShiftCoordinates
 
 noncomputable section
 
@@ -115,6 +117,50 @@ theorem foundMonotoneGuardedEntryOutcome_of_decrementShift_positive
       himmortalGuarded with ⟨parent⟩
   exact ⟨CounterControlPositiveGuarding.monotone_of_guardedTail_parent
     current hpositive (by simpa [guarded] using parent)⟩
+
+/-- Every arbitrary decrement shift on an immortal orbit has a weak
+monotone guarded-entry continuation.  Positive gaps consume one blank cell;
+at distance zero, absence of a collision exit forces the missing guard. -/
+theorem foundMonotoneGuardedEntryOutcome_of_decrementShift
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (hcommand : current.selectedRaw ∈
+      decrementShiftCommands growth source register)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
+  by_cases hzero : current.distance = 0
+  · rcases decrementShiftPosition_of_mem growth source register
+        current.selectedRaw hcommand with ⟨position⟩
+    rcases
+        CounterControlZeroGuarding.guarded_of_zero_markerShift_noCollision
+          base c current hzero
+          ⟨growth, source, secondarySearchBase + position.before.length⟩
+          position.current .right .left
+          (match position.remaining with
+            | [] => directRef growth source finishDirectSlot
+            | _ :: _ => searchRef growth source
+                (secondarySearchBase + position.before.length + 1))
+          (some .right) position.raw_eq himmortal with
+      ⟨guarded, hcurrent⟩
+    have hcommand' : guarded.selectedRaw ∈
+        decrementShiftCommands growth source register := by
+      simpa only [GuardedSearch.selectedRaw, GenuineSearch.selectedRaw,
+        hcurrent] using hcommand
+    rcases foundGuardedParentOutcome_of_decrementShift base c hmortal guarded
+        growth source register ifZero ifPositive hrule hcommand' (by
+          simpa [hcurrent] using himmortal) with
+      ⟨parent⟩
+    exact ⟨CounterControlZeroGuarding.monotone_of_zero_guardedParent
+      current hzero guarded hcurrent parent⟩
+  · exact foundMonotoneGuardedEntryOutcome_of_decrementShift_positive
+      base c hmortal current (Nat.pos_of_ne_zero hzero) growth source register
+      ifZero ifPositive hrule hcommand himmortal
 
 end
 
