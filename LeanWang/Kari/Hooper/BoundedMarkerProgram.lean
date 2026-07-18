@@ -656,15 +656,33 @@ def departState (radius offset : Nat) : FiniteTM0.State :=
 def resumeState (radius offset : Nat) : FiniteTM0.State :=
   clearState radius offset + 3
 
-/-- Shared return dispatcher after all private command blocks. -/
+/-- Directional return dispatchers after all private command blocks.  Hooper's
+return mechanism remembers the direction from which the nested core returned,
+so the two directions receive distinct states. -/
 def returnState (base radius : Nat) {numTags : Nat}
-    (commands : List (Command numTags)) : FiniteTM0.State :=
-  commandOffset base radius commands.length
+    (commands : List (Command numTags)) (direction : Turing.Dir) :
+    FiniteTM0.State :=
+  commandOffset base radius commands.length +
+    match direction with
+    | .left => 0
+    | .right => 1
+
+theorem returnState_injective (base radius : Nat) {numTags : Nat}
+    (commands : List (Command numTags)) :
+    Function.Injective (returnState base radius commands) := by
+  intro first second h
+  cases first <;> cases second <;> simp [returnState] at h ⊢
 
 /-- One shared entry for the eventual canonical nested computation. -/
 def coreEntry (base radius : Nat) {numTags : Nat}
     (commands : List (Command numTags)) : FiniteTM0.State :=
-  returnState base radius commands + 1
+  commandOffset base radius commands.length + 2
+
+theorem returnState_lt_coreEntry (base radius : Nat) {numTags : Nat}
+    (commands : List (Command numTags)) (direction : Turing.Dir) :
+    returnState base radius commands direction <
+      coreEntry base radius commands := by
+  cases direction <;> simp [returnState, coreEntry]
 
 /-- Source state of one bounded command. -/
 def entryState (_radius offset : Nat) : FiniteTM0.State := offset
@@ -861,14 +879,17 @@ def commandTables {numTags : Nat} (radius sharedCore : Nat) :
       commandTable radius offset sharedCore command ++
         commandTables radius sharedCore (offset + blockWidth radius) commands
 
-/-- Shared return rules.  Distinct command tags give distinct rule keys even
-though every rule has the same source state. -/
-def returnTable {numTags : Nat} (radius sharedReturn : Nat) :
+/-- Directional return rules.  A tag is accepted only at the return state
+matching the direction in which its command searches.  Distinct command tags
+still give distinct rule keys independently of their directions. -/
+def returnTable {numTags : Nat} (radius : Nat)
+    (sharedReturn : Turing.Dir → FiniteTM0.State) :
     Nat → List (Command numTags) →
       FiniteTM0.Table (AlphabetSize numTags)
   | _, [] => []
   | offset, command :: commands =>
-      FiniteTM0.Rule.mk sharedReturn (tagSymbol command.returnTag)
+      FiniteTM0.Rule.mk (sharedReturn command.searchDirection)
+          (tagSymbol command.returnTag)
           (resumeState radius offset) (.write blankSymbol) ::
         returnTable radius sharedReturn (offset + blockWidth radius) commands
 
@@ -1765,7 +1786,8 @@ theorem machine_cleanup_reaches_return {numTags : Nat}
     (core : FiniteTM0.Table (AlphabetSize numTags))
     (direction : Turing.Dir) (returnTag : Fin numTags)
     (hat : CommandAt radius base commandOffset
-      (Command.cleanup direction (returnState base radius commands) returnTag)
+      (Command.cleanup direction
+        (returnState base radius commands direction) returnTag)
       commands)
     (T : FullTM0.Tape (Symbol numTags)) (distance : Nat)
     (hgap : SearchGap (fun a => a = blankSymbol)
@@ -1773,10 +1795,12 @@ theorem machine_cleanup_reaches_return {numTags : Nat}
     (hnear : distance ≤ NestingMachine.bound radius) :
     FullTM0.Reaches (machine base radius commands core)
       ⟨entryState radius commandOffset, T⟩
-      ⟨returnState base radius commands, T.moveN direction distance⟩ := by
+      ⟨returnState base radius commands direction,
+        T.moveN direction distance⟩ := by
   exact table_reaches_of_commandAt core hat
     (command_cleanup_reaches_return radius commandOffset
-      (coreEntry base radius commands) (returnState base radius commands)
+      (coreEntry base radius commands)
+      (returnState base radius commands direction)
       direction returnTag T distance hgap hnear)
 
 /-! ## Determinism and computable lookup -/
@@ -2369,44 +2393,52 @@ theorem commandTables_deterministic {numTags : Nat}
       exact congrArg Prod.fst heq
 
 theorem returnTable_keys {numTags : Nat}
-    (radius sharedReturn offset : Nat) (commands : List (Command numTags)) :
+    (radius : Nat) (sharedReturn : Turing.Dir → FiniteTM0.State)
+    (offset : Nat) (commands : List (Command numTags)) :
     (returnTable radius sharedReturn offset commands).map Prod.fst =
       commands.map fun command =>
-        (sharedReturn, tagSymbol command.returnTag) := by
+        (sharedReturn command.searchDirection,
+          tagSymbol command.returnTag) := by
   induction commands generalizing offset with
   | nil => rfl
   | cons command commands ih =>
       simp [returnTable, FiniteTM0.Rule.mk, ih]
 
 theorem returnTable_deterministic {numTags : Nat}
-    (radius sharedReturn offset : Nat) (commands : List (Command numTags))
+    (radius : Nat) (sharedReturn : Turing.Dir → FiniteTM0.State)
+    (offset : Nat) (commands : List (Command numTags))
     (htags : (commands.map (fun command => command.returnTag)).Nodup) :
     FiniteTM0.Deterministic
       (returnTable radius sharedReturn offset commands) := by
-  let returnKey := fun tag : Fin numTags =>
-    (sharedReturn, tagSymbol tag)
-  have hinjective : Function.Injective returnKey := by
-    intro first second heq
-    apply tagSymbol_injective
-    exact congrArg Prod.snd heq
-  have hmapped := htags.map hinjective
+  let returnKey := fun command : Command numTags =>
+    (sharedReturn command.searchDirection, tagSymbol command.returnTag)
+  have hcommands : commands.Nodup := htags.of_map _
+  have htagInjective :=
+    (List.nodup_map_iff_inj_on hcommands).mp htags
+  have hmapped : (commands.map returnKey).Nodup := hcommands.map_on (by
+    intro first hfirst second hsecond heq
+    have htag : first.returnTag = second.returnTag := by
+      apply tagSymbol_injective
+      exact congrArg Prod.snd heq
+    exact htagInjective first hfirst second hsecond htag)
   rw [FiniteTM0.Deterministic,
     returnTable_keys radius sharedReturn offset commands]
-  simpa [returnKey, List.map_map, Function.comp_def] using hmapped
+  exact hmapped
 
 theorem source_mem_returnTable {numTags : Nat}
-    {radius sharedReturn offset source : Nat}
+    {radius offset source : Nat}
+    {sharedReturn : Turing.Dir → FiniteTM0.State}
     {commands : List (Command numTags)}
     (hsource : source ∈ FiniteTM0.sourceStates
       (returnTable radius sharedReturn offset commands)) :
-    source = sharedReturn := by
+    ∃ direction, source = sharedReturn direction := by
   induction commands generalizing offset with
   | nil => simp [returnTable, FiniteTM0.sourceStates] at hsource
   | cons command commands ih =>
       simp only [returnTable, FiniteTM0.sourceStates, List.map_cons,
         List.mem_cons] at hsource
       rcases hsource with hfirst | hrest
-      · exact hfirst
+      · exact ⟨command.searchDirection, hfirst⟩
       · exact ih hrest
 
 theorem source_mem_controllerTable {numTags : Nat}
@@ -2418,13 +2450,10 @@ theorem source_mem_controllerTable {numTags : Nat}
     List.mem_append] at hsource
   rcases hsource with hcommands | hreturn
   · have hbounds := source_mem_commandTables hcommands
-    have hbeforeReturn : source < returnState base radius commands := by
-      change source < base + commands.length * blockWidth radius
-      exact hbounds.2
-    simpa [coreEntry] using Nat.lt_succ_of_lt hbeforeReturn
-  · have heq := source_mem_returnTable hreturn
-    subst source
-    simp [coreEntry]
+    change source < base + commands.length * blockWidth radius + 2
+    exact lt_trans hbounds.2 (by omega)
+  · rcases source_mem_returnTable hreturn with ⟨direction, rfl⟩
+    exact returnState_lt_coreEntry base radius commands direction
 
 theorem controllerTable_deterministic {numTags : Nat}
     (base radius : Nat) (commands : List (Command numTags))
@@ -2441,11 +2470,14 @@ theorem controllerTable_deterministic {numTags : Nat}
   have hcommandSource := key_mem_sourceStates hcommand
   have hreturnSource := key_mem_sourceStates hreturn
   have hcommandBounds := source_mem_commandTables hcommandSource
-  have hreturnEq := source_mem_returnTable hreturnSource
-  have hcommandUpper : commandKey.1 < returnState base radius commands := by
-    change commandKey.1 < base + commands.length * blockWidth radius
+  rcases source_mem_returnTable hreturnSource with ⟨direction, hreturnEq⟩
+  have hcommandUpper : commandKey.1 <
+      commandOffset base radius commands.length := by
     exact hcommandBounds.2
-  apply Nat.ne_of_lt hcommandUpper
+  have hreturnLower : commandOffset base radius commands.length ≤
+      returnState base radius commands direction := by
+    cases direction <;> simp [returnState]
+  apply Nat.ne_of_lt (lt_of_lt_of_le hcommandUpper hreturnLower)
   rw [congrArg Prod.fst heq, hreturnEq]
 
 theorem table_deterministic {numTags : Nat}
@@ -2536,12 +2568,14 @@ theorem machine_resume_reaches {numTags : Nat}
 /-- A distinct physical return tag selects exactly the corresponding
 command-local resume state and is cleared back to blank. -/
 theorem lookupAction_returnTable_of_at {numTags : Nat}
-    {radius sharedReturn base commandOffset : Nat}
+    {radius base commandOffset : Nat}
+    {sharedReturn : Turing.Dir → FiniteTM0.State}
     {command : Command numTags} {commands : List (Command numTags)}
     (hat : CommandAt radius base commandOffset command commands)
     (htags : (commands.map (fun command => command.returnTag)).Nodup) :
     FiniteTM0.lookupAction (returnTable radius sharedReturn base commands)
-        sharedReturn (tagSymbol command.returnTag) =
+        (sharedReturn command.searchDirection)
+        (tagSymbol command.returnTag) =
       some (resumeState radius commandOffset, .write blankSymbol) := by
   induction hat with
   | head offset command commands =>
@@ -2557,23 +2591,125 @@ theorem lookupAction_returnTable_of_at {numTags : Nat}
         rw [← heq]
         exact htagMem
       have hkeyNe :
-          (sharedReturn, tagSymbol command.returnTag) ≠
-            (sharedReturn, tagSymbol first.returnTag) := by
+          (sharedReturn command.searchDirection,
+              tagSymbol command.returnTag) ≠
+            (sharedReturn first.searchDirection,
+              tagSymbol first.returnTag) := by
         intro heq
         apply htagNe
         apply tagSymbol_injective
         exact congrArg Prod.snd heq
       change FiniteTM0.lookupAction
-          (FiniteTM0.Rule.mk sharedReturn (tagSymbol first.returnTag)
+          (FiniteTM0.Rule.mk (sharedReturn first.searchDirection)
+              (tagSymbol first.returnTag)
               (resumeState radius offset) (.write blankSymbol) ::
             returnTable radius sharedReturn
               (offset + blockWidth radius) commands)
-          sharedReturn (tagSymbol command.returnTag) = _
+          (sharedReturn command.searchDirection)
+          (tagSymbol command.returnTag) = _
+      rw [FiniteTM0.lookupAction_cons_ne hkeyNe]
+      exact ih htags.2
+
+theorem lookupAction_returnTable_of_tag_not_mem {numTags : Nat}
+    {radius offset state : Nat}
+    {sharedReturn : Turing.Dir → FiniteTM0.State}
+    {commands : List (Command numTags)} {returnTag : Fin numTags}
+    (htag : returnTag ∉ commands.map (fun command => command.returnTag)) :
+    FiniteTM0.lookupAction (returnTable radius sharedReturn offset commands)
+        state (tagSymbol returnTag) = none := by
+  induction commands generalizing offset with
+  | nil => simp [returnTable, FiniteTM0.lookupAction]
+  | cons command commands ih =>
+      simp only [List.map_cons, List.mem_cons, not_or] at htag
+      have hkeyNe :
+          (state, tagSymbol returnTag) ≠
+            (sharedReturn command.searchDirection,
+              tagSymbol command.returnTag) := by
+        intro heq
+        apply htag.1
+        apply tagSymbol_injective
+        exact congrArg Prod.snd heq
+      change FiniteTM0.lookupAction
+          (FiniteTM0.Rule.mk (sharedReturn command.searchDirection)
+              (tagSymbol command.returnTag)
+              (resumeState radius offset) (.write blankSymbol) ::
+            returnTable radius sharedReturn
+              (offset + blockWidth radius) commands)
+          state (tagSymbol returnTag) = none
+      rw [FiniteTM0.lookupAction_cons_ne hkeyNe]
+      exact ih htag.2
+
+/-- The same tag at the return state for the opposite direction has no
+dispatcher rule.  Thus a nested core that returns from the wrong side halts
+instead of silently resuming the command. -/
+theorem lookupAction_returnTable_wrong_direction_of_at {numTags : Nat}
+    {radius base commandOffset : Nat}
+    {sharedReturn : Turing.Dir → FiniteTM0.State}
+    {command : Command numTags} {commands : List (Command numTags)}
+    (hat : CommandAt radius base commandOffset command commands)
+    (htags : (commands.map (fun command => command.returnTag)).Nodup)
+    (hreturn : Function.Injective sharedReturn) :
+    FiniteTM0.lookupAction (returnTable radius sharedReturn base commands)
+        (sharedReturn (NestingMachine.opposite command.searchDirection))
+        (tagSymbol command.returnTag) = none := by
+  induction hat with
+  | head offset command commands =>
+      simp only [List.map_cons, List.nodup_cons] at htags
+      have hopposite : NestingMachine.opposite command.searchDirection ≠
+          command.searchDirection := by
+        cases command.searchDirection <;> simp [NestingMachine.opposite]
+      have hkeyNe :
+          (sharedReturn (NestingMachine.opposite command.searchDirection),
+              tagSymbol command.returnTag) ≠
+            (sharedReturn command.searchDirection,
+              tagSymbol command.returnTag) := by
+        intro heq
+        apply hopposite
+        apply hreturn
+        exact congrArg Prod.fst heq
+      change FiniteTM0.lookupAction
+          (FiniteTM0.Rule.mk (sharedReturn command.searchDirection)
+              (tagSymbol command.returnTag)
+              (resumeState radius offset) (.write blankSymbol) ::
+            returnTable radius sharedReturn
+              (offset + blockWidth radius) commands)
+          (sharedReturn (NestingMachine.opposite command.searchDirection))
+          (tagSymbol command.returnTag) = none
+      rw [FiniteTM0.lookupAction_cons_ne hkeyNe]
+      exact lookupAction_returnTable_of_tag_not_mem htags.1
+  | tail offset commandOffset first command commands hat ih =>
+      simp only [List.map_cons, List.nodup_cons] at htags
+      have htagMem : command.returnTag ∈
+          commands.map (fun command => command.returnTag) :=
+        List.mem_map.mpr ⟨command, hat.command_mem, rfl⟩
+      have htagNe : command.returnTag ≠ first.returnTag := by
+        intro heq
+        apply htags.1
+        rw [← heq]
+        exact htagMem
+      have hkeyNe :
+          (sharedReturn (NestingMachine.opposite command.searchDirection),
+              tagSymbol command.returnTag) ≠
+            (sharedReturn first.searchDirection,
+              tagSymbol first.returnTag) := by
+        intro heq
+        apply htagNe
+        apply tagSymbol_injective
+        exact congrArg Prod.snd heq
+      change FiniteTM0.lookupAction
+          (FiniteTM0.Rule.mk (sharedReturn first.searchDirection)
+              (tagSymbol first.returnTag)
+              (resumeState radius offset) (.write blankSymbol) ::
+            returnTable radius sharedReturn
+              (offset + blockWidth radius) commands)
+          (sharedReturn (NestingMachine.opposite command.searchDirection))
+          (tagSymbol command.returnTag) = none
       rw [FiniteTM0.lookupAction_cons_ne hkeyNe]
       exact ih htags.2
 
 theorem returnTable_reaches_resume {numTags : Nat}
-    {radius sharedReturn base commandOffset : Nat}
+    {radius base commandOffset : Nat}
+    {sharedReturn : Turing.Dir → FiniteTM0.State}
     {command : Command numTags} {commands : List (Command numTags)}
     (hat : CommandAt radius base commandOffset command commands)
     (htags : (commands.map (fun command => command.returnTag)).Nodup)
@@ -2581,7 +2717,7 @@ theorem returnTable_reaches_resume {numTags : Nat}
     (hread : T.read = tagSymbol command.returnTag) :
     FullTM0.Reaches
       (FiniteTM0.machine (returnTable radius sharedReturn base commands))
-      ⟨sharedReturn, T⟩
+      ⟨sharedReturn command.searchDirection, T⟩
       ⟨resumeState radius commandOffset, T.write blankSymbol⟩ := by
   have hlookup := lookupAction_returnTable_of_at
     (sharedReturn := sharedReturn) hat htags
