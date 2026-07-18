@@ -395,7 +395,7 @@ theorem descendingShift_canonicalBackwardGeometry
 guarded caller.  Reverse shift geometry locates the selected moved boundary
 inside the reconstructed canonical core, after which the generic blank
 transport bounds the old gap by the core's first obstruction. -/
-theorem incrementRecovery_foundGuardedEscapeOutcome
+theorem incrementRecovery_foundGuardedParentOutcome
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
     (current : GuardedSearch base c)
@@ -406,7 +406,7 @@ theorem incrementRecovery_foundGuardedEscapeOutcome
     (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
     (handoff : IncrementRecoverySearchHandoff current growth source register
       next first rest) :
-    Nonempty (FoundGuardedEscapeOutcome current) := by
+    Nonempty (FoundGuardedParentOutcome current) := by
   rcases incrementRecoveryCenteredEnd base c hmortal current himmortal growth
       source register next first rest handoff with ⟨centered⟩
   have hdirection : current.direction = orient growth .left := by
@@ -487,12 +487,56 @@ theorem incrementRecovery_foundGuardedEscapeOutcome
     · simpa [centered.core_growth] using hopposite
     · simpa [centered.core_growth] using hcenter'
     · omega
-  exact foundGuardedEscapeOutcome_of_logicalLimit base c hmortal current
+  exact foundGuardedParentOutcome_of_logicalLimit base c hmortal current
     centered.core centered.reaches hdistance himmortal
 
+/-- Escape-sum wrapper for a nonempty increment-recovery route. -/
+theorem incrementRecovery_foundGuardedEscapeOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
+    (handoff : IncrementRecoverySearchHandoff current growth source register
+      next first rest) :
+    Nonempty (FoundGuardedEscapeOutcome current) := by
+  rcases incrementRecovery_foundGuardedParentOutcome base c hmortal current
+      himmortal growth source register next first rest handoff with ⟨outcome⟩
+  exact ⟨.parent outcome⟩
+
 /-- Every guarded caller selected inside an increment-shift schedule reaches
-a strict escape: the clock schedule uses its empty direct route, while all
-other completed schedules use the canonically reversed recovery route. -/
+a strict parent continuation: the clock schedule uses its empty direct route,
+while all other completed schedules use the canonically reversed recovery
+route. -/
+theorem incrementShift_foundGuardedParentOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (hcommand : current.selectedRaw ∈
+      incrementShiftCommands growth source register) :
+    Nonempty (FoundGuardedParentOutcome current) := by
+  rcases current.incrementShift_suffix_of_immortal base c hmortal growth
+      source register next hrule hcommand himmortal with ⟨suffix⟩
+  rcases incrementDirectCompletion base c current growth source register
+      next hrule suffix with ⟨completion⟩
+  cases completion with
+  | logical direct hroute =>
+      exact incrementLogical_foundGuardedParentOutcome base c hmortal current
+        himmortal growth source register next direct hroute
+  | recovery first rest handoff =>
+      exact incrementRecovery_foundGuardedParentOutcome base c hmortal
+        current himmortal growth source register next first rest handoff
+
+/-- Escape-sum wrapper for the guarded increment-shift continuation. -/
 theorem incrementShift_foundGuardedEscapeOutcome
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -506,17 +550,9 @@ theorem incrementShift_foundGuardedEscapeOutcome
     (hcommand : current.selectedRaw ∈
       incrementShiftCommands growth source register) :
     Nonempty (FoundGuardedEscapeOutcome current) := by
-  rcases current.incrementShift_suffix_of_immortal base c hmortal growth
-      source register next hrule hcommand himmortal with ⟨suffix⟩
-  rcases incrementDirectCompletion base c current growth source register
-      next hrule suffix with ⟨completion⟩
-  cases completion with
-  | logical direct hroute =>
-      exact incrementLogical_foundGuardedEscapeOutcome base c hmortal current
-        himmortal growth source register next direct hroute
-  | recovery first rest handoff =>
-      exact incrementRecovery_foundGuardedEscapeOutcome base c hmortal
-        current himmortal growth source register next first rest handoff
+  rcases incrementShift_foundGuardedParentOutcome base c hmortal current
+      himmortal growth source register next hrule hcommand with ⟨outcome⟩
+  exact ⟨.parent outcome⟩
 
 end
 

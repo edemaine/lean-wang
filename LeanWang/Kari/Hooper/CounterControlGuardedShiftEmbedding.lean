@@ -392,7 +392,7 @@ private theorem incrementLogical_distance_lt_limit_sub_one
 /-- A completed guarded increment whose recovery route is empty (necessarily
 the clock increment) reaches a strictly larger guarded caller after logical
 reconstruction and cleanup. -/
-theorem incrementLogical_foundGuardedEscapeOutcome
+theorem incrementLogical_foundGuardedParentOutcome
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
     (current : GuardedSearch base c)
@@ -402,7 +402,7 @@ theorem incrementLogical_foundGuardedEscapeOutcome
     (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
     (direct : IncrementDirectHandoff current growth source register next)
     (hroute : AnchoredCounterGeometry.routeFromIncrement register = []) :
-    Nonempty (FoundGuardedEscapeOutcome current) := by
+    Nonempty (FoundGuardedParentOutcome current) := by
   have hlogical := direct.reachesLogical_of_route_eq_nil hroute
   have himmortalLogical : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
@@ -447,8 +447,24 @@ theorem incrementLogical_foundGuardedEscapeOutcome
     rw [hcenter] at hlogical
     simpa [core, LogicalCore.cfg, LogicalCore.frame,
       LogicalCore.abstract, prefixLogicalCfg] using hlogical
-  exact foundGuardedEscapeOutcome_of_logicalLimit base c hmortal current core
+  exact foundGuardedParentOutcome_of_logicalLimit base c hmortal current core
     hreaches hdistance himmortal
+
+/-- Escape-sum wrapper for an empty increment-recovery route. -/
+theorem incrementLogical_foundGuardedEscapeOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (direct : IncrementDirectHandoff current growth source register next)
+    (hroute : AnchoredCounterGeometry.routeFromIncrement register = []) :
+    Nonempty (FoundGuardedEscapeOutcome current) := by
+  rcases incrementLogical_foundGuardedParentOutcome base c hmortal current
+      himmortal growth source register next direct hroute with ⟨outcome⟩
+  exact ⟨.parent outcome⟩
 
 private theorem decrementOrder_label_ne_zero
     (register : Register) (label : Fin 5)
