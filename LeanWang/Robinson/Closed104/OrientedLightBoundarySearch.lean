@@ -122,6 +122,105 @@ noncomputable def adjacentWeightWitness
       rw [shared, show coordinate - 1 + 1 = coordinate by omega,
         secondaryZero]
 
+/-- An oriented selected boundary after a unit-height point cannot be the
+direction whose local weight is `-1`. The potential, weights, and choice of
+the two directions are abstract, so the same scan applies on both axes. -/
+theorem selected_after_eq_of_negative_rejected
+    {Direction : Type}
+    {selected : Nat → Option Direction}
+    {primary secondary potential : Nat → Nat → Int}
+    {coordinate start boundary : Nat} {expected rejected : Direction}
+    (directions : ∀ direction, direction = expected ∨ direction = rejected)
+    (coordinatePositive : 0 < coordinate)
+    (startBoundary : start < boundary)
+    (boundarySelected : selected boundary ≠ none)
+    (rejectedWeight : selected boundary = some rejected →
+      primary coordinate boundary = -1 ∨ secondary coordinate boundary = -1)
+    (shared : ∀ scan position,
+      primary scan position = secondary (scan + 1) position)
+    (startHeight : ∀ scan,
+      scan = coordinate ∨ scan + 1 = coordinate → potential scan start = 1)
+    (step : ∀ scan position,
+      scan = coordinate ∨ scan + 1 = coordinate →
+      start < position → position ≤ boundary →
+      potential scan position =
+        potential scan (position - 1) + primary scan position)
+    (zero : ∀ position, start < position → position < boundary →
+      primary coordinate position = 0 ∧ secondary coordinate position = 0)
+    (positive : ∀ scan,
+      scan = coordinate ∨ scan + 1 = coordinate →
+      1 ≤ potential scan boundary) :
+    selected boundary = some expected := by
+  cases value : selected boundary with
+  | none => exact (boundarySelected value).elim
+  | some direction =>
+      rcases directions direction with rfl | rfl
+      · rfl
+      · exfalso
+        let witness := adjacentWeightWitness coordinatePositive shared
+          (rejectedWeight value)
+        apply negative_step_after_false
+          (potential := potential witness.scan)
+          (weight := primary witness.scan) startBoundary
+          (startHeight witness.scan witness.scan_eq)
+          (fun position lower upper =>
+            step witness.scan position witness.scan_eq lower upper)
+          (fun position lower upper =>
+            let pair := zero position lower upper
+            witness.zero_of_pair position pair.1 pair.2)
+          witness.boundaryWeight
+          (positive witness.scan witness.scan_eq)
+
+/-- An oriented selected boundary before a unit-height point cannot be the
+direction whose local weight is `+1`. This is the reverse scan dual of
+`selected_after_eq_of_negative_rejected`. -/
+theorem selected_before_eq_of_positive_rejected
+    {Direction : Type}
+    {selected : Nat → Option Direction}
+    {primary secondary potential : Nat → Nat → Int}
+    {coordinate boundary finish : Nat} {expected rejected : Direction}
+    (directions : ∀ direction, direction = expected ∨ direction = rejected)
+    (coordinatePositive : 0 < coordinate)
+    (boundaryFinish : boundary ≤ finish)
+    (boundarySelected : selected boundary ≠ none)
+    (rejectedWeight : selected boundary = some rejected →
+      primary coordinate boundary = 1 ∨ secondary coordinate boundary = 1)
+    (shared : ∀ scan position,
+      primary scan position = secondary (scan + 1) position)
+    (finishHeight : ∀ scan,
+      scan = coordinate ∨ scan + 1 = coordinate → potential scan finish = 1)
+    (step : ∀ scan position,
+      scan = coordinate ∨ scan + 1 = coordinate →
+      boundary ≤ position → position ≤ finish →
+      potential scan position =
+        potential scan (position - 1) + primary scan position)
+    (zero : ∀ position, boundary < position → position ≤ finish →
+      primary coordinate position = 0 ∧ secondary coordinate position = 0)
+    (positiveBefore : ∀ scan,
+      scan = coordinate ∨ scan + 1 = coordinate →
+      1 ≤ potential scan (boundary - 1)) :
+    selected boundary = some expected := by
+  cases value : selected boundary with
+  | none => exact (boundarySelected value).elim
+  | some direction =>
+      rcases directions direction with rfl | rfl
+      · rfl
+      · exfalso
+        let witness := adjacentWeightWitness coordinatePositive shared
+          (rejectedWeight value)
+        apply positive_step_before_false
+          (potential := potential witness.scan)
+          (weight := primary witness.scan) boundaryFinish
+          (finishHeight witness.scan witness.scan_eq)
+          (step witness.scan boundary witness.scan_eq le_rfl boundaryFinish)
+          (fun position lower upper =>
+            step witness.scan position witness.scan_eq (by omega) upper)
+          (fun position lower upper =>
+            let pair := zero position lower upper
+            witness.zero_of_pair position pair.1 pair.2)
+          witness.boundaryWeight
+          (positiveBefore witness.scan witness.scan_eq)
+
 theorem exists_first_after
     {P : Nat -> Prop} {start finish : Nat}
     (hstart : start < finish) (hfinish : P finish) :
