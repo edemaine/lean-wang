@@ -2,15 +2,37 @@
 
 Lean formalization of the undecidability of tiling the plane with Wang tiles.
 
-The main statements and reduction interface are proof-neutral. The completed
-proof follows the Berger/Robinson fixed-corner reduction described in
-[`cirm.pdf`](cirm.pdf), using Robinson's scaffold argument from
-[`robinson.pdf`](robinson.pdf), and lives in the `LeanWang.Robinson` module tree.
-Source provenance is recorded in [`cirm.txt`](cirm.txt) and
-[`robinson.txt`](robinson.txt); the current proof plan is in
-[`plan.md`](plan.md).
+**Status:** the Berger/Robinson proof is complete. It proves co-r.e.
+completeness and undecidability of both the direct and natural-number-encoded
+Wang domino problems. A second, independent proof based on Kari's affine
+construction and Hooper's immortality construction is in progress under
+`LeanWang.Kari`.
+
+The main statements and reduction interface are proof-neutral. The Robinson
+proof follows [`cirm.pdf`](cirm.pdf) and [`robinson.pdf`](robinson.pdf); the
+Kari--Hooper development follows [`hooper.pdf`](hooper.pdf). Source-provenance
+text files are stored beside the papers, and the historical Robinson proof plan
+is in [`plan.md`](plan.md).
+
+## Where to start
+
+- [`LeanWang/Final.lean`](LeanWang/Final.lean) contains the main public theorem
+  statements and currently discharges them with the completed Robinson proof.
+- [`LeanWang/DominoProblem.lean`](LeanWang/DominoProblem.lean) defines the
+  proof-neutral domino predicates, the shared reduction certificate, and the
+  generic co-r.e.-completeness and undecidability consequences.
+- [`LeanWang/Robinson/Final.lean`](LeanWang/Robinson/Final.lean) is the short
+  construction-specific endpoint: it combines the machine simulation and the
+  concrete scaffold into a `DominoProblem.Reduction`.
+- [`LeanWang/Robinson/Reduction.lean`](LeanWang/Robinson/Reduction.lean) is the
+  main place to read how fixed-corner machine tilings are converted to plane
+  tilings.
+- [`LeanWang/Kari.lean`](LeanWang/Kari.lean) is the aggregate entry point for
+  the in-progress Kari--Hooper formalization.
 
 ## Proof structure
+
+### Robinson
 
 The Robinson proof uses one fixed universal Mathlib TM0 machine:
 
@@ -28,61 +50,108 @@ route entirely. The generated initializer, position-code compiler, and their
 correctness modules have been removed from the repository; the retained proof
 uses the generic machine-to-Wang theorem directly.
 
-The shared endpoint is a `LeanWang.DominoProblem.Reduction`, which records the
-computable tileset map and its equivalence with fixed-input nonhalting. The
-public theorem surface is [`LeanWang.Final`](LeanWang/Final.lean):
+### Kari--Hooper (in progress)
+
+The second proof is developing an effective version of Hooper's nested
+bounded-search construction:
+
+```text
+Nat.Partrec.Code c
+  -> compile a deterministic finite counter-control TM0 table
+  -> prove arbitrary-configuration immortality iff c runs forever
+  -> compile the finite table to Kari's piecewise-affine system
+  -> encode its bi-infinite affine diagrams by Wang tiles
+```
+
+The difficult converse is being organized around guarded generated searches.
+The current modules formalize the finite counter-control compiler, designated
+forward simulation, affine encoding, and much of the arbitrary-configuration
+mortality argument. This tree does not yet provide a second completed
+`DominoProblem.Reduction`.
+
+The completed Robinson construction produces a
+`LeanWang.DominoProblem.Reduction`, which records the computable tileset map
+and its equivalence with fixed-input nonhalting. Kari is being developed
+toward the same interface. The current proof-neutral public theorem surface is
+[`LeanWang.Final`](LeanWang/Final.lean):
 
 ```lean
 LeanWang.fixedNonhalting_manyOneReducible_dominoProblem
 LeanWang.fixedNonhalting_manyOneReducible_encodedDominoProblem
+LeanWang.domino_problem_coRE
+LeanWang.encoded_domino_problem_coRE
+LeanWang.domino_problem_coRE_hard
+LeanWang.encoded_domino_problem_coRE_hard
+LeanWang.domino_problem_coRE_complete
+LeanWang.encoded_domino_problem_coRE_complete
 LeanWang.encoded_domino_problem_undecidable
 LeanWang.domino_problem_undecidable
 ```
 
-All four results have proof-technique-independent statements. The former
-`closed104_*` theorem names remain as compatibility aliases. Mathlib currently
-provides `REPred` and many-one reducibility but no co-r.e.-completeness
-abstraction. The exposed reductions are the construction-specific ingredient
-for the hardness direction; a future completeness theorem must also formalize
-co-r.e.-completeness of fixed nonhalting. Membership can use the already-proved
-finite-square compactness theorem, but still needs correctness and computability
-of the finite-square search and an r.e. packaging of finite obstructions.
+These results have proof-technique-independent statements.  The former
+`closed104_*` theorem names remain as compatibility aliases.  Co-r.e.
+membership is proved by enumerating finite square obstructions, while hardness
+is a generic corollary of any such reduction from fixed nonhalting.
 
-## Main modules
+## Directory structure
 
-- `LeanWang.Basic` defines Wang tiles, finite tilesets, tilings, rectangles,
-  and natural-number encodings.
-- `LeanWang.Compactness` proves compactness for centered boxes, squares, and
-  seeded quarter-plane tilings.
-- `LeanWang.DominoProblem` defines the proof-neutral predicates, reduction
-  certificate, many-one reductions, and generic undecidability corollaries.
-- `LeanWang.UniversalCode` defines the common universal partial function.
-- `LeanWang.Robinson.Machine.InputTiles` supplies the position and row colors
-  used to force a finite bottom row.
-- `LeanWang.Robinson.Machine.History` is the small input-independent kernel of
-  finite local history blocks. The obsolete table-program and blank-input
-  backends have been removed.
-- `LeanWang.UniversalTM0.Semantic` uses Mathlib's completeness
-  theorem to choose one evaluator code directly, carries its finite supports
-  through TM2, TM1, and TM0, and places the source code on its initial tape.
-- `LeanWang.Robinson.Machine.UniversalTM0.Folded` defines the paired coordinates
-  for the two-sided TM0 tape. `LeanWang.Robinson.Machine.UniversalTM0.Machine`
-  simulates each TM0 move in one target step and each write in two, and proves
-  exact halting equivalence.
-- `LeanWang.Robinson.Machine.UniversalTM0.MachineData` computes the
-  input-dependent bottom-row tiles and seed; all normal history tiles are fixed
-  constants.
-- `LeanWang.Robinson.Reduction` proves the fixed-corner and plane-tiling
-  reductions and packages them into the shared certificate.
-- `LeanWang.Robinson.Scaffold` defines the abstract scaffold certificate.
-- `LeanWang.Robinson.Closed104.*` contains the corrected 104-component Figure
-  13/Figure 16 transcription, substitution boundary certificates, and the
-  successful finite Proposition 8 recognizability check. In particular,
-  `OrientedLightHeight` proves a minimum principle for the light-wire height,
-  and `OrientedLightForward` derives forward square forcing directly from its
-  outward-facing nearest boundaries. Meanwhile,
-  `ShadedCarrierCornerAddressing` constructs cofinally large addressed squares
-  and proves pointed-plane realization.
+```text
+LeanWang/
+  Basic.lean, Compactness.lean, FiniteSearch.lean
+  CoRE.lean, DominoProblem.lean, Final.lean
+  UniversalCode.lean
+  UniversalTM0/
+  Robinson/
+    Machine/
+      UniversalTM0/
+    Scaffold/
+      Routed/
+    Closed104/
+    Reduction.lean, Final.lean
+  Kari/
+    Hooper/
+```
+
+The top-level modules are shared by all proof techniques:
+
+- `Basic`, `Compactness`, and `FiniteSearch` define Wang tiles, finite
+  rectangles, compactness, and computable finite obstruction search.
+- `CoRE` and `DominoProblem` define the proof-neutral computability statements
+  and derive the generic consequences of any `DominoProblem.Reduction`.
+- `UniversalCode` and `UniversalTM0/` select a universal Mathlib evaluator and
+  transport its finite machine support through Mathlib's TM2, TM1, and TM0
+  models.
+- `Final` is the public theorem module. The default `lake build` target imports
+  this file, so it checks the completed Robinson proof rather than the
+  in-progress Kari aggregate.
+
+The completed Robinson proof is split by responsibility:
+
+- `Robinson/Machine/` contains the finite-input Wang history construction.
+  Its `UniversalTM0/` subdirectory folds the two-sided universal TM0 tape into
+  one side, proves exact halting equivalence, and computes the input-dependent
+  bottom row and seed. The ordinary history tiles remain fixed.
+- `Robinson/Scaffold/` defines the abstract fixed-corner scaffold interface;
+  `Scaffold/Routed/` adds the routed carrier and pointed-plane machinery used
+  by the concrete construction.
+- `Robinson/Closed104/` contains the corrected 104-component Figure 13/Figure
+  16 transcription, substitution and shade certificates, free-square forcing,
+  and addressed-square realization. The active Figure 16 definitions are in
+  `Figure16.lean`; exhaustive transcription checks are retained separately in
+  the unimported `Figure16Audit.lean`.
+- `Robinson/Reduction.lean` connects machine histories to the scaffold, and
+  `Robinson/Final.lean` supplies the completed reduction certificate.
+
+The in-progress second proof is isolated under `Kari/`:
+
+- The files directly in `Kari/` formalize transducers, piecewise-affine
+  dynamics, Beatty encodings, affine Turing-machine diagrams, and their Wang
+  encodings.
+- `Kari/Hooper/` formalizes Hooper's nested counter and bounded-search
+  construction, including finite control, marker geometry, forward simulation,
+  and the developing arbitrary-configuration mortality converse.
+- `Kari.lean` imports the current Kari development for separate checking, but
+  it is not imported by `LeanWang.Final` and is not yet a second proof endpoint.
 
 The superseded exhaustive PairCover seam proof remains available as provenance
 in the [last pre-cleanup commit](https://github.com/edemaine/lean-wang/tree/a8bcfd206a9816868d0a77bda96c46227313dad3).
@@ -96,7 +165,8 @@ and committed component roots in
 ## Build
 
 ```bash
-lake build
+lake build                 # completed public theorem surface
+lake build LeanWang.Kari   # current in-progress Kari aggregate
 ```
 
 All Lean source files are nonexecutable (`100644`). The source contains no
