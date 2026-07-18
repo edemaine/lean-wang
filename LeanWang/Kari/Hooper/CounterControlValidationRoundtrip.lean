@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlValidationMortality
+import LeanWang.Kari.Hooper.CounterControlCoreRunway
+import LeanWang.Kari.Hooper.CounterControlOpenMortality
 
 /-!
 # Round-trip geometry of validation
@@ -541,6 +543,54 @@ theorem logical_reconstructs_core_of_immortal
   rw [houterReturn] at hbody
   exact ⟨instruction, registers, coreTape, hrule,
     by simpa [coreTape] using hcore, hcenter, hbody⟩
+
+/-- Source mortality rules out the open-tail alternative for the core
+reconstructed at an immortal logical entry.  Consequently there is a least
+nonblank obstruction beyond boundary `4`, preceded by an exact blank runway.
+The instruction body is still reached on the unchanged logical tape. -/
+theorem logical_reconstructs_firstNonblank_of_immortal
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (growth : Turing.Dir) (source : Nat) (hsourceBound : source < logicalSpan)
+    (logicalTape : FullTM0.Tape (Symbol numTags))
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+        ⟨logicalState base c growth source, logicalTape⟩) :
+    ∃ (instruction : CounterMachine.Instruction)
+        (registers : Registers)
+        (coreTape : FullTM0.Tape (Symbol numTags))
+        (distance : Nat),
+      (source, instruction) ∈ GlobalSourceProgram.program ∧
+        CounterControlCoreFrame.CoreRepresents registers growth coreTape ∧
+        logicalTape = atLogical growth coreTape (layoutEnd registers) ∧
+        FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          ⟨logicalState base c growth source, logicalTape⟩
+          ⟨resolve base c (bodyEntry growth source instruction),
+            logicalTape⟩ ∧
+        layoutEnd registers < distance ∧
+        (∀ position, layoutEnd registers < position →
+          position < distance →
+            FramedMarkerTape.logicalTape growth coreTape position =
+              blankSymbol) ∧
+        FramedMarkerTape.logicalTape growth coreTape distance ≠
+          blankSymbol := by
+  rcases logical_reconstructs_core_of_immortal base c hmortal growth source
+      hsourceBound logicalTape himmortal with
+    ⟨instruction, registers, coreTape, hrule, hcore, hcenter, hbody⟩
+  rcases CounterControlCoreRunway.coreOpen_or_firstNonblank hcore with
+    hopen | ⟨distance, hpast, hrunway, hnonblank⟩
+  · have hhalts :=
+      CounterControlOpenMortality.haltsFrom_logical_of_coreOpen
+        base c hmortal growth ⟨source, registers⟩ coreTape
+        hsourceBound hopen
+    rw [← hcenter] at hhalts
+    exact False.elim
+      ((FullTM0.HaltsFrom.immortalFrom_iff_not
+        (CounterControlNestingBridge.machine base c)
+        ⟨logicalState base c growth source, logicalTape⟩).mp
+          himmortal hhalts)
+  · exact ⟨instruction, registers, coreTape, distance, hrule, hcore,
+      hcenter, hbody, hpast, hrunway, hnonblank⟩
 
 end
 
