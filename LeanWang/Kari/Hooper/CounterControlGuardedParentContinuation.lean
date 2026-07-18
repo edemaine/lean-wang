@@ -76,6 +76,31 @@ def FoundGuardedParentContinuationLaw
       (foundCfg current.current) →
       Nonempty (FoundGuardedParentOutcome current)
 
+/-- The weaker first-entry classification starts from an arbitrary genuine
+search.  A containing inequality is unnecessary here: reaching either a
+represented logical core or a shared-return guard is enough to enter the
+stable guarded phase. -/
+inductive FoundGuardedEntryOutcome
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c) : Type where
+  | logical (core : LogicalCore base c)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        (foundCfg current) core.cfg)
+  | nextSearch (next : GuardedSearch base c)
+      (reaches : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c)
+        (foundCfg current) next.current.cfg)
+
+/-- Exact finite-continuation obligation for the first, possibly unguarded,
+generated search on an immortal orbit. -/
+def FoundGuardedEntryContinuationLaw
+    (base : Nat) (c : Nat.Partrec.Code) : Prop :=
+  ∀ current : GenuineSearch base c,
+    FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
+      (foundCfg current) →
+      Nonempty (FoundGuardedEntryOutcome current)
+
 /-- A found-state outcome supplies one strict guarded unnesting step.  In the
 logical branch, finite-prefix totality cleans the represented core, resumes
 its saved caller, and the shared return supplies the guard. -/
@@ -114,6 +139,43 @@ theorem guardedUnnestingLaw_of_foundGuardedParentContinuationLaw
   have himmortalFound := immortalFrom_foundCfg current.current himmortal
   rcases hlaw current himmortalFound with ⟨outcome⟩
   exact guardedUnnests_of_foundOutcome base c hmortal current
+    himmortal outcome
+
+/-- A first-entry found-state outcome reaches the stable guarded phase. -/
+theorem entersGuardedSearch_of_foundEntryOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) current.cfg)
+    (outcome : FoundGuardedEntryOutcome current) :
+    ∃ next : GuardedSearch base c, EntersGuardedSearch current next := by
+  have hfound := reaches_foundCfg_of_immortal current himmortal
+  cases outcome with
+  | nextSearch next htail =>
+      exact ⟨next, ⟨hfound.trans htail⟩⟩
+  | logical core htail =>
+      have himmortalFound := immortalFrom_of_reaches base c
+        himmortal hfound
+      have himmortalCore := immortalFrom_of_reaches base c
+        himmortalFound htail
+      rcases core.reaches_resumed_of_immortal base c hmortal
+          himmortalCore with ⟨resumed⟩
+      let next : GuardedSearch base c :=
+        CounterControlGuardedResume.PrefixResumedSearch.toGuardedSearch resumed
+      exact ⟨next, ⟨hfound.trans (htail.trans resumed.reaches)⟩⟩
+
+/-- The weaker exact found-state law supplies the initial guarded-entry law
+consumed by global iteration. -/
+theorem guardedEntryLaw_of_foundGuardedEntryContinuationLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hlaw : FoundGuardedEntryContinuationLaw base c) :
+    GuardedEntryLaw base c := by
+  intro current himmortal
+  have himmortalFound := immortalFrom_foundCfg current himmortal
+  rcases hlaw current himmortalFound with ⟨outcome⟩
+  exact entersGuardedSearch_of_foundEntryOutcome base c hmortal current
     himmortal outcome
 
 end
