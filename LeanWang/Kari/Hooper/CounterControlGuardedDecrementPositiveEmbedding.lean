@@ -535,6 +535,35 @@ theorem positiveOriginal_distance_lt_layoutEnd
       tailGeometry.travel + shiftDistance := rfl
   omega
 
+/-- Consumer-facing guarded-parent outcome for the positive branch of an
+original decrement-entry caller. -/
+theorem positiveOriginal_foundGuardedParentOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    {current : GuardedSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (entry : PositiveSearchHandoff current growth source register
+      ifZero ifPositive)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current)) :
+    Nonempty (FoundGuardedParentOutcome current) := by
+  rcases positiveLogicalHandoff_of_immortal base c entry hmortal himmortal
+      with ⟨handoff⟩
+  have himmortalEntry := positive_immortalFrom base c handoff.entry himmortal
+  have himmortalFound := immortalFrom_foundCfg handoff.entry.next.current
+    himmortalEntry
+  rcases decrementPositiveCenteredEnd base c hmortal handoff.entry.next
+      himmortalFound growth source register ifZero ifPositive handoff.direct
+      with ⟨endpoint⟩
+  have hinside := positiveOriginal_distance_lt_layoutEnd handoff endpoint
+  have hfound := reaches_foundCfg_of_immortal handoff.entry.next.current
+    himmortalEntry
+  have hreaches := handoff.entry.reaches.trans
+    (hfound.trans endpoint.reaches)
+  exact ⟨FoundGuardedParentOutcome.logical endpoint.core hreaches hinside⟩
+
 end
 
 end CounterControlGuardedDecrementPositiveEmbedding
