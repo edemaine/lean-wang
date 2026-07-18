@@ -82,7 +82,7 @@ inductive ControlRef where
   | logical (growth : Turing.Dir) (counterState : CounterMachine.State)
   | direct (address : DirectAddress)
   | search (address : SearchAddress)
-  | sharedReturn
+  | sharedReturn (growth : Turing.Dir)
   deriving DecidableEq
 
 def directRef (growth : Turing.Dir) (counterState slot : Nat) :
@@ -262,9 +262,7 @@ def cleanupCommands (growth : Turing.Dir) (source : Nat) :
   , .boundaryNavigation ⟨growth, source, cleanupSearchBase + 2⟩ 1 .left
       (searchRef growth source (cleanupSearchBase + 3)) (.erase (some .left))
   , .boundaryNavigation ⟨growth, source, cleanupSearchBase + 3⟩ 0 .left
-      (searchRef growth source (cleanupSearchBase + 4)) (.erase (some .left))
-  , .tagNavigation ⟨growth, source, cleanupSearchBase + 4⟩ .left
-      .sharedReturn
+      (.sharedReturn growth) (.erase (some .left))
   ]
 
 def incrementCommands (growth : Turing.Dir) (source next : Nat)
@@ -447,12 +445,18 @@ theorem command_searchIndex_lt_numTags {command : RawCommand}
   apply searchIndex_lt_numTags
   exact List.mem_map.mpr ⟨command, hcommand, rfl⟩
 
-def controllerReturn (base : Nat) (c : Nat.Partrec.Code) : Nat :=
-  BoundedMarkerProgram.commandOffset base (CanonicalInitializer.radius c)
-    numTags
+def controllerReturn (base : Nat) (c : Nat.Partrec.Code) :
+    Turing.Dir → Nat
+  | .left =>
+      BoundedMarkerProgram.commandOffset base (CanonicalInitializer.radius c)
+        numTags
+  | .right =>
+      BoundedMarkerProgram.commandOffset base (CanonicalInitializer.radius c)
+        numTags + 1
 
 def controllerCoreEntry (base : Nat) (c : Nat.Partrec.Code) : Nat :=
-  controllerReturn base c + 1
+  BoundedMarkerProgram.commandOffset base (CanonicalInitializer.radius c)
+    numTags + 2
 
 def initializerEnd (base : Nat) (c : Nat.Partrec.Code) : Nat :=
   CanonicalInitializerProgram.exitState (controllerCoreEntry base c) c numTags
@@ -497,7 +501,7 @@ def resolve (base : Nat) (c : Nat.Partrec.Code) : ControlRef → Nat
   | .logical growth counterState => logicalState base c growth counterState
   | .direct address => directState base c address
   | .search address => searchState base c address
-  | .sharedReturn => controllerReturn base c
+  | .sharedReturn growth => controllerReturn base c growth
 
 theorem logicalState_bounds (base : Nat) (c : Nat.Partrec.Code)
     (growth : Turing.Dir) {counterState : Nat}
@@ -644,16 +648,18 @@ theorem commands_returnTags_eq_finRange (base : Nat)
   simpa only [compileCommand_returnTag, Function.id_def] using
     (List.ofFn_id rawCommands.length)
 
-theorem controllerReturn_eq (base : Nat) (c : Nat.Partrec.Code) :
+theorem controllerReturn_eq (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) :
     BoundedMarkerProgram.returnState base (CanonicalInitializer.radius c)
-      (commands base c) = controllerReturn base c := by
-  simp [BoundedMarkerProgram.returnState, controllerReturn]
+      (commands base c) growth = controllerReturn base c growth := by
+  cases growth <;>
+    simp [BoundedMarkerProgram.returnState, controllerReturn]
 
 theorem controllerCoreEntry_eq (base : Nat) (c : Nat.Partrec.Code) :
     BoundedMarkerProgram.coreEntry base (CanonicalInitializer.radius c)
       (commands base c) = controllerCoreEntry base c := by
   simp [BoundedMarkerProgram.coreEntry, controllerCoreEntry,
-    controllerReturn_eq]
+    BoundedMarkerProgram.commandOffset]
 
 /-! ## Tag-selected initializer and direct finite table -/
 
