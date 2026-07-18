@@ -411,10 +411,10 @@ theorem lowerBoundary_inwardAgreement_of_upperAgreement
     _ = (lowerTape.moveN (orient growth .left) back).read := by
       rw [← FullTM0.Tape.moveN_add, oldUpper_back_to_lower]
 
-/-- A positive canonical anchor followed inward to the old found endpoint
+/-- A positive canonical anchor whose inward ray reaches the old found ray
 retains the old gap margin as soon as boundary `0` is absent along the
 intervening prefix. -/
-theorem distance_lt_anchor_of_centerOffset
+theorem distance_lt_anchor_of_centerRay
     {registers : Registers} {growth : Turing.Dir} {target : Fin 5}
     {coreTape center oldOuter oldFound :
       FullTM0.Tape (Symbol numTags)}
@@ -427,7 +427,9 @@ theorem distance_lt_anchor_of_centerOffset
       oldFound)
     (anchor_pos : 1 < anchor)
     (centered : center = atLogical growth coreTape anchor)
-    (foundAt : center.moveN (orient growth .left) toFound = oldFound)
+    (foundRay : ∀ back,
+      (center.moveN (orient growth .left) (toFound + back)).read =
+        (oldFound.moveN (orient growth .left) back).read)
     (avoidsZero : ∀ back ≤ toFound,
       (center.moveN (orient growth .left) back).read ≠ boundarySymbol 0) :
     distance < anchor := by
@@ -465,18 +467,38 @@ theorem distance_lt_anchor_of_centerOffset
         orient growth .left := by
       cases growth <;> rfl
     rw [hopposite] at hblank
-    have hcoordinate :
-        (center.moveN (orient growth .left)
-          (toFound + remaining)).read =
-        (oldFound.moveN (orient growth .left) remaining).read := by
-      rw [← FullTM0.Tape.moveN_add, foundAt]
     have hzeroBlank :
         (center.moveN (orient growth .left)
           (anchor - 1)).read = blankSymbol := by
-      rw [← hsum, hcoordinate]
+      rw [← hsum, foundRay]
       exact hblank
     rw [hboundaryZero] at hzeroBlank
     exact blankSymbol_ne_boundarySymbol 0 hzeroBlank.symm
+
+/-- Whole-tape equality at the old found endpoint supplies the corresponding
+inward-ray equality. -/
+theorem distance_lt_anchor_of_centerOffset
+    {registers : Registers} {growth : Turing.Dir} {target : Fin 5}
+    {coreTape center oldOuter oldFound :
+      FullTM0.Tape (Symbol numTags)}
+    {distance anchor toFound : Nat}
+    (core : CoreRepresents registers growth coreTape)
+    (oldGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches oldOuter
+      (orient growth .right) distance)
+    (oldFound_eq : oldOuter.moveN (orient growth .right) distance =
+      oldFound)
+    (anchor_pos : 1 < anchor)
+    (centered : center = atLogical growth coreTape anchor)
+    (foundAt : center.moveN (orient growth .left) toFound = oldFound)
+    (avoidsZero : ∀ back ≤ toFound,
+      (center.moveN (orient growth .left) back).read ≠ boundarySymbol 0) :
+    distance < anchor := by
+  apply distance_lt_anchor_of_centerRay core oldGap oldFound_eq anchor_pos
+    centered (toFound := toFound)
+  · intro back
+    rw [← FullTM0.Tape.moveN_add, foundAt]
+  · exact avoidsZero
 
 /-- A canonical logical-end center followed inward to the old found endpoint
 retains the old gap margin.  This is the common specialization used by
@@ -501,6 +523,32 @@ theorem distance_lt_layoutEnd_of_centerOffset
   · simp [layoutEnd, RegisterLayout.clockBoundary_eq]
   · exact centered
   · exact foundAt
+  · exact avoidsZero
+
+/-- Inward-ray equality is sufficient for the canonical logical-end margin;
+no equality of the complete shifted and original tapes is required. -/
+theorem distance_lt_layoutEnd_of_centerRay
+    {registers : Registers} {growth : Turing.Dir} {target : Fin 5}
+    {coreTape center oldOuter oldFound :
+      FullTM0.Tape (Symbol numTags)}
+    {distance toFound : Nat}
+    (core : CoreRepresents registers growth coreTape)
+    (oldGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches oldOuter
+      (orient growth .right) distance)
+    (oldFound_eq : oldOuter.moveN (orient growth .right) distance =
+      oldFound)
+    (centered : center = atLogical growth coreTape (layoutEnd registers))
+    (foundRay : ∀ back,
+      (center.moveN (orient growth .left) (toFound + back)).read =
+        (oldFound.moveN (orient growth .left) back).read)
+    (avoidsZero : ∀ back ≤ toFound,
+      (center.moveN (orient growth .left) back).read ≠ boundarySymbol 0) :
+    distance < layoutEnd registers := by
+  apply distance_lt_anchor_of_centerRay core oldGap oldFound_eq
+  · simp [layoutEnd, RegisterLayout.clockBoundary_eq]
+  · exact centered
+  · exact foundRay
   · exact avoidsZero
 
 /-- Inward-ray agreement at the corresponding canonical boundary is enough
