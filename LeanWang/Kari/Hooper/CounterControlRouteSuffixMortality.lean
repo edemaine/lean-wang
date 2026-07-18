@@ -65,6 +65,36 @@ inductive RouteTailGaps (growth : Turing.Dir) :
         (T.move (orient growth next.direction)) finish) :
       RouteTailGaps growth (next :: rest) T finish
 
+/-- Expose the first exact gap of a nonempty preserving-route tail while
+retaining the remaining trace in found-state form.  This nondependent
+destructor lets finite route proofs avoid eliminating `RouteGaps` directly.
+-/
+theorem RouteTailGaps.uncons
+    {growth : Turing.Dir} {next : MarkerValidation.Leg}
+    {rest : List MarkerValidation.Leg}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (trace : RouteTailGaps growth (next :: rest) start finish) :
+    ∃ distance,
+      SearchGap (fun symbol => symbol = blankSymbol)
+        (Target.boundary next.target).Matches
+        (start.move (orient growth next.direction))
+        (orient growth next.direction) distance ∧
+      RouteTailGaps growth rest
+        ((start.move (orient growth next.direction)).moveN
+          (orient growth next.direction) distance) finish := by
+  cases trace with
+  | cons _ _ start finish routeTrace =>
+      cases rest with
+      | nil =>
+          cases routeTrace with
+          | last _ _ distance gap =>
+              exact ⟨distance, gap, .nil _⟩
+      | cons following tail =>
+          cases routeTrace with
+          | cons _ _ _ _ distance gap finish remaining =>
+              exact ⟨distance, gap,
+                .cons following tail _ finish remaining⟩
+
 /-- Success reference selected by one route position. -/
 def routeSuffixSuccess (growth : Turing.Dir) (source directSlot : Nat)
     (after : ControlRef) : List MarkerValidation.Leg → ControlRef
