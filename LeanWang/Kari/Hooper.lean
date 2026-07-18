@@ -31,6 +31,7 @@ import LeanWang.Kari.Hooper.FiniteTM0Mirror
 import LeanWang.Kari.Hooper.MarkerProgram
 import LeanWang.Kari.Hooper.MarkerChain
 import LeanWang.Kari.Hooper.MarkerSchedule
+import LeanWang.Kari.Hooper.MarkerNavigation
 import LeanWang.Kari.Hooper.BasicLemma
 import LeanWang.Kari.Hooper.BasicLemmaConverse
 import LeanWang.Kari.Hooper.NestingMachine
@@ -51,7 +52,8 @@ covering every source transition together with its exact designated-start
 semantics, a four-register counter-program layer, its
 exact finite five-boundary marker tape, collision-free suffix shifts for every
 counter operation together with exact chained increment and
-positive-decrement schedules, concrete finite-table marker programs with
+positive-decrement schedules, exact navigation between their common boundary
+anchors, concrete finite-table marker programs with
 independently directed searches and shifts,
 relocatable and reflectable finite tables, a verified finite-table linker,
 concrete arbitrary-entry liveness laws for the complete fixed source program,
