@@ -50,6 +50,37 @@ theorem of_reaches {M : Turing.TM0.Machine Γ Λ} {start current : Cfg Γ Λ}
   rcases hhalts with ⟨terminal, hterminalReach, hterminal⟩
   exact ⟨terminal, hprefix.trans hterminalReach, hterminal⟩
 
+omit [Inhabited Γ] in
+/-- Every full-tape computation either reaches a terminal configuration or
+survives for arbitrarily many steps. -/
+theorem or_immortalFrom (M : Turing.TM0.Machine Γ Λ) (start : Cfg Γ Λ) :
+    HaltsFrom M start ∨ ImmortalFrom M start := by
+  classical
+  by_cases hdom : (StateTransition.eval (step M) start).Dom
+  · left
+    rcases Part.dom_iff_mem.mp hdom with ⟨terminal, hterminal⟩
+    rcases StateTransition.mem_eval.mp hterminal with ⟨hreach, hstep⟩
+    exact ⟨terminal, hreach, hstep⟩
+  · right
+    exact (Dynamics.not_eval_dom_iff_immortalFrom _ _).mp hdom
+
+omit [Inhabited Γ] in
+/-- Full-tape immortality from a fixed configuration is exactly the absence
+of a reachable terminal configuration. -/
+theorem immortalFrom_iff_not (M : Turing.TM0.Machine Γ Λ)
+    (start : Cfg Γ Λ) :
+    ImmortalFrom M start ↔ ¬ HaltsFrom M start := by
+  constructor
+  · intro himmortal
+    rintro ⟨terminal, hreach, hterminal⟩
+    rcases Dynamics.exists_iterate_eq_some_of_reaches hreach with ⟨n, hn⟩
+    rcases himmortal (n + 1) with ⟨next, hnext⟩
+    simp [Dynamics.iterate_succ, hn, hterminal] at hnext
+  · intro hnot
+    rcases or_immortalFrom M start with hhalts | himmortal
+    · exact False.elim (hnot hhalts)
+    · exact himmortal
+
 end HaltsFrom
 end FullTM0
 
