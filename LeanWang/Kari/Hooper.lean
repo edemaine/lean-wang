@@ -27,6 +27,7 @@ import LeanWang.Kari.Hooper.MarkerMachine
 import LeanWang.Kari.Hooper.FiniteTM0Program
 import LeanWang.Kari.Hooper.MarkerProgram
 import LeanWang.Kari.Hooper.MarkerChain
+import LeanWang.Kari.Hooper.MarkerSchedule
 import LeanWang.Kari.Hooper.BasicLemma
 import LeanWang.Kari.Hooper.NestingMachine
 
@@ -44,9 +45,10 @@ compiler for the fixed source tape, one finite deterministic counter program
 covering every source transition together with its exact designated-start
 semantics, a four-register counter-program layer, its
 exact finite five-boundary marker tape, collision-free suffix shifts for every
-counter operation, concrete finite-table marker programs with independently
-directed searches and shifts, relocatable fixed arithmetic blocks, a verified
-finite-table linker, and the abstract strong-induction core of Hooper's nested
-bounded-search construction.  The remaining files will compile the counter
-instructions to marker searches and instantiate the nesting laws.
+counter operation together with exact chained increment schedules, concrete
+finite-table marker programs with independently directed searches and shifts,
+relocatable fixed arithmetic blocks, a verified finite-table linker, and the
+abstract strong-induction core of Hooper's nested bounded-search construction.
+The remaining files will compile the counter instructions to bounded marker
+searches and instantiate the nesting laws.
 -/
