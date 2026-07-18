@@ -78,6 +78,10 @@ theorem cycleSourceShade_eq_dark {node : Nat} (hnode : node ∈ reachable) :
       simp [evenLocalChecks])
   exact of_decide_eq_true checked
 
+theorem evenRootCycleDark_of_mem {node : Nat} (hnode : node ∈ reachable) :
+    evenRootCycleDark node = true :=
+  evenLocalCheck_of_mem hnode (by simp [evenLocalChecks])
+
 theorem evenBaseValid_of_mem {node : Nat} (hnode : node ∈ reachable) :
     evenBaseValid node = true :=
   List.all_eq_true.1 evenBaseComplete_eq_true node hnode

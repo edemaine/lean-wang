@@ -93,6 +93,20 @@ def cycleSourceShade? (node : Nat) : Option RedShades.Shade :=
       | none => none
       | some data => (data.block.at 0 1).west
 
+def fineState? (node x y : Nat) : Option RedShades.State :=
+  match fineNode? node x y with
+  | none => none
+  | some child =>
+      match modelData child with
+      | none => none
+      | some data => some (data.block.at (x % 2) (y % 2))
+
+def evenRootCycleDark (node : Nat) : Bool :=
+  decide ((fineState? node 3 3).bind (fun state => state.east) = some .dark) &&
+    decide ((fineState? node 6 3).bind (fun state => state.west) = some .dark) &&
+    decide ((fineState? node 6 6).bind (fun state => state.west) = some .dark) &&
+    decide ((fineState? node 3 6).bind (fun state => state.east) = some .dark)
+
 /-- All local implications used by the even-phase semantic recurrence. -/
 def evenLocalChecks (node : Nat) : List Bool :=
   [!rowClear node 0 || fineRowClear node 0,
@@ -106,7 +120,8 @@ def evenLocalChecks (node : Nat) : List Bool :=
     southStripClear node 0,
     southStripClear node 1,
     southStripClear node 2,
-    decide (cycleSourceShade? node = some .dark)]
+    decide (cycleSourceShade? node = some .dark),
+    evenRootCycleDark node]
 
 def evenLocalValid (node : Nat) : Bool :=
   (evenLocalChecks node).all id

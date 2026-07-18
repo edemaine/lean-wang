@@ -46,6 +46,27 @@ def selectedHorizontalAt (root : Node) (level x y : Nat) :
     (componentAt (indexGrid root level) x y) (quadrantAt x y)
     (shadeGrid root level x y)
 
+theorem shadeGrid_one_eq_fineState (root : Node) (x y : Nat) :
+    shadeGrid root 1 x y =
+      flipShade ((fineNode root x y).data.block.at (x % 2) (y % 2)) := by
+  rfl
+
+theorem rootCycle_light (root : Node) :
+    CycleShade (shadeGrid root 1) 1 3 1 3 .light := by
+  have checked := evenRootCycleDark_of_mem root.property
+  simp only [evenRootCycleDark, Bool.and_eq_true, decide_eq_true_eq] at checked
+  rcases checked with ⟨⟨⟨southwest, southeast⟩, northeast⟩, northwest⟩
+  simp only [fineState?_val, Option.bind_some] at southwest southeast northeast northwest
+  constructor
+  · simp [quarterWest, quarterSouth, shadeGrid_one_eq_fineState, flipShade, southwest,
+      RedShades.Shade.opposite]
+  · simp [quarterEast, quarterSouth, shadeGrid_one_eq_fineState, flipShade, southeast,
+      RedShades.Shade.opposite]
+  · simp [quarterEast, quarterNorth, shadeGrid_one_eq_fineState, flipShade, northeast,
+      RedShades.Shade.opposite]
+  · simp [quarterWest, quarterNorth, shadeGrid_one_eq_fineState, flipShade, northwest,
+      RedShades.Shade.opposite]
+
 theorem selectedVerticalAt_eq_local (root : Node) (level x y : Nat) :
     selectedVerticalAt root level x y =
       CanonicalFreeLineLocal.selectedVertical

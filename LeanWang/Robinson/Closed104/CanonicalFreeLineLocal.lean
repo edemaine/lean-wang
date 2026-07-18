@@ -81,6 +81,11 @@ def SouthStripClear (node : Node) (x : Nat) : Prop :=
   rw [Node.childNode_child]
   simp
 
+@[simp] theorem fineState?_val (node : Node) (x y : Nat) :
+    fineState? node.val x y =
+      some ((fineNode node x y).data.block.at (x % 2) (y % 2)) := by
+  simp [fineState?, Node.modelData_data]
+
 @[simp] theorem fineClearVertical_val (node : Node) (x y : Nat) :
     fineClearVertical node.val x y = true ↔
       fineSelectedVertical node x y = none := by
