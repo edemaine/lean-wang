@@ -44,6 +44,22 @@ def selectedHorizontal? (node x y : Nat) :
       ShadedSignals.selectedHorizontalFor (components data.parent).2.1
         (quadrantAt x y) (flipShade (data.block.at (x % 2) (y % 2)))
 
+def rawSelectedVertical? (node x y : Nat) :
+    Option Signals.HorizontalInterior :=
+  match modelData node with
+  | none => none
+  | some data =>
+      ShadedSignals.selectedVerticalFor (components data.parent).2.1
+        (quadrantAt x y) (data.block.at (x % 2) (y % 2))
+
+def rawSelectedHorizontal? (node x y : Nat) :
+    Option Signals.VerticalInterior :=
+  match modelData node with
+  | none => none
+  | some data =>
+      ShadedSignals.selectedHorizontalFor (components data.parent).2.1
+        (quadrantAt x y) (data.block.at (x % 2) (y % 2))
+
 def clearVertical (node x y : Nat) : Bool :=
   (modelData node).isSome && selectedVertical? node x y == none
 
@@ -62,6 +78,12 @@ def fineClearHorizontal (node x y : Nat) : Bool :=
   match fineNode? node x y with
   | none => false
   | some child => clearHorizontal child x y
+
+def rawClearVertical (node x y : Nat) : Bool :=
+  (modelData node).isSome && rawSelectedVertical? node x y == none
+
+def rawClearHorizontal (node x y : Nat) : Bool :=
+  (modelData node).isSome && rawSelectedHorizontal? node x y == none
 
 def rowClear (node y : Nat) : Bool :=
   (List.range 2).all fun x => clearVertical node x y
@@ -84,6 +106,12 @@ def westStripClear (node y : Nat) : Bool :=
 southmost parent cell. -/
 def southStripClear (node x : Nat) : Bool :=
   (List.range 6).all fun dy => fineClearHorizontal node x (dy + 2)
+
+def rawRowClear (node y : Nat) : Bool :=
+  (List.range 2).all fun x => rawClearVertical node x y
+
+def rawColumnClear (node x : Nat) : Bool :=
+  (List.range 2).all fun y => rawClearHorizontal node x y
 
 def cycleSourceShade? (node : Nat) : Option RedShades.Shade :=
   match fineNode? node 4 3 with
@@ -139,6 +167,26 @@ def evenBaseValid (node : Nat) : Bool :=
 
 def evenBaseComplete : Bool :=
   reachable.all evenBaseValid
+
+def levelTwoNode? (node tileX tileY : Nat) : Option Nat := do
+  let first ← childNode node
+    ((tileX / 4) % 4 + 4 * ((tileY / 4) % 4))
+  childNode first (tileX % 4 + 4 * (tileY % 4))
+
+def levelTwoState? (node x y : Nat) : Option RedShades.State := do
+  let child ← levelTwoNode? node (x / 2) (y / 2)
+  let data ← modelData child
+  some (data.block.at (x % 2) (y % 2))
+
+def oddRootCycleLight (node : Nat) : Bool :=
+  decide ((levelTwoState? node 5 5).bind (fun state => state.east) =
+      some .light) &&
+    decide ((levelTwoState? node 12 5).bind (fun state => state.west) =
+      some .light) &&
+    decide ((levelTwoState? node 12 12).bind (fun state => state.west) =
+      some .light) &&
+    decide ((levelTwoState? node 5 12).bind (fun state => state.east) =
+      some .light)
 
 end CanonicalFreeLine
 end Closed104
