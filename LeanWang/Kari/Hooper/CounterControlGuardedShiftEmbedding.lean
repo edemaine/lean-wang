@@ -203,6 +203,27 @@ theorem shiftTailGaps_backwardGeometry
             rw [heq, hreturn]
             exact hstart
 
+/-- A blank cell between the preceding moved boundary and the first boundary
+of a suffix remains blank at the corresponding backward coordinate of the
+completed suffix.  This is the common prefix transport used by both guarded
+(`stepDistance = distance + 1`) and genuine (`stepDistance = distance`)
+shift callers. -/
+theorem ShiftTailBackwardGeometry.transported_blank
+    {direction : Turing.Dir} {labels : List (Fin 5)}
+    {outer finish : FullTM0.Tape (Symbol numTags)}
+    {stepDistance : Nat} {expected : Fin 5}
+    (geometry : ShiftTailBackwardGeometry direction labels
+      (shiftStepTape direction outer stepDistance expected) finish)
+    (gap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary expected).Matches outer direction stepDistance)
+    (back : Nat) (hpositive : 0 < back) (hback : back < stepDistance) :
+    ((finish.move (NestingMachine.opposite direction)).moveN
+      (NestingMachine.opposite direction)
+      (geometry.travel + back)).read = blankSymbol := by
+  rw [geometry.behind back]
+  exact shiftStepTape_between direction outer stepDistance back expected gap
+    hpositive hback
+
 private theorem decrementOrder_label_ne_zero
     (register : Register) (label : Fin 5)
     (hlabel : label ∈ MarkerShift.decrementOrder register) :
