@@ -3,8 +3,8 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Closed104.SparseFreeLinePlaneMarkedGrid
 import LeanWang.Robinson.Closed104.CanonicalShadeMarkedFreeGrid
+import LeanWang.Robinson.Closed104.CanonicalOddShadeMarkedFreeGrid
 
 /-! Marked free grids in actual decoded routed-product planes. -/
 
@@ -15,7 +15,7 @@ namespace Closed104
 namespace SparseFreeLineDecodedMarkedGrid
 
 open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths
-  RedShadeCrossingBoards ShadedFreeLineRecurrence SparseFreeLinePlaneBase
+  RedShadeCrossingBoards
   SparseFreeLinePlaneMarkedGrid CanonicalShadeComparison
   CanonicalShadeMarkedFreeGrid ShadedSubstitution
 
@@ -73,10 +73,6 @@ theorem unboundedMarkedFreeGrid_with_light
     dsimp [level]
     rw [show 2 * (1 + size) - 1 = 1 + 2 * size by omega, pow_add, pow_mul]
     norm_num
-  have hwestOdd : west .odd size = 2 ^ (level - 1) := by
-    simp [west, ShadedFreeLineRecurrence.scale, Phase.factor, hsmallPow]
-  have heastOdd : east .odd size = 3 * 2 ^ (level - 1) := by
-    simp [east, ShadedFreeLineRecurrence.scale, Phase.factor, hsmallPow]
   rcases light with largeLight | smallLight
   · left
     have cycle := RedShadeCrossingBoards.largeCycle coarse level
@@ -104,35 +100,31 @@ theorem unboundedMarkedFreeGrid_with_light
       rw [gridEq, ← hlargePow'] at witness
       exact witness⟩⟩
   · right
-    let shifted := iterateRefine 1 coarse
-    have shiftedRoot : shifted 0 0 = 0 := by
-      dsimp only [shifted, iterateRefine]
-      rw [show 0 = 2 * 0 by omega, show 0 = 2 * 0 by omega,
-        refineIndexGrid_even_even, coarseRoot]
-      native_decide
     have cycle := RedShadeCrossingBoards.smallCycle coarse hlevel
-    have hgridSmall : refinedGrid .odd size shifted =
-        iterateRefine (level + 2) coarse := by
-      unfold refinedGrid
-      dsimp [shifted]
-      rw [PlaneRedBoards.iterateRefine_add]
-      congr 1
-      simp [refinementDepth, Phase.extra, level]
-      omega
-    have validOdd : ValidShadeGrid (refinedGrid .odd size shifted) state := by
-      rw [hgridSmall]
-      exact valid
-    have cycleOdd : CycleOn (refinedGrid .odd size shifted)
-        (west .odd size) (east .odd size)
-        (west .odd size) (east .odd size) := by
-      simpa only [hgridSmall, hwestOdd, heastOdd] using cycle
-    have lightOdd : CycleShade state
-        (west .odd size) (east .odd size)
-        (west .odd size) (east .odd size) .light := by
-      simpa only [hwestOdd, heastOdd] using smallLight
+    have directValid : ValidShadeGrid
+        (CanonicalOddShadeComparison.actualGrid size coarse) state := by
+      simpa only [CanonicalOddShadeComparison.actualGrid,
+        show 2 * size + 4 = level + 2 by
+          dsimp [level]
+          omega] using valid
+    have directLight : CycleShade state
+        (CanonicalOddShadeComparison.scale size)
+        (3 * CanonicalOddShadeComparison.scale size)
+        (CanonicalOddShadeComparison.scale size)
+        (3 * CanonicalOddShadeComparison.scale size) .light := by
+      simpa only [CanonicalOddShadeComparison.scale, hsmallPow] using smallLight
     exact ⟨cycle, smallLight, ⟨by
-      simpa only [hgridSmall, hwestOdd, heastOdd] using
-        oddMarkedWitness size shifted shiftedRoot validOdd cycleOdd lightOdd⟩⟩
+      have witness := CanonicalOddShadeMarkedFreeGrid.markedFreeGrid size
+        coarse state coarseRoot directValid directLight
+      have gridEq : CanonicalOddShadeComparison.actualGrid size coarse =
+          iterateRefine (level + 2) coarse := by
+        unfold CanonicalOddShadeComparison.actualGrid
+        congr 1
+        dsimp [level]
+        omega
+      simp only [CanonicalOddShadeComparison.scale] at witness
+      rw [gridEq, ← hsmallPow] at witness
+      exact witness⟩⟩
 
 set_option maxHeartbeats 2000000 in
 -- Compatibility wrapper retaining the original grid-only interface.
