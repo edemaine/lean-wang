@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlCleanupSuffixProgress
+import LeanWang.Kari.Hooper.CounterControlGuardedParentContinuation
 import LeanWang.Kari.Hooper.CounterControlGuardedResume
 import LeanWang.Kari.Hooper.CounterControlParentContinuation
 
@@ -27,6 +28,7 @@ open BoundedMarkerProgram CounterControlPlan CounterControlSearchSystem
 open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedSearch CounterControlCleanupRoute
 open CounterControlCleanupSuffixGeometry
+open CounterControlGuardedParentContinuation
 
 noncomputable section
 
@@ -354,8 +356,175 @@ private theorem compileRawCommand_congr
   subst second
   rfl
 
-/-- From the exact found state of a guarded cleanup caller, the remaining
-erase suffix and shared return reach a strictly larger guarded search. -/
+/-- From the exact found state of an arbitrary genuine cleanup caller, the
+remaining erase suffix and shared return reach a strictly larger guarded
+search.  In particular, this is the comparison-preserving guarded re-entry
+needed after an intermediate unguarded replay. -/
+theorem found_reaches_larger_guardedSearch_of_genuine_cleanup
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (hcleanup : rawCommands.get current.search ∈
+      cleanupCommands growth source)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current)) :
+    ∃ next : GuardedSearch base c,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        (foundCfg current) next.current.cfg ∧
+      current.distance < next.current.distance := by
+  rcases exists_stage_of_mem_cleanupCommands hcleanup with ⟨stage, hstage⟩
+  have hselectedMem : rawCommands.get current.search ∈ rawCommands :=
+    List.get_mem rawCommands current.search
+  have hstageRaw : CounterControlCleanupRoute.command growth source stage ∈
+      rawCommands :=
+    command_mem_rawCommands_of_increment growth source register targetState
+      hrule stage
+  have hcompiled :
+      CounterControlCommandAt.compileRawCommand base c
+          (rawCommands.get current.search) hselectedMem =
+        CounterControlCommandAt.compileRawCommand base c
+          (CounterControlCleanupRoute.command growth source stage) hstageRaw := by
+    exact compileRawCommand_congr base c hstage hselectedMem hstageRaw
+  have hcommandSelected : CounterControlSearchSystem.command base c
+      current.search =
+      CounterControlCommandAt.compileRawCommand base c
+        (rawCommands.get current.search) hselectedMem := by
+    unfold CounterControlSearchSystem.command
+      CounterControlCommandAt.compileRawCommand
+    have htag : CounterControlCommandAt.rawTag
+        (rawCommands.get current.search) hselectedMem =
+        current.search := by
+      apply CounterControlCommandAt.rawTag_eq_of_get_eq
+      rfl
+    rw [htag]
+  have htarget :
+      (command base c current.search).target =
+        Target.boundary stage.expected := by
+    rw [hcommandSelected, hcompiled]
+    exact compile_command_target base c growth source stage hstageRaw
+  have hdirection :
+      (command base c current.search).searchDirection =
+        orient growth .left := by
+    rw [hcommandSelected, hcompiled]
+    exact compile_command_searchDirection base c growth source stage hstageRaw
+  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches current.outer
+      (orient growth .left) current.distance := by
+    simpa only [htarget, hdirection] using current.gap
+  have hrawGet : rawCommands.get current.search =
+      CounterControlCleanupRoute.command growth source stage := hstage
+  have hfound : foundCfg current =
+      ⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c ⟨growth, source, stage.slot⟩),
+        current.outer.moveN (orient growth .left)
+          current.distance⟩ := by
+    change
+      (⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c
+            (rawCommands.get current.search).address),
+        current.outer.moveN
+          (command base c current.search).searchDirection
+          current.distance⟩ :
+        FullTM0.Cfg (Symbol numTags) FiniteTM0.State) = _
+    rw [hrawGet, hdirection, command_address]
+  have himmortalFound : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      ⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c ⟨growth, source, stage.slot⟩),
+        current.outer.moveN (orient growth .left)
+          current.distance⟩ := by
+    rw [← hfound]
+    exact himmortal
+  have hread :
+      (current.outer.moveN (orient growth .left)
+        current.distance).read = boundarySymbol stage.expected := by
+    simpa [Target.Matches, FullTM0.Tape.read_moveN] using hgap.marked
+  have herase := found_reaches_success base c growth source stage hstageRaw
+    (current.outer.moveN (orient growth .left)
+      current.distance) hread
+  let nextOuter := eraseDepart current.outer
+    (orient growth .left) current.distance
+  have herase' : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      ⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c ⟨growth, source, stage.slot⟩),
+        current.outer.moveN (orient growth .left)
+          current.distance⟩
+      ⟨resolve base c (stage.successRef growth source), nextOuter⟩ := by
+    simpa [nextOuter, eraseDepart] using herase
+  have hbehindNext : BlankBehind nextOuter (orient growth .left)
+      (current.distance + 1) := by
+    dsimp [nextOuter]
+    simpa using blankBehind_eraseDepart hgap
+      (blankBehind_zero current.outer (orient growth .left))
+  have himmortalNext : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (stage.successRef growth source), nextOuter⟩ :=
+    immortalFrom_of_reaches base c himmortalFound herase'
+  have finish : ∃ finish : GuardedSearch base c,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨foundState (CanonicalInitializer.radius c)
+            (searchState base c ⟨growth, source, stage.slot⟩),
+          current.outer.moveN (orient growth .left)
+            current.distance⟩
+        finish.current.cfg ∧
+      current.distance < finish.current.distance := by
+    cases stage with
+    | zero =>
+        rw [resolve_success_zero] at herase' himmortalNext
+        have himmortalReturn : FullTM0.ImmortalFrom
+            (CounterControlNestingBridge.machine base c)
+            ⟨controllerReturn base c
+                (NestingMachine.opposite (orient growth .left)), nextOuter⟩ := by
+          rw [opposite_orient_left]
+          exact himmortalNext
+        rcases reaches_guardedSearch_beyond_blankBehind
+            base c hmortal nextOuter (orient growth .left)
+            (current.distance + 1) hbehindNext himmortalReturn with
+          ⟨finish, hfinish, hbound⟩
+        rw [opposite_orient_left] at hfinish
+        exact ⟨finish, herase'.trans hfinish, by omega⟩
+    | one =>
+        rw [resolve_success_one] at herase' himmortalNext
+        rcases gap_stage_of_immortal base c hmortal growth source register
+            targetState hrule .zero nextOuter himmortalNext with
+          ⟨nextDistance, hnextGap⟩
+        rcases zero_from_entry base c hmortal growth source register
+            targetState hrule nextOuter nextDistance
+            (current.distance + 1) hnextGap hbehindNext
+            himmortalNext with ⟨finish, hfinish, hbound⟩
+        exact ⟨finish, herase'.trans hfinish, by omega⟩
+    | two =>
+        rw [resolve_success_two] at herase' himmortalNext
+        rcases gap_stage_of_immortal base c hmortal growth source register
+            targetState hrule .one nextOuter himmortalNext with
+          ⟨nextDistance, hnextGap⟩
+        rcases one_from_entry base c hmortal growth source register
+            targetState hrule nextOuter nextDistance
+            (current.distance + 1) hnextGap hbehindNext
+            himmortalNext with ⟨finish, hfinish, hbound⟩
+        exact ⟨finish, herase'.trans hfinish, by omega⟩
+    | three =>
+        rw [resolve_success_three] at herase' himmortalNext
+        rcases gap_stage_of_immortal base c hmortal growth source register
+            targetState hrule .two nextOuter himmortalNext with
+          ⟨nextDistance, hnextGap⟩
+        rcases two_from_entry base c hmortal growth source register
+            targetState hrule nextOuter nextDistance
+            (current.distance + 1) hnextGap hbehindNext
+            himmortalNext with ⟨finish, hfinish, hbound⟩
+        exact ⟨finish, herase'.trans hfinish, by omega⟩
+  rcases finish with ⟨next, hreach, hgrowth⟩
+  refine ⟨next, ?_, hgrowth⟩
+  rw [hfound]
+  exact hreach
+
+/-- Guarded compatibility wrapper for the exact-found-state cleanup API. -/
 theorem found_reaches_larger_guardedSearch_of_cleanup
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -373,155 +542,58 @@ theorem found_reaches_larger_guardedSearch_of_cleanup
       FullTM0.Reaches (CounterControlNestingBridge.machine base c)
         (foundCfg current.current) next.current.cfg ∧
       current.current.distance < next.current.distance := by
-  rcases exists_stage_of_mem_cleanupCommands hcleanup with ⟨stage, hstage⟩
-  have hselectedMem : rawCommands.get current.current.search ∈ rawCommands :=
-    List.get_mem rawCommands current.current.search
-  have hstageRaw : CounterControlCleanupRoute.command growth source stage ∈
-      rawCommands :=
-    command_mem_rawCommands_of_increment growth source register targetState
-      hrule stage
-  have hcompiled :
-      CounterControlCommandAt.compileRawCommand base c
-          (rawCommands.get current.current.search) hselectedMem =
-        CounterControlCommandAt.compileRawCommand base c
-          (CounterControlCleanupRoute.command growth source stage) hstageRaw := by
-    exact compileRawCommand_congr base c hstage hselectedMem hstageRaw
-  have hcommandSelected : CounterControlSearchSystem.command base c
-      current.current.search =
-      CounterControlCommandAt.compileRawCommand base c
-        (rawCommands.get current.current.search) hselectedMem := by
-    unfold CounterControlSearchSystem.command
-      CounterControlCommandAt.compileRawCommand
-    have htag : CounterControlCommandAt.rawTag
-        (rawCommands.get current.current.search) hselectedMem =
-        current.current.search := by
-      apply CounterControlCommandAt.rawTag_eq_of_get_eq
-      rfl
-    rw [htag]
-  have htarget :
-      (command base c current.current.search).target =
-        Target.boundary stage.expected := by
-    rw [hcommandSelected, hcompiled]
-    exact compile_command_target base c growth source stage hstageRaw
-  have hdirection :
-      (command base c current.current.search).searchDirection =
-        orient growth .left := by
-    rw [hcommandSelected, hcompiled]
-    exact compile_command_searchDirection base c growth source stage hstageRaw
-  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary stage.expected).Matches current.current.outer
-      (orient growth .left) current.current.distance := by
-    simpa only [htarget, hdirection] using current.current.gap
-  have hrawGet : rawCommands.get current.current.search =
-      CounterControlCleanupRoute.command growth source stage := hstage
-  have hfound : foundCfg current.current =
-      ⟨foundState (CanonicalInitializer.radius c)
-          (searchState base c ⟨growth, source, stage.slot⟩),
-        current.current.outer.moveN (orient growth .left)
-          current.current.distance⟩ := by
-    change
-      (⟨foundState (CanonicalInitializer.radius c)
-          (searchState base c
-            (rawCommands.get current.current.search).address),
-        current.current.outer.moveN
-          (command base c current.current.search).searchDirection
-          current.current.distance⟩ :
-        FullTM0.Cfg (Symbol numTags) FiniteTM0.State) = _
-    rw [hrawGet, hdirection, command_address]
-  have himmortalFound : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c)
-      ⟨foundState (CanonicalInitializer.radius c)
-          (searchState base c ⟨growth, source, stage.slot⟩),
-        current.current.outer.moveN (orient growth .left)
-          current.current.distance⟩ := by
-    rw [← hfound]
-    exact himmortal
-  have hread :
-      (current.current.outer.moveN (orient growth .left)
-        current.current.distance).read = boundarySymbol stage.expected := by
-    simpa [Target.Matches, FullTM0.Tape.read_moveN] using hgap.marked
-  have herase := found_reaches_success base c growth source stage hstageRaw
-    (current.current.outer.moveN (orient growth .left)
-      current.current.distance) hread
-  let nextOuter := eraseDepart current.current.outer
-    (orient growth .left) current.current.distance
-  have herase' : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨foundState (CanonicalInitializer.radius c)
-          (searchState base c ⟨growth, source, stage.slot⟩),
-        current.current.outer.moveN (orient growth .left)
-          current.current.distance⟩
-      ⟨resolve base c (stage.successRef growth source), nextOuter⟩ := by
-    simpa [nextOuter, eraseDepart] using herase
-  have hbehindNext : BlankBehind nextOuter (orient growth .left)
-      (current.current.distance + 1) := by
-    dsimp [nextOuter]
-    simpa using blankBehind_eraseDepart hgap
-      (blankBehind_zero current.current.outer (orient growth .left))
-  have himmortalNext : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c (stage.successRef growth source), nextOuter⟩ :=
-    immortalFrom_of_reaches base c himmortalFound herase'
-  have finish : ∃ finish : GuardedSearch base c,
-      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c ⟨growth, source, stage.slot⟩),
-          current.current.outer.moveN (orient growth .left)
-            current.current.distance⟩
-        finish.current.cfg ∧
-      current.current.distance < finish.current.distance := by
-    cases stage with
-    | zero =>
-        rw [resolve_success_zero] at herase' himmortalNext
-        have himmortalReturn : FullTM0.ImmortalFrom
-            (CounterControlNestingBridge.machine base c)
-            ⟨controllerReturn base c
-                (NestingMachine.opposite (orient growth .left)), nextOuter⟩ := by
-          rw [opposite_orient_left]
-          exact himmortalNext
-        rcases reaches_guardedSearch_beyond_blankBehind
-            base c hmortal nextOuter (orient growth .left)
-            (current.current.distance + 1) hbehindNext himmortalReturn with
-          ⟨finish, hfinish, hbound⟩
-        rw [opposite_orient_left] at hfinish
-        exact ⟨finish, herase'.trans hfinish, by omega⟩
-    | one =>
-        rw [resolve_success_one] at herase' himmortalNext
-        rcases gap_stage_of_immortal base c hmortal growth source register
-            targetState hrule .zero nextOuter himmortalNext with
-          ⟨nextDistance, hnextGap⟩
-        rcases zero_from_entry base c hmortal growth source register
-            targetState hrule nextOuter nextDistance
-            (current.current.distance + 1) hnextGap hbehindNext
-            himmortalNext with ⟨finish, hfinish, hbound⟩
-        exact ⟨finish, herase'.trans hfinish, by omega⟩
-    | two =>
-        rw [resolve_success_two] at herase' himmortalNext
-        rcases gap_stage_of_immortal base c hmortal growth source register
-            targetState hrule .one nextOuter himmortalNext with
-          ⟨nextDistance, hnextGap⟩
-        rcases one_from_entry base c hmortal growth source register
-            targetState hrule nextOuter nextDistance
-            (current.current.distance + 1) hnextGap hbehindNext
-            himmortalNext with ⟨finish, hfinish, hbound⟩
-        exact ⟨finish, herase'.trans hfinish, by omega⟩
-    | three =>
-        rw [resolve_success_three] at herase' himmortalNext
-        rcases gap_stage_of_immortal base c hmortal growth source register
-            targetState hrule .two nextOuter himmortalNext with
-          ⟨nextDistance, hnextGap⟩
-        rcases two_from_entry base c hmortal growth source register
-            targetState hrule nextOuter nextDistance
-            (current.current.distance + 1) hnextGap hbehindNext
-            himmortalNext with ⟨finish, hfinish, hbound⟩
-        exact ⟨finish, herase'.trans hfinish, by omega⟩
-  rcases finish with ⟨next, hreach, hgrowth⟩
-  refine ⟨next, ?_, hgrowth⟩
-  rw [hfound]
-  exact hreach
+  exact found_reaches_larger_guardedSearch_of_genuine_cleanup
+    base c hmortal current.current growth source register targetState hrule
+    hcleanup himmortal
 
-/-- Entry-state form of guarded cleanup progress, obtained by prepending the
-finite generated-search resolution. -/
+/-- Cleanup callers directly satisfy the monotone found-state re-entry
+classification: the cleanup suffix actually increases the advertised gap. -/
+theorem foundMonotoneGuardedEntryOutcome_of_cleanup
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (hcleanup : rawCommands.get current.search ∈
+      cleanupCommands growth source)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
+  rcases found_reaches_larger_guardedSearch_of_genuine_cleanup
+      base c hmortal current growth source register targetState hrule
+      hcleanup himmortal with ⟨next, hreach, hdistance⟩
+  exact ⟨FoundMonotoneGuardedEntryOutcome.nextSearch next hreach
+    hdistance.le⟩
+
+/-- Entry-state form of guard-free cleanup progress, obtained by prepending
+the finite generated-search resolution. -/
+theorem reaches_larger_guardedSearch_of_genuine_cleanup
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (hcleanup : rawCommands.get current.search ∈
+      cleanupCommands growth source)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) current.cfg) :
+    ∃ next : GuardedSearch base c,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        current.cfg next.current.cfg ∧
+      current.distance < next.current.distance := by
+  have hfound := reaches_foundCfg_of_immortal current himmortal
+  have himmortalFound := immortalFrom_foundCfg current himmortal
+  rcases found_reaches_larger_guardedSearch_of_genuine_cleanup
+      base c hmortal current
+      growth source register targetState hrule hcleanup himmortalFound with
+    ⟨next, htail, hgrowth⟩
+  exact ⟨next, hfound.trans htail, hgrowth⟩
+
+/-- Guarded compatibility wrapper for entry-state cleanup progress. -/
 theorem reaches_larger_guardedSearch_of_cleanup
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -538,12 +610,9 @@ theorem reaches_larger_guardedSearch_of_cleanup
       FullTM0.Reaches (CounterControlNestingBridge.machine base c)
         current.current.cfg next.current.cfg ∧
       current.current.distance < next.current.distance := by
-  have hfound := reaches_foundCfg_of_immortal current.current himmortal
-  have himmortalFound := immortalFrom_foundCfg current.current himmortal
-  rcases found_reaches_larger_guardedSearch_of_cleanup base c hmortal current
-      growth source register targetState hrule hcleanup himmortalFound with
-    ⟨next, htail, hgrowth⟩
-  exact ⟨next, hfound.trans htail, hgrowth⟩
+  exact reaches_larger_guardedSearch_of_genuine_cleanup
+    base c hmortal current.current growth source register targetState hrule
+    hcleanup himmortal
 
 end
 
