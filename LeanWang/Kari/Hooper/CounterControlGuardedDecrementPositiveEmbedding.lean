@@ -187,8 +187,7 @@ private theorem ShiftedAgainst.advance
             have hcast : ((routeDistance - k : Nat) : Int) =
                 (routeDistance : Int) - (k : Int) := by omega
             cases growth <;>
-              simp [orient, FullTM0.Tape.read_moveN,
-                FullTM0.Tape.move, FullTM0.Tape.moveN,
+              simp [orient, FullTM0.Tape.move, FullTM0.Tape.moveN,
                 FullTM0.Tape.offset, hcast] at hblank ⊢ <;>
               convert hblank using 1 <;> ring_nf
         simpa [FullTM0.Tape.read_moveN] using hahead.trans hroute
@@ -216,6 +215,51 @@ private theorem ShiftedAgainst.advance
       _ = ((upper.moveN (orient growth .right) k)).read := by
         rw [show routeDistance + 1 + k = (routeDistance + 1) + k by omega,
           ← FullTM0.Tape.moveN_add, inwardFound_moveN_right]
+
+/-- Pair an entire retained inward route with the reverse marker-shift
+suffix.  The shifted tape at the source boundary then agrees strictly
+outward with the tape at which that inward route began. -/
+private theorem alignInwardRoute
+    {growth : Turing.Dir} {source target : Fin 5}
+    {route : List MarkerValidation.Leg}
+    (hroute : ToBoundary source target route)
+    {originalStart routeFinish shiftedStart shiftFinish :
+      FullTM0.Tape (Symbol numTags)}
+    (originalRead : originalStart.read = boundarySymbol source)
+    (routeTrace : RouteTailGaps growth route originalStart routeFinish)
+    (initial : ShiftedAgainst (orient growth .right) target
+      shiftedStart routeFinish)
+    (shiftTrace : ShiftTailGaps (orient growth .right)
+      (shiftAfter target) shiftedStart shiftFinish) :
+    ∃ shifted,
+      ShiftedAgainst (orient growth .right) source shifted originalStart ∧
+      ShiftTailGaps (orient growth .right) (shiftAfter source)
+        shifted shiftFinish := by
+  induction hroute generalizing originalStart routeFinish shiftedStart with
+  | here target =>
+      cases routeTrace
+      exact ⟨shiftedStart, initial, shiftTrace⟩
+  | step i tail ih =>
+      cases routeTrace with
+      | cons _ _ originalStart routeFinish trace =>
+          rcases routeGaps_uncons growth ⟨i.castSucc, .left⟩ _ _ _ trace with
+            ⟨routeDistance, routeGap, remainingRoute⟩
+          let found :=
+            ((originalStart.move (orient growth .left)).moveN
+              (orient growth .left) routeDistance)
+          have foundRead : found.read = boundarySymbol i.castSucc := by
+            change (Target.boundary i.castSucc).Matches found.read
+            simpa [found, FullTM0.Tape.read_moveN] using routeGap.marked
+          rcases ih foundRead remainingRoute initial shiftTrace with
+            ⟨lowerShifted, lowerAgreement, lowerTrace⟩
+          rw [shiftAfter_castSucc i] at lowerTrace
+          cases lowerTrace with
+          | cons _ _ _ shiftDistance shiftGap shiftPositive _ tailTrace =>
+              exact ⟨shiftStepTape (orient growth .right) lowerShifted
+                shiftDistance i.succ,
+                lowerAgreement.advance originalRead routeGap shiftGap
+                  shiftPositive,
+                tailTrace⟩
 
 end
 
