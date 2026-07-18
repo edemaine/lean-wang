@@ -912,6 +912,7 @@ structure IncrementRecoveryCenteredEnd
     (handoff : IncrementRecoverySearchHandoff current growth source register
       next first rest) : Type where
   core : LogicalCore base c
+  core_growth : core.growth = growth
   core_represents : CoreRepresents core.registers growth core.tape
   shift_center : incrementAfterShiftTape handoff.direct.suffix =
     atLogical growth core.tape
@@ -981,7 +982,7 @@ theorem incrementRecoveryCenteredEnd
     rw [hcenter] at hrun
     simpa [core, LogicalCore.cfg, LogicalCore.frame,
       LogicalCore.abstract, prefixLogicalCfg] using hrun
-  exact ⟨⟨core, hcore, hshiftCenter, hreaches⟩⟩
+  exact ⟨⟨core, rfl, hcore, hshiftCenter, hreaches⟩⟩
 
 end
 

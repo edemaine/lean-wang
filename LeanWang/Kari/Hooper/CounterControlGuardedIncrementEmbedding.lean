@@ -389,6 +389,135 @@ theorem descendingShift_canonicalBackwardGeometry
             rw [hopposite] at hbehind
             exact hbehind.symm.trans hahead'
 
+/-! ## Guarded increment continuation -/
+
+/-- A nonempty increment-recovery route strictly escapes the original
+guarded caller.  Reverse shift geometry locates the selected moved boundary
+inside the reconstructed canonical core, after which the generic blank
+transport bounds the old gap by the core's first obstruction. -/
+theorem incrementRecovery_foundGuardedEscapeOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
+    (handoff : IncrementRecoverySearchHandoff current growth source register
+      next first rest) :
+    Nonempty (FoundGuardedEscapeOutcome current) := by
+  rcases incrementRecoveryCenteredEnd base c hmortal current himmortal growth
+      source register next first rest handoff with ⟨centered⟩
+  have hdirection : current.direction = orient growth .left := by
+    have hdirection := current.selectedRaw_direction_eq
+    rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+      at hdirection
+    rw [handoff.direct.suffix.position.raw_eq] at hdirection
+    exact hdirection.symm
+  have hopposite : NestingMachine.opposite (orient growth .left) =
+      orient growth .right := by
+    cases growth <;> rfl
+  have hstartRead :
+      ((current.shiftedParentBacking
+        handoff.direct.suffix.position.current).move
+          (orient growth .right)).read =
+        boundarySymbol handoff.direct.suffix.position.current := by
+    have hread := handoff.direct.suffix.handoff.destination_boundary
+    rw [hdirection, hopposite] at hread
+    exact hread
+  have hfinish : handoff.direct.suffix.finish.move
+      (orient growth .right) =
+        atLogical growth centered.core.tape
+          (boundaryOffset centered.core.registers
+            (MarkerSchedule.decrementStartBoundary register)) := by
+    simpa [incrementAfterShiftTape] using centered.shift_center
+  have schedule := incrementShiftPosition_descendingTo
+    handoff.direct.suffix.position
+  rcases descendingShift_canonicalBackwardGeometry schedule
+      handoff.direct.suffix.tailGaps hstartRead centered.core_represents
+      hfinish with ⟨canonical⟩
+  unfold GuardedSearch.shiftedParentBacking at canonical
+  rw [hdirection] at canonical
+  let geometry := canonical.geometry
+  have hcoordinate :
+      boundaryOffset centered.core.registers
+          (MarkerSchedule.decrementStartBoundary register) +
+          geometry.travel =
+        boundaryOffset centered.core.registers
+          handoff.direct.suffix.position.current := by
+    exact canonical.coordinate
+  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary handoff.direct.suffix.position.current).Matches
+      current.parentOuter (orient growth .left)
+      (current.current.distance + 1) := by
+    have hgap := current.parentGap
+    rw [← current.compileRawCommand_selectedRaw,
+      CounterControlCommandAt.compileRawCommand_spec] at hgap
+    rw [hdirection] at hgap
+    simpa [handoff.direct.suffix.position.raw_eq,
+      CounterControlCommandAt.compileRawAtTag, Command.target,
+      Command.searchDirection] using hgap
+  have hanchorPositive : 0 < boundaryOffset centered.core.registers
+      (MarkerSchedule.decrementStartBoundary register) := by
+    simp [boundaryOffset]
+  have hanchor :
+      boundaryOffset centered.core.registers
+          (MarkerSchedule.decrementStartBoundary register) +
+          geometry.travel ≤ layoutEnd centered.core.registers := by
+    rw [hcoordinate]
+    exact
+      CounterControlInstructionSemantics.boundaryOffset_le_layoutEnd
+        centered.core.registers handoff.direct.suffix.position.current
+  have hcenter' : handoff.direct.suffix.finish.move
+      (NestingMachine.opposite (orient growth .left)) =
+        atLogical growth centered.core.tape
+          (boundaryOffset centered.core.registers
+            (MarkerSchedule.decrementStartBoundary register)) := by
+    rw [hopposite]
+    exact hfinish
+  have hdistance : current.current.distance < centered.core.limit - 1 := by
+    apply geometry.prefixLength_lt_limit_sub_one_of_anchor hgap
+      centered.core.registers centered.core.limit centered.core.target
+      centered.core.represented
+      (boundaryOffset centered.core.registers
+        (MarkerSchedule.decrementStartBoundary register))
+    · exact hanchorPositive
+    · exact hanchor
+    · simpa [centered.core_growth] using hopposite
+    · simpa [centered.core_growth] using hcenter'
+    · omega
+  exact foundGuardedEscapeOutcome_of_logicalLimit base c hmortal current
+    centered.core centered.reaches hdistance himmortal
+
+/-- Every guarded caller selected inside an increment-shift schedule reaches
+a strict escape: the clock schedule uses its empty direct route, while all
+other completed schedules use the canonically reversed recovery route. -/
+theorem incrementShift_foundGuardedEscapeOutcome
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (hcommand : current.selectedRaw ∈
+      incrementShiftCommands growth source register) :
+    Nonempty (FoundGuardedEscapeOutcome current) := by
+  rcases current.incrementShift_suffix_of_immortal base c hmortal growth
+      source register next hrule hcommand himmortal with ⟨suffix⟩
+  rcases incrementDirectCompletion base c current growth source register
+      next hrule suffix with ⟨completion⟩
+  cases completion with
+  | logical direct hroute =>
+      exact incrementLogical_foundGuardedEscapeOutcome base c hmortal current
+        himmortal growth source register next direct hroute
+  | recovery first rest handoff =>
+      exact incrementRecovery_foundGuardedEscapeOutcome base c hmortal
+        current himmortal growth source register next first rest handoff
+
 end
 
 end CounterControlGuardedIncrementEmbedding
