@@ -22,13 +22,14 @@ namespace Figure13Layers
 namespace Closed104
 namespace CanonicalShadeComparison
 
-open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
+open OrientedRedCycles RedCycles RedShades RedShadePaths RedShadeCycles
+  RedShadeGraph RedShadeGraphBoards
   RedShadeGraphColoring RedShadeGraphLocalCoverage RedShadeGraphRefinement
   RedShadeGraphSearchSoundness RedShadeGraphTranslation
   RedShadeCycleConnectivity RedShadeCycleBridgeComposition
   RedShadeCycleEvenDescendants OrientedRedBoardTranslations
   ShadedSubstitution CanonicalFreeLineCoordinates CanonicalEvenFreeLines
-  CanonicalShadeGeometry ShadedPlaneSignalGrid
+  CanonicalShadeGeometry ShadedPlaneSignalGrid Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
@@ -146,20 +147,21 @@ private theorem value_succ_block (level : Nat) (root : Node)
         port := by
   rcases port with ⟨x, y, side⟩
   have stateEq := shadeGrid_succ_block level root blockX blockY x y hx hy
-  cases side <;> exact congrArg _ stateEq
+  cases side <;> simpa [value, translatePort] using congrArg _ stateEq
 
 private theorem value_succ_sparse (level : Nat) (root : Node) (port : Port) :
     value (shadeGrid root (level + 1)) (sparsePort port) =
       value (shadeGrid root level) port := by
   rcases port with ⟨x, y, side⟩
   have stateEq := shadeGrid_succ_sparse level root x y
-  cases side <;> exact congrArg _ stateEq
+  cases side <;> simpa [value, sparsePort] using congrArg _ stateEq
 
 private theorem localGrid_eq (node : Node) (parent : Index)
     (parentEq : node.data.parent = parent) :
     indexGrid node 1 = fineGrid parent := by
   rw [indexGrid, supertileIndexGrid_eq_iterateRefine]
-  simp [fineGrid, coarseGrid, parentEq]
+  subst parent
+  rfl
 
 private theorem sourceOnCell (blockX blockY : Nat) :
     OnCycle
@@ -211,11 +213,18 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
         have comparison := portPresent_two_block coarse 0 0 target
           (by omega) (by omega)
         rw [coarseRoot] at comparison
-        simpa [actualGrid, translatePort] using comparison.trans targetPresent
+        have targetPresent' :
+            portPresent (iterateRefine 2 coarse)
+              (translatePort target (8 * 0) (8 * 0)) = true := by
+          simpa [actualGrid, translatePort] using targetPresent
+        exact comparison.trans targetPresent'
       rcases base_exists_boundedPath targetMem targetWest' targetEast'
           targetSouth' targetNorth' localPresent with
         ⟨parity, localPath⟩
-      have actualPath := boundedPath_two_block coarse 0 0 localPath
+      have localPath' : BoundedPath (fineGrid (coarse 0 0)) 8 8
+          cycleSource target parity := by
+        simpa [coarseRoot] using localPath
+      have actualPath := boundedPath_two_block coarse 0 0 localPath'
       have actualRelation : Related parity (some .light) (value states target) := by
         have sourceValue := localCycleSource_onCycle.value_eq
           (rootCycle 0 coarse) shaded valid
@@ -251,7 +260,7 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
           (scale depth) (3 * scale depth) .light := by
         apply RedShadeGraphCoarsening.cycleShade validFine
           (rootCycle depth coarse)
-        simpa [scaleSucc, Nat.mul_assoc] using shaded
+        convert shaded using 1 <;> rw [scaleSucc] <;> omega
       let blockX := target.x / 8
       let blockY := target.y / 8
       let localTarget : Port :=
@@ -305,9 +314,11 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
         coarseRoot.trans rootParent.symm
       have parentEq : node.data.parent = oldGrid blockX blockY := by
         change supertileIndexGrid (depth + 1) root blockX blockY = _
-        simpa [oldGrid, actualGrid] using
-          (supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
-            blockXBound blockYBound)
+        change supertileIndexGrid (depth + 1) root blockX blockY =
+          iterateRefine (2 * depth + 2) coarse blockX blockY
+        rw [← show 2 * (depth + 1) = 2 * depth + 2 by omega]
+        exact supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
+          blockXBound blockYBound
       have canonicalValid := validRectangle 1 node
       have localIndexEq : indexGrid node 1 = fineGrid (oldGrid blockX blockY) :=
         localGrid_eq node (oldGrid blockX blockY) parentEq
@@ -370,7 +381,7 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
         have oldNorth : oldGlobal.y < 6 * scale depth := by
           dsimp [oldGlobal, translatePort]
           omega
-        have oldAgreement := ih coarseStates oldGlobal coarseValid coarseShaded
+        have oldAgreement := ih coarseStates coarseValid coarseShaded oldGlobal
           oldWest oldEast oldSouth oldNorth oldPresent
         have refinedEq :
             value states (sparsePort oldGlobal) =
@@ -391,10 +402,10 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
           sparsePort_two_block blockX blockY old oldBounds.1 oldBounds.2
         have canonicalBlock := value_succ_block (depth + 1) root
           blockX blockY (sparsePort old)
-          (sources_inBounds (oldGrid blockX blockY) (sparsePort old) (by
-            simp [sources, inheritedSources, oldMem, oldLocalPresent])).1
-          (sources_inBounds (oldGrid blockX blockY) (sparsePort old) (by
-            simp [sources, inheritedSources, oldMem, oldLocalPresent])).2
+          (sources_inBounds (oldGrid blockX blockY) (sparsePort old)
+            sourceMem).1
+          (sources_inBounds (oldGrid blockX blockY) (sparsePort old)
+            sourceMem).2
         rw [← sourceGlobalEq] at canonicalBlock
         have sourceValues :
             value states
@@ -414,19 +425,24 @@ private theorem portPresent_canonical_eq (depth : Nat)
       portPresent (actualGrid depth coarse) port := by
   have xBound : port.x / 2 < 4 ^ (depth + 1) := by
     apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
-      Nat.mul_left_comm] using portEast
+    rw [pow_succ]
+    simp only [scale] at portEast
+    omega
   have yBound : port.y / 2 < 4 ^ (depth + 1) := by
     apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
-      Nat.mul_left_comm] using portNorth
+    rw [pow_succ]
+    simp only [scale] at portNorth
+    omega
   have indexEq :
       indexGrid root (depth + 1) (port.x / 2) (port.y / 2) =
         actualGrid depth coarse (port.x / 2) (port.y / 2) := by
-    simpa [indexGrid, actualGrid] using
-      (supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
-        xBound yBound)
+    change supertileIndexGrid (depth + 1) root (port.x / 2) (port.y / 2) =
+      iterateRefine (2 * depth + 2) coarse (port.x / 2) (port.y / 2)
+    rw [← show 2 * (depth + 1) = 2 * depth + 2 by omega]
+    exact supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
+      xBound yBound
   rcases port with ⟨x, y, side⟩
+  simp only at indexEq
   cases side <;> simp only [portPresent, componentAt] <;> rw [indexEq]
 
 /-- The comparison extends to absent ports: validity forces both assignments
@@ -484,15 +500,24 @@ theorem state_eq (depth : Nat) (coarse : Nat → Nat → Index)
     (xWest : 2 * scale depth ≤ x) (xEast : x < 6 * scale depth)
     (ySouth : 2 * scale depth ≤ y) (yNorth : y < 6 * scale depth) :
     states x y = shadeGrid root (depth + 1) x y := by
-  apply RedShades.State.ext
-  · simpa [value] using value_eq depth coarse states root coarseRoot
-      rootParent valid shaded ⟨x, y, .west⟩ xWest xEast ySouth yNorth
-  · simpa [value] using value_eq depth coarse states root coarseRoot
-      rootParent valid shaded ⟨x, y, .east⟩ xWest xEast ySouth yNorth
-  · simpa [value] using value_eq depth coarse states root coarseRoot
-      rootParent valid shaded ⟨x, y, .south⟩ xWest xEast ySouth yNorth
-  · simpa [value] using value_eq depth coarse states root coarseRoot
-      rootParent valid shaded ⟨x, y, .north⟩ xWest xEast ySouth yNorth
+  have west := value_eq depth coarse states root coarseRoot rootParent valid
+    shaded ⟨x, y, .west⟩ xWest xEast ySouth yNorth
+  have east := value_eq depth coarse states root coarseRoot rootParent valid
+    shaded ⟨x, y, .east⟩ xWest xEast ySouth yNorth
+  have south := value_eq depth coarse states root coarseRoot rootParent valid
+    shaded ⟨x, y, .south⟩ xWest xEast ySouth yNorth
+  have north := value_eq depth coarse states root coarseRoot rootParent valid
+    shaded ⟨x, y, .north⟩ xWest xEast ySouth yNorth
+  rcases actualEq : states x y with ⟨actualWest, actualEast,
+    actualSouth, actualNorth⟩
+  rcases canonicalEq : shadeGrid root (depth + 1) x y with
+    ⟨canonicalWest, canonicalEast, canonicalSouth, canonicalNorth⟩
+  simp only [value, actualEq, canonicalEq] at west east south north
+  subst canonicalWest
+  subst canonicalEast
+  subst canonicalSouth
+  subst canonicalNorth
+  rfl
 
 private theorem componentAt_canonical_eq (depth : Nat)
     (coarse : Nat → Nat → Index) (root : Node)
@@ -502,18 +527,22 @@ private theorem componentAt_canonical_eq (depth : Nat)
       componentAt (actualGrid depth coarse) x y := by
   have xBound : x / 2 < 4 ^ (depth + 1) := by
     apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
-      Nat.mul_left_comm] using xEast
+    rw [pow_succ]
+    simp only [scale] at xEast
+    omega
   have yBound : y / 2 < 4 ^ (depth + 1) := by
     apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    simpa [scale, pow_succ, Nat.mul_assoc, Nat.mul_comm,
-      Nat.mul_left_comm] using yNorth
+    rw [pow_succ]
+    simp only [scale] at yNorth
+    omega
   have indexEq :
       indexGrid root (depth + 1) (x / 2) (y / 2) =
         actualGrid depth coarse (x / 2) (y / 2) := by
-    simpa [indexGrid, actualGrid] using
-      (supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
-        xBound yBound)
+    change supertileIndexGrid (depth + 1) root (x / 2) (y / 2) =
+      iterateRefine (2 * depth + 2) coarse (x / 2) (y / 2)
+    rw [← show 2 * (depth + 1) = 2 * depth + 2 by omega]
+    exact supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
+      xBound yBound
   simp only [componentAt]
   rw [indexEq]
 
