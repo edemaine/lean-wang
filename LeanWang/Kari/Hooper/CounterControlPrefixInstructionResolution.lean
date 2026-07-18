@@ -580,90 +580,6 @@ theorem machine_reaches_incrementSchedule_or_halts_of_prefix
   exact machine_reaches_incrementSchedule_or_halts_of_envelope base c source
     register E h hroom hcommands
 
-theorem incrementCoreSchedule_source_blank
-    {registers : Registers} {growth : Turing.Dir} {limit : Nat}
-    {T : FullTM0.Tape (Symbol numTags)}
-    (h : CorePrefixRepresents registers growth limit T) (register : Register)
-    (hroom : layoutEnd (registers.increment register) < limit) :
-    logicalTape growth (incrementCoreTape registers growth register T)
-        (boundaryOffset registers
-          (MarkerSchedule.decrementStartBoundary register)) =
-      blankSymbol := by
-  have hnext := incrementCoreTape_preserves_prefix h register hroom
-  cases register with
-  | left =>
-      have hb := hnext.gap_blank (0 : Fin 4) registers.left (by
-        simp [RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get])
-      change logicalTape growth (incrementCoreTape registers growth .left T)
-        (firstGapOffset (registers.increment .left) 0 + registers.left) =
-          blankSymbol at hb
-      have hcoord : firstGapOffset (registers.increment .left) 0 +
-          registers.left = boundaryOffset registers 1 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (registers.increment .left) 0 : Int) + registers.left =
-          boundaryOffset registers 1 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | right =>
-      have hb := hnext.gap_blank (1 : Fin 4) registers.right (by
-        simp [RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get])
-      change logicalTape growth (incrementCoreTape registers growth .right T)
-        (firstGapOffset (registers.increment .right) 1 + registers.right) =
-          blankSymbol at hb
-      have hcoord : firstGapOffset (registers.increment .right) 1 +
-          registers.right = boundaryOffset registers 2 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (registers.increment .right) 1 : Int) + registers.right =
-          boundaryOffset registers 2 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | temp =>
-      have hb := hnext.gap_blank (2 : Fin 4) registers.temp (by
-        simp [RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get])
-      change logicalTape growth (incrementCoreTape registers growth .temp T)
-        (firstGapOffset (registers.increment .temp) 2 + registers.temp) =
-          blankSymbol at hb
-      have hcoord : firstGapOffset (registers.increment .temp) 2 +
-          registers.temp = boundaryOffset registers 3 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (registers.increment .temp) 2 : Int) + registers.temp =
-          boundaryOffset registers 3 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | clock =>
-      have hb := hnext.gap_blank (3 : Fin 4) registers.clock (by
-        simp [RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get])
-      change logicalTape growth (incrementCoreTape registers growth .clock T)
-        (firstGapOffset (registers.increment .clock) 3 + registers.clock) =
-          blankSymbol at hb
-      have hcoord : firstGapOffset (registers.increment .clock) 3 +
-          registers.clock = boundaryOffset registers 4 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (registers.increment .clock) 3 : Int) + registers.clock =
-          boundaryOffset registers 4 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-
 /-- The direct blank rule following the increment schedule moves onto the
 shifted boundary and chooses the recovery route (or the logical successor for
 the clock register). -/
@@ -688,59 +604,10 @@ theorem machine_reaches_incrementHandoff_of_prefix
         atLogical growth (incrementCoreTape registers growth register T)
           (boundaryOffset (registers.increment register)
             (MarkerSchedule.decrementStartBoundary register))⟩ := by
-  let route := AnchoredCounterGeometry.routeFromIncrement register
-  let afterShift : ControlRef := match route with
-    | [] => .logical growth next
-    | _ :: _ => directRef growth source (bodyDirectBase + 1)
-  let raw : RawDirectRule :=
-    ⟨growth, directRef growth source bodyDirectBase, .blank,
-      afterShift, .right⟩
-  have hraw : raw ∈ rawDirectRules := by
-    apply directRule_mem_rawDirectRules_of_rule growth hrule
-    change raw ∈ validationRules growth source ++
-      incrementRules growth source next register
-    apply List.mem_append_right
-    simp only [incrementRules, List.mem_append]
-    apply Or.inl
-    apply Or.inl
-    apply Or.inl
-    simp only [List.mem_singleton]
-    exact rfl
-  have hblank : raw.read.Matches
-      (atLogical growth (incrementCoreTape registers growth register T)
-        (boundaryOffset registers
-          (MarkerSchedule.decrementStartBoundary register))).read := by
-    change (atLogical growth (incrementCoreTape registers growth register T)
-      (boundaryOffset registers
-        (MarkerSchedule.decrementStartBoundary register))).read = blankSymbol
-    rw [atLogical_read]
-    exact incrementCoreSchedule_source_blank h register hroom
-  have hrun := CounterControlDirectSemantics.reaches_directRule base c raw
-    hraw (atLogical growth (incrementCoreTape registers growth register T)
-      (boundaryOffset registers
-        (MarkerSchedule.decrementStartBoundary register))) hblank
-  have hcoord : boundaryOffset registers
-        (MarkerSchedule.decrementStartBoundary register) + 1 =
-      boundaryOffset (registers.increment register)
-        (MarkerSchedule.decrementStartBoundary register) :=
-    AnchoredCounterGeometry.incrementStartBoundary_add_one registers register
-  rw [show orient growth .right =
-    OrientedMarkerTape.orientDirection growth .right by
-      exact orient_eq_orientDirection growth .right,
-    atLogical_move_right, hcoord] at hrun
-  change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-    ⟨resolve base c (directRef growth source bodyDirectBase),
-      atLogical growth (incrementCoreTape registers growth register T)
-        (boundaryOffset registers
-          (MarkerSchedule.decrementStartBoundary register))⟩
-    ⟨resolve base c
-        (match AnchoredCounterGeometry.routeFromIncrement register with
-        | [] => .logical growth next
-        | _ :: _ => directRef growth source (bodyDirectBase + 1)),
-      atLogical growth (incrementCoreTape registers growth register T)
-        (boundaryOffset (registers.increment register)
-          (MarkerSchedule.decrementStartBoundary register))⟩ at hrun
-  exact hrun
+  apply machine_reaches_incrementHandoff_of_source_blank base c source next
+    register hrule
+  exact (incrementCoreTape_preserves_prefix h register hroom).toCoreRepresents
+    |>.increment_source_blank registers register
 
 /-- A collision-free increment resolves directly from its validated body
 entry and preserves the same finite tag-free prefix. -/

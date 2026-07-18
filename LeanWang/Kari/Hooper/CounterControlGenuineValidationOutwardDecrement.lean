@@ -28,58 +28,12 @@ open BoundedMarkerProgram CounterControlPlan CounterControlSearchSystem
 open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedParentContinuation
 open CounterControlGenuineValidation
+open CounterControlGenuineValidationOutward
 
 noncomputable section
 
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
-
-private theorem outwardFour_gap
-    {base : Nat} {c : Nat.Partrec.Code}
-    (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction)
-    (hraw : current.selectedRaw = .boundaryNavigation
-      ⟨growth, source, 7⟩ 4 .right
-        (bodyEntry growth source instruction) .preserve) :
-    SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary (4 : Fin 5)).Matches current.outer
-      (orient growth .right) current.distance := by
-  have hgap := current.gap
-  rw [← current.compileRawCommand_selectedRaw,
-    CounterControlCommandAt.compileRawCommand_spec] at hgap
-  simpa [hraw, CounterControlCommandAt.compileRawAtTag,
-    compileNavigationAction, Command.target,
-    Command.searchDirection] using hgap
-
-private theorem outwardFour_direction
-    {base : Nat} {c : Nat.Partrec.Code}
-    (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction)
-    (hraw : current.selectedRaw = .boundaryNavigation
-      ⟨growth, source, 7⟩ 4 .right
-        (bodyEntry growth source instruction) .preserve) :
-    current.direction = orient growth .right := by
-  have hdirection := current.selectedRaw_direction_eq
-  rw [CounterControlCommandAt.compileRawCommand_searchDirection]
-    at hdirection
-  rw [hraw] at hdirection
-  exact hdirection.symm
-
-private theorem outwardFour_foundTape_read
-    {base : Nat} {c : Nat.Partrec.Code}
-    (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction)
-    (hraw : current.selectedRaw = .boundaryNavigation
-      ⟨growth, source, 7⟩ 4 .right
-        (bodyEntry growth source instruction) .preserve) :
-    current.foundTape.read = boundarySymbol 4 := by
-  have hmatch := current.selectedRaw_target_matches_foundTape
-  rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
-  simpa [hraw, CounterControlCommandAt.compileRawAtTag,
-    compileNavigationAction, Command.target, Target.Matches] using hmatch
 
 /-- Common proof for the three nonempty decrement-entry routes. -/
 private theorem outwardFour_nonemptyDecrement_handoff

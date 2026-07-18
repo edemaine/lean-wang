@@ -96,10 +96,11 @@ the physical outward direction. -/
 theorem outwardFour_gap
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat) (next : Nat)
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction)
     (hraw : current.selectedRaw = .boundaryNavigation
       ⟨growth, source, 7⟩ 4 .right
-        (bodyEntry growth source (.increment .clock next)) .preserve) :
+        (bodyEntry growth source instruction) .preserve) :
     SearchGap (fun symbol => symbol = blankSymbol)
       (Target.boundary (4 : Fin 5)).Matches current.outer
       (orient growth .right) current.distance := by
@@ -114,10 +115,11 @@ theorem outwardFour_gap
 theorem outwardFour_direction
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat) (next : Nat)
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction)
     (hraw : current.selectedRaw = .boundaryNavigation
       ⟨growth, source, 7⟩ 4 .right
-        (bodyEntry growth source (.increment .clock next)) .preserve) :
+        (bodyEntry growth source instruction) .preserve) :
     current.direction = orient growth .right := by
   have hdirection := current.selectedRaw_direction_eq
   rw [CounterControlCommandAt.compileRawCommand_searchDirection]
@@ -130,10 +132,11 @@ on boundary `4`. -/
 theorem outwardFour_foundTape_read
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat) (next : Nat)
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction)
     (hraw : current.selectedRaw = .boundaryNavigation
       ⟨growth, source, 7⟩ 4 .right
-        (bodyEntry growth source (.increment .clock next)) .preserve) :
+        (bodyEntry growth source instruction) .preserve) :
     current.foundTape.read = boundarySymbol 4 := by
   have hmatch := current.selectedRaw_target_matches_foundTape
   rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch

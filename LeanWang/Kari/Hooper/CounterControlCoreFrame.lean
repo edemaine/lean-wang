@@ -114,6 +114,90 @@ theorem gap_blank (h : CoreRepresents registers growth T)
   rw [hcoordinate']
   exact hcore
 
+/-- In an incremented core, the old tested boundary position is the new
+last blank of the incremented register gap. -/
+theorem increment_source_blank
+    (registers : Registers) (register : Register)
+    {growth : Turing.Dir} {T : FullTM0.Tape (Symbol numTags)}
+    (h : CoreRepresents (registers.increment register) growth T) :
+    logicalTape growth T
+        (boundaryOffset registers
+          (MarkerSchedule.decrementStartBoundary register)) =
+      blankSymbol := by
+  cases register with
+  | left =>
+      have hb := h.gap_blank (0 : Fin 4) registers.left (by
+        simp [RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get])
+      change logicalTape growth T
+        (firstGapOffset (registers.increment .left) 0 + registers.left) =
+          blankSymbol at hb
+      have hcoord : firstGapOffset (registers.increment .left) 0 +
+          registers.left = boundaryOffset registers 1 := by
+        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
+          RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get] <;> omega
+      have hcoordInt : (firstGapOffset
+          (registers.increment .left) 0 : Int) + registers.left =
+          boundaryOffset registers 1 := by
+        exact_mod_cast hcoord
+      rw [hcoordInt] at hb
+      simpa [MarkerSchedule.decrementStartBoundary] using hb
+  | right =>
+      have hb := h.gap_blank (1 : Fin 4) registers.right (by
+        simp [RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get])
+      change logicalTape growth T
+        (firstGapOffset (registers.increment .right) 1 + registers.right) =
+          blankSymbol at hb
+      have hcoord : firstGapOffset (registers.increment .right) 1 +
+          registers.right = boundaryOffset registers 2 := by
+        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
+          RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get] <;> omega
+      have hcoordInt : (firstGapOffset
+          (registers.increment .right) 1 : Int) + registers.right =
+          boundaryOffset registers 2 := by
+        exact_mod_cast hcoord
+      rw [hcoordInt] at hb
+      simpa [MarkerSchedule.decrementStartBoundary] using hb
+  | temp =>
+      have hb := h.gap_blank (2 : Fin 4) registers.temp (by
+        simp [RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get])
+      change logicalTape growth T
+        (firstGapOffset (registers.increment .temp) 2 + registers.temp) =
+          blankSymbol at hb
+      have hcoord : firstGapOffset (registers.increment .temp) 2 +
+          registers.temp = boundaryOffset registers 3 := by
+        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
+          RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get] <;> omega
+      have hcoordInt : (firstGapOffset
+          (registers.increment .temp) 2 : Int) + registers.temp =
+          boundaryOffset registers 3 := by
+        exact_mod_cast hcoord
+      rw [hcoordInt] at hb
+      simpa [MarkerSchedule.decrementStartBoundary] using hb
+  | clock =>
+      have hb := h.gap_blank (3 : Fin 4) registers.clock (by
+        simp [RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get])
+      change logicalTape growth T
+        (firstGapOffset (registers.increment .clock) 3 + registers.clock) =
+          blankSymbol at hb
+      have hcoord : firstGapOffset (registers.increment .clock) 3 +
+          registers.clock = boundaryOffset registers 4 := by
+        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
+          RegisterLayout.values, Registers.increment, Registers.set,
+          Registers.get] <;> omega
+      have hcoordInt : (firstGapOffset
+          (registers.increment .clock) 3 : Int) + registers.clock =
+          boundaryOffset registers 4 := by
+        exact_mod_cast hcoord
+      rw [hcoordInt] at hb
+      simpa [MarkerSchedule.decrementStartBoundary] using hb
+
 /-- The cell immediately preceding the tested boundary is blank when the
 selected represented register is positive. -/
 theorem positive_predecessor_blank
