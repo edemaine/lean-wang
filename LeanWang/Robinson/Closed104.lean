@@ -48,25 +48,17 @@ theorem mem_childCandidates_iff
         (components parent) quadrant (components child) = true := by
   simp [childCandidates]
 
-/-- Every corrected parent/quadrant cell has exactly one child tile. -/
-def allChildrenUniqueBool : Bool :=
-  (List.finRange 104).all fun parent =>
-    Quadrant.all.all fun quadrant =>
-      decide ((childCandidates parent quadrant).length = 1)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allChildrenUniqueBool_eq_true :
-    allChildrenUniqueBool = true := by
+private theorem allChildrenUnique :
+    ∀ (parent : Index) (quadrant : Quadrant),
+      (childCandidates parent quadrant).length = 1 := by
   native_decide
 
 theorem childCandidates_length_eq_one
     (parent : Index) (quadrant : Quadrant) :
-    (childCandidates parent quadrant).length = 1 := by
-  have hparent := List.all_eq_true.1 allChildrenUniqueBool_eq_true
-    parent (List.mem_finRange parent)
-  have hquadrant := List.all_eq_true.1 hparent quadrant (Quadrant.mem_all quadrant)
-  exact of_decide_eq_true hquadrant
+    (childCandidates parent quadrant).length = 1 :=
+  allChildrenUnique parent quadrant
 
 /-- Executable Figure 16 substitution on the corrected tile alphabet. -/
 def childIndex (parent : Index) (quadrant : Quadrant) : Index :=

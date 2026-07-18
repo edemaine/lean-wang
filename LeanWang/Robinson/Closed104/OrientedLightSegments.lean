@@ -141,7 +141,6 @@ private theorem segment_mem_all (segment : Segment) : segment ∈ segmentAll := 
   cases segment <;> decide
 
 local instance : Fintype Thick := Fintype.ofList Thick.all thick_mem_all
-local instance : Fintype Quadrant := Fintype.ofList Quadrant.all Quadrant.mem_all
 local instance : Fintype RedShades.State :=
   Fintype.ofList RedShades.State.all RedShades.State.mem_all
 local instance : Fintype Direction := Fintype.ofList directionAll direction_mem_all

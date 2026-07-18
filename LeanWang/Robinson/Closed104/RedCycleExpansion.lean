@@ -32,10 +32,11 @@ theorem indexThick_eq (index : Index) :
   unfold indexThick
   rfl
 
-/-- Finite audit of the six local facts that double a red rectangular cycle. -/
-def allRedCycleExpansionRulesBool : Bool :=
-  (List.finRange 104).all fun parent =>
-    decide (
+/- Finite audit of the local facts that double a red rectangular cycle. -/
+set_option linter.style.nativeDecide false in
+set_option maxRecDepth 20000 in
+private theorem allRedCycleExpansionRules :
+    ∀ parent : Index,
       (indexThick parent = .a → indexThick (southwestChild parent) = .a) ∧
       (indexThick parent = .b → indexThick (southwestChild parent) = .b) ∧
       (indexThick parent = .c → indexThick (southwestChild parent) = .c) ∧
@@ -52,12 +53,7 @@ def allRedCycleExpansionRulesBool : Bool :=
         hasRedHorizontal (indexThick (southeastChild parent)) = true) ∧
       (hasRedVertical (indexThick parent) = true →
         hasRedVertical (indexThick (southwestChild parent)) = true ∧
-        hasRedVertical (indexThick (northwestChild parent)) = true))
-
-set_option linter.style.nativeDecide false in
-set_option maxRecDepth 20000 in
-theorem allRedCycleExpansionRulesBool_eq_true :
-    allRedCycleExpansionRulesBool = true := by
+        hasRedVertical (indexThick (northwestChild parent)) = true) := by
   native_decide
 
 theorem redCycleExpansionRules (parent : Index) :
@@ -77,10 +73,8 @@ theorem redCycleExpansionRules (parent : Index) :
       hasRedHorizontal (indexThick (southeastChild parent)) = true) ∧
     (hasRedVertical (indexThick parent) = true →
       hasRedVertical (indexThick (southwestChild parent)) = true ∧
-      hasRedVertical (indexThick (northwestChild parent)) = true) := by
-  have hparent := List.all_eq_true.1 allRedCycleExpansionRulesBool_eq_true
-    parent (List.mem_finRange parent)
-  exact of_decide_eq_true hparent
+      hasRedVertical (indexThick (northwestChild parent)) = true) :=
+  allRedCycleExpansionRules parent
 
 theorem southwestChild_thick_a {parent : Index} (h : indexThick parent = .a) :
     indexThick (southwestChild parent) = .a :=

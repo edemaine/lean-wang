@@ -51,24 +51,16 @@ theorem tileSet_length : tileSet.length = 416 := by
 theorem quarterTile_mem (site : QuarterIndex) : quarterTile site ∈ tileSet := by
   exact List.mem_map.2 ⟨site, mem_all site, rfl⟩
 
-def allQuarterTilesDistinctBool : Bool :=
-  all.all fun left =>
-    all.all fun right =>
-      decide (quarterTile left = quarterTile right → left = right)
-
 /- Both the corrected parent encoding and its four subdivisions are injective. -/
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allQuarterTilesDistinctBool_eq_true :
-    allQuarterTilesDistinctBool = true := by
+private theorem allQuarterTilesDistinct :
+    ∀ left right : QuarterIndex,
+      quarterTile left = quarterTile right → left = right := by
   native_decide
 
 theorem quarterTile_injective : Function.Injective quarterTile := by
-  intro left right heq
-  have hleft := List.all_eq_true.1 allQuarterTilesDistinctBool_eq_true
-    left (mem_all left)
-  have hright := List.all_eq_true.1 hleft right (mem_all right)
-  exact (of_decide_eq_true hright) heq
+  exact allQuarterTilesDistinct
 
 def candidates (wang : WangTile) : List QuarterIndex :=
   all.filter fun site => quarterTile site == wang
@@ -76,20 +68,16 @@ def candidates (wang : WangTile) : List QuarterIndex :=
 @[irreducible] def decode (wang : WangTile) : QuarterIndex :=
   (candidates wang).headD (⟨0, by decide⟩, .southwest)
 
-def allDecodeCorrectBool : Bool :=
-  all.all fun site => decide (decode (quarterTile site) = site)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allDecodeCorrectBool_eq_true : allDecodeCorrectBool = true := by
+private theorem allDecodeCorrect :
+    ∀ site : QuarterIndex, decode (quarterTile site) = site := by
   native_decide
 
 @[simp]
 theorem decode_quarterTile (site : QuarterIndex) :
-    decode (quarterTile site) = site := by
-  have hsite := List.all_eq_true.1 allDecodeCorrectBool_eq_true
-    site (mem_all site)
-  exact of_decide_eq_true hsite
+    decode (quarterTile site) = site :=
+  allDecodeCorrect site
 
 theorem quarterTile_decode_of_mem {wang : WangTile} (hwang : wang ∈ tileSet) :
     quarterTile (decode wang) = wang := by

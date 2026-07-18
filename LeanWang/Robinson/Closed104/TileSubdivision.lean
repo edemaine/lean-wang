@@ -83,6 +83,8 @@ theorem all_length : all.length = 4 := by
 theorem mem_all (q : Quadrant) : q ∈ all := by
   cases q <;> decide
 
+instance : Fintype Quadrant := Fintype.ofList all mem_all
+
 end Quadrant
 
 namespace TileSubdivision
