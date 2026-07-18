@@ -103,6 +103,7 @@ inductive LogicalFrame (base : Nat) (c : Nat.Partrec.Code)
         tape frame.outer)
       (concrete_eq : concrete = logicalCfg base c frame abstract tape)
       (state_lt : abstract.state < logicalSpan)
+      (frame_well_formed : FrameWellFormed base c frame)
 
 namespace LogicalFrame
 
@@ -116,7 +117,7 @@ search distance. -/
 theorem clock_lt_distance
     (h : LogicalFrame base c frame abstract concrete) :
     abstract.registers.clock < frame.distance := by
-  rcases h with ⟨hcore, _T, _hback, _hconcrete, _hstate⟩
+  rcases h with ⟨hcore, _T, _hback, _hconcrete, _hstate, _hframe⟩
   exact (clock_lt_layoutEnd abstract.registers).trans hcore
 
 /-- Contradiction form used at the endpoint of the growth argument. -/
@@ -124,6 +125,14 @@ theorem not_distance_le_clock
     (h : LogicalFrame base c frame abstract concrete) :
     ¬ frame.distance ≤ abstract.registers.clock :=
   Nat.not_le_of_gt h.clock_lt_distance
+
+/-- The original suspended search remains well formed throughout every
+logical counter instruction. -/
+theorem wellFormed
+    (h : LogicalFrame base c frame abstract concrete) :
+    FrameWellFormed base c frame := by
+  rcases h with ⟨_hcore, _T, _hback, _hconcrete, _hstate, hframe⟩
+  exact hframe
 
 end LogicalFrame
 
@@ -146,7 +155,8 @@ theorem logicalFrame_of_nestedAt (base : Nat) (c : Nat.Partrec.Code)
     (frameSpec c selected frame.distance hfar).core_before_target
   let T := initializeTape c selected frame.outer
   refine ⟨?_, T, ?_, ?_,
-    CounterControlAbstractTrace.canonicalCounterCfg_state_lt_logicalSpan c⟩
+    CounterControlAbstractTrace.canonicalCounterCfg_state_lt_logicalSpan c,
+    hframe⟩
   · simpa [CanonicalInitializer.registers] using hcore
   · have hback := initializeTape_backedBy c selected frame.outer
         frame.distance hframe.1 hfar

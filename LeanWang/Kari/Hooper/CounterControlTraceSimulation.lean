@@ -362,7 +362,7 @@ theorem reachesBoundary_or_halts_of_haltsFrom
   rcases reaches_logical_or_boundary_or_halts base c hlaw hterminalReach
       hlogical with hfinish | hboundary | hhalts
   · rcases hfinish with ⟨finishConcrete, hfinishReach, hfinish⟩
-    rcases hfinish with ⟨hcore, T, _hback, rfl, hstate⟩
+    rcases hfinish with ⟨hcore, T, _hback, rfl, hstate, _hframe⟩
     right
     refine ⟨logicalCfg base c frame terminal T, hfinishReach, ?_⟩
     simpa [logicalCfg] using
@@ -391,7 +391,8 @@ theorem haltsFrom_of_abstract_haltsFrom
   rcases reaches_logical_or_halts base c hlaw hterminalReach hlogical with
     hfinish | hhalts
   · rcases hfinish with ⟨finishConcrete, hfinishReach, hfinish⟩
-    rcases hfinish with ⟨_hcore, T, _hback, rfl, hstate⟩
+    rcases hfinish with
+      ⟨_hcore, T, _hback, rfl, hstate, _hframe⟩
     apply FullTM0.HaltsFrom.of_reaches hfinishReach
     refine ⟨logicalCfg base c frame terminal T,
       Relation.ReflTransGen.refl, ?_⟩
@@ -423,7 +424,8 @@ theorem haltsFrom_of_terminal_iterate_of_room
   rcases iterate_logical_or_halts_of_room base c hlaw steps hrun hfits
       hlogical with hfinish | hhalts
   · rcases hfinish with ⟨finishConcrete, hfinishReach, hfinish⟩
-    rcases hfinish with ⟨_hcore, T, _hback, rfl, hstate⟩
+    rcases hfinish with
+      ⟨_hcore, T, _hback, rfl, hstate, _hframe⟩
     apply FullTM0.HaltsFrom.of_reaches hfinishReach
     refine ⟨logicalCfg base c frame terminal T,
       Relation.ReflTransGen.refl, ?_⟩
