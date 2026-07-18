@@ -47,6 +47,7 @@ import LeanWang.Kari.Hooper.CounterControlPlanComputable
 import LeanWang.Kari.Hooper.CounterControlWellFormed
 import LeanWang.Kari.Hooper.CounterControlCommandAt
 import LeanWang.Kari.Hooper.CounterControlDeterministic
+import LeanWang.Kari.Hooper.CounterControlTerminalSemantics
 import LeanWang.Kari.Hooper.CounterControlDirectSemantics
 import LeanWang.Kari.Hooper.CounterControlBridge
 import LeanWang.Kari.Hooper.CounterControlNestingBridge
@@ -88,6 +89,8 @@ exact framed semantics, framed increment/decrement and collision-cleanup
 geometry, an executable two-orientation counter-control plan with
 tag-selected initialization, structurally verified search indexing and table
 determinism whose complete table is primitive recursive in the source code,
+an exact bridge taking halted logical counter states to halted compiled
+full-tape configurations,
 command-oriented access to compiled controller blocks, reusable
 execution bridges from bounded commands to framed tape endpoints, and an
 exact nearby-or-nested execution dichotomy, together with exact near-branch
