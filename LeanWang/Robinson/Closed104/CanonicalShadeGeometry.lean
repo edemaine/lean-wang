@@ -237,6 +237,26 @@ theorem shadeGrid_succ_sparse (level : Nat) (root : Node) (x y : Nat) :
   unfold shadeGrid
   rw [supertileShadeGrid_succ_sparse]
 
+/-- Every two-substitution macrocell is the level-one canonical supertile of
+its preceding-level node. -/
+theorem shadeGrid_succ_block (level : Nat) (root : Node)
+    (blockX blockY localX localY : Nat)
+    (hx : localX < 8) (hy : localY < 8) :
+    shadeGrid root (level + 1)
+        (8 * blockX + localX) (8 * blockY + localY) =
+      shadeGrid (supertileNodeGrid level root blockX blockY) 1
+        localX localY := by
+  rw [shadeGrid_one_eq_fineState]
+  unfold shadeGrid supertileShadeGrid supertileBlockGrid
+  have hxDiv : ((8 * blockX + localX) / 2) / 4 = blockX := by omega
+  have hyDiv : ((8 * blockY + localY) / 2) / 4 = blockY := by omega
+  have hxMod : ((8 * blockX + localX) / 2) % 4 = localX / 2 := by omega
+  have hyMod : ((8 * blockY + localY) / 2) % 4 = localY / 2 := by omega
+  have hxQuarter : (8 * blockX + localX) % 2 = localX % 2 := by omega
+  have hyQuarter : (8 * blockY + localY) % 2 = localY % 2 := by omega
+  simp [supertileNodeGrid, iterateNodeRefine, refineNodeGrid, fineNode,
+    childPosition, hxDiv, hyDiv, hxMod, hyMod, hxQuarter, hyQuarter]
+
 /-- The newly created local cell-cycle source is light after the canonical
 global shade flip. -/
 theorem cycleSource_light (node : Node) :
