@@ -393,16 +393,18 @@ theorem machine_cleanup_from_found_reaches_return_native {numTags : Nat}
     (core : FiniteTM0.Table (AlphabetSize numTags))
     (direction : Turing.Dir) (returnTag : Fin numTags)
     (hat : CommandAt radius base commandOffset
-      (Command.cleanup direction (returnState base radius commands) returnTag)
+      (Command.cleanup direction
+        (returnState base radius commands direction) returnTag)
       commands)
     (T : FullTM0.Tape (Symbol numTags))
     (hmatch : (Target.anyTag : Target numTags).Matches T.read) :
     FullTM0.Reaches (machine base radius commands core)
       ⟨foundState radius commandOffset, T⟩
-      ⟨returnState base radius commands, T⟩ := by
+      ⟨returnState base radius commands direction, T⟩ := by
   exact machine_reaches_of_continuation core hat
     (continuation_cleanup_reaches_return_native radius commandOffset
-      (coreEntry base radius commands) (returnState base radius commands)
+      (coreEntry base radius commands)
+      (returnState base radius commands direction)
       direction returnTag T hmatch)
 
 /-! ## Marker-shift success and collision -/
