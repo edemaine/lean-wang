@@ -52,6 +52,7 @@ import LeanWang.Kari.Hooper.CounterControlNestingBridge
 import LeanWang.Kari.Hooper.CounterControlNavigationSemantics
 import LeanWang.Kari.Hooper.CounterControlShiftSemantics
 import LeanWang.Kari.Hooper.CounterControlRouteSemantics
+import LeanWang.Kari.Hooper.CounterControlCleanupSemantics
 
 /-!
 # Hooper's immortality construction
@@ -85,7 +86,8 @@ execution bridges from bounded commands to framed tape endpoints, and an
 exact nearby-or-nested execution dichotomy, together with exact near-branch
 semantics for direct glue, navigation, erasure, and both marker-shift
 orientations, plus a generic nearby-or-nested semantics theorem for compiled
-boundary routes,
+boundary routes and the complete collision-cleanup chain back to the saved
+command (or its first deeper nested frame),
 and both directions of the abstract strong-induction core of Hooper's nested
 construction.  The remaining files prove the compiled plan's operational
 semantics and use its shared canonical core to discharge the nesting laws.
