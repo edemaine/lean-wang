@@ -9,6 +9,7 @@ import LeanWang.Kari.Hooper.FiniteTM0
 import LeanWang.Kari.Hooper.CounterMachine
 import LeanWang.Kari.Hooper.CounterProgram
 import LeanWang.Kari.Hooper.CounterArithmetic
+import LeanWang.Kari.Hooper.CounterArithmeticLiveness
 import LeanWang.Kari.Hooper.SourceMachine
 import LeanWang.Kari.Hooper.StackEncoding
 import LeanWang.Kari.Hooper.StackEncodingComputable
@@ -18,6 +19,7 @@ import LeanWang.Kari.Hooper.SourceRegisterSemantics
 import LeanWang.Kari.Hooper.GlobalSourceProgram
 import LeanWang.Kari.Hooper.GlobalSourceSemantics
 import LeanWang.Kari.Hooper.CounterLiveness
+import LeanWang.Kari.Hooper.GlobalSourceLiveness
 import LeanWang.Kari.Hooper.SearchGeometry
 import LeanWang.Kari.Hooper.CounterLayout
 import LeanWang.Kari.Hooper.RegisterLayout
@@ -47,8 +49,9 @@ semantics, a four-register counter-program layer, its
 exact finite five-boundary marker tape, collision-free suffix shifts for every
 counter operation together with exact chained increment schedules, concrete
 finite-table marker programs with independently directed searches and shifts,
-relocatable fixed arithmetic blocks, a verified finite-table linker, and the
+relocatable fixed arithmetic blocks, a verified finite-table linker, concrete
+arbitrary-entry liveness laws for the complete fixed source program, and the
 abstract strong-induction core of Hooper's nested bounded-search construction.
 The remaining files will compile the counter instructions to bounded marker
-searches and instantiate the nesting laws.
+searches and connect those searches to the liveness laws.
 -/
