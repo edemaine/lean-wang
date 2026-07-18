@@ -22,7 +22,7 @@ open OrientedRedCycles RedCycles RedShades RedShadePaths RedShadeCycles
   RedShadeCycleConnectivity RedShadeCycleBridgeComposition
   OrientedRedBoardTranslations RefinementTranslation
   Signals.FreeCellLocal ShadedSubstitution
-  CanonicalShadeGeometry
+  CanonicalShadeGeometry Figure16
 
 theorem Related.right_unique
     {parity : Bool} {first second third : Option RedShades.Shade}
@@ -457,60 +457,69 @@ theorem state_eq
   subst canonicalNorth
   rfl
 
-/-- Transfer a canonical free row through one phase comparison. -/
-theorem isFreeRow
-    {actualGrid canonicalGrid : Nat → Nat → Index}
-    {actualStates canonicalStates : Nat → Nat → RedShades.State}
-    {scale extent row : Nat}
-    (comparison : PhaseComparison actualGrid canonicalGrid
-      actualStates canonicalStates scale extent)
-    (componentEq : ∀ x y, x < 8 * scale → y < 8 * scale →
-      componentAt canonicalGrid x y = componentAt actualGrid x y)
-    (canonicalFree : ShadedPlaneSignalGrid.IsFreeRow
-      canonicalGrid canonicalStates scale (3 * scale) row)
-    (rowSouth : 2 * scale ≤ row) (rowNorth : row < 6 * scale) :
-    ShadedPlaneSignalGrid.IsFreeRow
-      actualGrid actualStates scale (3 * scale) row := by
-  intro quarterX westBound eastBound
-  have xWest : 2 * scale ≤ quarterX := by
-    unfold quarterWest at westBound
-    omega
-  have xEast : quarterX < 6 * scale := by
-    unfold quarterEast at eastBound
-    omega
-  have stateAgreement := comparison.state_eq
-    xWest xEast rowSouth rowNorth
-  have componentAgreement := componentEq quarterX row (by omega) (by omega)
-  rw [← componentAgreement, stateAgreement]
-  exact canonicalFree quarterX westBound eastBound
+/-- The two coordinate directions in which a free line can run. -/
+inductive FreeAxis where
+  | row
+  | column
 
-/-- Transfer a canonical free column through one phase comparison. -/
-theorem isFreeColumn
+namespace FreeAxis
+
+/-- The grid point on a line at a given transverse coordinate. -/
+def point : FreeAxis → Nat → Nat → Nat × Nat
+  | .row, line, transverse => (transverse, line)
+  | .column, line, transverse => (line, transverse)
+
+/-- The absence of the light border transverse to a line. -/
+def Clear : FreeAxis → Thick → Quadrant → RedShades.State → Prop
+  | .row, component, quadrant, state =>
+      ShadedSignals.selectedVerticalFor component quadrant state = none
+  | .column, component, quadrant, state =>
+      ShadedSignals.selectedHorizontalFor component quadrant state = none
+
+/-- Axis-neutral form of a free row or column. -/
+def IsFreeLine (axis : FreeAxis) (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (first last line : Nat) : Prop :=
+  ∀ transverse, quarterWest first < transverse →
+    transverse < quarterEast last →
+    let location := axis.point line transverse
+    axis.Clear
+      (componentAt indexGrid location.1 location.2)
+      (quadrantAt location.1 location.2)
+      (shadeGrid location.1 location.2)
+
+end FreeAxis
+
+/-- Transfer a canonical free line through one phase comparison. -/
+theorem isFreeLine
     {actualGrid canonicalGrid : Nat → Nat → Index}
     {actualStates canonicalStates : Nat → Nat → RedShades.State}
-    {scale extent column : Nat}
+    {scale extent line : Nat} (axis : FreeAxis)
     (comparison : PhaseComparison actualGrid canonicalGrid
       actualStates canonicalStates scale extent)
     (componentEq : ∀ x y, x < 8 * scale → y < 8 * scale →
       componentAt canonicalGrid x y = componentAt actualGrid x y)
-    (canonicalFree : ShadedPlaneSignalGrid.IsFreeColumn
-      canonicalGrid canonicalStates scale (3 * scale) column)
-    (columnWest : 2 * scale ≤ column)
-    (columnEast : column < 6 * scale) :
-    ShadedPlaneSignalGrid.IsFreeColumn
-      actualGrid actualStates scale (3 * scale) column := by
-  intro quarterY southBound northBound
-  have ySouth : 2 * scale ≤ quarterY := by
-    unfold quarterSouth at southBound
-    omega
-  have yNorth : quarterY < 6 * scale := by
-    unfold quarterNorth at northBound
-    omega
-  have stateAgreement := comparison.state_eq
-    columnWest columnEast ySouth yNorth
-  have componentAgreement := componentEq column quarterY (by omega) (by omega)
+    (canonicalFree : axis.IsFreeLine
+      canonicalGrid canonicalStates scale (3 * scale) line)
+    (lineLower : 2 * scale ≤ line) (lineUpper : line < 6 * scale) :
+    axis.IsFreeLine actualGrid actualStates scale (3 * scale) line := by
+  intro transverse lower upper
+  let location := axis.point line transverse
+  have locationBounds :
+      2 * scale ≤ location.1 ∧ location.1 < 6 * scale ∧
+      2 * scale ≤ location.2 ∧ location.2 < 6 * scale := by
+    cases axis <;> simp [location, FreeAxis.point] <;>
+      unfold quarterWest at lower <;> unfold quarterEast at upper <;> omega
+  rcases locationBounds with ⟨xLower, xUpper, yLower, yUpper⟩
+  have stateAgreement := comparison.state_eq xLower xUpper yLower yUpper
+  have componentAgreement := componentEq location.1 location.2
+    (by omega) (by omega)
+  change axis.Clear
+    (componentAt actualGrid location.1 location.2)
+    (quadrantAt location.1 location.2)
+    (actualStates location.1 location.2)
   rw [← componentAgreement, stateAgreement]
-  exact canonicalFree quarterY southBound northBound
+  exact canonicalFree transverse lower upper
 
 end PhaseComparison
 

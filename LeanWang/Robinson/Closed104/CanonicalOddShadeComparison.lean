@@ -370,6 +370,41 @@ private theorem componentAt_canonical_eq (depth : Nat)
   simp only [componentAt]
   rw [index_canonical_eq depth coarse coarseRoot x y xEast yNorth]
 
+private theorem coordinate_isFreeLine
+    (axis : PhaseComparison.FreeAxis) (depth : Nat)
+    (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State)
+    (coarseRoot : coarse 0 0 = 0)
+    (valid : ValidShadeGrid (actualGrid depth coarse) states)
+    (shaded : CycleShade states
+      (scale depth) (3 * scale depth)
+      (scale depth) (3 * scale depth) .light)
+    {line : Nat} (lineMem : line ∈ coordinates depth) :
+    axis.IsFreeLine (actualGrid depth coarse) states
+      (scale depth) (3 * scale depth) line := by
+  have canonicalFree : axis.IsFreeLine
+      (indexGrid (depth + 2)) (shadeGrid (depth + 2))
+      (scale depth) (3 * scale depth) line := by
+    rw [show 3 * scale depth = 6 * 4 ^ depth by
+      unfold scale
+      omega]
+    cases axis
+    · exact CanonicalOddFreeLines.coordinate_isFreeRow depth lineMem
+    · exact CanonicalOddFreeLines.coordinate_isFreeColumn depth lineMem
+  have lineBounds := mem_coordinates_bounds depth lineMem
+  have lineLower : 2 * scale depth ≤ line := by
+    unfold quarterSouth at lineBounds
+    simp only [scale] at lineBounds ⊢
+    omega
+  have lineUpper : line < 6 * scale depth := by
+    unfold quarterNorth at lineBounds
+    simp only [scale] at lineBounds ⊢
+    omega
+  exact (comparison depth coarse states coarseRoot valid shaded).isFreeLine axis
+    (fun x y hx hy => componentAt_canonical_eq depth coarse coarseRoot
+      x y hx hy)
+    canonicalFree lineLower lineUpper
+
 theorem coordinate_isFreeRow (depth : Nat)
     (coarse : Nat → Nat → Index)
     (states : Nat → Nat → RedShades.State)
@@ -380,27 +415,8 @@ theorem coordinate_isFreeRow (depth : Nat)
       (scale depth) (3 * scale depth) .light)
     {row : Nat} (rowMem : row ∈ coordinates depth) :
     ShadedPlaneSignalGrid.IsFreeRow (actualGrid depth coarse) states
-      (scale depth) (3 * scale depth) row := by
-  have canonicalFree : ShadedPlaneSignalGrid.IsFreeRow
-      (indexGrid (depth + 2)) (shadeGrid (depth + 2))
-      (scale depth) (3 * scale depth) row := by
-    rw [show 3 * scale depth = 6 * 4 ^ depth by
-      unfold scale
-      omega]
-    exact CanonicalOddFreeLines.coordinate_isFreeRow depth rowMem
-  have rowBounds := mem_coordinates_bounds depth rowMem
-  have ySouth : 2 * scale depth ≤ row := by
-    unfold quarterSouth at rowBounds
-    simp only [scale] at rowBounds ⊢
-    omega
-  have yNorth : row < 6 * scale depth := by
-    unfold quarterNorth at rowBounds
-    simp only [scale] at rowBounds ⊢
-    omega
-  exact (comparison depth coarse states coarseRoot valid shaded).isFreeRow
-    (fun x y hx hy => componentAt_canonical_eq depth coarse coarseRoot
-      x y hx hy)
-    canonicalFree ySouth yNorth
+      (scale depth) (3 * scale depth) row :=
+  coordinate_isFreeLine .row depth coarse states coarseRoot valid shaded rowMem
 
 theorem coordinate_isFreeColumn (depth : Nat)
     (coarse : Nat → Nat → Index)
@@ -412,27 +428,8 @@ theorem coordinate_isFreeColumn (depth : Nat)
       (scale depth) (3 * scale depth) .light)
     {column : Nat} (columnMem : column ∈ coordinates depth) :
     ShadedPlaneSignalGrid.IsFreeColumn (actualGrid depth coarse) states
-      (scale depth) (3 * scale depth) column := by
-  have canonicalFree : ShadedPlaneSignalGrid.IsFreeColumn
-      (indexGrid (depth + 2)) (shadeGrid (depth + 2))
-      (scale depth) (3 * scale depth) column := by
-    rw [show 3 * scale depth = 6 * 4 ^ depth by
-      unfold scale
-      omega]
-    exact CanonicalOddFreeLines.coordinate_isFreeColumn depth columnMem
-  have columnBounds := mem_coordinates_bounds depth columnMem
-  have xWest : 2 * scale depth ≤ column := by
-    unfold quarterSouth at columnBounds
-    simp only [scale] at columnBounds ⊢
-    omega
-  have xEast : column < 6 * scale depth := by
-    unfold quarterNorth at columnBounds
-    simp only [scale] at columnBounds ⊢
-    omega
-  exact (comparison depth coarse states coarseRoot valid shaded).isFreeColumn
-    (fun x y hx hy => componentAt_canonical_eq depth coarse coarseRoot
-      x y hx hy)
-    canonicalFree xWest xEast
+      (scale depth) (3 * scale depth) column :=
+  coordinate_isFreeLine .column depth coarse states coarseRoot valid shaded columnMem
 
 end CanonicalOddShadeComparison
 end Closed104

@@ -311,6 +311,41 @@ private theorem componentAt_canonical_eq (depth : Nat)
   simp only [componentAt]
   rw [index_canonical_eq depth coarse root rootEq x y xEast yNorth]
 
+private theorem coordinate_isFreeLine
+    (axis : PhaseComparison.FreeAxis) (depth : Nat)
+    (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State) (root : Node)
+    (coarseRoot : coarse 0 0 = 0) (rootParent : root.data.parent = 0)
+    (valid : ValidShadeGrid (actualGrid depth coarse) states)
+    (shaded : CycleShade states
+      (scale depth) (3 * scale depth)
+      (scale depth) (3 * scale depth) .light)
+    {line : Nat} (lineMem : line ∈ coordinates depth) :
+    axis.IsFreeLine (actualGrid depth coarse) states
+      (scale depth) (3 * scale depth) line := by
+  have canonicalFree : axis.IsFreeLine
+      (indexGrid root (depth + 1)) (shadeGrid root (depth + 1))
+      (scale depth) (3 * scale depth) line := by
+    cases axis
+    · exact CanonicalEvenFreeLines.coordinate_isFreeRow root depth lineMem
+    · exact CanonicalEvenFreeLines.coordinate_isFreeColumn root depth lineMem
+  have lineBounds := mem_coordinates_bounds depth lineMem
+  have rootEq : coarse 0 0 = root.data.parent :=
+    coarseRoot.trans rootParent.symm
+  have lineLower : 2 * scale depth ≤ line := by
+    unfold quarterSouth at lineBounds
+    simp only [scale] at lineBounds ⊢
+    omega
+  have lineUpper : line < 6 * scale depth := by
+    unfold quarterNorth at lineBounds
+    simp only [scale] at lineBounds ⊢
+    omega
+  exact (comparison depth coarse states root coarseRoot rootParent valid shaded).isFreeLine
+      axis
+      (fun x y hx hy => componentAt_canonical_eq depth coarse root rootEq
+        x y hx hy)
+      canonicalFree lineLower lineUpper
+
 /-- Every coordinate in the canonical family is a free row in the arbitrary
 light-root shade assignment. -/
 theorem coordinate_isFreeRow (depth : Nat)
@@ -323,25 +358,9 @@ theorem coordinate_isFreeRow (depth : Nat)
       (scale depth) (3 * scale depth) .light)
     {row : Nat} (rowMem : row ∈ coordinates depth) :
     IsFreeRow (actualGrid depth coarse) states
-      (scale depth) (3 * scale depth) row := by
-  have canonicalFree :=
-    CanonicalEvenFreeLines.coordinate_isFreeRow root depth rowMem
-  have rowBounds := mem_coordinates_bounds depth rowMem
-  have rootEq : coarse 0 0 = root.data.parent :=
-    coarseRoot.trans rootParent.symm
-  have ySouth : 2 * scale depth ≤ row := by
-    unfold quarterSouth at rowBounds
-    simp only [scale] at rowBounds ⊢
-    omega
-  have yNorth : row < 6 * scale depth := by
-    unfold quarterNorth at rowBounds
-    simp only [scale] at rowBounds ⊢
-    omega
-  exact (comparison depth coarse states root coarseRoot rootParent
-    valid shaded).isFreeRow
-      (fun x y hx hy => componentAt_canonical_eq depth coarse root rootEq
-        x y hx hy)
-      canonicalFree ySouth yNorth
+      (scale depth) (3 * scale depth) row :=
+  coordinate_isFreeLine .row depth coarse states root coarseRoot rootParent
+    valid shaded rowMem
 
 /-- Every coordinate in the canonical family is a free column in the
 arbitrary light-root shade assignment. -/
@@ -355,25 +374,9 @@ theorem coordinate_isFreeColumn (depth : Nat)
       (scale depth) (3 * scale depth) .light)
     {column : Nat} (columnMem : column ∈ coordinates depth) :
     IsFreeColumn (actualGrid depth coarse) states
-      (scale depth) (3 * scale depth) column := by
-  have canonicalFree :=
-    CanonicalEvenFreeLines.coordinate_isFreeColumn root depth columnMem
-  have columnBounds := mem_coordinates_bounds depth columnMem
-  have rootEq : coarse 0 0 = root.data.parent :=
-    coarseRoot.trans rootParent.symm
-  have xWest : 2 * scale depth ≤ column := by
-    unfold quarterSouth at columnBounds
-    simp only [scale] at columnBounds ⊢
-    omega
-  have xEast : column < 6 * scale depth := by
-    unfold quarterNorth at columnBounds
-    simp only [scale] at columnBounds ⊢
-    omega
-  exact (comparison depth coarse states root coarseRoot rootParent
-    valid shaded).isFreeColumn
-      (fun x y hx hy => componentAt_canonical_eq depth coarse root rootEq
-        x y hx hy)
-      canonicalFree xWest xEast
+      (scale depth) (3 * scale depth) column :=
+  coordinate_isFreeLine .column depth coarse states root coarseRoot rootParent
+    valid shaded columnMem
 
 end CanonicalShadeComparison
 end Closed104
