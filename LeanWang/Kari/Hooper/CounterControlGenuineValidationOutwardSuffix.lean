@@ -27,6 +27,7 @@ open CounterControlGenuineRouteEmbedding
 open CounterControlGenuineValidation
 open CounterControlRouteSuffixMortality
 open CounterControlResumedRouteEmbedding
+open CounterControlParentContinuation
 
 noncomputable section
 
@@ -42,6 +43,146 @@ structure Suffix
   index : Fin 4
   current_eq : progress.suffix.current = ⟨index.succ, .right⟩
   remaining_toFour : ToFour index.succ progress.suffix.remaining
+
+/-- The original caller found the source boundary of the retained outward
+suffix. -/
+theorem Suffix.current_read
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (suffix : Suffix current growth source instruction) :
+    current.foundTape.read = boundarySymbol suffix.index.succ := by
+  have hread := suffix.progress.current_read
+  rw [suffix.current_eq] at hread
+  exact hread
+
+/-- The original validation search is physically outward. -/
+theorem Suffix.current_direction
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (suffix : Suffix current growth source instruction) :
+    current.direction = orient growth .right := by
+  have hdirection := current.selectedRaw_direction_eq
+  rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+    at hdirection
+  rw [suffix.progress.suffix.raw_eq, suffix.current_eq] at hdirection
+  exact hdirection.symm
+
+/-- Exact blank gap of the original outward validation search. -/
+theorem Suffix.current_gap
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (suffix : Suffix current growth source instruction) :
+    SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary suffix.index.succ).Matches current.outer
+      (orient growth .right) current.distance := by
+  have hgap := suffix.progress.current_gap
+  rw [suffix.current_eq] at hgap
+  exact hgap
+
+/-- The original found tape is the outward endpoint of its exact gap. -/
+theorem Suffix.current_foundTape
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (suffix : Suffix current growth source instruction) :
+    current.outer.moveN (orient growth .right) current.distance =
+      current.foundTape := by
+  have hfound := suffix.progress.current_foundTape
+  rw [suffix.current_eq] at hfound
+  exact hfound
+
+/-- Exact tape trace from the original found boundary through every later
+outward validation boundary. -/
+theorem Suffix.tailGaps
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (suffix : Suffix current growth source instruction) :
+    RouteTailGaps growth suffix.progress.suffix.remaining current.foundTape
+      suffix.progress.suffix.finish :=
+  suffix.progress.suffix.tailGaps
+
+/-- Expose the first found tape of a nonempty route trace. -/
+private theorem routeGaps_uncons
+    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
+    (rest : List MarkerValidation.Leg)
+    (outer finish : FullTM0.Tape (Symbol numTags))
+    (htrace : CounterControlValidationMortality.RouteGaps growth
+      (leg :: rest) outer finish) :
+    ∃ distance,
+      SearchGap (fun symbol => symbol = blankSymbol)
+        (Target.boundary leg.target).Matches outer
+        (orient growth leg.direction) distance ∧
+      RouteTailGaps growth rest
+        (outer.moveN (orient growth leg.direction) distance) finish := by
+  cases rest with
+  | nil =>
+      cases htrace with
+      | last _ _ distance gap =>
+          exact ⟨distance, gap, .nil _⟩
+  | cons next rest =>
+      cases htrace with
+      | cons _ _ _ _ distance gap finish tail =>
+          exact ⟨distance, gap, .cons next rest _ finish tail⟩
+
+/-- A consecutive outward suffix ending at boundary `4` is centered on that
+boundary at its final tape. -/
+private theorem toFour_finish_read
+    {growth : Turing.Dir} {start finish : FullTM0.Tape (Symbol numTags)}
+    {source : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToFour source route)
+    (hread : start.read = boundarySymbol source)
+    (htrace : RouteTailGaps growth route start finish) :
+    finish.read = boundarySymbol 4 := by
+  induction hroute generalizing start finish with
+  | four =>
+      cases htrace
+      exact hread
+  | step i tail ih =>
+      cases htrace with
+      | cons _ _ start finish trace =>
+          rcases routeGaps_uncons growth ⟨i.succ, .right⟩ _ _ _ trace with
+            ⟨distance, gap, restTrace⟩
+          let found :=
+            ((start.move (orient growth .right)).moveN
+              (orient growth .right) distance)
+          have hfoundRead : found.read = boundarySymbol i.succ := by
+            change (Target.boundary i.succ).Matches found.read
+            simpa [found, FullTM0.Tape.read_moveN] using gap.marked
+          exact ih hfoundRead restTrace
+
+/-- The completed validation suffix is centered on boundary `4`. -/
+theorem Suffix.finish_read
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (suffix : Suffix current growth source instruction) :
+    suffix.progress.suffix.finish.read = boundarySymbol 4 := by
+  exact toFour_finish_read suffix.remaining_toFour suffix.current_read
+    suffix.tailGaps
+
+/-- Operationally, the retained validation suffix reaches the selected
+instruction body on its boundary-`4`-centered final tape. -/
+theorem Suffix.reaches_bodyEntry
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (suffix : Suffix current growth source instruction) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨resolve base c (bodyEntry growth source instruction),
+        suffix.progress.suffix.finish⟩ :=
+  suffix.progress.reaches
 
 private theorem remaining_of_boundaryRaw
     {base : Nat} {c : Nat.Partrec.Code}
