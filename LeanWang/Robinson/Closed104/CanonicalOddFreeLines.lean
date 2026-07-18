@@ -116,7 +116,7 @@ private theorem childAt?_val (node : Node) (childX childY : Nat)
 
 set_option maxHeartbeats 1000000 in
 -- Normalizing two certified `Node.child` witnesses unfolds their choice proofs.
-private theorem seedNodeAt?_eq (x y : Nat) :
+theorem seedNodeAt?_eq (x y : Nat) :
     seedNodeAt? x y = some (nodeAt 0 x y).val := by
   let firstPosition := childPosition (x / 4) (y / 4)
   let secondPosition := childPosition x y

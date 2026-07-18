@@ -200,7 +200,7 @@ theorem child_zero_block (node : Node) :
   have childBlock := node.child_block ⟨0, by decide⟩
   exact Option.some.inj (childBlock.symm.trans parentBlock)
 
-private theorem supertileShadeGrid_succ_sparse
+theorem supertileShadeGrid_succ_sparse
     (level : Nat) (root : Node) (x y : Nat) :
     supertileShadeGrid (level + 1) root
         (sparseCoordinate x) (sparseCoordinate y) =
