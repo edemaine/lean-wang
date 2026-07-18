@@ -36,6 +36,7 @@ import LeanWang.Kari.Hooper.BasicLemma
 import LeanWang.Kari.Hooper.BasicLemmaConverse
 import LeanWang.Kari.Hooper.NestingMachine
 import LeanWang.Kari.Hooper.BoundedMarkerProgram
+import LeanWang.Kari.Hooper.CanonicalInitializerFrame
 
 /-!
 # Hooper's immortality construction
@@ -58,8 +59,9 @@ independently directed searches and shifts,
 relocatable and reflectable finite tables, a verified finite-table linker,
 concrete arbitrary-entry liveness laws for the complete fixed source program,
 a deterministic tagged controller for a finite family of bounded searches,
+an executable tag-sensitive canonical initializer with exact framed semantics,
 and both directions of the abstract strong-induction core of Hooper's nested
-construction.  The
-remaining files will compile the counter instructions to those searches and
-implement the shared canonical core that discharges the nesting laws.
+construction.  The remaining files will compile the counter instructions to
+those searches and implement the shared canonical core that discharges the
+nesting laws.
 -/
