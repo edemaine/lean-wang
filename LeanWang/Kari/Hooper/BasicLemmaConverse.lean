@@ -97,12 +97,47 @@ theorem of_reaches {M : Turing.TM0.Machine Γ Λ} {start current : Cfg Γ Λ}
 
 end ImmortalFrom
 
+/-- A finite execution which either reaches its advertised continuation or
+fails at its starting configuration. -/
+abbrev CompletesOr (M : Turing.TM0.Machine Γ Λ)
+    (Failure : Cfg Γ Λ → Prop) (start finish : Cfg Γ Λ) : Prop :=
+  Reaches M start finish ∨ Failure start
+
+namespace CompletesOr
+
+omit [Inhabited Γ] in
+/-- Failure predicates which can be pulled backward over a successful finite
+execution make `CompletesOr` compositional. -/
+theorem trans {M : Turing.TM0.Machine Γ Λ} {Failure : Cfg Γ Λ → Prop}
+    (pullback : ∀ {start current}, Reaches M start current →
+      Failure current → Failure start)
+    {start middle finish : Cfg Γ Λ}
+    (h₁ : CompletesOr M Failure start middle)
+    (h₂ : CompletesOr M Failure middle finish) :
+    CompletesOr M Failure start finish := by
+  rcases h₁ with h₁ | h₁
+  · rcases h₂ with h₂ | h₂
+    · exact Or.inl (h₁.trans h₂)
+    · exact Or.inr (pullback h₁ h₂)
+  · exact Or.inr h₁
+
+omit [Inhabited Γ] in
+/-- Attach stable data to the successful side of a failure-parametric
+execution. -/
+theorem and_right {M : Turing.TM0.Machine Γ Λ}
+    {Failure : Cfg Γ Λ → Prop} {start finish : Cfg Γ Λ} {P : Prop}
+    (h : CompletesOr M Failure start finish) (hP : P) :
+    (Reaches M start finish ∧ P) ∨ Failure start :=
+  h.imp (fun hreach => ⟨hreach, hP⟩) id
+
+end CompletesOr
+
 /-- A finite execution either reaches the advertised continuation or exposes
 a terminal configuration reachable from its starting point.  This is the
 common outcome type of the converse bounded-search proofs. -/
 abbrev ResolvesTo (M : Turing.TM0.Machine Γ Λ)
     (start finish : Cfg Γ Λ) : Prop :=
-  Reaches M start finish ∨ HaltsFrom M start
+  CompletesOr M (HaltsFrom M) start finish
 
 namespace ResolvesTo
 

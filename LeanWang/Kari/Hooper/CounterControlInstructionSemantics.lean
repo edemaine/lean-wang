@@ -1814,21 +1814,74 @@ theorem machine_reaches_validation_solved
 
 /-! ## Solved increment schedule -/
 
-/-- All collision-free shifts of one generated increment execute exactly.
-The endpoint is the blank old source cell of the last shifted boundary; the
-following direct rule moves right onto the new boundary. -/
-theorem machine_reaches_incrementSchedule_solved
-    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
-    (register : Register)
+/-- The two primitive increment shifts needed by the register-independent
+schedule.  The successful and halting-aware developments instantiate the
+same runner with different shorter-search hypotheses and failure predicates.
+-/
+structure IncrementScheduleRunner
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop) where
+  pullback : ∀ {start current},
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c) start current →
+      Failure current → Failure start
+  clock : ∀ (limit : Nat), Short limit →
+    ∀ (counterState searchSlot : Nat)
+      (success : ControlRef) (collision : Option ControlRef)
+      {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)},
+      Represents spec T →
+      layoutEnd (spec.registers.increment .clock) < spec.outerDistance →
+      0 < limit →
+      RawCommand.markerShift
+        ⟨spec.growth, counterState, searchSlot⟩ 4 .left .right
+        success (some .left) collision ∈ rawCommands →
+      FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+        ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
+          atLogical spec.growth T (layoutEnd spec.registers)⟩
+        ⟨resolve base c success,
+          atLogical spec.growth (incrementTape spec .clock T)
+            (layoutEnd spec.registers)⟩
+  internal : ∀ (limit : Nat), Short limit →
+    ∀ (counterState searchSlot : Nat)
+      (success : ControlRef) (collision : Option ControlRef)
+      {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)},
+      Represents spec T → ∀ (next : Registers) (i : Fin 4),
+      0 < RegisterLayout.values spec.registers i →
+      RegisterLayout.values spec.registers i < limit →
+      layoutEnd next < spec.outerDistance →
+      layoutEnd next = layoutEnd spec.registers →
+      MarkerMachine.moveAt .right
+          (MarkerTape.canonicalTape spec.registers)
+          (MarkerTape.boundaryPosition spec.registers i.castSucc) i.castSucc =
+        MarkerTape.canonicalTape next →
+      RawCommand.markerShift
+        ⟨spec.growth, counterState, searchSlot⟩ i.castSucc .left .right
+        success (some .left) collision ∈ rawCommands →
+      FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+        ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
+          atLogical spec.growth T (lastGapOffset spec.registers i)⟩
+        ⟨resolve base c success,
+          atLogical spec.growth
+            (install next spec.growth spec.returnTag T)
+            (boundaryOffset spec.registers i.castSucc)⟩
+
+/-- Register-independent increment scheduling, parameterized by the outcome
+of each constituent bounded search. -/
+theorem machine_reaches_incrementSchedule_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : IncrementScheduleRunner base c Short Failure)
+    (source : Nat) (register : Register)
     {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
     (h : Represents spec T)
     (hroom : layoutEnd (spec.registers.increment register) <
       spec.outerDistance)
-    (hshort : ShortSearches base c spec.outerDistance)
+    (hshort : Short spec.outerDistance)
     (hcommands : ∀ raw,
       raw ∈ incrementShiftCommands spec.growth source register →
         raw ∈ rawCommands) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
       ⟨searchState base c ⟨spec.growth, source, bodySearchBase⟩,
         atLogical spec.growth T (layoutEnd spec.registers)⟩
       ⟨resolve base c (directRef spec.growth source bodyDirectBase),
@@ -1861,16 +1914,15 @@ theorem machine_reaches_incrementSchedule_solved
         simp [incrementShiftCommands, incrementShiftCommandsAux,
           MarkerShift.incrementOrder]
       simpa [MarkerSchedule.decrementStartBoundary] using
-        machine_reaches_incrementClock_solved base c spec.outerDistance
-          hshort source bodySearchBase
+        runner.clock spec.outerDistance hshort source bodySearchBase
           (directRef spec.growth source bodyDirectBase)
           (some (directRef spec.growth source testDirectSlot)) h hclockRoom
           hlimit hraw
   | temp =>
       let clockTape := incrementTape spec .clock T
       let clockSpec := incrementSpec spec .clock hclockRoom
-      have hclockRep : Represents clockSpec clockTape := by
-        exact incrementTape_represents h .clock hclockRoom
+      have hclockRep : Represents clockSpec clockTape :=
+        incrementTape_represents h .clock hclockRoom
       have hrawFour : RawCommand.markerShift
           ⟨spec.growth, source, bodySearchBase⟩ 4 .left .right
           (searchRef spec.growth source (bodySearchBase + 1)) (some .left)
@@ -1879,8 +1931,7 @@ theorem machine_reaches_incrementSchedule_solved
         apply hcommands
         simp [incrementShiftCommands, incrementShiftCommandsAux,
           MarkerShift.incrementOrder]
-      have hfour := machine_reaches_incrementClock_solved base c
-        spec.outerDistance hshort source bodySearchBase
+      have hfour := runner.clock spec.outerDistance hshort source bodySearchBase
         (searchRef spec.growth source (bodySearchBase + 1))
         (some (directRef spec.growth source testDirectSlot)) h hclockRoom
         hlimit hrawFour
@@ -1894,8 +1945,7 @@ theorem machine_reaches_incrementSchedule_solved
             (directRef spec.growth source bodyDirectBase) (some .left) none)
           (by simp [incrementShiftCommands, incrementShiftCommandsAux,
             MarkerShift.incrementOrder])
-      have hthree := machine_reaches_incrementInternal_solved base c
-        spec.outerDistance hshort source (bodySearchBase + 1)
+      have hthree := runner.internal spec.outerDistance hshort source (bodySearchBase + 1)
         (directRef clockSpec.growth source bodyDirectBase) none hclockRep
         (spec.registers.increment .temp) (3 : Fin 4)
         (by simp [clockSpec, incrementSpec, updateSpec,
@@ -1933,7 +1983,7 @@ theorem machine_reaches_incrementSchedule_solved
           Registers.get] <;> omega
       rw [← hhead, hfinish] at hthree
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      exact hfour.trans hthree
+      exact FullTM0.CompletesOr.trans runner.pullback hfour hthree
   | right =>
       let clockTape := incrementTape spec .clock T
       let clockSpec := incrementSpec spec .clock hclockRoom
@@ -1972,13 +2022,11 @@ theorem machine_reaches_incrementSchedule_solved
             (directRef spec.growth source bodyDirectBase) (some .left) none)
           (by simp [incrementShiftCommands, incrementShiftCommandsAux,
             MarkerShift.incrementOrder])
-      have hfour := machine_reaches_incrementClock_solved base c
-        spec.outerDistance hshort source bodySearchBase
+      have hfour := runner.clock spec.outerDistance hshort source bodySearchBase
         (searchRef spec.growth source (bodySearchBase + 1))
         (some (directRef spec.growth source testDirectSlot)) h hclockRoom
         hlimit hrawFour
-      have hthree := machine_reaches_incrementInternal_solved base c
-        spec.outerDistance hshort source (bodySearchBase + 1)
+      have hthree := runner.internal spec.outerDistance hshort source (bodySearchBase + 1)
         (searchRef clockSpec.growth source (bodySearchBase + 2)) none
         hclockRep (spec.registers.increment .temp) (3 : Fin 4)
         (by simp [clockSpec, incrementSpec, updateSpec,
@@ -1991,8 +2039,7 @@ theorem machine_reaches_incrementSchedule_solved
         (by simpa [clockSpec, incrementSpec, updateSpec] using
           MarkerSchedule.moveTempBoundary_after_clock spec.registers)
         hrawThree
-      have htwo := machine_reaches_incrementInternal_solved base c
-        spec.outerDistance hshort source (bodySearchBase + 2)
+      have htwo := runner.internal spec.outerDistance hshort source (bodySearchBase + 2)
         (directRef tempSpec.growth source bodyDirectBase) none htempRep
         (spec.registers.increment .right) (2 : Fin 4)
         (by simp [tempSpec, incrementSpec, updateSpec,
@@ -2054,7 +2101,8 @@ theorem machine_reaches_incrementSchedule_solved
       rw [← hheadFour, hhandoffThree] at hthree
       rw [hfinish] at htwo
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      exact hfour.trans (hthree.trans htwo)
+      exact FullTM0.CompletesOr.trans runner.pullback hfour
+        (FullTM0.CompletesOr.trans runner.pullback hthree htwo)
   | left =>
       let clockTape := incrementTape spec .clock T
       let clockSpec := incrementSpec spec .clock hclockRoom
@@ -2108,13 +2156,11 @@ theorem machine_reaches_incrementSchedule_solved
             (directRef spec.growth source bodyDirectBase) (some .left) none)
           (by simp [incrementShiftCommands, incrementShiftCommandsAux,
             MarkerShift.incrementOrder])
-      have hfour := machine_reaches_incrementClock_solved base c
-        spec.outerDistance hshort source bodySearchBase
+      have hfour := runner.clock spec.outerDistance hshort source bodySearchBase
         (searchRef spec.growth source (bodySearchBase + 1))
         (some (directRef spec.growth source testDirectSlot)) h hclockRoom
         hlimit hrawFour
-      have hthree := machine_reaches_incrementInternal_solved base c
-        spec.outerDistance hshort source (bodySearchBase + 1)
+      have hthree := runner.internal spec.outerDistance hshort source (bodySearchBase + 1)
         (searchRef clockSpec.growth source (bodySearchBase + 2)) none
         hclockRep (spec.registers.increment .temp) (3 : Fin 4)
         (by simp [clockSpec, incrementSpec, updateSpec,
@@ -2127,8 +2173,7 @@ theorem machine_reaches_incrementSchedule_solved
         (by simpa [clockSpec, incrementSpec, updateSpec] using
           MarkerSchedule.moveTempBoundary_after_clock spec.registers)
         hrawThree
-      have htwo := machine_reaches_incrementInternal_solved base c
-        spec.outerDistance hshort source (bodySearchBase + 2)
+      have htwo := runner.internal spec.outerDistance hshort source (bodySearchBase + 2)
         (searchRef tempSpec.growth source (bodySearchBase + 3)) none
         htempRep (spec.registers.increment .right) (2 : Fin 4)
         (by simp [tempSpec, incrementSpec, updateSpec,
@@ -2141,8 +2186,7 @@ theorem machine_reaches_incrementSchedule_solved
         (by simpa [tempSpec, incrementSpec, updateSpec] using
           MarkerSchedule.moveRightBoundary_after_temp spec.registers)
         hrawTwo
-      have hone := machine_reaches_incrementInternal_solved base c
-        spec.outerDistance hshort source (bodySearchBase + 3)
+      have hone := runner.internal spec.outerDistance hshort source (bodySearchBase + 3)
         (directRef rightSpec.growth source bodyDirectBase) none hrightRep
         (spec.registers.increment .left) (1 : Fin 4)
         (by simp [rightSpec, incrementSpec, updateSpec,
@@ -2228,10 +2272,53 @@ theorem machine_reaches_incrementSchedule_solved
       rw [hhandoffTwo] at htwo
       rw [hfinish] at hone
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree htwo
-      exact hfour.trans (hthree.trans (htwo.trans hone))
+      exact FullTM0.CompletesOr.trans runner.pullback hfour
+        (FullTM0.CompletesOr.trans runner.pullback hthree
+          (FullTM0.CompletesOr.trans runner.pullback htwo hone))
 
-/-- The cell vacated by the last boundary of an increment schedule is blank
-in the exact canonical increment tape. -/
+/-- All collision-free shifts of one generated increment execute exactly.
+The endpoint is the blank old source cell of the last shifted boundary; the
+following direct rule moves right onto the new boundary. -/
+theorem machine_reaches_incrementSchedule_solved
+    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
+    (register : Register)
+    {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
+    (h : Represents spec T)
+    (hroom : layoutEnd (spec.registers.increment register) <
+      spec.outerDistance)
+    (hshort : ShortSearches base c spec.outerDistance)
+    (hcommands : ∀ raw,
+      raw ∈ incrementShiftCommands spec.growth source register →
+        raw ∈ rawCommands) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨spec.growth, source, bodySearchBase⟩,
+        atLogical spec.growth T (layoutEnd spec.registers)⟩
+      ⟨resolve base c (directRef spec.growth source bodyDirectBase),
+        atLogical spec.growth (incrementTape spec register T)
+          (boundaryOffset spec.registers
+            (MarkerSchedule.decrementStartBoundary register))⟩ := by
+  let runner : IncrementScheduleRunner base c (ShortSearches base c)
+      (fun _ => False) := {
+    pullback := by
+      intro _ _ _ failure
+      exact failure.elim
+    clock := by
+      intro limit hshort counterState searchSlot success collision spec T
+        h hroom hlimit hraw
+      exact Or.inl (machine_reaches_incrementClock_solved base c limit hshort
+        counterState searchSlot success collision h hroom hlimit hraw)
+    internal := by
+      intro limit hshort counterState searchSlot success collision spec T
+        h next i hpositive hdistance hnextCore hsameEnd hmove hraw
+      exact Or.inl (machine_reaches_incrementInternal_solved base c limit hshort
+        counterState searchSlot success collision h next i hpositive hdistance
+        hnextCore hsameEnd hmove hraw) }
+  rcases machine_reaches_incrementSchedule_with base c (ShortSearches base c)
+      (fun _ => False) runner source register h hroom hshort hcommands with
+    result | failure
+  · exact result
+  · exact failure.elim
+
 theorem incrementSchedule_source_blank
     {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
     (h : Represents spec T) (register : Register)
@@ -3156,17 +3243,88 @@ theorem boundaryOffset_le_layoutEnd (registers : Registers)
 
 /-- Complete positive-decrement suffix schedule, including exact preservation
 of the suspended outer backing. -/
-theorem machine_reaches_decrementSchedule_solved
-    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
+structure DecrementScheduleRunner
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop) where
+  pullback : ∀ {start current},
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c) start current →
+      Failure current → Failure start
+  first : ∀ (limit : Nat), Short limit →
+    ∀ (counterState searchSlot : Nat) (success : ControlRef), 0 < limit →
+    ∀ {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)},
+      Represents spec T → ∀ (next : Registers) (i : Fin 4),
+      0 < RegisterLayout.values spec.registers i →
+      layoutEnd next < spec.outerDistance →
+      layoutEnd next ≤ layoutEnd spec.registers →
+      layoutEnd spec.registers ≤ layoutEnd next + 1 →
+      boundaryOffset spec.registers i.succ ≤ layoutEnd spec.registers →
+      boundaryOffset spec.registers i.succ - 1 ≤ layoutEnd next →
+      (layoutEnd next < layoutEnd spec.registers →
+        boundaryOffset spec.registers i.succ = layoutEnd spec.registers) →
+      MarkerMachine.moveAt .left
+          (MarkerTape.canonicalTape spec.registers)
+          (MarkerTape.boundaryPosition spec.registers i.succ) i.succ =
+        MarkerTape.canonicalTape next →
+      RawCommand.markerShift
+        ⟨spec.growth, counterState, searchSlot⟩ i.succ .right .left success
+        (some .right) none ∈ rawCommands →
+      FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+        ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
+          atLogical spec.growth T (boundaryOffset spec.registers i.succ)⟩
+        ⟨resolve base c success,
+          atLogical spec.growth
+            (install next spec.growth spec.returnTag
+              (writeLogical spec.growth T
+                (boundaryOffset spec.registers i.succ) blankSymbol))
+            (boundaryOffset spec.registers i.succ)⟩
+  following : ∀ (limit : Nat), Short limit →
+    ∀ (counterState searchSlot : Nat) (success : ControlRef),
+    ∀ {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)},
+      Represents spec T → ∀ (next : Registers) (i : Fin 4),
+      0 < RegisterLayout.values spec.registers i →
+      RegisterLayout.values spec.registers i < limit →
+      layoutEnd next < spec.outerDistance →
+      layoutEnd next ≤ layoutEnd spec.registers →
+      layoutEnd spec.registers ≤ layoutEnd next + 1 →
+      boundaryOffset spec.registers i.succ ≤ layoutEnd spec.registers →
+      boundaryOffset spec.registers i.succ - 1 ≤ layoutEnd next →
+      (layoutEnd next < layoutEnd spec.registers →
+        boundaryOffset spec.registers i.succ = layoutEnd spec.registers) →
+      MarkerMachine.moveAt .left
+          (MarkerTape.canonicalTape spec.registers)
+          (MarkerTape.boundaryPosition spec.registers i.succ) i.succ =
+        MarkerTape.canonicalTape next →
+      RawCommand.markerShift
+        ⟨spec.growth, counterState, searchSlot⟩ i.succ .right .left success
+        (some .right) none ∈ rawCommands →
+      FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+        ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
+          atLogical spec.growth T (firstGapOffset spec.registers i)⟩
+        ⟨resolve base c success,
+          atLogical spec.growth
+            (install next spec.growth spec.returnTag
+              (writeLogical spec.growth T
+                (boundaryOffset spec.registers i.succ) blankSymbol))
+            (boundaryOffset spec.registers i.succ)⟩
+
+/-- Register-independent positive-decrement scheduling, parameterized by the
+outcome of each constituent bounded search. -/
+theorem machine_reaches_decrementSchedule_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : DecrementScheduleRunner base c Short Failure)
+    (source : Nat)
     (register : Register)
     {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
     (hback : BackedBy spec T outer)
     (hpositive : 0 < spec.registers.get register)
-    (hshort : ShortSearches base c spec.outerDistance)
+    (hshort : Short spec.outerDistance)
     (hcommands : ∀ raw,
       raw ∈ decrementShiftCommands spec.growth source register →
         raw ∈ rawCommands) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨spec.growth, source, secondarySearchBase⟩,
           atLogical spec.growth T
             (boundaryOffset spec.registers
@@ -3175,7 +3333,12 @@ theorem machine_reaches_decrementSchedule_solved
           atLogical spec.growth (decrementTape spec register T)
             (layoutEnd spec.registers)⟩ ∧
       BackedBy (decrementSpec spec register hpositive)
-        (decrementTape spec register T) outer := by
+        (decrementTape spec register T) outer) ∨
+      Failure
+        ⟨searchState base c ⟨spec.growth, source, secondarySearchBase⟩,
+          atLogical spec.growth T
+            (boundaryOffset spec.registers
+              (MarkerSchedule.decrementStartBoundary register))⟩ := by
   have h := hback.represents
   have hlimit : 0 < spec.outerDistance := by
     exact Nat.zero_lt_of_lt spec.core_before_target
@@ -3206,8 +3369,7 @@ theorem machine_reaches_decrementSchedule_solved
         apply hcommands
         simp [decrementShiftCommands, decrementShiftCommandsAux,
           MarkerShift.decrementOrder]
-      have hrun := machine_reaches_decrementFirst_solved base c
-        spec.outerDistance hshort source secondarySearchBase
+      have hrun := runner.first spec.outerDistance hshort source secondarySearchBase
         (directRef spec.growth source finishDirectSlot) hlimit h next
         (3 : Fin 4) (by simpa [RegisterLayout.values] using hp)
         hnextCore (by omega) (by omega)
@@ -3216,11 +3378,10 @@ theorem machine_reaches_decrementSchedule_solved
           change layoutEnd spec.registers - 1 ≤ layoutEnd next
           omega)
         (by intro _; rfl) hmove hraw
-      constructor
-      · simpa [next, decrementTape, clearOldLayoutEnd,
-          MarkerSchedule.decrementStartBoundary,
-          boundaryOffset_four] using hrun
-      · exact hdesired
+      apply FullTM0.CompletesOr.and_right ?_ hdesired
+      simpa [next, decrementTape, clearOldLayoutEnd,
+        MarkerSchedule.decrementStartBoundary,
+        boundaryOffset_four] using hrun
   | temp =>
       have hp : 0 < spec.registers.temp := by
         simpa [Registers.get] using hpositive
@@ -3249,8 +3410,7 @@ theorem machine_reaches_decrementSchedule_solved
         apply hcommands
         simp [decrementShiftCommands, decrementShiftCommandsAux,
           MarkerShift.decrementOrder]
-      have hthree := machine_reaches_decrementFirst_solved base c
-        spec.outerDistance hshort source secondarySearchBase
+      have hthree := runner.first spec.outerDistance hshort source secondarySearchBase
         (searchRef spec.growth source (secondarySearchBase + 1)) hlimit h
         clockRegs (2 : Fin 4) (by simpa [RegisterLayout.values] using hp)
         hclockCore (by omega) (by omega)
@@ -3298,8 +3458,7 @@ theorem machine_reaches_decrementSchedule_solved
             (directRef spec.growth source finishDirectSlot) (some .right) none)
           (by simp [decrementShiftCommands, decrementShiftCommandsAux,
             MarkerShift.decrementOrder])
-      have hfour := machine_reaches_decrementFollowing_solved base c
-        spec.outerDistance (by simpa [clockSpec, updateSpec] using hshort)
+      have hfour := runner.following spec.outerDistance (by simpa [clockSpec, updateSpec] using hshort)
         source (secondarySearchBase + 1)
         (directRef clockSpec.growth source finishDirectSlot) hclockRep final
         (3 : Fin 4)
@@ -3383,11 +3542,9 @@ theorem machine_reaches_decrementSchedule_solved
       rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
         layoutEnd clockRegs by rfl, hclockEnd] at hfour
       simp only [searchRef, CounterControlPlan.resolve] at hthree
-      constructor
-      · simp only [MarkerSchedule.decrementStartBoundary]
-        rw [hhead']
-        exact hthree.trans hfour
-      · exact hdesired
+      apply FullTM0.CompletesOr.and_right ?_ hdesired
+      simpa only [MarkerSchedule.decrementStartBoundary, hhead'] using
+        FullTM0.CompletesOr.trans runner.pullback hthree hfour
   | right =>
       have hp : 0 < spec.registers.right := by
         simpa [Registers.get] using hpositive
@@ -3415,8 +3572,7 @@ theorem machine_reaches_decrementSchedule_solved
         apply hcommands
         simp [decrementShiftCommands, decrementShiftCommandsAux,
           MarkerShift.decrementOrder]
-      have htwo := machine_reaches_decrementFirst_solved base c
-        spec.outerDistance hshort source secondarySearchBase
+      have htwo := runner.first spec.outerDistance hshort source secondarySearchBase
         (searchRef spec.growth source (secondarySearchBase + 1)) hlimit h
         tempRegs (1 : Fin 4)
         (by simpa [RegisterLayout.values, Registers.get] using hpositive)
@@ -3460,8 +3616,7 @@ theorem machine_reaches_decrementSchedule_solved
             (some .right) none)
           (by simp [decrementShiftCommands, decrementShiftCommandsAux,
             MarkerShift.decrementOrder])
-      have hthree := machine_reaches_decrementFollowing_solved base c
-        spec.outerDistance (by simpa [tempSpec, updateSpec] using hshort)
+      have hthree := runner.following spec.outerDistance (by simpa [tempSpec, updateSpec] using hshort)
         source (secondarySearchBase + 1)
         (searchRef tempSpec.growth source (secondarySearchBase + 2))
         htempBack.represents clockRegs (2 : Fin 4)
@@ -3529,9 +3684,7 @@ theorem machine_reaches_decrementSchedule_solved
             (directRef spec.growth source finishDirectSlot) (some .right) none)
           (by simp [decrementShiftCommands, decrementShiftCommandsAux,
             MarkerShift.decrementOrder])
-      have hfour := machine_reaches_decrementFollowing_solved base c
-        spec.outerDistance
-        (by simpa [clockSpec, tempSpec, updateSpec] using hshort)
+      have hfour := runner.following spec.outerDistance (by simpa [clockSpec, tempSpec, updateSpec] using hshort)
         source (secondarySearchBase + 2)
         (directRef clockSpec.growth source finishDirectSlot)
         hclockBack.represents final (3 : Fin 4)
@@ -3630,11 +3783,9 @@ theorem machine_reaches_decrementSchedule_solved
       rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
         layoutEnd clockRegs by rfl, hclockEnd] at hfour
       simp only [searchRef, CounterControlPlan.resolve] at htwo hthree
-      constructor
-      · simp only [MarkerSchedule.decrementStartBoundary]
-        rw [hheadTwo']
-        exact htwo.trans (hthree.trans hfour)
-      · exact hdesired
+      apply FullTM0.CompletesOr.and_right ?_ hdesired
+      simpa only [MarkerSchedule.decrementStartBoundary, hheadTwo'] using
+        FullTM0.CompletesOr.trans runner.pullback htwo (FullTM0.CompletesOr.trans runner.pullback hthree hfour)
   | left =>
       have hp : 0 < spec.registers.left := by
         simpa [Registers.get] using hpositive
@@ -3666,8 +3817,7 @@ theorem machine_reaches_decrementSchedule_solved
         apply hcommands
         simp [decrementShiftCommands, decrementShiftCommandsAux,
           MarkerShift.decrementOrder]
-      have hone := machine_reaches_decrementFirst_solved base c
-        spec.outerDistance hshort source secondarySearchBase
+      have hone := runner.first spec.outerDistance hshort source secondarySearchBase
         (searchRef spec.growth source (secondarySearchBase + 1)) hlimit h
         rightRegs (0 : Fin 4)
         (by simpa [RegisterLayout.values, Registers.get] using hpositive)
@@ -3711,8 +3861,7 @@ theorem machine_reaches_decrementSchedule_solved
             (some .right) none)
           (by simp [decrementShiftCommands, decrementShiftCommandsAux,
             MarkerShift.decrementOrder])
-      have htwo := machine_reaches_decrementFollowing_solved base c
-        spec.outerDistance (by simpa [rightSpec, updateSpec] using hshort)
+      have htwo := runner.following spec.outerDistance (by simpa [rightSpec, updateSpec] using hshort)
         source (secondarySearchBase + 1)
         (searchRef rightSpec.growth source (secondarySearchBase + 2))
         hrightBack.represents tempRegs (1 : Fin 4)
@@ -3778,9 +3927,7 @@ theorem machine_reaches_decrementSchedule_solved
             (some .right) none)
           (by simp [decrementShiftCommands, decrementShiftCommandsAux,
             MarkerShift.decrementOrder])
-      have hthree := machine_reaches_decrementFollowing_solved base c
-        spec.outerDistance
-        (by simpa [tempSpec, rightSpec, updateSpec] using hshort)
+      have hthree := runner.following spec.outerDistance (by simpa [tempSpec, rightSpec, updateSpec] using hshort)
         source (secondarySearchBase + 2)
         (searchRef tempSpec.growth source (secondarySearchBase + 3))
         htempBack.represents clockRegs (2 : Fin 4)
@@ -3848,9 +3995,7 @@ theorem machine_reaches_decrementSchedule_solved
             (directRef spec.growth source finishDirectSlot) (some .right) none)
           (by simp [decrementShiftCommands, decrementShiftCommandsAux,
             MarkerShift.decrementOrder])
-      have hfour := machine_reaches_decrementFollowing_solved base c
-        spec.outerDistance
-        (by simpa [clockSpec, tempSpec, rightSpec, updateSpec] using hshort)
+      have hfour := runner.following spec.outerDistance (by simpa [clockSpec, tempSpec, rightSpec, updateSpec] using hshort)
         source (secondarySearchBase + 3)
         (directRef clockSpec.growth source finishDirectSlot)
         hclockBack.represents final (3 : Fin 4)
@@ -3969,14 +4114,61 @@ theorem machine_reaches_decrementSchedule_solved
       rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
         layoutEnd clockRegs by rfl, hclockEnd] at hfour
       simp only [searchRef, CounterControlPlan.resolve] at hone htwo hthree
-      constructor
-      · simp only [MarkerSchedule.decrementStartBoundary]
-        rw [hheadOne']
-        exact hone.trans (htwo.trans (hthree.trans hfour))
-      · exact hdesired
+      apply FullTM0.CompletesOr.and_right ?_ hdesired
+      simpa only [MarkerSchedule.decrementStartBoundary, hheadOne'] using
+        FullTM0.CompletesOr.trans runner.pullback hone
+          (FullTM0.CompletesOr.trans runner.pullback htwo
+            (FullTM0.CompletesOr.trans runner.pullback hthree hfour))
 
-/-- The final blank rule leaves the vacated old boundary cell and moves left
-onto boundary `4` of the decremented logical frame. -/
+
+
+/-- Complete positive-decrement suffix schedule, including exact preservation
+of the suspended outer backing. -/
+theorem machine_reaches_decrementSchedule_solved
+    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
+    (register : Register)
+    {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
+    (hback : BackedBy spec T outer)
+    (hpositive : 0 < spec.registers.get register)
+    (hshort : ShortSearches base c spec.outerDistance)
+    (hcommands : ∀ raw,
+      raw ∈ decrementShiftCommands spec.growth source register →
+        raw ∈ rawCommands) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨spec.growth, source, secondarySearchBase⟩,
+          atLogical spec.growth T
+            (boundaryOffset spec.registers
+              (MarkerSchedule.decrementStartBoundary register))⟩
+        ⟨resolve base c (directRef spec.growth source finishDirectSlot),
+          atLogical spec.growth (decrementTape spec register T)
+            (layoutEnd spec.registers)⟩ ∧
+      BackedBy (decrementSpec spec register hpositive)
+        (decrementTape spec register T) outer := by
+  let runner : DecrementScheduleRunner base c (ShortSearches base c)
+      (fun _ => False) := {
+    pullback := by
+      intro _ _ _ failure
+      exact failure.elim
+    first := by
+      intro limit hshort counterState searchSlot success hlimit spec T h next i
+        hpositive hnextCore hlower hupper hsource hdestination hshrink hmove
+        hraw
+      exact Or.inl (machine_reaches_decrementFirst_solved base c limit hshort
+        counterState searchSlot success hlimit h next i hpositive hnextCore
+        hlower hupper hsource hdestination hshrink hmove hraw)
+    following := by
+      intro limit hshort counterState searchSlot success spec T h next i
+        hpositive hdistance hnextCore hlower hupper hsource hdestination
+        hshrink hmove hraw
+      exact Or.inl (machine_reaches_decrementFollowing_solved base c limit
+        hshort counterState searchSlot success h next i hpositive hdistance
+        hnextCore hlower hupper hsource hdestination hshrink hmove hraw) }
+  rcases machine_reaches_decrementSchedule_with base c (ShortSearches base c)
+      (fun _ => False) runner source register hback hpositive hshort hcommands
+      with result | failure
+  · exact result
+  · exact failure.elim
+
 theorem machine_reaches_decrementPositiveFinish
     (base : Nat) (c : Nat.Partrec.Code) (source ifZero ifPositive : Nat)
     (register : Register)
