@@ -58,6 +58,7 @@ import LeanWang.Kari.Hooper.CounterControlScheduleSemantics
 import LeanWang.Kari.Hooper.CounterControlRouteSemantics
 import LeanWang.Kari.Hooper.CounterControlCleanupSemantics
 import LeanWang.Kari.Hooper.CounterControlFrameBacking
+import LeanWang.Kari.Hooper.CounterControlOpenFrame
 import LeanWang.Kari.Hooper.CounterControlSearchSystem
 import LeanWang.Kari.Hooper.CounterControlSearchExecution
 
@@ -104,6 +105,8 @@ semantics theorem for compiled
 boundary routes and the complete collision-cleanup chain back to the saved
 command (or its first deeper nested frame), together with an exact backing-tape
 invariant proving that cleanup restores the suspended outer search tape,
+plus a target-free canonical frame with an infinite blank runway and exact
+update preservation for the designated immortal witness,
 and a concrete simultaneous Hooper search system whose local launch, direct,
 and unwind laws are discharged by the compiled controller,
 with raw-command bridges for applying its forward and converse search
