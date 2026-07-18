@@ -801,15 +801,75 @@ theorem machine_reaches_incrementInternal_or_halts_of_open
 
 /-! ## The target-free increment schedule -/
 
-/-- Every shift in a collision-free increment schedule resolves on an open
-core.  The arbitrary finite `limit` used by the converse Basic Lemma is chosen
-past the updated core; it is not asserted to contain a target. -/
-theorem machine_reaches_incrementSchedule_or_halts_of_open
+/-- Operational interface shared by open and finite-prefix increment
+schedules.  Both representations supply the same clock and internal shifts;
+only their runway invariant differs. -/
+structure IncrementEnvelope (growth : Turing.Dir) (limit : Nat) where
+  Represents : Registers → FullTM0.Tape (Symbol numTags) → Prop
+  core_before_limit : ∀ {registers T}, Represents registers T →
+    layoutEnd registers < limit
+  increment : ∀ {registers T} (register : Register),
+    Represents registers T → layoutEnd (registers.increment register) < limit →
+      Represents (registers.increment register)
+        (incrementCoreTape registers growth register T)
+  clock : ∀ (base : Nat) (c : Nat.Partrec.Code)
+      (source searchSlot : Nat) (success : ControlRef)
+      (collision : Option ControlRef)
+      {registers : Registers} {T : FullTM0.Tape (Symbol numTags)},
+      Represents registers T →
+      layoutEnd (registers.increment .clock) < limit →
+      RawCommand.markerShift
+        ⟨growth, source, searchSlot⟩ 4 .left .right success
+        (some .left) collision ∈ rawCommands →
+      (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          ⟨searchState base c ⟨growth, source, searchSlot⟩,
+            atLogical growth T (layoutEnd registers)⟩
+          ⟨resolve base c success,
+            atLogical growth
+              (incrementCoreTape registers growth .clock T)
+              (layoutEnd registers)⟩ ∧
+        Represents (registers.increment .clock)
+          (incrementCoreTape registers growth .clock T)) ∨
+        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+          ⟨searchState base c ⟨growth, source, searchSlot⟩,
+            atLogical growth T (layoutEnd registers)⟩
+  internal : ∀ (base : Nat) (c : Nat.Partrec.Code)
+      (counterState searchSlot : Nat) (success : ControlRef)
+      (collision : Option ControlRef)
+      {current next : Registers} {T : FullTM0.Tape (Symbol numTags)},
+      Represents current T → ∀ (i : Fin 4),
+      0 < RegisterLayout.values current i →
+      RegisterLayout.values current i < limit →
+      layoutEnd current ≤ layoutEnd next →
+      layoutEnd next ≤ layoutEnd current + 1 →
+      layoutEnd next = layoutEnd current →
+      MarkerMachine.moveAt .right
+          (MarkerTape.canonicalTape current)
+          (MarkerTape.boundaryPosition current i.castSucc) i.castSucc =
+        MarkerTape.canonicalTape next →
+      RawCommand.markerShift
+        ⟨growth, counterState, searchSlot⟩ i.castSucc .left .right
+        success (some .left) collision ∈ rawCommands →
+      (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+            atLogical growth T (lastGapOffset current i)⟩
+          ⟨resolve base c success,
+            atLogical growth (installCore next growth T)
+              (boundaryOffset current i.castSucc)⟩ ∧
+        Represents next (installCore next growth T)) ∨
+        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+          ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+            atLogical growth T (lastGapOffset current i)⟩
+
+/-- Every collision-free increment schedule has the same controller trace
+under any increment envelope. -/
+theorem machine_reaches_incrementSchedule_or_halts_of_envelope
     (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
     (register : Register)
-    {registers : Registers} {growth : Turing.Dir}
+    {registers : Registers} {growth : Turing.Dir} {limit : Nat}
     {T : FullTM0.Tape (Symbol numTags)}
-    (h : CoreOpenRepresents registers growth T)
+    (E : IncrementEnvelope growth limit) (h : E.Represents registers T)
+    (hroom : layoutEnd (registers.increment register) < limit)
     (hcommands : ∀ raw,
       raw ∈ incrementShiftCommands growth source register →
         raw ∈ rawCommands) :
@@ -820,16 +880,15 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
           atLogical growth (incrementCoreTape registers growth register T)
             (boundaryOffset registers
               (MarkerSchedule.decrementStartBoundary register))⟩ ∧
-      CoreOpenRepresents (registers.increment register) growth
+      E.Represents (registers.increment register)
         (incrementCoreTape registers growth register T)) ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
           atLogical growth T (layoutEnd registers)⟩ := by
-  let limit := layoutEnd registers + 2
   have hfinal (r : Register) :
-      CoreOpenRepresents (registers.increment r) growth
+      E.Represents (registers.increment r)
         (incrementCoreTape registers growth r T) :=
-    incrementCoreTape_preserves_open h r
+    E.increment r h (by simpa [layoutEnd_increment] using hroom)
   cases register with
   | clock =>
       have hraw : RawCommand.markerShift
@@ -840,15 +899,16 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
         simp [incrementShiftCommands, incrementShiftCommandsAux,
           MarkerShift.incrementOrder]
       simpa [MarkerSchedule.decrementStartBoundary] using
-        machine_reaches_incrementClock_or_halts_of_open base c source
+        E.clock base c source
           bodySearchBase (directRef growth source bodyDirectBase)
-          (some (directRef growth source testDirectSlot)) h hraw
+          (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hraw
   | temp =>
       let clockRegisters := registers.increment .clock
       let tempRegisters := registers.increment .temp
       let clockTape := incrementCoreTape registers growth .clock T
       let tempTape := incrementCoreTape registers growth .temp T
-      have hclockOpen : CoreOpenRepresents clockRegisters growth clockTape := by
+      have hclockPrefix :
+          E.Represents clockRegisters clockTape := by
         simpa [clockRegisters, clockTape] using hfinal .clock
       have hrawFour : RawCommand.markerShift
           ⟨growth, source, bodySearchBase⟩ 4 .left .right
@@ -864,18 +924,21 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
         apply hcommands
         simp [incrementShiftCommands, incrementShiftCommandsAux,
           MarkerShift.incrementOrder]
-      have hfour := machine_reaches_incrementClock_or_halts_of_open base c
+      have hfour := E.clock base c
         source bodySearchBase (searchRef growth source (bodySearchBase + 1))
-        (some (directRef growth source testDirectSlot)) h hrawFour
-      have hthree := machine_reaches_incrementInternal_or_halts_of_open
+        (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hrawFour
+      have hthree := E.internal
         (next := tempRegisters) base c
-        limit source (bodySearchBase + 1)
-        (directRef growth source bodyDirectBase) none hclockOpen (3 : Fin 4)
+        source (bodySearchBase + 1)
+        (directRef growth source bodyDirectBase) none hclockPrefix (3 : Fin 4)
         (by simp [clockRegisters, RegisterLayout.values, Registers.increment,
           Registers.set, Registers.get])
-        (by simp [limit, clockRegisters, layoutEnd, CounterLayout.boundaryPos,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega)
+        (by
+          have hbound := E.core_before_limit h
+          simp [clockRegisters, layoutEnd, CounterLayout.boundaryPos,
+            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
+            Registers.increment, Registers.set, Registers.get] at hbound ⊢
+          omega)
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
@@ -912,9 +975,11 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
       let clockTape := incrementCoreTape registers growth .clock T
       let tempTape := incrementCoreTape registers growth .temp T
       let rightTape := incrementCoreTape registers growth .right T
-      have hclockOpen : CoreOpenRepresents clockRegisters growth clockTape := by
+      have hclockPrefix :
+          E.Represents clockRegisters clockTape := by
         simpa [clockRegisters, clockTape] using hfinal .clock
-      have htempOpen : CoreOpenRepresents tempRegisters growth tempTape := by
+      have htempPrefix :
+          E.Represents tempRegisters tempTape := by
         simpa [tempRegisters, tempTape] using hfinal .temp
       have hrawFour : RawCommand.markerShift
           ⟨growth, source, bodySearchBase⟩ 4 .left .right
@@ -937,34 +1002,40 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
         apply hcommands
         simp [incrementShiftCommands, incrementShiftCommandsAux,
           MarkerShift.incrementOrder]
-      have hfour := machine_reaches_incrementClock_or_halts_of_open base c
+      have hfour := E.clock base c
         source bodySearchBase (searchRef growth source (bodySearchBase + 1))
-        (some (directRef growth source testDirectSlot)) h hrawFour
-      have hthree := machine_reaches_incrementInternal_or_halts_of_open
+        (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hrawFour
+      have hthree := E.internal
         (next := tempRegisters) base c
-        limit source (bodySearchBase + 1)
-        (searchRef growth source (bodySearchBase + 2)) none hclockOpen
+        source (bodySearchBase + 1)
+        (searchRef growth source (bodySearchBase + 2)) none hclockPrefix
         (3 : Fin 4)
         (by simp [clockRegisters, RegisterLayout.values, Registers.increment,
           Registers.set, Registers.get])
-        (by simp [limit, clockRegisters, layoutEnd, CounterLayout.boundaryPos,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega)
+        (by
+          have hbound := E.core_before_limit h
+          simp [clockRegisters, layoutEnd, CounterLayout.boundaryPos,
+            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
+            Registers.increment, Registers.set, Registers.get] at hbound ⊢
+          omega)
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simpa [clockRegisters, tempRegisters] using
           MarkerSchedule.moveTempBoundary_after_clock registers)
         hrawThree
-      have htwo := machine_reaches_incrementInternal_or_halts_of_open
+      have htwo := E.internal
         (next := rightRegisters) base c
-        limit source (bodySearchBase + 2)
-        (directRef growth source bodyDirectBase) none htempOpen (2 : Fin 4)
+        source (bodySearchBase + 2)
+        (directRef growth source bodyDirectBase) none htempPrefix (2 : Fin 4)
         (by simp [tempRegisters, RegisterLayout.values, Registers.increment,
           Registers.set, Registers.get])
-        (by simp [limit, tempRegisters, layoutEnd, CounterLayout.boundaryPos,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega)
+        (by
+          have hbound := E.core_before_limit h
+          simp [tempRegisters, layoutEnd, CounterLayout.boundaryPos,
+            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
+            Registers.increment, Registers.set, Registers.get] at hbound ⊢
+          omega)
         (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
         (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
         (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
@@ -1024,11 +1095,14 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
       let tempTape := incrementCoreTape registers growth .temp T
       let rightTape := incrementCoreTape registers growth .right T
       let leftTape := incrementCoreTape registers growth .left T
-      have hclockOpen : CoreOpenRepresents clockRegisters growth clockTape := by
+      have hclockPrefix :
+          E.Represents clockRegisters clockTape := by
         simpa [clockRegisters, clockTape] using hfinal .clock
-      have htempOpen : CoreOpenRepresents tempRegisters growth tempTape := by
+      have htempPrefix :
+          E.Represents tempRegisters tempTape := by
         simpa [tempRegisters, tempTape] using hfinal .temp
-      have hrightOpen : CoreOpenRepresents rightRegisters growth rightTape := by
+      have hrightPrefix :
+          E.Represents rightRegisters rightTape := by
         simpa [rightRegisters, rightTape] using hfinal .right
       have hrawFour : RawCommand.markerShift
           ⟨growth, source, bodySearchBase⟩ 4 .left .right
@@ -1058,50 +1132,59 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
         apply hcommands
         simp [incrementShiftCommands, incrementShiftCommandsAux,
           MarkerShift.incrementOrder]
-      have hfour := machine_reaches_incrementClock_or_halts_of_open base c
+      have hfour := E.clock base c
         source bodySearchBase (searchRef growth source (bodySearchBase + 1))
-        (some (directRef growth source testDirectSlot)) h hrawFour
-      have hthree := machine_reaches_incrementInternal_or_halts_of_open
+        (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hrawFour
+      have hthree := E.internal
         (next := tempRegisters) base c
-        limit source (bodySearchBase + 1)
-        (searchRef growth source (bodySearchBase + 2)) none hclockOpen
+        source (bodySearchBase + 1)
+        (searchRef growth source (bodySearchBase + 2)) none hclockPrefix
         (3 : Fin 4)
         (by simp [clockRegisters, RegisterLayout.values, Registers.increment,
           Registers.set, Registers.get])
-        (by simp [limit, clockRegisters, layoutEnd, CounterLayout.boundaryPos,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega)
+        (by
+          have hbound := E.core_before_limit h
+          simp [clockRegisters, layoutEnd, CounterLayout.boundaryPos,
+            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
+            Registers.increment, Registers.set, Registers.get] at hbound ⊢
+          omega)
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
         (by simpa [clockRegisters, tempRegisters] using
           MarkerSchedule.moveTempBoundary_after_clock registers)
         hrawThree
-      have htwo := machine_reaches_incrementInternal_or_halts_of_open
+      have htwo := E.internal
         (next := rightRegisters) base c
-        limit source (bodySearchBase + 2)
-        (searchRef growth source (bodySearchBase + 3)) none htempOpen
+        source (bodySearchBase + 2)
+        (searchRef growth source (bodySearchBase + 3)) none htempPrefix
         (2 : Fin 4)
         (by simp [tempRegisters, RegisterLayout.values, Registers.increment,
           Registers.set, Registers.get])
-        (by simp [limit, tempRegisters, layoutEnd, CounterLayout.boundaryPos,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega)
+        (by
+          have hbound := E.core_before_limit h
+          simp [tempRegisters, layoutEnd, CounterLayout.boundaryPos,
+            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
+            Registers.increment, Registers.set, Registers.get] at hbound ⊢
+          omega)
         (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
         (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
         (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
         (by simpa [tempRegisters, rightRegisters] using
           MarkerSchedule.moveRightBoundary_after_temp registers)
         hrawTwo
-      have hone := machine_reaches_incrementInternal_or_halts_of_open
+      have hone := E.internal
         (next := leftRegisters) base c
-        limit source (bodySearchBase + 3)
-        (directRef growth source bodyDirectBase) none hrightOpen (1 : Fin 4)
+        source (bodySearchBase + 3)
+        (directRef growth source bodyDirectBase) none hrightPrefix (1 : Fin 4)
         (by simp [rightRegisters, RegisterLayout.values, Registers.increment,
           Registers.set, Registers.get])
-        (by simp [limit, rightRegisters, layoutEnd, CounterLayout.boundaryPos,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega)
+        (by
+          have hbound := E.core_before_limit h
+          simp [rightRegisters, layoutEnd, CounterLayout.boundaryPos,
+            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
+            Registers.increment, Registers.set, Registers.get] at hbound ⊢
+          omega)
         (by simp [rightRegisters, leftRegisters, layoutEnd_increment])
         (by simp [rightRegisters, leftRegisters, layoutEnd_increment])
         (by simp [rightRegisters, leftRegisters, layoutEnd_increment])
@@ -1171,10 +1254,62 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
       · exact Or.inl ⟨hrun, hfinal .left⟩
       · exact Or.inr hhalts
 
-/-! ## Target-free increment handoff and recovery -/
 
-/-- The cell vacated by the last boundary shift is blank in the exact
-core-only increment tape. -/
+/-- Every shift in a collision-free increment schedule resolves on an open
+core.  The arbitrary finite `limit` used by the converse Basic Lemma is chosen
+past the updated core; it is not asserted to contain a target. -/
+theorem machine_reaches_incrementSchedule_or_halts_of_open
+    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
+    (register : Register)
+    {registers : Registers} {growth : Turing.Dir}
+    {T : FullTM0.Tape (Symbol numTags)}
+    (h : CoreOpenRepresents registers growth T)
+    (hcommands : ∀ raw,
+      raw ∈ incrementShiftCommands growth source register →
+        raw ∈ rawCommands) :
+    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
+          atLogical growth T (layoutEnd registers)⟩
+        ⟨resolve base c (directRef growth source bodyDirectBase),
+          atLogical growth (incrementCoreTape registers growth register T)
+            (boundaryOffset registers
+              (MarkerSchedule.decrementStartBoundary register))⟩ ∧
+      CoreOpenRepresents (registers.increment register) growth
+        (incrementCoreTape registers growth register T)) ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
+          atLogical growth T (layoutEnd registers)⟩ := by
+  let limit := layoutEnd registers + 2
+  let E : IncrementEnvelope growth limit := {
+    Represents := fun current U =>
+      CoreOpenRepresents current growth U ∧ layoutEnd current < limit
+    core_before_limit := fun h => h.2
+    increment := by
+      intro current U r h hroom
+      exact ⟨incrementCoreTape_preserves_open h.1 r, hroom⟩
+    clock := by
+      intro base c source searchSlot success collision current U h hroom hraw
+      exact (machine_reaches_incrementClock_or_halts_of_open base c source
+        searchSlot success collision h.1 hraw).imp
+          (fun result => ⟨result.1, result.2, hroom⟩) id
+    internal := by
+      intro base c counterState searchSlot success collision current next U h i
+        hpositive hdistance hlower hupper hsameEnd hmove hraw
+      have hbound : layoutEnd next < limit := by
+        rw [hsameEnd]
+        exact h.2
+      exact (machine_reaches_incrementInternal_or_halts_of_open base c limit
+        counterState searchSlot success collision h.1 i hpositive hdistance
+        hlower hupper hsameEnd hmove hraw).imp
+          (fun result => ⟨result.1, result.2, hbound⟩) id }
+  have hE : E.Represents registers T := by
+    exact ⟨h, by simp [E, limit]⟩
+  have hroom : layoutEnd (registers.increment register) < limit := by
+    simp [limit, layoutEnd_increment]
+  exact (machine_reaches_incrementSchedule_or_halts_of_envelope base c source
+    register E hE hroom hcommands).imp
+      (fun result => ⟨result.1, result.2.1⟩) id
+
 theorem incrementCoreSchedule_source_blank
     {registers : Registers} {growth : Turing.Dir}
     {T : FullTM0.Tape (Symbol numTags)}
