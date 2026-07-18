@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlBodyMonotone
+import LeanWang.Kari.Hooper.CounterControlBodyFirstObstruction
 import LeanWang.Kari.Hooper.CounterControlGenuineRouteEmbedding
 import LeanWang.Kari.Hooper.CounterControlInwardValidationReplay
 
@@ -709,6 +710,26 @@ theorem ReconstructedBody.monotone_of_coreTarget
       target body.tape hrule represented body.reaches body.strictly_inside
       himmortal
 
+/-- Immortality rules out an infinite blank tail from a reconstructed body.
+The least remaining nonblank cell therefore supplies the finite target needed
+by the generic body continuation. -/
+theorem ReconstructedBody.monotone
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    (body : ReconstructedBody current growth source instruction)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hrule : (source, instruction) ∈ GlobalSourceProgram.program)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
+  exact
+    CounterControlBodyFirstObstruction.foundMonotoneGuardedEntryOutcome_of_reconstructedBody
+      base c hmortal current growth source instruction body.registers
+      body.tape hrule body.represented body.reaches body.strictly_inside
+      himmortal
+
 /-- Result of compiling arbitrary validation membership as far as the
 available geometry allows.  Every inward position reaches an exact body core
 which strictly contains the original gap.  The four outward positions retain
@@ -776,6 +797,71 @@ theorem classify_compiled
       exact ⟨.outwardThree progress hraw⟩
   | outwardFour progress hraw =>
       exact ⟨.outwardFour progress hraw⟩
+
+/-- The exact four outward-prefix cases left after all inward validation
+callers have been converted to monotone guarded-entry outcomes. -/
+inductive OutwardObligation
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction) : Type where
+  | one
+      (progress : ValidationEnd current growth source instruction)
+      (raw_eq : current.selectedRaw = .boundaryNavigation
+        ⟨growth, source, 4⟩ 1 .right (directRef growth source 4) .preserve)
+  | two
+      (progress : ValidationEnd current growth source instruction)
+      (raw_eq : current.selectedRaw = .boundaryNavigation
+        ⟨growth, source, 5⟩ 2 .right (directRef growth source 5) .preserve)
+  | three
+      (progress : ValidationEnd current growth source instruction)
+      (raw_eq : current.selectedRaw = .boundaryNavigation
+        ⟨growth, source, 6⟩ 3 .right (directRef growth source 6) .preserve)
+  | four
+      (progress : ValidationEnd current growth source instruction)
+      (raw_eq : current.selectedRaw = .boundaryNavigation
+        ⟨growth, source, 7⟩ 4 .right
+          (bodyEntry growth source instruction) .preserve)
+
+/-- Arbitrary validation is completely discharged except for a precisely
+typed outward-prefix obligation. -/
+inductive MonotoneOrOutward
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction) : Type where
+  | monotone (outcome : FoundMonotoneGuardedEntryOutcome current)
+  | outward (obligation :
+      OutwardObligation current growth source instruction)
+
+/-- All four inward validation positions now satisfy the monotone entry law;
+only the four exact outward-prefix obligations survive. -/
+theorem classify_monotone_or_outward
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current))
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction)
+    (hrule : (source, instruction) ∈ GlobalSourceProgram.program)
+    (hcommand : current.selectedRaw ∈
+      validationCommands growth source instruction) :
+    Nonempty (MonotoneOrOutward current growth source instruction) := by
+  rcases classify_compiled base c hmortal current himmortal growth source
+      instruction hrule hcommand with ⟨compiled⟩
+  cases compiled with
+  | body body =>
+      rcases body.monotone hmortal hrule himmortal with ⟨outcome⟩
+      exact ⟨.monotone outcome⟩
+  | outwardOne progress hraw =>
+      exact ⟨.outward (.one progress hraw)⟩
+  | outwardTwo progress hraw =>
+      exact ⟨.outward (.two progress hraw)⟩
+  | outwardThree progress hraw =>
+      exact ⟨.outward (.three progress hraw)⟩
+  | outwardFour progress hraw =>
+      exact ⟨.outward (.four progress hraw)⟩
 
 end
 
