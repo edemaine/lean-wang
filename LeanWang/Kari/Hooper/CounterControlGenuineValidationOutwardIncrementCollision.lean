@@ -110,6 +110,197 @@ theorem InwardRayEq.eraseDepart
     ring_nf at heq ⊢
     exact heq
 
+theorem InwardRayEq.trans
+    {inward : Turing.Dir}
+    {first second third : FullTM0.Tape (Symbol numTags)}
+    (firstSecond : InwardRayEq inward first second)
+    (secondThird : InwardRayEq inward second third) :
+    InwardRayEq inward first third := by
+  intro distance
+  exact (firstSecond distance).trans (secondThird distance)
+
+/-- Clearing the cell just behind an inward-moving head does not change the
+ray at or ahead of that head. -/
+theorem InwardRayEq.clearedBehind
+    (T : FullTM0.Tape (Symbol numTags)) (inward : Turing.Dir) :
+    InwardRayEq inward ((T.write blankSymbol).move inward)
+      (T.move inward) := by
+  intro distance
+  have hread := CanonicalInitializerProgram.read_moveN_write_of_pos
+    T blankSymbol inward (distance + 1) (by omega)
+  rw [FullTM0.Tape.move_moveN, FullTM0.Tape.move_moveN]
+  exact hread
+
+/-! ## Reversing one retained outward gap -/
+
+private theorem move_move_opposite
+    (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir) :
+    (T.move direction).move (NestingMachine.opposite direction) = T := by
+  funext position
+  cases direction <;>
+    simp [NestingMachine.opposite, FullTM0.Tape.move]
+
+private theorem reverseGap_of_source_boundary
+    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
+    {distance : Nat} {found source : Fin 5}
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary found).Matches T direction distance)
+    (hsource : (T.move (NestingMachine.opposite direction)).read =
+      boundarySymbol source) :
+    SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary source).Matches
+      ((T.moveN direction distance).move
+        (NestingMachine.opposite direction))
+      (NestingMachine.opposite direction) distance := by
+  constructor
+  · intro i hi
+    let j := distance - i - 1
+    have hj : j < distance := by
+      dsimp [j]
+      omega
+    have hblank := hgap.blank hj
+    cases direction with
+    | left =>
+        simp only [NestingMachine.opposite,
+          FullTM0.Tape.move_apply_delta, FullTM0.Tape.moveN_apply,
+          FullTM0.Tape.offset_left, FullTM0.Tape.offset_right,
+          FullTM0.Tape.delta_right] at hblank ⊢
+        rw [show -(j : Int) = (i : Int) + 1 - (distance : Int) by
+          dsimp [j]
+          omega] at hblank
+        exact hblank
+    | right =>
+        simp only [NestingMachine.opposite,
+          FullTM0.Tape.move_apply_delta, FullTM0.Tape.moveN_apply,
+          FullTM0.Tape.offset_left, FullTM0.Tape.offset_right,
+          FullTM0.Tape.delta_left] at hblank ⊢
+        rw [show (j : Int) = -(i : Int) - 1 + (distance : Int) by
+          dsimp [j]
+          omega] at hblank
+        exact hblank
+  · cases direction <;>
+      simpa [Target.Matches, FullTM0.Tape.read,
+        NestingMachine.opposite, FullTM0.Tape.move_apply_delta,
+        FullTM0.Tape.moveN_apply, FullTM0.Tape.offset_left,
+        FullTM0.Tape.offset_right, FullTM0.Tape.delta_left,
+        FullTM0.Tape.delta_right] using hsource
+
+/-- After the found endpoint is cleared and the head departs back toward the
+source, the preserved outward gap is an exact inward gap of the same length. -/
+theorem reverseGap_after_clear_depart
+    {sourceTape : FullTM0.Tape (Symbol numTags)}
+    {outward : Turing.Dir} {distance : Nat} {found source : Fin 5}
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary found).Matches (sourceTape.move outward)
+      outward distance)
+    (hsource : sourceTape.read = boundarySymbol source) :
+    SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary source).Matches
+      ((((sourceTape.move outward).moveN outward distance).write
+        blankSymbol).move (NestingMachine.opposite outward))
+      (NestingMachine.opposite outward) distance := by
+  have hsource' : ((sourceTape.move outward).move
+      (NestingMachine.opposite outward)).read = boundarySymbol source := by
+    rw [move_move_opposite]
+    exact hsource
+  have hreverse := reverseGap_of_source_boundary hgap hsource'
+  exact (InwardRayEq.clearedBehind
+    ((sourceTape.move outward).moveN outward distance)
+    (NestingMachine.opposite outward)).searchGap hreverse
+
+/-- At the collision entry the cleared endpoint itself contributes one
+additional blank cell before the same reverse gap. -/
+theorem reverseGap_from_cleared_endpoint
+    {sourceTape : FullTM0.Tape (Symbol numTags)}
+    {outward : Turing.Dir} {distance : Nat} {found source : Fin 5}
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary found).Matches (sourceTape.move outward)
+      outward distance)
+    (hsource : sourceTape.read = boundarySymbol source) :
+    SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary source).Matches
+      (((sourceTape.move outward).moveN outward distance).write blankSymbol)
+      (NestingMachine.opposite outward) (distance + 1) := by
+  let foundTape := (sourceTape.move outward).moveN outward distance
+  have htail : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary source).Matches
+      ((foundTape.write blankSymbol).move
+        (NestingMachine.opposite outward))
+      (NestingMachine.opposite outward) distance := by
+    simpa only [foundTape] using reverseGap_after_clear_depart hgap hsource
+  have hmove : (foundTape.write blankSymbol).moveN
+      (NestingMachine.opposite outward) 1 =
+        (foundTape.write blankSymbol).move
+          (NestingMachine.opposite outward) := by
+    simpa using (FullTM0.Tape.move_moveN (foundTape.write blankSymbol)
+      (NestingMachine.opposite outward) 0).symm
+  have hprefix : ∀ i < 1,
+      ((foundTape.write blankSymbol)
+        (FullTM0.Tape.offset (NestingMachine.opposite outward) i)) =
+          blankSymbol := by
+    intro i hi
+    have hi0 : i = 0 := by omega
+    subst i
+    simp
+  have hfull :=
+    CounterControlArbitrarySearch.SearchGap.prepend_moveN hprefix (by
+      rw [hmove]
+      exact htail)
+  simpa [foundTape, Nat.add_comm] using hfull
+
+private theorem outward_then_reverse
+    (T : FullTM0.Tape (Symbol numTags)) (outward : Turing.Dir)
+    (distance : Nat) :
+    ((((T.move outward).moveN outward distance).move
+      (NestingMachine.opposite outward)).moveN
+        (NestingMachine.opposite outward) distance) = T := by
+  funext position
+  cases outward <;>
+    simp [NestingMachine.opposite, FullTM0.Tape.move,
+      FullTM0.Tape.moveN, FullTM0.Tape.offset] <;>
+    congr 1 <;> ring
+
+/-- Once a reversed retained gap has been erased, its actual tape agrees on
+the remaining inward ray with the canonical tape obtained by clearing its
+source boundary and departing inward. -/
+theorem clearedRouteStep_ray
+    (sourceTape : FullTM0.Tape (Symbol numTags))
+    (outward : Turing.Dir) (distance : Nat) :
+    InwardRayEq (NestingMachine.opposite outward)
+      (eraseDepart
+        ((((sourceTape.move outward).moveN outward distance).write
+          blankSymbol).move (NestingMachine.opposite outward))
+        (NestingMachine.opposite outward) distance)
+      ((sourceTape.write blankSymbol).move
+        (NestingMachine.opposite outward)) := by
+  let foundTape := (sourceTape.move outward).moveN outward distance
+  have hagreement := (InwardRayEq.clearedBehind foundTape
+    (NestingMachine.opposite outward)).eraseDepart distance
+  have hnormalize : eraseDepart
+      (foundTape.move (NestingMachine.opposite outward))
+        (NestingMachine.opposite outward) distance =
+      (sourceTape.write blankSymbol).move
+        (NestingMachine.opposite outward) := by
+    simp only [eraseDepart]
+    rw [outward_then_reverse]
+  rw [hnormalize] at hagreement
+  exact hagreement
+
+/-- The same ray statement at the first cleanup stage, where the collision
+entry is still centered on the cleared final endpoint. -/
+theorem clearedEndpointStep_ray
+    (sourceTape : FullTM0.Tape (Symbol numTags))
+    (outward : Turing.Dir) (distance : Nat) :
+    InwardRayEq (NestingMachine.opposite outward)
+      (eraseDepart
+        (((sourceTape.move outward).moveN outward distance).write blankSymbol)
+        (NestingMachine.opposite outward) (distance + 1))
+      ((sourceTape.write blankSymbol).move
+        (NestingMachine.opposite outward)) := by
+  have hstep := clearedRouteStep_ray sourceTape outward distance
+  simpa only [eraseDepart, FullTM0.Tape.move_moveN,
+    Nat.add_comm] using hstep
+
 /-- Any reached cleanup caller whose gap contains the original outward gap
 produces the required outward-instruction handoff.  The cleanup suffix itself
 grows strictly, so the consumer-facing comparison is weak only because that
