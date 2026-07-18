@@ -32,11 +32,12 @@ namespace CounterControlGenuineValidationOutward
 
 open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape
-open CounterControlPlan CounterControlBridge
+open CounterControlPlan CounterControlBridge CounterControlSearchSystem
 open CounterControlCoreFrame CounterControlPrefixInstructionResolution
 open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedParentContinuation
 open CounterControlExactCommandContinuation
+open CounterControlCommandContinuationMortality
 open CounterControlGenuineValidation
 open CounterControlResumedShiftCoordinates
 open CounterControlResumedRouteEmbedding
@@ -90,6 +91,55 @@ theorem clockIncrementRaw_direction
   simp [clockIncrementRaw, CounterControlCommandAt.compileRawAtTag,
     Command.searchDirection]
 
+/-- The last outward validation caller advertises its boundary-`4` gap in
+the physical outward direction. -/
+theorem outwardFour_gap
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (next : Nat)
+    (hraw : current.selectedRaw = .boundaryNavigation
+      ⟨growth, source, 7⟩ 4 .right
+        (bodyEntry growth source (.increment .clock next)) .preserve) :
+    SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary (4 : Fin 5)).Matches current.outer
+      (orient growth .right) current.distance := by
+  have hgap := current.gap
+  rw [← current.compileRawCommand_selectedRaw,
+    CounterControlCommandAt.compileRawCommand_spec] at hgap
+  simpa [hraw, CounterControlCommandAt.compileRawAtTag,
+    compileNavigationAction, Command.target,
+    Command.searchDirection] using hgap
+
+/-- Exact physical direction of the last outward validation search. -/
+theorem outwardFour_direction
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (next : Nat)
+    (hraw : current.selectedRaw = .boundaryNavigation
+      ⟨growth, source, 7⟩ 4 .right
+        (bodyEntry growth source (.increment .clock next)) .preserve) :
+    current.direction = orient growth .right := by
+  have hdirection := current.selectedRaw_direction_eq
+  rw [CounterControlCommandAt.compileRawCommand_searchDirection]
+    at hdirection
+  rw [hraw] at hdirection
+  exact hdirection.symm
+
+/-- The exact found tape of the last outward validation caller is centered
+on boundary `4`. -/
+theorem outwardFour_foundTape_read
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (next : Nat)
+    (hraw : current.selectedRaw = .boundaryNavigation
+      ⟨growth, source, 7⟩ 4 .right
+        (bodyEntry growth source (.increment .clock next)) .preserve) :
+    current.foundTape.read = boundarySymbol 4 := by
+  have hmatch := current.selectedRaw_target_matches_foundTape
+  rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
+  simpa [hraw, CounterControlCommandAt.compileRawAtTag,
+    compileNavigationAction, Command.target, Target.Matches] using hmatch
+
 /-- The boundary-`4` tape delivered by the last outward validation command
 is an immediate genuine entry to the singleton clock shift. -/
 def immediateClockShift
@@ -131,6 +181,19 @@ def immediateClockShift
       clockIncrementRaw growth source := by
   simp [immediateClockShift,
     CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw]
+
+@[simp] theorem immediateClockShift_foundTape
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source next : Nat)
+    (hrule : (source, .increment .clock next) ∈
+      GlobalSourceProgram.program)
+    (hread : current.foundTape.read = boundarySymbol 4) :
+    (immediateClockShift base c current growth source next hrule
+        hread).foundTape = current.foundTape := by
+  simp [immediateClockShift,
+    CounterControlGenuineDecrementEntry.immediateSearch,
+    GenuineSearch.foundTape]
 
 /-! ## Tape geometry of one outward shift -/
 
@@ -242,6 +305,172 @@ theorem clockIncrementSuccessTape_eq_outwardShiftedTape
     simp [exactSuccessTape, clockIncrementRaw, outwardShiftedTape,
       shiftStepTape, orient, NestingMachine.opposite]
 
+/-- The blank continuation after a successful singleton clock shift enters
+the target logical counter state on the shifted boundary-`4` tape. -/
+theorem reaches_logical_of_clockIncrementSuccess
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat)
+    (hrule : (source, .increment .clock next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags)) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (directRef growth source bodyDirectBase),
+        exactSuccessTape (clockIncrementRaw growth source) T⟩
+      ⟨logicalState base c growth next,
+        (exactSuccessTape (clockIncrementRaw growth source) T).move
+          (orient growth .right)⟩ := by
+  let rule : RawDirectRule :=
+    ⟨growth, directRef growth source bodyDirectBase, .blank,
+      .logical growth next, .right⟩
+  have hmem : rule ∈ rawDirectRules := by
+    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      growth hrule
+    change rule ∈ validationRules growth source ++
+      incrementRules growth source next .clock
+    apply List.mem_append_right
+    simp only [incrementRules, List.mem_append]
+    apply Or.inl
+    apply Or.inl
+    apply Or.inl
+    simp [rule, AnchoredCounterGeometry.routeFromIncrement]
+  have hmatch : rule.read.Matches
+      (exactSuccessTape (clockIncrementRaw growth source) T).read := by
+    cases growth <;>
+      simp [rule, RawRead.Matches, exactSuccessTape,
+        clockIncrementRaw, orient, FullTM0.Tape.read,
+        FullTM0.Tape.move, FullTM0.Tape.write]
+  have hrun := CounterControlDirectSemantics.reaches_directRule
+    base c rule hmem
+      (exactSuccessTape (clockIncrementRaw growth source) T) hmatch
+  simpa [CounterControlNestingBridge.machine,
+    BoundedMarkerProgram.machine, CounterControlPlan.table, rule,
+    CounterControlPlan.resolve] using hrun
+
+/-- The nonblank collision continuation returns from the occupied
+destination to the cleared old boundary and enters cleanup stage `3`. -/
+theorem reaches_cleanup_of_clockIncrementCollision
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat)
+    (hrule : (source, .increment .clock next) ∈
+      GlobalSourceProgram.program)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hoccupied : ShiftDestinationOccupied
+      (clockIncrementRaw growth source) T) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (directRef growth source testDirectSlot),
+        exactCollisionTape (clockIncrementRaw growth source) T⟩
+      ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+        T.write blankSymbol⟩ := by
+  let rule : RawDirectRule :=
+    ⟨growth, directRef growth source testDirectSlot, .nonblank,
+      searchRef growth source cleanupSearchBase, .left⟩
+  have hmem : rule ∈ rawDirectRules := by
+    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      growth hrule
+    change rule ∈ validationRules growth source ++
+      incrementRules growth source next .clock
+    apply List.mem_append_right
+    simp [rule, incrementRules]
+  have hmatch : rule.read.Matches
+      (exactCollisionTape (clockIncrementRaw growth source) T).read := by
+    simpa [rule, RawRead.Matches, ShiftDestinationOccupied,
+      clockIncrementRaw, exactCollisionTape] using hoccupied
+  have hrun := CounterControlDirectSemantics.reaches_directRule
+    base c rule hmem
+      (exactCollisionTape (clockIncrementRaw growth source) T) hmatch
+  have hrun' : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (directRef growth source testDirectSlot),
+        exactCollisionTape (clockIncrementRaw growth source) T⟩
+      ⟨resolve base c (searchRef growth source cleanupSearchBase),
+        (exactCollisionTape (clockIncrementRaw growth source) T).move
+          (orient growth .left)⟩ := by
+    simpa [CounterControlNestingBridge.machine,
+      BoundedMarkerProgram.machine, CounterControlPlan.table, rule,
+      CounterControlPlan.resolve] using hrun
+  have htape :
+      (exactCollisionTape (clockIncrementRaw growth source) T).move
+          (orient growth .left) = T.write blankSymbol := by
+    cases growth <;>
+      funext position <;>
+      simp [exactCollisionTape, clockIncrementRaw, orient,
+        FullTM0.Tape.move, FullTM0.Tape.write]
+  rw [htape] at hrun'
+  simpa [searchRef, CounterControlPlan.resolve] using hrun'
+
+/-- Package a genuine cleanup-stage-`3` gap under the exact generated raw
+command used by collision recovery. -/
+def cleanupThreeSearch
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat)
+    (hrule : (source, .increment .clock next) ∈
+      GlobalSourceProgram.program)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary (3 : Fin 5)).Matches outer
+      (orient growth .left) distance) : GenuineSearch base c := by
+  let raw := CounterControlCleanupRoute.command growth source
+    CounterControlCleanupRoute.Stage.three
+  let hmem := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source .clock next hrule CounterControlCleanupRoute.Stage.three
+  let search : Search := CounterControlCommandAt.rawTag raw hmem
+  exact {
+    search := search
+    outer := outer
+    distance := distance
+    gap := by
+      have hcommand : CounterControlSearchSystem.command base c search =
+          CounterControlCommandAt.compileRawCommand base c raw hmem := rfl
+      rw [hcommand, CounterControlCleanupRoute.compile_command]
+      simpa [raw, CounterControlCleanupRoute.Stage.expected,
+        Command.target, Command.searchDirection] using hgap }
+
+@[simp] theorem cleanupThreeSearch_cfg
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat)
+    (hrule : (source, .increment .clock next) ∈
+      GlobalSourceProgram.program)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary (3 : Fin 5)).Matches outer
+      (orient growth .left) distance) :
+    (cleanupThreeSearch base c growth source next hrule outer distance
+        hgap).cfg =
+      ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩, outer⟩ := by
+  let raw := CounterControlCleanupRoute.command growth source
+    CounterControlCleanupRoute.Stage.three
+  let hmem := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source .clock next hrule CounterControlCleanupRoute.Stage.three
+  let search : Search := CounterControlCommandAt.rawTag raw hmem
+  have hget : rawCommands.get search = raw :=
+    CounterControlCommandAt.rawCommands_get_rawTag raw hmem
+  change (searchSystem base c).startCfg search outer = _
+  change (⟨CounterControlSearchSystem.commandOffset base c search, outer⟩ :
+    FullTM0.Cfg (Symbol numTags) FiniteTM0.State) = _
+  unfold CounterControlSearchSystem.commandOffset
+  rw [hget]
+  rfl
+
+@[simp] theorem cleanupThreeSearch_selectedRaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source next : Nat)
+    (hrule : (source, .increment .clock next) ∈
+      GlobalSourceProgram.program)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary (3 : Fin 5)).Matches outer
+      (orient growth .left) distance) :
+    (cleanupThreeSearch base c growth source next hrule outer distance
+        hgap).selectedRaw =
+      CounterControlCleanupRoute.command growth source
+        CounterControlCleanupRoute.Stage.three := by
+  let raw := CounterControlCleanupRoute.command growth source
+    CounterControlCleanupRoute.Stage.three
+  let hmem := CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+    growth source .clock next hrule CounterControlCleanupRoute.Stage.three
+  change rawCommands.get (CounterControlCommandAt.rawTag raw hmem) = raw
+  exact CounterControlCommandAt.rawCommands_get_rawTag raw hmem
+
 /-! ## Tape geometry of collision cleanup -/
 
 /-- If the marked end of a blank gap is cleared, any boundary found by
@@ -300,6 +529,273 @@ theorem clearedReverseGap_distance_gt
       rw [hread] at hboundary
       rw [hboundary] at hblank
       exact blankSymbol_ne_boundarySymbol replayTarget hblank.symm
+
+private theorem immortalFrom_of_reaches
+    (base : Nat) (c : Nat.Partrec.Code)
+    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) first)
+    (hreach : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) first second) :
+    FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) second := by
+  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
+  intro hhalts
+  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
+
+private theorem reaches_trans
+    (base : Nat) (c : Nat.Partrec.Code)
+    {first second third : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (hfirst : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) first second)
+    (hsecond : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) second third) :
+    FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) first third := by
+  unfold FullTM0.Reaches at hfirst hsecond ⊢
+  exact hfirst.trans hsecond
+
+/-! ## Final-outward clock increment -/
+
+/-- The final outward validation caller followed by a clock increment either
+reaches a represented logical core containing its old gap, or collides and
+reaches a strictly farther guarded cleanup caller. -/
+theorem outwardFour_clockIncrement_handoff
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source next : Nat)
+    (hrule : (source, .increment .clock next) ∈
+      GlobalSourceProgram.program)
+    (progress : ValidationEnd current growth source
+      (.increment .clock next))
+    (hraw : current.selectedRaw = .boundaryNavigation
+      ⟨growth, source, 7⟩ 4 .right
+        (bodyEntry growth source (.increment .clock next)) .preserve)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current
+      (OutwardObligation.four progress hraw)) := by
+  let raw := clockIncrementRaw growth source
+  let hmem := clockIncrementRaw_mem growth source next hrule
+  have hread : current.foundTape.read = boundarySymbol 4 :=
+    outwardFour_foundTape_read current growth source next hraw
+  let shift := immediateClockShift base c current growth source next hrule
+    hread
+  have hbody := outwardFour_reaches_bodyEntry progress hraw
+  have hentry : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current) shift.cfg := by
+    rw [immediateClockShift_cfg]
+    simpa [bodyEntry, searchRef, CounterControlPlan.resolve] using hbody
+  have himmortalEntry : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) shift.cfg :=
+    immortalFrom_of_reaches base c himmortal hentry
+  have hfoundEntry :=
+    CounterControlParentContinuation.reaches_foundCfg_of_immortal
+      shift himmortalEntry
+  have hfoundTotal := hentry.trans hfoundEntry
+  have hfoundEndpoint : foundCfg shift =
+      ⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c raw.address), current.foundTape⟩ := by
+    rw [shift.foundCfg_eq]
+    simp [shift, raw, RawCommand.address]
+  rw [hfoundEndpoint] at hfoundTotal
+  have hfound : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c raw.address), current.foundTape⟩ := by
+    exact hfoundTotal
+  have hmatch :
+      (CounterControlCommandAt.compileRawCommand base c raw hmem).target.Matches
+        current.foundTape.read := by
+    rw [clockIncrementRaw_target]
+    simpa [Target.Matches] using hread
+  let continuation := exact_found_continuation base c raw hmem
+    current.foundTape hmatch
+  have hcurrentGap := outwardFour_gap current growth source next hraw
+  have hfoundTape : current.foundTape =
+      current.outer.moveN (orient growth .right) current.distance := by
+    simp [GenuineSearch.foundTape,
+      outwardFour_direction current growth source next hraw]
+  cases continuation with
+  | success hshift =>
+      have hshift' : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c)
+          ⟨foundState (CanonicalInitializer.radius c)
+              (searchState base c raw.address), current.foundTape⟩
+          ⟨resolve base c (directRef growth source bodyDirectBase),
+            exactSuccessTape raw current.foundTape⟩ := by
+        simpa [raw, clockIncrementRaw, rawSuccessRef] using hshift
+      have hlogical : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c)
+          (foundCfg current)
+          ⟨logicalState base c growth next,
+            (exactSuccessTape raw current.foundTape).move
+              (orient growth .right)⟩ := by
+        have hdirect :=
+          reaches_logical_of_clockIncrementSuccess base c growth source
+            next hrule current.foundTape
+        have hdirect' : FullTM0.Reaches
+            (CounterControlNestingBridge.machine base c)
+            ⟨resolve base c (directRef growth source bodyDirectBase),
+              exactSuccessTape raw current.foundTape⟩
+            ⟨logicalState base c growth next,
+              (exactSuccessTape raw current.foundTape).move
+                (orient growth .right)⟩ := by
+          simpa only [raw] using hdirect
+        exact reaches_trans base c (reaches_trans base c hfound hshift')
+          hdirect'
+      have himmortalLogical : FullTM0.ImmortalFrom
+          (CounterControlNestingBridge.machine base c)
+          ⟨logicalState base c growth next,
+            (exactSuccessTape raw current.foundTape).move
+              (orient growth .right)⟩ :=
+        immortalFrom_of_reaches base c himmortal hlogical
+      have hnextBound : next < logicalSpan :=
+        state_lt_logicalSpan
+          (CounterControlAbstractTrace.target_mem_programStates hrule
+            (by simp [instructionTargets]))
+      rcases
+          CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
+            base c hmortal growth next hnextBound
+            ((exactSuccessTape raw current.foundTape).move
+              (orient growth .right)) himmortalLogical with
+        ⟨instruction, registers, coreTape, limit, target, nextRule, hcore,
+          hcoreBefore, hrunway, htarget, hcenter, _hbody⟩
+      let represented : CoreTargetRepresents registers growth limit target
+          coreTape := {
+        toCorePrefixRepresents := {
+          toCoreRepresents := hcore
+          core_before_limit := hcoreBefore
+          runway := hrunway }
+        target_matches := htarget }
+      let core : CounterControlParentEmbedding.LogicalCore base c := {
+        growth := growth
+        source := next
+        source_lt := hnextBound
+        registers := registers
+        tape := coreTape
+        limit := limit
+        target := target
+        represented := represented }
+      have hshiftCenter :
+          outwardShiftedTape (orient growth .right) current.outer
+              current.distance 4 =
+            atLogical growth coreTape (layoutEnd registers) := by
+        rw [← clockIncrementSuccessTape_eq_outwardShiftedTape]
+        rw [← hfoundTape]
+        simpa [raw] using hcenter
+      have hinside : current.distance < layoutEnd registers :=
+        outwardShifted_distance_lt_layoutEnd growth current.outer
+          current.distance hcurrentGap registers coreTape hcore hshiftCenter
+      have hreaches : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c)
+          (foundCfg current) core.cfg := by
+        rw [hcenter] at hlogical
+        simpa [core, CounterControlParentEmbedding.LogicalCore.cfg,
+          CounterControlParentEmbedding.LogicalCore.frame,
+          CounterControlParentEmbedding.LogicalCore.abstract,
+          prefixLogicalCfg] using hlogical
+      exact ⟨.logical core hreaches hinside.le⟩
+  | collision reference isCollision hoccupied hshift =>
+      have href : reference = directRef growth source testDirectSlot := by
+        simpa [raw, clockIncrementRaw, rawCollisionRef] using
+          Option.some.inj isCollision.symm
+      subst reference
+      have hshift' : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c)
+          ⟨foundState (CanonicalInitializer.radius c)
+              (searchState base c raw.address), current.foundTape⟩
+          ⟨resolve base c (directRef growth source testDirectSlot),
+            exactCollisionTape raw current.foundTape⟩ := by
+        simpa [raw] using hshift
+      have hcleanupEntry : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c)
+          (foundCfg current)
+          ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+            current.foundTape.write blankSymbol⟩ := by
+        have hcleanupDirect :=
+          reaches_cleanup_of_clockIncrementCollision base c growth source
+            next hrule current.foundTape hoccupied
+        have hcleanupDirect' : FullTM0.Reaches
+            (CounterControlNestingBridge.machine base c)
+            ⟨resolve base c (directRef growth source testDirectSlot),
+              exactCollisionTape raw current.foundTape⟩
+            ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+              current.foundTape.write blankSymbol⟩ := by
+          simpa only [raw] using hcleanupDirect
+        exact reaches_trans base c (reaches_trans base c hfound hshift')
+          hcleanupDirect'
+      have himmortalCleanupEntry : FullTM0.ImmortalFrom
+          (CounterControlNestingBridge.machine base c)
+          ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+            current.foundTape.write blankSymbol⟩ :=
+        immortalFrom_of_reaches base c himmortal hcleanupEntry
+      have hcleanupMem :=
+        CounterControlCleanupRoute.command_mem_rawCommands_of_increment
+          growth source .clock next hrule
+            CounterControlCleanupRoute.Stage.three
+      rcases
+          CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
+            base c hmortal ⟨growth, source, cleanupSearchBase⟩ 3 .left
+            (searchRef growth source (cleanupSearchBase + 1))
+            (.erase (some .left))
+            (by simpa [CounterControlCleanupRoute.command,
+              CounterControlCleanupRoute.Stage.slot,
+              CounterControlCleanupRoute.Stage.expected,
+              CounterControlCleanupRoute.Stage.successRef] using hcleanupMem)
+            (current.foundTape.write blankSymbol) himmortalCleanupEntry with
+        ⟨cleanupDistance, hcleanupGap⟩
+      let cleanup := cleanupThreeSearch base c growth source next hrule
+        (current.foundTape.write blankSymbol) cleanupDistance hcleanupGap
+      have hcleanupCfg : cleanup.cfg =
+          ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+            current.foundTape.write blankSymbol⟩ := by
+        simp [cleanup]
+      have himmortalCleanup : FullTM0.ImmortalFrom
+          (CounterControlNestingBridge.machine base c) cleanup.cfg := by
+        rw [hcleanupCfg]
+        exact himmortalCleanupEntry
+      have hcleanupList : rawCommands.get cleanup.search ∈
+          cleanupCommands growth source := by
+        change cleanup.selectedRaw ∈ cleanupCommands growth source
+        rw [show cleanup.selectedRaw =
+            CounterControlCleanupRoute.command growth source
+              CounterControlCleanupRoute.Stage.three by simp [cleanup]]
+        exact CounterControlCleanupRoute.command_mem_cleanupCommands
+          growth source CounterControlCleanupRoute.Stage.three
+      have hopposite :
+          NestingMachine.opposite (orient growth .right) =
+            orient growth .left := by
+        cases growth <;> rfl
+      have hreverseGap : SearchGap
+          (fun symbol => symbol = blankSymbol)
+          (Target.boundary (3 : Fin 5)).Matches
+          ((current.outer.moveN (orient growth .right)
+              current.distance).write blankSymbol)
+          (NestingMachine.opposite (orient growth .right))
+          cleanupDistance := by
+        rw [hopposite]
+        simpa [hfoundTape] using hcleanupGap
+      have hstrictCleanup : current.distance < cleanupDistance :=
+        clearedReverseGap_distance_gt hcurrentGap hreverseGap
+      rcases
+          CounterControlGuardedCleanupProgress.reaches_larger_guardedSearch_of_genuine_cleanup
+            base c hmortal cleanup growth source .clock next hrule
+              hcleanupList himmortalCleanup with
+        ⟨nextSearch, hnextReach, hnextStrict⟩
+      have hreaches : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c)
+          (foundCfg current) nextSearch.current.cfg := by
+        rw [hcleanupCfg] at hnextReach
+        exact hcleanupEntry.trans hnextReach
+      exact ⟨.nextSearch nextSearch hreaches
+        (hstrictCleanup.trans hnextStrict).le⟩
+  | blocked isBlocked =>
+      simp [ShiftBlocked, raw, clockIncrementRaw, rawCollisionRef]
+        at isBlocked
 
 end
 
