@@ -1035,6 +1035,50 @@ def cleanupEntryRule (growth : Turing.Dir) (source : Nat) : RawDirectRule :=
   ⟨growth, directRef growth source testDirectSlot, .nonblank,
     searchRef growth source cleanupSearchBase, .left⟩
 
+/-- The common nonblank collision handoff from the outward test cell back to
+the first cleanup search. -/
+theorem machine_reaches_cleanupEntry
+    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
+    {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
+    (h : Represents spec T)
+    (hcollision : layoutEnd spec.registers + 1 = spec.outerDistance)
+    (hentry : cleanupEntryRule spec.growth source ∈ rawDirectRules) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (directRef spec.growth source testDirectSlot),
+        atLogical spec.growth (afterFour spec T) spec.outerDistance⟩
+      ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
+        atLogical spec.growth (afterFour spec T)
+          (layoutEnd spec.registers)⟩ := by
+  have htargetRead : (atLogical spec.growth (afterFour spec T)
+      spec.outerDistance).read =
+      logicalTape spec.growth T spec.outerDistance := by
+    rw [atLogical_read]
+    simp only [afterFour, clearBoundary]
+    apply writeLogical_of_ne
+    rw [boundaryOffset_four]
+    omega
+  have htargetNonblank : (atLogical spec.growth (afterFour spec T)
+      spec.outerDistance).read ≠ blankSymbol := by
+    rw [htargetRead]
+    intro hblank
+    exact target_not_blank spec.outerTarget (hblank ▸ h.target)
+  have hentryRun := CounterControlDirectSemantics.reaches_directRule
+    base c (cleanupEntryRule spec.growth source) hentry
+    (atLogical spec.growth (afterFour spec T) spec.outerDistance)
+    htargetNonblank
+  have hmove :
+      (atLogical spec.growth (afterFour spec T) spec.outerDistance).move
+          (orient spec.growth .left) =
+        atLogical spec.growth (afterFour spec T)
+          (layoutEnd spec.registers) := by
+    rw [← hcollision, orient_eq_orientDirection, atLogical_move_left]
+  simp only [cleanupEntryRule] at hentryRun
+  rw [hmove] at hentryRun
+  change FullTM0.Reaches
+    (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
+  simpa [cleanupEntryRule, searchRef, CounterControlPlan.resolve] using
+    hentryRun
+
 /-- From the exact increment-collision endpoint, the generated nonblank glue
 rule moves back onto erased boundary `4`; cleanup then resumes the suspended
 outer command, or one of its four bounded searches launches a deeper exact
@@ -1059,42 +1103,8 @@ theorem machine_reaches_collision_cleanup_or_nests
       NestsDuringCleanup base c spec.growth source
         ⟨resolve base c (directRef spec.growth source testDirectSlot),
           atLogical spec.growth (afterFour spec T) spec.outerDistance⟩ := by
-  have htargetRead : (atLogical spec.growth (afterFour spec T)
-      spec.outerDistance).read =
-      logicalTape spec.growth T spec.outerDistance := by
-    rw [atLogical_read]
-    simp only [afterFour, clearBoundary]
-    apply writeLogical_of_ne
-    rw [boundaryOffset_four]
-    omega
-  have htargetNonblank : (atLogical spec.growth (afterFour spec T)
-      spec.outerDistance).read ≠ blankSymbol := by
-    rw [htargetRead]
-    intro hblank
-    exact target_not_blank spec.outerTarget (hblank ▸ h.target)
-  have hentryRunLocal := CounterControlDirectSemantics.reaches_directRule
-    base c (cleanupEntryRule spec.growth source) hentry
-    (atLogical spec.growth (afterFour spec T) spec.outerDistance)
-    htargetNonblank
-  have hmove :
-      (atLogical spec.growth (afterFour spec T) spec.outerDistance).move
-          (orient spec.growth .left) =
-        atLogical spec.growth (afterFour spec T)
-          (layoutEnd spec.registers) := by
-    rw [← hcollision, orient_eq_orientDirection, atLogical_move_left]
-  have hentryRun : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c (directRef spec.growth source testDirectSlot),
-        atLogical spec.growth (afterFour spec T) spec.outerDistance⟩
-      ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
-        atLogical spec.growth (afterFour spec T)
-          (layoutEnd spec.registers)⟩ := by
-    simp only [cleanupEntryRule] at hentryRunLocal
-    rw [hmove] at hentryRunLocal
-    change FullTM0.Reaches
-      (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-    simpa [cleanupEntryRule, searchRef, CounterControlPlan.resolve] using
-      hentryRunLocal
+  have hentryRun := machine_reaches_cleanupEntry base c source h
+    hcollision hentry
   rcases machine_reaches_cleanupTape_resume_or_nests base c source h
       hreturnDirection hcommands with hresume | hnests
   · exact Or.inl (hentryRun.trans hresume)

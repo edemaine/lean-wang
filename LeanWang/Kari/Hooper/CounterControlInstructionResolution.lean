@@ -592,56 +592,9 @@ theorem machine_reaches_collisionCleanup_or_halts
           atLogical spec.growth
             (CounterControlCleanupSemantics.afterFour spec T)
             spec.outerDistance⟩ := by
-  have h := hback.represents
-  have htargetRead :
-      (atLogical spec.growth
-        (CounterControlCleanupSemantics.afterFour spec T)
-        spec.outerDistance).read =
-        logicalTape spec.growth T spec.outerDistance := by
-    rw [atLogical_read]
-    simp only [CounterControlCleanupSemantics.afterFour,
-      CounterControlCleanupSemantics.clearBoundary]
-    apply writeLogical_of_ne
-    rw [boundaryOffset_four]
-    omega
-  have htargetNonblank :
-      (atLogical spec.growth
-        (CounterControlCleanupSemantics.afterFour spec T)
-        spec.outerDistance).read ≠ blankSymbol := by
-    rw [htargetRead]
-    intro hblank
-    exact target_not_blank spec.outerTarget (hblank ▸ h.target)
-  have hentryRunLocal :=
-    CounterControlDirectSemantics.reaches_directRule base c
-      (CounterControlCleanupSemantics.cleanupEntryRule spec.growth source)
-      hentry
-      (atLogical spec.growth
-        (CounterControlCleanupSemantics.afterFour spec T)
-        spec.outerDistance) htargetNonblank
-  have hmove :
-      (atLogical spec.growth
-        (CounterControlCleanupSemantics.afterFour spec T)
-        spec.outerDistance).move (orient spec.growth .left) =
-        atLogical spec.growth
-          (CounterControlCleanupSemantics.afterFour spec T)
-          (layoutEnd spec.registers) := by
-    rw [← hcollision, orient_eq_orientDirection, atLogical_move_left]
-  have hentryRun : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c (directRef spec.growth source testDirectSlot),
-        atLogical spec.growth
-          (CounterControlCleanupSemantics.afterFour spec T)
-          spec.outerDistance⟩
-      ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
-        atLogical spec.growth
-          (CounterControlCleanupSemantics.afterFour spec T)
-          (layoutEnd spec.registers)⟩ := by
-    simp only [CounterControlCleanupSemantics.cleanupEntryRule] at hentryRunLocal
-    rw [hmove] at hentryRunLocal
-    change FullTM0.Reaches
-      (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-    simpa [CounterControlCleanupSemantics.cleanupEntryRule, searchRef,
-      CounterControlPlan.resolve] using hentryRunLocal
+  have hentryRun :=
+    CounterControlCleanupSemantics.machine_reaches_cleanupEntry base c source
+      hback.represents hcollision hentry
   exact FullTM0.ResolvesTo.trans_reaches hentryRun
     (machine_reaches_cleanup_outer_or_halts base c source hback
       hreturnDirection hshort hcommands)
@@ -2031,55 +1984,6 @@ theorem machine_reaches_decrementSchedule_or_halts
   exact machine_reaches_decrementSchedule_with base c (ShortResolves base c)
     (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)) runner
     source register hback hpositive hshort hcommands
-
-theorem machine_reaches_decrementPositiveFinish
-    (base : Nat) (c : Nat.Partrec.Code) (source ifZero ifPositive : Nat)
-    (register : Register)
-    (hrule : (source, .decrement register ifZero ifPositive) ∈
-      GlobalSourceProgram.program)
-    {spec : Spec numTags} (T : FullTM0.Tape (Symbol numTags))
-    (hpositive : 0 < spec.registers.get register) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨resolve base c (directRef spec.growth source finishDirectSlot),
-          atLogical spec.growth (decrementTape spec register T)
-            (layoutEnd spec.registers)⟩
-        ⟨logicalState base c spec.growth ifPositive,
-          atLogical spec.growth (decrementTape spec register T)
-            (layoutEnd (spec.registers.decrement register))⟩ := by
-  let raw : RawDirectRule :=
-    ⟨spec.growth, directRef spec.growth source finishDirectSlot, .blank,
-      .logical spec.growth ifPositive, .left⟩
-  have hraw : raw ∈ rawDirectRules := by
-    apply directRule_mem_rawDirectRules_of_rule spec.growth hrule
-    change raw ∈ validationRules spec.growth source ++
-      decrementRules spec.growth source register ifZero ifPositive
-    apply List.mem_append_right
-    simp [raw, decrementRules]
-  have hmatch : raw.read.Matches
-      (atLogical spec.growth (decrementTape spec register T)
-        (layoutEnd spec.registers)).read := by
-    change (atLogical spec.growth (decrementTape spec register T)
-      (layoutEnd spec.registers)).read = blankSymbol
-    rw [atLogical_read]
-    exact decrementTape_old_layoutEnd_blank spec register T hpositive
-  have hrun := CounterControlDirectSemantics.reaches_directRule base c raw
-    hraw (atLogical spec.growth (decrementTape spec register T)
-      (layoutEnd spec.registers)) hmatch
-  have hend := layoutEnd_decrement_add_one spec.registers register hpositive
-  have hmove : (atLogical spec.growth (decrementTape spec register T)
-      (layoutEnd spec.registers)).move (orient spec.growth .left) =
-      atLogical spec.growth (decrementTape spec register T)
-        (layoutEnd (spec.registers.decrement register)) := by
-    rw [← hend, orient_eq_orientDirection, atLogical_move_left]
-  rw [hmove] at hrun
-  change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-    ⟨resolve base c (directRef spec.growth source finishDirectSlot),
-      atLogical spec.growth (decrementTape spec register T)
-        (layoutEnd spec.registers)⟩
-    ⟨logicalState base c spec.growth ifPositive,
-      atLogical spec.growth (decrementTape spec register T)
-        (layoutEnd (spec.registers.decrement register))⟩ at hrun
-  exact hrun
 
 /-- Exact positive branch of a compiled conditional decrement.  Every
 shorter search either completes the decremented logical frame or exposes a

@@ -4563,43 +4563,8 @@ theorem machine_reaches_collisionCleanup_solved
         ⟨resumeState (CanonicalInitializer.radius c)
             (searchState base c
               (rawCommands.get spec.returnTag).address), outer⟩ := by
-  have h := hback.represents
-  have htargetRead : (atLogical spec.growth (afterFour spec T)
-      spec.outerDistance).read =
-      logicalTape spec.growth T spec.outerDistance := by
-    rw [atLogical_read]
-    simp only [afterFour, clearBoundary]
-    apply writeLogical_of_ne
-    rw [boundaryOffset_four]
-    omega
-  have htargetNonblank : (atLogical spec.growth (afterFour spec T)
-      spec.outerDistance).read ≠ blankSymbol := by
-    rw [htargetRead]
-    intro hblank
-    exact target_not_blank spec.outerTarget (hblank ▸ h.target)
-  have hentryRunLocal := CounterControlDirectSemantics.reaches_directRule
-    base c (cleanupEntryRule spec.growth source) hentry
-    (atLogical spec.growth (afterFour spec T) spec.outerDistance)
-    htargetNonblank
-  have hmove :
-      (atLogical spec.growth (afterFour spec T) spec.outerDistance).move
-          (orient spec.growth .left) =
-        atLogical spec.growth (afterFour spec T)
-          (layoutEnd spec.registers) := by
-    rw [← hcollision, orient_eq_orientDirection, atLogical_move_left]
-  have hentryRun : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c (directRef spec.growth source testDirectSlot),
-        atLogical spec.growth (afterFour spec T) spec.outerDistance⟩
-      ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
-        atLogical spec.growth (afterFour spec T)
-          (layoutEnd spec.registers)⟩ := by
-    simp only [cleanupEntryRule] at hentryRunLocal
-    rw [hmove] at hentryRunLocal
-    change FullTM0.Reaches
-      (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-    simpa [cleanupEntryRule, searchRef, CounterControlPlan.resolve] using
-      hentryRunLocal
+  have hentryRun := machine_reaches_cleanupEntry base c source
+    hback.represents hcollision hentry
   exact hentryRun.trans
     (machine_reaches_cleanup_outer_solved base c source hback
       hreturnDirection hshort hcommands)
