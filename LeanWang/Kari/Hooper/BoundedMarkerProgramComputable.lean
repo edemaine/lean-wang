@@ -1441,17 +1441,40 @@ theorem commandOffset_primrec :
       (blockWidth_primrec.comp (Primrec.fst.comp Primrec.snd)))
 
 theorem returnState_primrec {numTags : Nat} :
-    Primrec fun input : Nat × Nat × List (Command numTags) =>
-      returnState input.1 input.2.1 input.2.2 := by
-  exact commandOffset_primrec.comp
-    (Primrec.pair Primrec.fst
-      (Primrec.pair (Primrec.fst.comp Primrec.snd)
-        (Primrec.list_length.comp (Primrec.snd.comp Primrec.snd))))
+    Primrec fun input : Nat × Nat × List (Command numTags) × Turing.Dir =>
+      returnState input.1 input.2.1 input.2.2.1 input.2.2.2 := by
+  have hbase : Primrec fun input :
+      Nat × Nat × List (Command numTags) × Turing.Dir => input.1 :=
+    Primrec.fst
+  have hradius : Primrec fun input :
+      Nat × Nat × List (Command numTags) × Turing.Dir => input.2.1 :=
+    Primrec.fst.comp Primrec.snd
+  have hcommands : Primrec fun input :
+      Nat × Nat × List (Command numTags) × Turing.Dir => input.2.2.1 :=
+    Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hdirection : Primrec fun input :
+      Nat × Nat × List (Command numTags) × Turing.Dir => input.2.2.2 :=
+    Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
+  have hoffset : Primrec fun direction : Turing.Dir =>
+      match direction with
+      | .left => 0
+      | .right => 1 :=
+    Primrec.dom_finite _
+  exact Primrec.nat_add.comp
+    (commandOffset_primrec.comp
+      (Primrec.pair hbase
+        (Primrec.pair hradius (Primrec.list_length.comp hcommands))))
+    (hoffset.comp hdirection)
 
 theorem coreEntry_primrec {numTags : Nat} :
     Primrec fun input : Nat × Nat × List (Command numTags) =>
-      coreEntry input.1 input.2.1 input.2.2 :=
-  Primrec.succ.comp returnState_primrec
+      coreEntry input.1 input.2.1 input.2.2 := by
+  exact Primrec.nat_add.comp
+    (commandOffset_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.list_length.comp (Primrec.snd.comp Primrec.snd)))))
+    (Primrec.const 2)
 
 /-! ## Uniformly linking variable command lists -/
 
@@ -1546,26 +1569,48 @@ theorem commandTables_primrec {numTags : Nat} :
     simpa using commandTablesFold_eq input.1 input.2.1 input.2.2.1
       input.2.2.2 ([] : FiniteTM0.Table (AlphabetSize numTags))
 
-private def returnTableFoldStep {numTags : Nat} (radius sharedReturn : Nat)
+private def directionalReturn (states : Nat × Nat) :
+    Turing.Dir → FiniteTM0.State
+  | .left => states.1
+  | .right => states.2
+
+private theorem directionalReturn_primrec :
+    Primrec fun input : (Nat × Nat) × Turing.Dir =>
+      directionalReturn input.1 input.2 := by
+  have hdirection : Primrec fun input : (Nat × Nat) × Turing.Dir =>
+      dirEquivBool input.2 :=
+    (Primrec.of_equiv (e := dirEquivBool)).comp Primrec.snd
+  exact (Primrec.cond hdirection
+    (Primrec.snd.comp Primrec.fst)
+    (Primrec.fst.comp Primrec.fst)).of_eq fun input => by
+      cases input.2 <;> rfl
+
+private def returnTableFoldStep {numTags : Nat} (radius : Nat)
+    (sharedReturn : Nat × Nat)
     (accumulator : Nat × FiniteTM0.Table (AlphabetSize numTags))
     (command : Command numTags) :
     Nat × FiniteTM0.Table (AlphabetSize numTags) :=
   (accumulator.1 + blockWidth radius,
     accumulator.2 ++
-      [FiniteTM0.Rule.mk sharedReturn (tagSymbol command.returnTag)
+      [FiniteTM0.Rule.mk
+        (directionalReturn sharedReturn command.searchDirection)
+        (tagSymbol command.returnTag)
         (resumeState radius accumulator.1) (.write blankSymbol)])
 
-private def returnTableFold {numTags : Nat} (radius sharedReturn offset : Nat)
+private def returnTableFold {numTags : Nat} (radius : Nat)
+    (sharedReturn : Nat × Nat) (offset : Nat)
     (commands : List (Command numTags)) :
     FiniteTM0.Table (AlphabetSize numTags) :=
   (commands.foldl (returnTableFoldStep radius sharedReturn) (offset, [])).2
 
 private theorem returnTableFold_eq {numTags : Nat}
-    (radius sharedReturn offset : Nat) (commands : List (Command numTags))
+    (radius : Nat) (sharedReturn : Nat × Nat) (offset : Nat)
+    (commands : List (Command numTags))
     (acc : FiniteTM0.Table (AlphabetSize numTags)) :
     (commands.foldl (returnTableFoldStep radius sharedReturn)
         (offset, acc)).2 =
-      acc ++ returnTable radius sharedReturn offset commands := by
+      acc ++ returnTable radius (directionalReturn sharedReturn)
+        offset commands := by
   induction commands generalizing offset acc with
   | nil => simp [returnTable]
   | cons command commands ih =>
@@ -1573,55 +1618,66 @@ private theorem returnTableFold_eq {numTags : Nat}
       rw [ih]
       simp [List.append_assoc]
 
+private abbrev ReturnTablesInput (numTags : Nat) :=
+  Nat × (Nat × Nat) × Nat × List (Command numTags)
+
 set_option maxHeartbeats 800000 in
 private theorem returnTableFold_primrec {numTags : Nat} :
-    Primrec fun input : CommandTablesInput numTags =>
+    Primrec fun input : ReturnTablesInput numTags =>
       returnTableFold input.1 input.2.1 input.2.2.1 input.2.2.2 := by
-  have hcommands : Primrec fun input : CommandTablesInput numTags =>
+  have hcommands : Primrec fun input : ReturnTablesInput numTags =>
       input.2.2.2 :=
     Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
-  have hinitial : Primrec fun input : CommandTablesInput numTags =>
+  have hinitial : Primrec fun input : ReturnTablesInput numTags =>
       (input.2.2.1,
         ([] : FiniteTM0.Table (AlphabetSize numTags))) :=
     Primrec.pair
       (Primrec.fst.comp (Primrec.snd.comp Primrec.snd))
       (Primrec.const [])
-  have hstep : Primrec₂ fun input : CommandTablesInput numTags =>
+  have hstep : Primrec₂ fun input : ReturnTablesInput numTags =>
       fun pair :
         (Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags =>
         returnTableFoldStep input.1 input.2.1 pair.1 pair.2 := by
     apply Primrec₂.mk
-    have hradius : Primrec fun pair : CommandTablesInput numTags ×
+    have hradius : Primrec fun pair : ReturnTablesInput numTags ×
         ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
         pair.1.1 :=
       Primrec.fst.comp Primrec.fst
-    have hshared : Primrec fun pair : CommandTablesInput numTags ×
+    have hshared : Primrec fun pair : ReturnTablesInput numTags ×
         ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
         pair.1.2.1 :=
       Primrec.fst.comp (Primrec.snd.comp Primrec.fst)
-    have hoffset : Primrec fun pair : CommandTablesInput numTags ×
+    have hoffset : Primrec fun pair : ReturnTablesInput numTags ×
         ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
         pair.2.1.1 :=
       Primrec.fst.comp (Primrec.fst.comp Primrec.snd)
-    have hprefix : Primrec fun pair : CommandTablesInput numTags ×
+    have hprefix : Primrec fun pair : ReturnTablesInput numTags ×
         ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
         pair.2.1.2 :=
       Primrec.snd.comp (Primrec.fst.comp Primrec.snd)
-    have hcommand : Primrec fun pair : CommandTablesInput numTags ×
+    have hcommand : Primrec fun pair : ReturnTablesInput numTags ×
         ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
         pair.2.2 :=
       Primrec.snd.comp Primrec.snd
-    have hreturnTag : Primrec fun pair : CommandTablesInput numTags ×
+    have hreturnTag : Primrec fun pair : ReturnTablesInput numTags ×
         ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
         pair.2.2.returnTag :=
       Command.returnTag_primrec.comp hcommand
-    have hrule : Primrec fun pair : CommandTablesInput numTags ×
+    have hreturnState : Primrec fun pair : ReturnTablesInput numTags ×
         ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
-        FiniteTM0.Rule.mk pair.1.2.1 (tagSymbol pair.2.2.returnTag)
+        directionalReturn pair.1.2.1 pair.2.2.searchDirection :=
+      directionalReturn_primrec.comp
+        (Primrec.pair hshared
+          (Command.searchDirection_primrec.comp hcommand))
+    have hrule : Primrec fun pair : ReturnTablesInput numTags ×
+        ((Nat × FiniteTM0.Table (AlphabetSize numTags)) × Command numTags) =>
+        FiniteTM0.Rule.mk
+          (directionalReturn pair.1.2.1 pair.2.2.searchDirection)
+          (tagSymbol pair.2.2.returnTag)
           (resumeState pair.1.1 pair.2.1.1)
           (.write (blankSymbol (numTags := numTags))) := by
       apply rule_primrec
-      · exact hshared
+      · exact hreturnState
       · exact tagSymbol_primrec.comp hreturnTag
       · exact resumeState_primrec.comp (Primrec.pair hradius hoffset)
       · exact Primrec.const
@@ -1629,17 +1685,18 @@ private theorem returnTableFold_primrec {numTags : Nat} :
     exact Primrec.pair
       (Primrec.nat_add.comp hoffset (blockWidth_primrec.comp hradius))
       (Primrec.list_append.comp hprefix (singleton_primrec hrule))
-  have hfold : Primrec fun input : CommandTablesInput numTags =>
+  have hfold : Primrec fun input : ReturnTablesInput numTags =>
       input.2.2.2.foldl (returnTableFoldStep input.1 input.2.1)
         (input.2.2.1, []) :=
     Primrec.list_foldl hcommands hinitial hstep
   exact Primrec.snd.comp hfold
 
-/-- The shared return dispatcher is primitive recursive in radius, return
-state, initial offset, and the varying command list. -/
+/-- The directional return dispatcher is primitive recursive in radius, its
+left and right return states, initial offset, and the varying command list. -/
 theorem returnTable_primrec {numTags : Nat} :
-    Primrec fun input : CommandTablesInput numTags =>
-      returnTable input.1 input.2.1 input.2.2.1 input.2.2.2 :=
+    Primrec fun input : ReturnTablesInput numTags =>
+      returnTable input.1 (directionalReturn input.2.1)
+        input.2.2.1 input.2.2.2 :=
   returnTableFold_primrec.of_eq fun input => by
     rw [returnTableFold]
     simpa using returnTableFold_eq input.1 input.2.1 input.2.2.1
@@ -1656,9 +1713,18 @@ theorem controllerTable_primrec {numTags : Nat} :
   have hcommands : Primrec fun input : ControllerTableInput numTags =>
       input.2.2 :=
     Primrec.snd.comp Primrec.snd
-  have hreturn : Primrec fun input : ControllerTableInput numTags =>
-      returnState input.1 input.2.1 input.2.2 :=
-    returnState_primrec
+  have hreturnLeft : Primrec fun input : ControllerTableInput numTags =>
+      returnState input.1 input.2.1 input.2.2 .left :=
+    returnState_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.pair hcommands (Primrec.const Turing.Dir.left))))
+  have hreturnRight : Primrec fun input : ControllerTableInput numTags =>
+      returnState input.1 input.2.1 input.2.2 .right :=
+    returnState_primrec.comp
+      (Primrec.pair Primrec.fst
+        (Primrec.pair (Primrec.fst.comp Primrec.snd)
+          (Primrec.pair hcommands (Primrec.const Turing.Dir.right))))
   have hcore : Primrec fun input : ControllerTableInput numTags =>
       coreEntry input.1 input.2.1 input.2.2 :=
     coreEntry_primrec
@@ -1671,9 +1737,13 @@ theorem controllerTable_primrec {numTags : Nat} :
   have hreturns : Primrec fun input : ControllerTableInput numTags =>
       returnTable input.2.1
         (returnState input.1 input.2.1 input.2.2) input.1 input.2.2 :=
-    returnTable_primrec.comp
+    (returnTable_primrec.comp
       (Primrec.pair (Primrec.fst.comp Primrec.snd)
-        (Primrec.pair hreturn (Primrec.pair Primrec.fst hcommands)))
+        (Primrec.pair (Primrec.pair hreturnLeft hreturnRight)
+          (Primrec.pair Primrec.fst hcommands)))).of_eq fun input => by
+            congr 2
+            funext direction
+            cases direction <;> rfl
   exact Primrec.list_append.comp hprivate hreturns
 
 private abbrev FullTableInput (numTags : Nat) :=
