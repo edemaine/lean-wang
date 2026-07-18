@@ -438,6 +438,140 @@ private theorem reaches_cleanupSuccess_of_immortal
       outer distance hgap himmortal
   simpa [eraseDepart] using hreach
 
+/-! ## Operational reverse replay of retained route legs -/
+
+private theorem reverseFinalRouteLeg
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    {start : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (sourceTape : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary (4 : Fin 5)).Matches
+      (sourceTape.move (orient growth .right))
+      (orient growth .right) distance)
+    (hsource : sourceTape.read = boundarySymbol 3)
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) start
+      ⟨searchState base c
+          ⟨growth, source, CounterControlCleanupRoute.Stage.three.slot⟩,
+        (((sourceTape.move (orient growth .right)).moveN
+          (orient growth .right) distance).write blankSymbol)⟩)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) start) :
+    ∃ outer,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c) start
+        ⟨searchState base c
+          ⟨growth, source, CounterControlCleanupRoute.Stage.two.slot⟩,
+          outer⟩ ∧
+      InwardRayEq (orient growth .left) outer
+        ((sourceTape.write blankSymbol).move (orient growth .left)) := by
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hreverse : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary (3 : Fin 5)).Matches
+      (((sourceTape.move (orient growth .right)).moveN
+        (orient growth .right) distance).write blankSymbol)
+      (orient growth .left) (distance + 1) := by
+    rw [← hopposite]
+    exact reverseGap_from_cleared_endpoint hgap hsource
+  let outer :=
+    eraseDepart
+      (((sourceTape.move (orient growth .right)).moveN
+        (orient growth .right) distance).write blankSymbol)
+      (orient growth .left) (distance + 1)
+  have himmortalEntry := immortalFrom_of_reaches base c himmortal hreaches
+  have hstep := reaches_cleanupSuccess_of_immortal base c growth source
+    register targetState hrule .three
+    (((sourceTape.move (orient growth .right)).moveN
+      (orient growth .right) distance).write blankSymbol)
+    (distance + 1) hreverse himmortalEntry
+  have hstep' : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c
+          ⟨growth, source, CounterControlCleanupRoute.Stage.three.slot⟩,
+        (((sourceTape.move (orient growth .right)).moveN
+          (orient growth .right) distance).write blankSymbol)⟩
+      ⟨searchState base c
+          ⟨growth, source, CounterControlCleanupRoute.Stage.two.slot⟩,
+        outer⟩ := by
+    simpa [outer] using hstep
+  refine ⟨outer, hreaches.trans hstep', ?_⟩
+  dsimp [outer]
+  rw [← hopposite]
+  exact clearedEndpointStep_ray sourceTape (orient growth .right) distance
+
+private theorem reverseEarlierRouteLeg
+    (base : Nat) (c : Nat.Partrec.Code)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (targetState : Nat)
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    {start : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (stage nextStage : CounterControlCleanupRoute.Stage)
+    (sourceBoundary foundBoundary : Fin 5)
+    (hstage : stage.expected = sourceBoundary)
+    (hsuccess : resolve base c (stage.successRef growth source) =
+      searchState base c ⟨growth, source, nextStage.slot⟩)
+    (sourceTape : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary foundBoundary).Matches
+      (sourceTape.move (orient growth .right))
+      (orient growth .right) distance)
+    (hsource : sourceTape.read = boundarySymbol sourceBoundary)
+    (outer : FullTM0.Tape (Symbol numTags))
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) start
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩)
+    (agreement : InwardRayEq (orient growth .left) outer
+      (((sourceTape.move (orient growth .right)).moveN
+          (orient growth .right) distance).write blankSymbol |>.move
+        (orient growth .left)))
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) start) :
+    ∃ nextOuter,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c) start
+        ⟨searchState base c ⟨growth, source, nextStage.slot⟩,
+          nextOuter⟩ ∧
+      InwardRayEq (orient growth .left) nextOuter
+        ((sourceTape.write blankSymbol).move (orient growth .left)) := by
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hideal : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary sourceBoundary).Matches
+      ((((sourceTape.move (orient growth .right)).moveN
+        (orient growth .right) distance).write blankSymbol).move
+          (orient growth .left))
+      (orient growth .left) distance := by
+    rw [← hopposite]
+    exact reverseGap_after_clear_depart hgap hsource
+  have hactual : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary stage.expected).Matches outer
+      (orient growth .left) distance := by
+    rw [hstage]
+    exact agreement.searchGap hideal
+  let nextOuter := eraseDepart outer (orient growth .left) distance
+  have himmortalEntry := immortalFrom_of_reaches base c himmortal hreaches
+  have hstep := reaches_cleanupSuccess_of_immortal base c growth source
+    register targetState hrule stage outer distance hactual himmortalEntry
+  have hstep' : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩
+      ⟨searchState base c ⟨growth, source, nextStage.slot⟩,
+        nextOuter⟩ := by
+    rw [hsuccess] at hstep
+    simpa [nextOuter] using hstep
+  refine ⟨nextOuter, hreaches.trans hstep', ?_⟩
+  have hafter := agreement.eraseDepart distance
+  have hcanonical := clearedRouteStep_ray sourceTape
+    (orient growth .right) distance
+  rw [hopposite] at hcanonical
+  exact hafter.trans hcanonical
+
 /-- Any reached cleanup caller whose gap contains the original outward gap
 produces the required outward-instruction handoff.  The cleanup suffix itself
 grows strictly, so the consumer-facing comparison is weak only because that
@@ -603,6 +737,219 @@ theorem handoff_of_clearedCurrentEntry
     simp [cleanup]
   apply handoff_of_cleanupEntry base c hmortal hrule cleanup hcleanup
     (by simpa [hcleanupCfg] using hreaches) hdistance himmortal
+
+/-! ## Collision entry for an arbitrary outward suffix -/
+
+private theorem toFour_uncons
+    {boundary : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : CounterControlResumedRouteEmbedding.ToFour boundary route)
+    (hne : boundary ≠ 4) :
+    ∃ i : Fin 4, ∃ rest,
+      boundary = i.castSucc ∧
+      route = ⟨i.succ, .right⟩ :: rest ∧
+      CounterControlResumedRouteEmbedding.ToFour i.succ rest := by
+  cases hroute with
+  | four => exact False.elim (hne rfl)
+  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
+
+private theorem toFour_nil_of_eq_four
+    {boundary : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : CounterControlResumedRouteEmbedding.ToFour boundary route)
+    (heq : boundary = 4) : route = [] := by
+  cases hroute with
+  | four => rfl
+  | step i tail =>
+      have hval := congrArg Fin.val heq
+      simp at hval
+      omega
+
+private theorem toFour_four
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlResumedRouteEmbedding.ToFour 4 route) :
+    route = [] :=
+  toFour_nil_of_eq_four hroute rfl
+
+private theorem toFour_three
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlResumedRouteEmbedding.ToFour 3 route) :
+    route = [⟨4, .right⟩] := by
+  rcases toFour_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (3 : Fin 4) := by
+    apply Fin.ext
+    exact (congrArg Fin.val hi).symm
+  subst i
+  have hnil : rest = [] := by
+    apply toFour_four
+    simpa using hrest
+  rw [hrouteEq, hnil]
+  rfl
+
+private theorem toFour_two
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlResumedRouteEmbedding.ToFour 2 route) :
+    route = [⟨3, .right⟩, ⟨4, .right⟩] := by
+  rcases toFour_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (2 : Fin 4) := by
+    apply Fin.ext
+    exact (congrArg Fin.val hi).symm
+  subst i
+  have htail : rest = [⟨4, .right⟩] := by
+    apply toFour_three
+    simpa using hrest
+  rw [hrouteEq, htail]
+  rfl
+
+private theorem toFour_one
+    {route : List MarkerValidation.Leg}
+    (hroute : CounterControlResumedRouteEmbedding.ToFour 1 route) :
+    route = [⟨2, .right⟩, ⟨3, .right⟩, ⟨4, .right⟩] := by
+  rcases toFour_uncons hroute (by decide) with
+    ⟨i, rest, hi, hrouteEq, hrest⟩
+  have hi' : i = (1 : Fin 4) := by
+    apply Fin.ext
+    exact (congrArg Fin.val hi).symm
+  subst i
+  have htail : rest = [⟨3, .right⟩, ⟨4, .right⟩] := by
+    apply toFour_two
+    simpa using hrest
+  rw [hrouteEq, htail]
+  rfl
+
+private theorem routeTail_nil_finish
+    {growth : Turing.Dir}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (trace : CounterControlRouteSuffixMortality.RouteTailGaps growth []
+      start finish) : finish = start := by
+  cases trace
+  rfl
+
+/-- Starting at the boundary-`4` collision-cleanup entry, replay the retained
+outward validation suffix in reverse and hand off from the cleanup stage
+opposite the original caller. -/
+theorem handoff_of_collisionEntry
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {targetState : Nat}
+    {obligation : OutwardObligation current growth source
+      (.increment register targetState)}
+    (suffix : CounterControlGenuineValidationOutwardSuffix.Suffix
+      current growth source (.increment register targetState))
+    (hrule : (source, .increment register targetState) ∈
+      GlobalSourceProgram.program)
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
+        suffix.progress.suffix.finish.write blankSymbol⟩)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  generalize hindex : suffix.index = index
+  fin_cases index
+  · -- The original caller found boundary `1`; replay `4,3,2`.
+    have htoFour : CounterControlResumedRouteEmbedding.ToFour 1
+        suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_one htoFour
+    have htail := suffix.tailGaps
+    rw [hremaining] at htail
+    rcases htail.uncons with ⟨d2, gap2, tail3⟩
+    let found2 :=
+      (current.foundTape.move (orient growth .right)).moveN
+        (orient growth .right) d2
+    rcases tail3.uncons with ⟨d3, gap3, tail4⟩
+    let found3 :=
+      (found2.move (orient growth .right)).moveN
+        (orient growth .right) d3
+    rcases tail4.uncons with ⟨d4, gap4, tailEnd⟩
+    have hfinish := routeTail_nil_finish tailEnd
+    have hread3 : found3.read = boundarySymbol 3 := by
+      simpa [found3, found2, FullTM0.Tape.read_moveN,
+        Target.Matches] using gap3.marked
+    rcases reverseFinalRouteLeg base c growth source register
+        targetState hrule found3 d4 (by simpa [found3, found2] using gap4)
+        hread3 (by simpa [found3, found2, hfinish,
+          CounterControlCleanupRoute.Stage.slot] using hreaches) himmortal with
+      ⟨outer2, hreach2, hagree2⟩
+    have hread2 : found2.read = boundarySymbol 2 := by
+      simpa [found2, FullTM0.Tape.read_moveN,
+        Target.Matches] using gap2.marked
+    rcases reverseEarlierRouteLeg base c growth source register
+        targetState hrule .two .one 2 3 rfl rfl found2 d3
+        (by simpa [found2] using gap3) hread2 outer2 hreach2
+        (by simpa [found3] using hagree2) himmortal with
+      ⟨outer1, hreach1, hagree1⟩
+    have hread1 : current.foundTape.read = boundarySymbol 1 := by
+      simpa [hindex] using suffix.current_read
+    rcases reverseEarlierRouteLeg base c growth source register
+        targetState hrule .one .zero 1 2 rfl rfl
+        current.foundTape d2 (by simpa using gap2) hread1
+        outer1 hreach1 (by simpa [found2] using hagree1)
+        himmortal with ⟨outer0, hreach0, hagree0⟩
+    exact handoff_of_cleanupRayEntry base c hmortal suffix hrule
+      .zero outer0 hreach0 hagree0 himmortal
+  · -- The original caller found boundary `2`; replay `4,3`.
+    have htoFour : CounterControlResumedRouteEmbedding.ToFour 2
+        suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_two htoFour
+    have htail := suffix.tailGaps
+    rw [hremaining] at htail
+    rcases htail.uncons with ⟨d3, gap3, tail4⟩
+    let found3 :=
+      (current.foundTape.move (orient growth .right)).moveN
+        (orient growth .right) d3
+    rcases tail4.uncons with ⟨d4, gap4, tailEnd⟩
+    have hfinish := routeTail_nil_finish tailEnd
+    have hread3 : found3.read = boundarySymbol 3 := by
+      simpa [found3, FullTM0.Tape.read_moveN,
+        Target.Matches] using gap3.marked
+    rcases reverseFinalRouteLeg base c growth source register
+        targetState hrule found3 d4 (by simpa [found3] using gap4)
+        hread3 (by simpa [found3, hfinish,
+          CounterControlCleanupRoute.Stage.slot] using hreaches) himmortal with
+      ⟨outer2, hreach2, hagree2⟩
+    have hread2 : current.foundTape.read = boundarySymbol 2 := by
+      simpa [hindex] using suffix.current_read
+    rcases reverseEarlierRouteLeg base c growth source register
+        targetState hrule .two .one 2 3 rfl rfl
+        current.foundTape d3 (by simpa using gap3) hread2
+        outer2 hreach2 (by simpa [found3] using hagree2)
+        himmortal with ⟨outer1, hreach1, hagree1⟩
+    exact handoff_of_cleanupRayEntry base c hmortal suffix hrule
+      .one outer1 hreach1 hagree1 himmortal
+  · -- The original caller found boundary `3`; replay `4`.
+    have htoFour : CounterControlResumedRouteEmbedding.ToFour 3
+        suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_three htoFour
+    have htail := suffix.tailGaps
+    rw [hremaining] at htail
+    rcases htail.uncons with ⟨d4, gap4, tailEnd⟩
+    have hfinish := routeTail_nil_finish tailEnd
+    have hread3 : current.foundTape.read = boundarySymbol 3 := by
+      simpa [hindex] using suffix.current_read
+    rcases reverseFinalRouteLeg base c growth source register
+        targetState hrule current.foundTape d4 (by simpa using gap4)
+        hread3 (by simpa [hfinish,
+          CounterControlCleanupRoute.Stage.slot] using hreaches) himmortal with
+      ⟨outer2, hreach2, hagree2⟩
+    exact handoff_of_cleanupRayEntry base c hmortal suffix hrule
+      .two outer2 hreach2 hagree2 himmortal
+  · -- Boundary `4` is already the original found endpoint.
+    have htoFour : CounterControlResumedRouteEmbedding.ToFour 4
+        suffix.progress.suffix.remaining := by
+      simpa [hindex] using suffix.remaining_toFour
+    have hremaining := toFour_four htoFour
+    have htail := suffix.tailGaps
+    rw [hremaining] at htail
+    have hfinish := routeTail_nil_finish htail
+    exact handoff_of_clearedCurrentEntry base c hmortal suffix hrule
+      .three (by simpa [hfinish,
+        CounterControlCleanupRoute.Stage.slot] using hreaches) himmortal
 
 end
 
