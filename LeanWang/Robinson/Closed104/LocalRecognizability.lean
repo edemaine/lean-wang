@@ -33,16 +33,16 @@ structure IndexRow4 where
 
 namespace IndexRow4
 
-def codes (row : IndexRow4) : List Nat :=
-  [row.x0.val, row.x1.val, row.x2.val, row.x3.val]
+def entries (row : IndexRow4) : List Index :=
+  [row.x0, row.x1, row.x2, row.x3]
 
 def HValid (row : IndexRow4) : Prop :=
   WangTile.HMatches (tile (components row.x0)) (tile (components row.x1)) ∧
     WangTile.HMatches (tile (components row.x1)) (tile (components row.x2)) ∧
     WangTile.HMatches (tile (components row.x2)) (tile (components row.x3))
 
-theorem codes_mem_fourRows {row : IndexRow4} (hrow : row.HValid) :
-    row.codes ∈ fourRows := by
+theorem entries_mem_fourRows {row : IndexRow4} (hrow : row.HValid) :
+    row.entries ∈ fourRows := by
   exact indexRow_mem_fourRows row.x0 row.x1 row.x2 row.x3
     hrow.1 hrow.2.1 hrow.2.2
 
@@ -52,9 +52,9 @@ def VCompatible (lower upper : IndexRow4) : Prop :=
     WangTile.VMatches (tile (components lower.x2)) (tile (components upper.x2)) ∧
     WangTile.VMatches (tile (components lower.x3)) (tile (components upper.x3))
 
-theorem codes_vCompatible {lower upper : IndexRow4}
+theorem entries_vCompatible {lower upper : IndexRow4}
     (hrows : VCompatible lower upper) :
-    rowsVCompatible vFollowerTable lower.codes upper.codes = true := by
+    rowsVCompatible vFollowerTable lower.entries upper.entries = true := by
   exact indexRows_vCompatible
     lower.x0 lower.x1 lower.x2 lower.x3
     upper.x0 upper.x1 upper.x2 upper.x3
@@ -104,37 +104,37 @@ theorem centerNortheastThin (N : Neighborhood) :
     _ = .b := by rw [N.centerEastThin]; rfl
 
 theorem middleSouth_mem (N : Neighborhood) :
-    N.middleSouth.codes ∈ southCentralRows := by
+    N.middleSouth.entries ∈ southCentralRows := by
   rw [mem_southCentralRows_iff]
-  exact ⟨N.middleSouth.codes_mem_fourRows N.middleSouth_h,
-    by simp [IndexRow4.codes, rowCell, N.centerThin],
-    by simp [IndexRow4.codes, rowCell, N.centerEastThin]⟩
+  exact ⟨N.middleSouth.entries_mem_fourRows N.middleSouth_h,
+    by simp [IndexRow4.entries, rowCell, N.centerThin],
+    by simp [IndexRow4.entries, rowCell, N.centerEastThin]⟩
 
 theorem middleNorth_mem (N : Neighborhood) :
-    N.middleNorth.codes ∈ northCentralRows := by
+    N.middleNorth.entries ∈ northCentralRows := by
   rw [mem_northCentralRows_iff]
-  exact ⟨N.middleNorth.codes_mem_fourRows N.middleNorth_h,
-    by simp [IndexRow4.codes, rowCell, N.centerNorthThin],
-    by simp [IndexRow4.codes, rowCell, N.centerNortheastThin]⟩
+  exact ⟨N.middleNorth.entries_mem_fourRows N.middleNorth_h,
+    by simp [IndexRow4.entries, rowCell, N.centerNorthThin],
+    by simp [IndexRow4.entries, rowCell, N.centerNortheastThin]⟩
 
 theorem middle_mem_extendable (N : Neighborhood) :
-    (N.middleSouth.codes, N.middleNorth.codes) ∈
+    (N.middleSouth.entries, N.middleNorth.entries) ∈
       extendableCentralRowPairs := by
   exact middle_mem_extendableCentralRowPairs
-    (N.south.codes_mem_fourRows N.south_h)
+    (N.south.entries_mem_fourRows N.south_h)
     N.middleSouth_mem N.middleNorth_mem
-    (N.north.codes_mem_fourRows N.north_h)
-    (IndexRow4.codes_vCompatible N.south_middle_v)
-    (IndexRow4.codes_vCompatible N.middle_v)
-    (IndexRow4.codes_vCompatible N.middle_north_v)
+    (N.north.entries_mem_fourRows N.north_h)
+    (IndexRow4.entries_vCompatible N.south_middle_v)
+    (IndexRow4.entries_vCompatible N.middle_v)
+    (IndexRow4.entries_vCompatible N.middle_north_v)
 
 /-- The central `2 x 2` block has a unique Figure 16 substitution parent. -/
 theorem existsUnique_centerParent (N : Neighborhood) :
     ∃! parent : Index,
-      childCodeBlock parent =
-        (N.middleSouth.x1.val, N.middleSouth.x2.val,
-          N.middleNorth.x1.val, N.middleNorth.x2.val) := by
-  simpa [centralCodeBlock, IndexRow4.codes, rowCell] using
+      childIndexBlock parent =
+        (N.middleSouth.x1, N.middleSouth.x2,
+          N.middleNorth.x1, N.middleNorth.x2) := by
+  simpa [centralIndexBlock, IndexRow4.entries, rowCell] using
     existsUnique_parent_of_mem_extendableCentralRowPairs N.middle_mem_extendable
 
 def IsCenterParent (N : Neighborhood) (parent : Index) : Prop :=
@@ -143,20 +143,20 @@ def IsCenterParent (N : Neighborhood) (parent : Index) : Prop :=
     childBlock parent offset0 offset1 = N.middleNorth.x1 ∧
     childBlock parent offset1 offset1 = N.middleNorth.x2
 
-theorem childCodeBlock_eq_center_iff (N : Neighborhood) (parent : Index) :
-    childCodeBlock parent =
-        (N.middleSouth.x1.val, N.middleSouth.x2.val,
-          N.middleNorth.x1.val, N.middleNorth.x2.val) ↔
+theorem childIndexBlock_eq_center_iff (N : Neighborhood) (parent : Index) :
+    childIndexBlock parent =
+        (N.middleSouth.x1, N.middleSouth.x2,
+          N.middleNorth.x1, N.middleNorth.x2) ↔
       N.IsCenterParent parent := by
-  simp [childCodeBlock, IsCenterParent, offset0, offset1, Fin.ext_iff]
+  simp [childIndexBlock, IsCenterParent, offset0, offset1]
 
 /-- Index-level form of local recognizability. -/
 theorem existsUnique_centerParentIndex (N : Neighborhood) :
     ∃! parent : Index, N.IsCenterParent parent := by
   rcases N.existsUnique_centerParent with ⟨parent, hparent, hunique⟩
-  refine ⟨parent, (N.childCodeBlock_eq_center_iff parent).1 hparent, ?_⟩
+  refine ⟨parent, (N.childIndexBlock_eq_center_iff parent).1 hparent, ?_⟩
   intro other hother
-  exact hunique other ((N.childCodeBlock_eq_center_iff other).2 hother)
+  exact hunique other ((N.childIndexBlock_eq_center_iff other).2 hother)
 
 end Neighborhood
 
