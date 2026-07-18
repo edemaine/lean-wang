@@ -154,7 +154,7 @@ end BoundaryZeroRepresents
 
 /-! ## Inverting the outward validation route -/
 
-@[simp] theorem logicalTape_atLogical (growth : Turing.Dir)
+@[simp] theorem logicalTape_atLogical {numTags : Nat} (growth : Turing.Dir)
     (T : FullTM0.Tape (Symbol numTags)) (origin position : Nat) :
     logicalTape growth (atLogical growth T origin) position =
       logicalTape growth T (origin + position) := by
@@ -162,14 +162,15 @@ end BoundaryZeroRepresents
     simp [logicalTape, atLogical, OrientedMarkerTape.orientTape,
       FullTM0.Tape.moveN, FullTM0.Tape.offset] <;> congr 1 <;> ring
 
-@[simp] theorem atLogical_apply_physicalCoord (growth : Turing.Dir)
+@[simp] theorem atLogical_apply_physicalCoord {numTags : Nat}
+    (growth : Turing.Dir)
     (T : FullTM0.Tape (Symbol numTags)) (origin position : Nat) :
     atLogical growth T origin (physicalCoord growth position) =
       T (physicalCoord growth (origin + position)) := by
   simpa only [logicalTape_apply] using
     logicalTape_atLogical growth T origin position
 
-private theorem rightGap_blank
+private theorem rightGap_blank {numTags : Nat} {target : Fin 5}
     (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))
     (origin distance k : Nat)
     (hgap : SearchGap (fun symbol => symbol = blankSymbol)
@@ -181,7 +182,7 @@ private theorem rightGap_blank
   rw [atLogical_apply_offset] at hblank
   simpa [FullTM0.Tape.offset_right, Nat.cast_add] using hblank
 
-private theorem rightGap_boundary
+private theorem rightGap_boundary {numTags : Nat} {target : Fin 5}
     (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))
     (origin distance : Nat)
     (hgap : SearchGap (fun symbol => symbol = blankSymbol)
@@ -196,7 +197,8 @@ private theorem rightGap_boundary
 unique four-register core between the observed boundary `0` and boundary
 `4`.  The returned tape is centered at the reconstructed final boundary. -/
 theorem outwardSweep_reconstructs
-    (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))
+    {numTags : Nat} (growth : Turing.Dir)
+    (T : FullTM0.Tape (Symbol numTags))
     (source finish : Nat)
     (hsource : (atLogical growth T source).read = boundarySymbol 0)
     (hexec : RouteExecutesAt growth T outwardSweep source finish) :
