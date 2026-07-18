@@ -16,9 +16,11 @@ namespace CanonicalShadeComparisonCore
 
 open OrientedRedCycles RedCycles RedShades RedShadePaths RedShadeCycles
   RedShadeGraph RedShadeGraphBoards RedShadeGraphColoring
-  RedShadeGraphLocalCoverage RedShadeGraphRefinement RedShadeGraphTranslation
+  RedShadeGraphLocalCoverage RedShadeGraphRefinement
+  RedShadeGraphBoundedPath RedShadeGraphTranslation
   RedShadeCycleConnectivity RedShadeCycleBridgeComposition
-  RefinementTranslation ShadedSubstitution CanonicalShadeGeometry
+  RefinementTranslation Signals.FreeCellLocal ShadedSubstitution
+  CanonicalShadeGeometry
 
 theorem Related.right_unique
     {parity : Bool} {first second third : Option RedShades.Shade}
@@ -165,6 +167,143 @@ theorem value_eq_of_oddCycleBridge
   have aroundEq : value states secondPort = value states target :=
     around.sound valid
   exact aroundEq.symm.trans secondValue
+
+/-- Phase-specific inputs needed after agreement has been proved on live ports. -/
+structure PhaseComparison
+    (actualGrid canonicalGrid : Nat → Nat → Index)
+    (actualStates canonicalStates : Nat → Nat → RedShades.State)
+    (scale extent : Nat) : Prop where
+  actualValid : ValidShadeGrid actualGrid actualStates
+  canonicalValid : ValidShadeRectangle canonicalGrid canonicalStates extent extent
+  extent_large : 8 * scale ≤ extent
+  portPresent_eq : ∀ port, port.x < 8 * scale → port.y < 8 * scale →
+    portPresent canonicalGrid port = portPresent actualGrid port
+  present_value_eq : ∀ port,
+    2 * scale ≤ port.x → port.x < 6 * scale →
+    2 * scale ≤ port.y → port.y < 6 * scale →
+    portPresent actualGrid port = true →
+    value actualStates port = value canonicalStates port
+
+namespace PhaseComparison
+
+/-- Agreement on live ports extends to absent ports through common geometry. -/
+theorem value_eq
+    {actualGrid canonicalGrid : Nat → Nat → Index}
+    {actualStates canonicalStates : Nat → Nat → RedShades.State}
+    {scale extent : Nat}
+    (comparison : PhaseComparison actualGrid canonicalGrid
+      actualStates canonicalStates scale extent)
+    (target : Port)
+    (targetWest : 2 * scale ≤ target.x)
+    (targetEast : target.x < 6 * scale)
+    (targetSouth : 2 * scale ≤ target.y)
+    (targetNorth : target.y < 6 * scale) :
+    value actualStates target = value canonicalStates target := by
+  by_cases present : portPresent actualGrid target = true
+  · exact comparison.present_value_eq target targetWest targetEast
+      targetSouth targetNorth present
+  · have canonicalBounds : PortInBounds target extent extent := by
+      have extentLarge := comparison.extent_large
+      constructor <;> omega
+    have actualSome :=
+      RedShadeGraphCoarsening.value_isSome_eq_portPresent
+        comparison.actualValid target
+    have canonicalSome :=
+      RedShadeGraphColoring.value_isSome_eq_portPresent
+        comparison.canonicalValid target canonicalBounds
+    rw [comparison.portPresent_eq target (by omega) (by omega)] at canonicalSome
+    have absent : portPresent actualGrid target = false :=
+      Bool.eq_false_of_not_eq_true present
+    rw [absent] at actualSome canonicalSome
+    cases actualValue : value actualStates target <;>
+      cases canonicalValue : value canonicalStates target <;>
+      simp_all
+
+/-- Portwise phase agreement determines the complete quarter state. -/
+theorem state_eq
+    {actualGrid canonicalGrid : Nat → Nat → Index}
+    {actualStates canonicalStates : Nat → Nat → RedShades.State}
+    {scale extent x y : Nat}
+    (comparison : PhaseComparison actualGrid canonicalGrid
+      actualStates canonicalStates scale extent)
+    (xWest : 2 * scale ≤ x) (xEast : x < 6 * scale)
+    (ySouth : 2 * scale ≤ y) (yNorth : y < 6 * scale) :
+    actualStates x y = canonicalStates x y := by
+  have west := comparison.value_eq ⟨x, y, .west⟩
+    xWest xEast ySouth yNorth
+  have east := comparison.value_eq ⟨x, y, .east⟩
+    xWest xEast ySouth yNorth
+  have south := comparison.value_eq ⟨x, y, .south⟩
+    xWest xEast ySouth yNorth
+  have north := comparison.value_eq ⟨x, y, .north⟩
+    xWest xEast ySouth yNorth
+  rcases actualEq : actualStates x y with
+    ⟨actualWest, actualEast, actualSouth, actualNorth⟩
+  rcases canonicalEq : canonicalStates x y with
+    ⟨canonicalWest, canonicalEast, canonicalSouth, canonicalNorth⟩
+  simp only [value, actualEq, canonicalEq] at west east south north
+  subst canonicalWest
+  subst canonicalEast
+  subst canonicalSouth
+  subst canonicalNorth
+  rfl
+
+/-- Transfer a canonical free row through one phase comparison. -/
+theorem isFreeRow
+    {actualGrid canonicalGrid : Nat → Nat → Index}
+    {actualStates canonicalStates : Nat → Nat → RedShades.State}
+    {scale extent row : Nat}
+    (comparison : PhaseComparison actualGrid canonicalGrid
+      actualStates canonicalStates scale extent)
+    (componentEq : ∀ x y, x < 8 * scale → y < 8 * scale →
+      componentAt canonicalGrid x y = componentAt actualGrid x y)
+    (canonicalFree : ShadedPlaneSignalGrid.IsFreeRow
+      canonicalGrid canonicalStates scale (3 * scale) row)
+    (rowSouth : 2 * scale ≤ row) (rowNorth : row < 6 * scale) :
+    ShadedPlaneSignalGrid.IsFreeRow
+      actualGrid actualStates scale (3 * scale) row := by
+  intro quarterX westBound eastBound
+  have xWest : 2 * scale ≤ quarterX := by
+    unfold quarterWest at westBound
+    omega
+  have xEast : quarterX < 6 * scale := by
+    unfold quarterEast at eastBound
+    omega
+  have stateAgreement := comparison.state_eq
+    xWest xEast rowSouth rowNorth
+  have componentAgreement := componentEq quarterX row (by omega) (by omega)
+  rw [← componentAgreement, stateAgreement]
+  exact canonicalFree quarterX westBound eastBound
+
+/-- Transfer a canonical free column through one phase comparison. -/
+theorem isFreeColumn
+    {actualGrid canonicalGrid : Nat → Nat → Index}
+    {actualStates canonicalStates : Nat → Nat → RedShades.State}
+    {scale extent column : Nat}
+    (comparison : PhaseComparison actualGrid canonicalGrid
+      actualStates canonicalStates scale extent)
+    (componentEq : ∀ x y, x < 8 * scale → y < 8 * scale →
+      componentAt canonicalGrid x y = componentAt actualGrid x y)
+    (canonicalFree : ShadedPlaneSignalGrid.IsFreeColumn
+      canonicalGrid canonicalStates scale (3 * scale) column)
+    (columnWest : 2 * scale ≤ column)
+    (columnEast : column < 6 * scale) :
+    ShadedPlaneSignalGrid.IsFreeColumn
+      actualGrid actualStates scale (3 * scale) column := by
+  intro quarterY southBound northBound
+  have ySouth : 2 * scale ≤ quarterY := by
+    unfold quarterSouth at southBound
+    omega
+  have yNorth : quarterY < 6 * scale := by
+    unfold quarterNorth at northBound
+    omega
+  have stateAgreement := comparison.state_eq
+    columnWest columnEast ySouth yNorth
+  have componentAgreement := componentEq column quarterY (by omega) (by omega)
+  rw [← componentAgreement, stateAgreement]
+  exact canonicalFree quarterY southBound northBound
+
+end PhaseComparison
 
 end CanonicalShadeComparisonCore
 end Closed104

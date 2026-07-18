@@ -369,113 +369,12 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
             (canonicalSparse.symm.trans canonicalBlock)
         exact finish sourceValues
 
-private theorem portPresent_canonical_eq (depth : Nat)
-    (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0)
-    (port : Port) (portEast : port.x < 8 * scale depth)
-    (portNorth : port.y < 8 * scale depth) :
-    portPresent (indexGrid (depth + 2)) port =
-      portPresent (actualGrid depth coarse) port := by
-  have xBound : port.x / 2 < 4 ^ (depth + 2) := by
-    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    simp only [scale] at portEast
-    rw [show 4 ^ (depth + 2) = 16 * 4 ^ depth by
-      exact pow_four_add_two depth]
-    omega
-  have yBound : port.y / 2 < 4 ^ (depth + 2) := by
-    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    simp only [scale] at portNorth
-    rw [show 4 ^ (depth + 2) = 16 * 4 ^ depth by
-      exact pow_four_add_two depth]
-    omega
-  have indexEq :
-      indexGrid (depth + 2) (port.x / 2) (port.y / 2) =
-        actualGrid depth coarse (port.x / 2) (port.y / 2) := by
-    change supertileIndexGrid (depth + 2) seedNode
-        (port.x / 2) (port.y / 2) =
-      iterateRefine (2 * depth + 4) coarse
-        (port.x / 2) (port.y / 2)
-    rw [← show 2 * (depth + 2) = 2 * depth + 4 by omega]
-    exact CanonicalShadeGeometry.supertileIndexGrid_eq_coarse
-      (depth + 2) seedNode coarse
-      (coarseRoot.trans seedNode_parent.symm) xBound yBound
-  rcases port with ⟨x, y, side⟩
-  simp only at indexEq
-  cases side <;> simp only [portPresent, componentAt] <;> rw [indexEq]
-
-theorem value_eq (depth : Nat) (coarse : Nat → Nat → Index)
-    (states : Nat → Nat → RedShades.State)
-    (coarseRoot : coarse 0 0 = 0)
-    (valid : ValidShadeGrid (actualGrid depth coarse) states)
-    (shaded : CycleShade states
-      (scale depth) (3 * scale depth)
-      (scale depth) (3 * scale depth) .light)
-    (target : Port)
-    (targetWest : 2 * scale depth ≤ target.x)
-    (targetEast : target.x < 6 * scale depth)
-    (targetSouth : 2 * scale depth ≤ target.y)
-    (targetNorth : target.y < 6 * scale depth) :
-    value states target = value (shadeGrid (depth + 2)) target := by
-  by_cases present : portPresent (actualGrid depth coarse) target = true
-  · exact present_value_eq depth coarse states coarseRoot valid shaded target
-      targetWest targetEast targetSouth targetNorth present
-  · have canonicalBounds : PortInBounds target
-        (2 * 4 ^ (depth + 2)) (2 * 4 ^ (depth + 2)) := by
-      constructor <;> simp only [scale] at targetEast targetNorth ⊢ <;>
-        rw [show 4 ^ (depth + 2) = 16 * 4 ^ depth by
-          exact pow_four_add_two depth] <;>
-        omega
-    have canonicalValid := CanonicalOddShadeGeometry.validRectangle (depth + 2)
-    have actualSome :=
-      RedShadeGraphCoarsening.value_isSome_eq_portPresent valid target
-    have canonicalSome :=
-      RedShadeGraphColoring.value_isSome_eq_portPresent
-        canonicalValid target canonicalBounds
-    have presentEq := portPresent_canonical_eq depth coarse coarseRoot target
-      (by omega) (by omega)
-    rw [presentEq] at canonicalSome
-    have absent : portPresent (actualGrid depth coarse) target = false :=
-      Bool.eq_false_of_not_eq_true present
-    rw [absent] at actualSome canonicalSome
-    cases actualValue : value states target <;>
-      cases canonicalValue : value (shadeGrid (depth + 2)) target <;>
-      simp_all
-
-theorem state_eq (depth : Nat) (coarse : Nat → Nat → Index)
-    (states : Nat → Nat → RedShades.State)
-    (coarseRoot : coarse 0 0 = 0)
-    (valid : ValidShadeGrid (actualGrid depth coarse) states)
-    (shaded : CycleShade states
-      (scale depth) (3 * scale depth)
-      (scale depth) (3 * scale depth) .light)
-    (x y : Nat)
-    (xWest : 2 * scale depth ≤ x) (xEast : x < 6 * scale depth)
-    (ySouth : 2 * scale depth ≤ y) (yNorth : y < 6 * scale depth) :
-    states x y = shadeGrid (depth + 2) x y := by
-  have west := value_eq depth coarse states coarseRoot valid shaded
-    ⟨x, y, .west⟩ xWest xEast ySouth yNorth
-  have east := value_eq depth coarse states coarseRoot valid shaded
-    ⟨x, y, .east⟩ xWest xEast ySouth yNorth
-  have south := value_eq depth coarse states coarseRoot valid shaded
-    ⟨x, y, .south⟩ xWest xEast ySouth yNorth
-  have north := value_eq depth coarse states coarseRoot valid shaded
-    ⟨x, y, .north⟩ xWest xEast ySouth yNorth
-  rcases actualEq : states x y with ⟨actualWest, actualEast,
-    actualSouth, actualNorth⟩
-  rcases canonicalEq : shadeGrid (depth + 2) x y with
-    ⟨canonicalWest, canonicalEast, canonicalSouth, canonicalNorth⟩
-  simp only [value, actualEq, canonicalEq] at west east south north
-  subst canonicalWest
-  subst canonicalEast
-  subst canonicalSouth
-  subst canonicalNorth
-  rfl
-
-private theorem componentAt_canonical_eq (depth : Nat)
+private theorem index_canonical_eq (depth : Nat)
     (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0)
     (x y : Nat) (xEast : x < 8 * scale depth)
     (yNorth : y < 8 * scale depth) :
-    componentAt (indexGrid (depth + 2)) x y =
-      componentAt (actualGrid depth coarse) x y := by
+    indexGrid (depth + 2) (x / 2) (y / 2) =
+      actualGrid depth coarse (x / 2) (y / 2) := by
   have xBound : x / 2 < 4 ^ (depth + 2) := by
     apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
     simp only [scale] at xEast
@@ -488,16 +387,59 @@ private theorem componentAt_canonical_eq (depth : Nat)
     rw [show 4 ^ (depth + 2) = 16 * 4 ^ depth by
       exact pow_four_add_two depth]
     omega
-  have indexEq : indexGrid (depth + 2) (x / 2) (y / 2) =
-      actualGrid depth coarse (x / 2) (y / 2) := by
-    change supertileIndexGrid (depth + 2) seedNode (x / 2) (y / 2) =
-      iterateRefine (2 * depth + 4) coarse (x / 2) (y / 2)
-    rw [← show 2 * (depth + 2) = 2 * depth + 4 by omega]
-    exact CanonicalShadeGeometry.supertileIndexGrid_eq_coarse
-      (depth + 2) seedNode coarse
-      (coarseRoot.trans seedNode_parent.symm) xBound yBound
+  change supertileIndexGrid (depth + 2) seedNode (x / 2) (y / 2) =
+    iterateRefine (2 * depth + 4) coarse (x / 2) (y / 2)
+  rw [← show 2 * (depth + 2) = 2 * depth + 4 by omega]
+  exact CanonicalShadeGeometry.supertileIndexGrid_eq_coarse
+    (depth + 2) seedNode coarse
+    (coarseRoot.trans seedNode_parent.symm) xBound yBound
+
+private theorem portPresent_canonical_eq (depth : Nat)
+    (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0)
+    (port : Port) (portEast : port.x < 8 * scale depth)
+    (portNorth : port.y < 8 * scale depth) :
+    portPresent (indexGrid (depth + 2)) port =
+      portPresent (actualGrid depth coarse) port := by
+  rcases port with ⟨x, y, side⟩
+  cases side <;> simp only [portPresent, componentAt] <;>
+    rw [index_canonical_eq depth coarse coarseRoot x y portEast portNorth]
+
+/-- The odd phase packages live-port agreement and common geometry. -/
+theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
+    (states : Nat → Nat → RedShades.State)
+    (coarseRoot : coarse 0 0 = 0)
+    (valid : ValidShadeGrid (actualGrid depth coarse) states)
+    (shaded : CycleShade states
+      (scale depth) (3 * scale depth)
+      (scale depth) (3 * scale depth) .light) :
+    PhaseComparison (actualGrid depth coarse) (indexGrid (depth + 2))
+      states (shadeGrid (depth + 2)) (scale depth)
+      (2 * 4 ^ (depth + 2)) := by
+  refine {
+    actualValid := valid
+    canonicalValid := CanonicalOddShadeGeometry.validRectangle (depth + 2)
+    extent_large := ?_
+    portPresent_eq := ?_
+    present_value_eq := ?_
+  }
+  · rw [pow_four_add_two]
+    simp only [scale]
+    omega
+  · intro port portEast portNorth
+    exact portPresent_canonical_eq depth coarse coarseRoot
+      port portEast portNorth
+  · intro port portWest portEast portSouth portNorth portPresent
+    exact present_value_eq depth coarse states coarseRoot valid shaded
+      port portWest portEast portSouth portNorth portPresent
+
+private theorem componentAt_canonical_eq (depth : Nat)
+    (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0)
+    (x y : Nat) (xEast : x < 8 * scale depth)
+    (yNorth : y < 8 * scale depth) :
+    componentAt (indexGrid (depth + 2)) x y =
+      componentAt (actualGrid depth coarse) x y := by
   simp only [componentAt]
-  rw [indexEq]
+  rw [index_canonical_eq depth coarse coarseRoot x y xEast yNorth]
 
 theorem coordinate_isFreeRow (depth : Nat)
     (coarse : Nat → Nat → Index)
@@ -510,15 +452,14 @@ theorem coordinate_isFreeRow (depth : Nat)
     {row : Nat} (rowMem : row ∈ coordinates depth) :
     ShadedPlaneSignalGrid.IsFreeRow (actualGrid depth coarse) states
       (scale depth) (3 * scale depth) row := by
-  have canonicalFree := CanonicalOddFreeLines.coordinate_isFreeRow depth rowMem
+  have canonicalFree : ShadedPlaneSignalGrid.IsFreeRow
+      (indexGrid (depth + 2)) (shadeGrid (depth + 2))
+      (scale depth) (3 * scale depth) row := by
+    rw [show 3 * scale depth = 6 * 4 ^ depth by
+      unfold scale
+      omega]
+    exact CanonicalOddFreeLines.coordinate_isFreeRow depth rowMem
   have rowBounds := mem_coordinates_bounds depth rowMem
-  intro quarterX westBound eastBound
-  have xWest : 2 * scale depth ≤ quarterX := by
-    unfold quarterWest at westBound
-    omega
-  have xEast : quarterX < 6 * scale depth := by
-    unfold quarterEast at eastBound
-    omega
   have ySouth : 2 * scale depth ≤ row := by
     unfold quarterSouth at rowBounds
     simp only [scale] at rowBounds ⊢
@@ -527,16 +468,10 @@ theorem coordinate_isFreeRow (depth : Nat)
     unfold quarterNorth at rowBounds
     simp only [scale] at rowBounds ⊢
     omega
-  have stateAgreement := state_eq depth coarse states coarseRoot valid shaded
-    quarterX row xWest xEast ySouth yNorth
-  have componentAgreement := componentAt_canonical_eq depth coarse coarseRoot
-    quarterX row (by omega) (by omega)
-  rw [← componentAgreement, stateAgreement]
-  have eastScale : 3 * scale depth = 6 * 4 ^ depth := by
-    unfold scale
-    omega
-  rw [eastScale] at eastBound
-  exact canonicalFree quarterX westBound eastBound
+  exact (comparison depth coarse states coarseRoot valid shaded).isFreeRow
+    (fun x y hx hy => componentAt_canonical_eq depth coarse coarseRoot
+      x y hx hy)
+    canonicalFree ySouth yNorth
 
 theorem coordinate_isFreeColumn (depth : Nat)
     (coarse : Nat → Nat → Index)
@@ -549,10 +484,14 @@ theorem coordinate_isFreeColumn (depth : Nat)
     {column : Nat} (columnMem : column ∈ coordinates depth) :
     ShadedPlaneSignalGrid.IsFreeColumn (actualGrid depth coarse) states
       (scale depth) (3 * scale depth) column := by
-  have canonicalFree := CanonicalOddFreeLines.coordinate_isFreeColumn
-    depth columnMem
+  have canonicalFree : ShadedPlaneSignalGrid.IsFreeColumn
+      (indexGrid (depth + 2)) (shadeGrid (depth + 2))
+      (scale depth) (3 * scale depth) column := by
+    rw [show 3 * scale depth = 6 * 4 ^ depth by
+      unfold scale
+      omega]
+    exact CanonicalOddFreeLines.coordinate_isFreeColumn depth columnMem
   have columnBounds := mem_coordinates_bounds depth columnMem
-  intro quarterY southBound northBound
   have xWest : 2 * scale depth ≤ column := by
     unfold quarterSouth at columnBounds
     simp only [scale] at columnBounds ⊢
@@ -561,22 +500,10 @@ theorem coordinate_isFreeColumn (depth : Nat)
     unfold quarterNorth at columnBounds
     simp only [scale] at columnBounds ⊢
     omega
-  have ySouth : 2 * scale depth ≤ quarterY := by
-    unfold quarterSouth at southBound
-    omega
-  have yNorth : quarterY < 6 * scale depth := by
-    unfold quarterNorth at northBound
-    omega
-  have stateAgreement := state_eq depth coarse states coarseRoot valid shaded
-    column quarterY xWest xEast ySouth yNorth
-  have componentAgreement := componentAt_canonical_eq depth coarse coarseRoot
-    column quarterY (by omega) (by omega)
-  rw [← componentAgreement, stateAgreement]
-  have northScale : 3 * scale depth = 6 * 4 ^ depth := by
-    unfold scale
-    omega
-  rw [northScale] at northBound
-  exact canonicalFree quarterY southBound northBound
+  exact (comparison depth coarse states coarseRoot valid shaded).isFreeColumn
+    (fun x y hx hy => componentAt_canonical_eq depth coarse coarseRoot
+      x y hx hy)
+    canonicalFree xWest xEast
 
 end CanonicalOddShadeComparison
 end Closed104
