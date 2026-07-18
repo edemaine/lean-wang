@@ -26,6 +26,7 @@ open BoundedMarkerProgram CounterControlPlan
 open CounterControlGlobalUnnesting CounterControlParentContinuation
 open CounterControlGuardedSearch
 open CounterControlGenuineValidation
+open CounterControlCleanupSuffixGeometry
 
 noncomputable section
 
@@ -41,6 +42,73 @@ private theorem immortalFrom_of_reaches
   rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
   intro hhalts
   exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
+
+/-! ## Agreement on the inward ray -/
+
+/-- Two tapes agree at and inward from their common head.  Cleanup may have
+erased markers farther outward, so full tape equality is unnecessarily
+strong for replaying the next inward search. -/
+def InwardRayEq (inward : Turing.Dir)
+    (first second : FullTM0.Tape (Symbol numTags)) : Prop :=
+  ∀ distance,
+    (first.moveN inward distance).read =
+      (second.moveN inward distance).read
+
+@[refl] theorem InwardRayEq.refl
+    (inward : Turing.Dir) (T : FullTM0.Tape (Symbol numTags)) :
+    InwardRayEq inward T T := by
+  intro distance
+  rfl
+
+/-- Ray agreement transports an exact search gap. -/
+theorem InwardRayEq.searchGap
+    {inward : Turing.Dir}
+    {first second : FullTM0.Tape (Symbol numTags)}
+    (agreement : InwardRayEq inward first second)
+    {target : Fin 5} {distance : Nat}
+    (gap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches second inward distance) :
+    SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches first inward distance := by
+  have hagree : ∀ k,
+      first (FullTM0.Tape.offset inward k) =
+        second (FullTM0.Tape.offset inward k) := by
+    intro k
+    have heq := agreement k
+    cases inward <;>
+      simpa [FullTM0.Tape.read, FullTM0.Tape.moveN,
+        FullTM0.Tape.offset] using heq
+  constructor
+  · intro k hk
+    rw [hagree k]
+    exact gap.blank hk
+  · rw [hagree distance]
+    exact gap.marked
+
+/-- Erasing the same reached target and departing inward preserves agreement
+on the remaining inward ray. -/
+theorem InwardRayEq.eraseDepart
+    {inward : Turing.Dir}
+    {first second : FullTM0.Tape (Symbol numTags)}
+    (agreement : InwardRayEq inward first second)
+    (distance : Nat) :
+    InwardRayEq inward (eraseDepart first inward distance)
+      (eraseDepart second inward distance) := by
+  intro k
+  have heq := agreement (distance + 1 + k)
+  change
+    (((((first.moveN inward distance).write blankSymbol).move inward).moveN
+      inward k).read) =
+    (((((second.moveN inward distance).write blankSymbol).move inward).moveN
+      inward k).read)
+  cases inward <;>
+    simp [FullTM0.Tape.read,
+      FullTM0.Tape.move, FullTM0.Tape.moveN,
+      FullTM0.Tape.offset] at heq ⊢ <;>
+    split_ifs <;> try omega
+  all_goals
+    ring_nf at heq ⊢
+    exact heq
 
 /-- Any reached cleanup caller whose gap contains the original outward gap
 produces the required outward-instruction handoff.  The cleanup suffix itself
