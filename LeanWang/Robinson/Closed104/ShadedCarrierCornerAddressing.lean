@@ -333,20 +333,48 @@ theorem supertileIndexGrid_succ (level x y : Nat) :
   rw [Node.child_parent, childPosition_mod_four, childPosition_div_four]
   rfl
 
+/-- A crossing lies at the common center of one horizontal and vertical
+carrier frame. -/
+private structure Centered (level x y depth : Nat) : Prop where
+  rowOwner : depthAt (level - 1) y = some depth
+  columnOwner : depthAt (level - 1) x = some depth
+  xCenter : x % period depth = 2 * scale depth + 1
+  yCenter : y % period depth = 2 * scale depth + 1
+
+private theorem Centered.lift
+    {level x y depth : Nat} (centered : Centered level x y depth)
+    (levelPositive : 0 < level) (xPositive : 0 < x) (yPositive : 0 < y)
+    (xMod : x % 4 = 1) (yMod : y % 4 = 1) :
+    Centered (level + 1) (liftCoordinate x) (liftCoordinate y) (depth + 1) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · have shifted := depthAt_liftCoordinate (level - 1) y yPositive yMod
+    rw [Nat.sub_add_cancel levelPositive, centered.rowOwner] at shifted
+    simpa using shifted
+  · have shifted := depthAt_liftCoordinate (level - 1) x xPositive xMod
+    rw [Nat.sub_add_cancel levelPositive, centered.columnOwner] at shifted
+    simpa using shifted
+  · exact liftCoordinate_centerResidue xPositive centered.xCenter
+  · exact liftCoordinate_centerResidue yPositive centered.yCenter
+
+private theorem centeredAtOne
+    {level x y : Nat} (levelPositive : 0 < level)
+    (xCenter : x % period 1 = 2 * scale 1 + 1)
+    (yCenter : y % period 1 = 2 * scale 1 + 1) :
+    Centered (level + 1) x y 1 := by
+  exact ⟨depthAt_eq_one_of_center_one levelPositive yCenter,
+    depthAt_eq_one_of_center_one levelPositive xCenter,
+    xCenter, yCenter⟩
+
 /-- Every all-clear index-zero crossing in a canonical seed supertile is the
 center of one of its recursive carrier frames. -/
-theorem indexZero_crossing_centered :
+private theorem indexZero_crossing_centered :
     ∀ level x y : Nat,
       x < 4 ^ level →
       y < 4 ^ level →
       supertileIndexGrid level seedNode x y = 0 →
       isHorizontalCarrier level (2 * x + 1) (2 * y + 1) = true →
       isVerticalCarrier level (2 * x + 1) (2 * y + 1) = true →
-      ∃ depth,
-        depthAt (level - 1) (2 * y + 1) = some depth ∧
-        depthAt (level - 1) (2 * x + 1) = some depth ∧
-        (2 * x + 1) % period depth = 2 * scale depth + 1 ∧
-        (2 * y + 1) % period depth = 2 * scale depth + 1 := by
+      ∃ depth, Centered level (2 * x + 1) (2 * y + 1) depth := by
   intro level
   induction level with
   | zero =>
@@ -416,27 +444,11 @@ theorem indexZero_crossing_centered :
           simpa only [fineXEq, fineYEq] using vertical
         rcases inductionHypothesis (x / 4) (y / 4)
             parentXBound parentYBound parentZero
-            coarseHorizontal coarseVertical with
-          ⟨depth, rowOwner, columnOwner, xCenter, yCenter⟩
-        have rowOwnerFine :
-            depthAt level (liftCoordinate coarseY) = some (depth + 1) := by
-          have shifted := depthAt_liftCoordinate (level - 1) coarseY
-            coarseYPositive coarseYMod
-          rw [Nat.sub_add_cancel levelPositive, rowOwner] at shifted
-          simpa using shifted
-        have columnOwnerFine :
-            depthAt level (liftCoordinate coarseX) = some (depth + 1) := by
-          have shifted := depthAt_liftCoordinate (level - 1) coarseX
-            coarseXPositive coarseXMod
-          rw [Nat.sub_add_cancel levelPositive, columnOwner] at shifted
-          simpa using shifted
-        refine ⟨depth + 1, ?_, ?_, ?_, ?_⟩
-        · simpa [fineYEq] using rowOwnerFine
-        · simpa [fineXEq] using columnOwnerFine
-        · simpa only [fineXEq] using
-            liftCoordinate_centerResidue coarseXPositive xCenter
-        · simpa only [fineYEq] using
-            liftCoordinate_centerResidue coarseYPositive yCenter
+            coarseHorizontal coarseVertical with ⟨depth, coarseCentered⟩
+        exact ⟨depth + 1, by
+          simpa only [fineXEq, fineYEq] using
+            coarseCentered.lift levelPositive coarseXPositive coarseYPositive
+              coarseXMod coarseYMod⟩
       · have xMod : x % 4 = 0 := by simpa using congrArg Fin.val xLocal
         have yMod : y % 4 = 0 := by simpa using congrArg Fin.val yLocal
         have parentOdd := odd_coordinates_of_index_four
@@ -463,15 +475,9 @@ theorem indexZero_crossing_centered :
             liftCoordinate coarseY % period 1 = 2 * scale 1 + 1 := by
           simp only [coarseY, liftCoordinate, period, scale]
           omega
-        have rowOwner : depthAt level (liftCoordinate coarseY) = some 1 :=
-          depthAt_eq_one_of_center_one levelPositive yCenter
-        have columnOwner : depthAt level (liftCoordinate coarseX) = some 1 :=
-          depthAt_eq_one_of_center_one levelPositive xCenter
-        refine ⟨1, ?_, ?_, ?_, ?_⟩
-        · simpa [fineYEq] using rowOwner
-        · simpa [fineXEq] using columnOwner
-        · simpa only [fineXEq] using xCenter
-        · simpa only [fineYEq] using yCenter
+        exact ⟨1, by
+          simpa only [fineXEq, fineYEq] using
+            centeredAtOne levelPositive xCenter yCenter⟩
       · have xMod : x % 4 = 2 := by simpa using congrArg Fin.val xLocal
         have yMod : y % 4 = 2 := by simpa using congrArg Fin.val yLocal
         have parentPhase := supertileIndexGrid_thinPhase level
@@ -553,7 +559,7 @@ theorem corner_point_zero
     (by simpa only [← iEq, ← jEq] using horizontal)
     (by simpa only [← iEq, ← jEq] using vertical)
   rcases centered with
-    ⟨depth, rowOwner, columnOwner, xCenter, yCenter⟩
+    ⟨depth, ⟨rowOwner, columnOwner, xCenter, yCenter⟩⟩
   apply point_eq_zero_of_centerResidues
     (depth := depth)
   · simpa only [← jEq] using rowOwner
