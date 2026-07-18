@@ -52,33 +52,6 @@ theorem ValidShadeGrid.vertical_east_has_positive_weightAt
     vertical_east_has_positive_weight _ _ _
       (valid.allowed x y) hselected
 
-/-- Zero vertical crossings preserve height while moving horizontally. -/
-private theorem faceHeight_add_column_eq_of_upWeightAt_zero
-    (shaded : CycleShade stateGrid west east south north .light)
-    (cycle : CycleOn indexGrid west east south north)
-    (valid : ValidShadeGrid indexGrid stateGrid)
-    {start offset count : Nat}
-    (hstartWest : quarterWest west <= start)
-    (hfinishEast : start + count < quarterEast east)
-    (hzero : forall i, i < count ->
-      upWeightAt stateGrid (start + i + 1)
-        (quarterSouth south + offset) = 0) :
-    faceHeight stateGrid (start + count) (quarterSouth south) offset =
-      faceHeight stateGrid start (quarterSouth south) offset := by
-  induction count with
-  | zero => simp
-  | succ count ih =>
-      have hprevious := ih (by omega) (fun i hi => hzero i (by omega))
-      have hdiff := OrientedLightHeight.CycleShade.faceHeight_sub_left
-        shaded cycle valid (column := start + (count + 1))
-        (offset := offset) (by omega) (by omega)
-      have hleft : start + (count + 1) - 1 = start + count := by omega
-      rw [hleft] at hdiff
-      have hstep := hzero count (by omega)
-      have hcolumn : start + count + 1 = start + (count + 1) := by omega
-      rw [hcolumn] at hstep
-      omega
-
 private theorem negative_upWeightAt_right_false
     (shaded : CycleShade stateGrid west east south north .light)
     (cycle : CycleOn indexGrid west east south north)
@@ -95,37 +68,30 @@ private theorem negative_upWeightAt_right_false
       upWeightAt stateGrid x row = 0)
     (hnegative : upWeightAt stateGrid boundary row = -1) : False := by
   let offset := row - quarterSouth south
-  let count := boundary - start - 1
+  let potential := fun x =>
+    faceHeight stateGrid x (quarterSouth south) offset
+  let weight := fun x => upWeightAt stateGrid x row
   have hrow : quarterSouth south + offset = row := by
     dsimp [offset]
     omega
-  have hrun := faceHeight_add_column_eq_of_upWeightAt_zero
-    shaded cycle valid (start := start) (offset := offset) (count := count)
-    hstartWest (by dsimp [count]; omega) (by
-      intro i hi
-      rw [hrow]
-      apply hzero (start + i + 1)
-      · omega
-      · dsimp [count] at hi
-        omega)
-  have hbeforeColumn : start + count = boundary - 1 := by
-    dsimp [count]
+  have step (position : Nat) (westPosition : quarterWest west < position)
+      (eastPosition : position < quarterEast east) :
+      potential position = potential (position - 1) + weight position := by
+    have difference := OrientedLightHeight.CycleShade.faceHeight_sub_left
+      shaded cycle valid (column := position) (offset := offset)
+        westPosition eastPosition
+    rw [hrow] at difference
+    dsimp [potential, weight]
     omega
-  rw [hbeforeColumn, hfreeHeight] at hrun
-  have hbefore : faceHeight stateGrid (boundary - 1)
-      (quarterSouth south) offset = 1 := hrun
-  have hdiff := OrientedLightHeight.CycleShade.faceHeight_sub_left
-    shaded cycle valid (column := boundary) (offset := offset)
-      (by omega) hboundaryEast
-  have hleft : boundary - 1 = boundary - 1 := rfl
-  rw [hrow, hnegative, hbefore] at hdiff
-  have hafter : faceHeight stateGrid boundary (quarterSouth south) offset = 0 := by
-    omega
-  have hpositive := OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
+  apply OrientedLightBoundarySearch.negative_step_after_false
+    (potential := potential) (weight := weight) hstartBoundary
+    (by simpa [potential] using hfreeHeight)
+    (fun position lower upper => step position (by omega) (by omega))
+    (fun position lower upper => by simpa [weight] using hzero position lower upper)
+    (by simpa [weight] using hnegative)
+  exact OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
     shaded cycle valid (column := boundary) (row := row)
       (by omega) hboundaryEast hrowSouth hrowNorth
-  rw [hafter] at hpositive
-  omega
 
 private theorem positive_upWeightAt_left_false
     (shaded : CycleShade stateGrid west east south north .light)
@@ -143,36 +109,31 @@ private theorem positive_upWeightAt_left_false
       upWeightAt stateGrid x row = 0)
     (hpositiveWeight : upWeightAt stateGrid boundary row = 1) : False := by
   let offset := row - quarterSouth south
-  let count := finish - boundary
+  let potential := fun x =>
+    faceHeight stateGrid x (quarterSouth south) offset
+  let weight := fun x => upWeightAt stateGrid x row
   have hrow : quarterSouth south + offset = row := by
     dsimp [offset]
     omega
-  have hrun := faceHeight_add_column_eq_of_upWeightAt_zero
-    shaded cycle valid (start := boundary) (offset := offset) (count := count)
-    (le_of_lt hboundaryWest) (by dsimp [count]; omega) (by
-      intro i hi
-      rw [hrow]
-      apply hzero (boundary + i + 1)
-      · omega
-      · dsimp [count] at hi
-        omega)
-  have hfinish : boundary + count = finish := by
-    dsimp [count]
+  have step (position : Nat) (westPosition : quarterWest west < position)
+      (eastPosition : position < quarterEast east) :
+      potential position = potential (position - 1) + weight position := by
+    have difference := OrientedLightHeight.CycleShade.faceHeight_sub_left
+      shaded cycle valid (column := position) (offset := offset)
+        westPosition eastPosition
+    rw [hrow] at difference
+    dsimp [potential, weight]
     omega
-  rw [hfinish, hfreeHeight] at hrun
-  have hboundaryHeight : faceHeight stateGrid boundary
-      (quarterSouth south) offset = 1 := hrun.symm
-  have hdiff := OrientedLightHeight.CycleShade.faceHeight_sub_left
-    shaded cycle valid (column := boundary) (offset := offset)
-      hboundaryWest (hboundaryFinish.trans_lt hfinishEast)
-  rw [hrow, hpositiveWeight, hboundaryHeight] at hdiff
-  have hleftHeight : faceHeight stateGrid (boundary - 1)
-      (quarterSouth south) offset = 0 := by omega
-  have hpositive := OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
+  apply OrientedLightBoundarySearch.positive_step_before_false
+    (potential := potential) (weight := weight) hboundaryFinish
+    (by simpa [potential] using hfreeHeight)
+    (step boundary hboundaryWest (by omega))
+    (fun position lower upper => step position (by omega) (by omega))
+    (fun position lower upper => by simpa [weight] using hzero position lower upper)
+    (by simpa [weight] using hpositiveWeight)
+  exact OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
     shaded cycle valid (column := boundary - 1) (row := row)
       (by omega) (by omega) hrowSouth hrowNorth
-  rw [hleftHeight] at hpositive
-  omega
 
 theorem CycleShade.nearest_right_selected_east
     (shaded : CycleShade stateGrid west east south north .light)
@@ -342,38 +303,21 @@ theorem CycleShade.horizontalBoundary
   intro column row hwest heast hsouth hnorth free notFree
   let selected := fun x => ShadedSignals.selectedVerticalFor
     (componentAt indexGrid x row) (quadrantAt x row) (stateGrid x row)
-  by_cases hat : selected column ≠ none
-  · exact Or.inl hat
   have witness : exists boundary,
       quarterWest west < boundary /\ boundary < quarterEast east /\
         selected boundary ≠ none := by
     simp only [IsFreeRow] at notFree
     push Not at notFree
     exact notFree
-  rcases witness with ⟨boundary, hboundaryWest, hboundaryEast, hselected⟩
-  rcases lt_trichotomy column boundary with hright | hequal | hleft
-  · rcases OrientedLightVerticalGeometry.exists_first_after
-      (P := fun x => selected x ≠ none) hright hselected with
-      ⟨first, hcolumnFirst, hfirstBoundary, hfirstSelected, hbetween⟩
-    have hfirstEast := hfirstBoundary.trans_lt hboundaryEast
-    have horiented := CycleShade.nearest_right_selected_east
-      shaded cycle valid hwest hcolumnFirst hfirstEast hsouth hnorth free
-      hfirstSelected (fun x hxColumn hxFirst =>
-        not_ne_iff.mp (hbetween x hxColumn hxFirst))
-    exact Or.inr (Or.inl ⟨first, hcolumnFirst, hfirstEast, horiented,
-      fun x hxColumn hxFirst => not_ne_iff.mp (hbetween x hxColumn hxFirst)⟩)
-  · subst boundary
-    exact False.elim (hselected (not_ne_iff.mp hat))
-  · rcases OrientedLightVerticalGeometry.exists_last_before
-      (P := fun x => selected x ≠ none) hleft hselected with
-      ⟨last, hboundaryLast, hlastColumn, hlastSelected, hbetween⟩
-    have hlastWest := hboundaryWest.trans_le hboundaryLast
-    have horiented := CycleShade.nearest_left_selected_west
-      shaded cycle valid hlastWest hlastColumn heast hsouth hnorth free
-      hlastSelected (fun x hxLast hxColumn =>
-        not_ne_iff.mp (hbetween x hxLast hxColumn))
-    exact Or.inr (Or.inr ⟨last, hlastWest, hlastColumn, horiented,
-      fun x hxLast hxColumn => not_ne_iff.mp (hbetween x hxLast hxColumn)⟩)
+  apply OrientedLightBoundarySearch.boundary_of_exists_selected witness
+  · intro boundary columnBoundary boundaryEast boundarySelected between
+    exact CycleShade.nearest_right_selected_east
+      shaded cycle valid hwest columnBoundary boundaryEast hsouth hnorth free
+      boundarySelected between
+  · intro boundary boundaryWest boundaryColumn boundarySelected between _
+    exact CycleShade.nearest_left_selected_west
+      shaded cycle valid boundaryWest boundaryColumn heast hsouth hnorth free
+      boundarySelected between
 
 end OrientedLightHorizontalGeometry
 end Closed104

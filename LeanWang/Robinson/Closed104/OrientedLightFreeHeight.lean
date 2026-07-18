@@ -49,23 +49,6 @@ theorem ValidShadeGrid.vertical_none_weightsAt_zero
   simpa [upWeightAt, downWeightAt] using
     vertical_none_weights_zero _ _ _ (valid.allowed x y) hselected
 
-/-- A run of zero horizontal crossings leaves the recursively defined height
-unchanged. -/
-theorem faceHeight_add_eq_of_rightWeightAt_zero
-    (stateGrid : Nat -> Nat -> RedShades.State)
-    (column bottom start count : Nat)
-    (hzero : forall i, i < count ->
-      rightWeightAt stateGrid column (bottom + (start + i) + 1) = 0) :
-    faceHeight stateGrid column bottom (start + count) =
-      faceHeight stateGrid column bottom start := by
-  induction count with
-  | zero => simp
-  | succ count ih =>
-      have hstep := hzero count (by omega)
-      rw [show start + (count + 1) = (start + count) + 1 by omega,
-        faceHeight, ih (fun i hi => hzero i (by omega)), hstep]
-      omega
-
 /-- Absolute-coordinate form of the positive-height theorem. -/
 theorem CycleShade.one_le_faceHeight_at
     (shaded : CycleShade stateGrid west east south north .light)

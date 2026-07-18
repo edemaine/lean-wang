@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.OrientedLightFreeHeight
+import LeanWang.Robinson.Closed104.OrientedLightBoundarySearch
 import LeanWang.Robinson.Closed104.ShadedObstructionGeometry
 
 /-!
@@ -68,36 +69,27 @@ private theorem negative_rightWeightAt_above_false
     (hzero : forall y, row < y -> y < boundary ->
       rightWeightAt stateGrid scan y = 0)
     (hnegative : rightWeightAt stateGrid scan boundary = -1) : False := by
-  let start := row - quarterSouth south
-  let count := boundary - row - 1
-  have hrun := faceHeight_add_eq_of_rightWeightAt_zero
-    stateGrid scan (quarterSouth south) start count (by
-      intro i hi
-      apply hzero (quarterSouth south + (start + i) + 1)
-      · dsimp [start, count] at hi ⊢
-        omega
-      · dsimp [start, count] at hi ⊢
-        omega)
-  have hoffset : start + count = boundary - quarterSouth south - 1 := by
-    dsimp [start, count]
-    omega
-  rw [hoffset, hfreeHeight] at hrun
-  have hbefore : faceHeight stateGrid scan (quarterSouth south)
-      (boundary - quarterSouth south - 1) = 1 := hrun
-  have hafter : faceHeight stateGrid scan (quarterSouth south)
-      (boundary - quarterSouth south) = 0 := by
-    have hsucc : boundary - quarterSouth south =
-        (boundary - quarterSouth south - 1) + 1 := by omega
-    rw [hsucc, faceHeight, hbefore]
-    have hy : quarterSouth south +
-        (boundary - quarterSouth south - 1) + 1 = boundary := by omega
-    rw [hy, hnegative]
-    omega
-  have hpositive := OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
+  let potential := fun y => faceHeight stateGrid scan (quarterSouth south)
+    (y - quarterSouth south)
+  let weight := fun y => rightWeightAt stateGrid scan y
+  have step (position : Nat) (southPosition : quarterSouth south < position) :
+      potential position = potential (position - 1) + weight position := by
+    have offset : position - quarterSouth south =
+        (position - 1 - quarterSouth south) + 1 := by omega
+    rw [show potential position = faceHeight stateGrid scan (quarterSouth south)
+      (position - quarterSouth south) by rfl, offset, faceHeight]
+    have coordinate : quarterSouth south +
+        (position - 1 - quarterSouth south) + 1 = position := by omega
+    rw [coordinate]
+  apply OrientedLightBoundarySearch.negative_step_after_false
+    (potential := potential) (weight := weight) hrowBoundary
+    (by simpa [potential] using hfreeHeight)
+    (fun position lower _ => step position (by omega))
+    (fun position lower upper => by simpa [weight] using hzero position lower upper)
+    (by simpa [weight] using hnegative)
+  exact OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
     shaded cycle valid hscanWest hscanEast (row := boundary)
       (by omega) hboundaryNorth
-  rw [hafter] at hpositive
-  omega
 
 private theorem positive_rightWeightAt_below_false
     (shaded : CycleShade stateGrid west east south north .light)
@@ -114,38 +106,29 @@ private theorem positive_rightWeightAt_below_false
     (hzero : forall y, boundary < y -> y <= row ->
       rightWeightAt stateGrid scan y = 0)
     (hpositiveWeight : rightWeightAt stateGrid scan boundary = 1) : False := by
-  let start := boundary - quarterSouth south
-  let count := row - boundary
-  have hrun := faceHeight_add_eq_of_rightWeightAt_zero
-    stateGrid scan (quarterSouth south) start count (by
-      intro i hi
-      apply hzero (quarterSouth south + (start + i) + 1)
-      · dsimp [start, count] at hi ⊢
-        omega
-      · dsimp [start, count] at hi ⊢
-        omega)
-  have hoffset : start + count = row - quarterSouth south := by
-    dsimp [start, count]
-    omega
-  rw [hoffset, hfreeHeight] at hrun
-  have hboundaryHeight : faceHeight stateGrid scan (quarterSouth south)
-      (boundary - quarterSouth south) = 1 := hrun.symm
-  have hbelow : faceHeight stateGrid scan (quarterSouth south)
-      (boundary - quarterSouth south - 1) = 0 := by
-    have hsucc : boundary - quarterSouth south =
-        (boundary - quarterSouth south - 1) + 1 := by omega
-    rw [hsucc, faceHeight] at hboundaryHeight
-    have hy : quarterSouth south +
-        (boundary - quarterSouth south - 1) + 1 = boundary := by omega
-    rw [hy, hpositiveWeight] at hboundaryHeight
-    omega
-  have hpositive := OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
+  let potential := fun y => faceHeight stateGrid scan (quarterSouth south)
+    (y - quarterSouth south)
+  let weight := fun y => rightWeightAt stateGrid scan y
+  have step (position : Nat) (southPosition : quarterSouth south < position) :
+      potential position = potential (position - 1) + weight position := by
+    have offset : position - quarterSouth south =
+        (position - 1 - quarterSouth south) + 1 := by omega
+    rw [show potential position = faceHeight stateGrid scan (quarterSouth south)
+      (position - quarterSouth south) by rfl, offset, faceHeight]
+    have coordinate : quarterSouth south +
+        (position - 1 - quarterSouth south) + 1 = position := by omega
+    rw [coordinate]
+  apply OrientedLightBoundarySearch.positive_step_before_false
+    (potential := potential) (weight := weight)
+    (boundary := boundary) (finish := row) (by omega)
+    (by simpa [potential] using hfreeHeight)
+    (step boundary hboundarySouth)
+    (fun position lower _ => step position (by omega))
+    (fun position lower upper => by simpa [weight] using hzero position lower upper)
+    (by simpa [weight] using hpositiveWeight)
+  exact OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
     shaded cycle valid hscanWest hscanEast
       (row := boundary - 1) (by omega) (by omega)
-  have hrow : boundary - 1 - quarterSouth south =
-      boundary - quarterSouth south - 1 := by omega
-  rw [hrow, hbelow] at hpositive
-  omega
 
 theorem CycleShade.nearest_above_selected_north
     (shaded : CycleShade stateGrid west east south north .light)
@@ -289,57 +272,6 @@ theorem CycleShade.nearest_below_selected_south
                 rw [hcolumn, hzero.2] at hshared
                 exact hshared) hmatch)
 
-theorem exists_first_after
-    {P : Nat -> Prop} {start finish : Nat}
-    (hstart : start < finish) (hfinish : P finish) :
-    exists first, start < first /\ first <= finish /\ P first /\
-      forall value, start < value -> value < first -> Not (P value) := by
-  classical
-  let Q : Nat -> Prop := fun distance =>
-    0 < distance /\ start + distance <= finish /\ P (start + distance)
-  have existsQ : exists distance, Q distance := by
-    refine ⟨finish - start, ?_⟩
-    dsimp [Q]
-    have hsum : start + (finish - start) = finish := by omega
-    exact ⟨by omega, by omega, by simpa [hsum] using hfinish⟩
-  let distance := Nat.find existsQ
-  have found : Q distance := Nat.find_spec existsQ
-  refine ⟨start + distance, by simpa [Q] using found.1,
-    found.2.1, found.2.2, ?_⟩
-  intro value hvalueStart hvalueFirst hvalue
-  have candidate : Q (value - start) := by
-    dsimp [Q]
-    have hsum : start + (value - start) = value := by omega
-    exact ⟨by omega, by omega, by simpa [hsum] using hvalue⟩
-  have minimal := Nat.find_min' existsQ candidate
-  dsimp [distance] at hvalueFirst
-  omega
-
-theorem exists_last_before
-    {P : Nat -> Prop} {first finish : Nat}
-    (hfirst : first < finish) (hfirstP : P first) :
-    exists last, first <= last /\ last < finish /\ P last /\
-      forall value, last < value -> value < finish -> Not (P value) := by
-  classical
-  let Q : Nat -> Prop := fun distance =>
-    0 < distance /\ distance <= finish - first /\ P (finish - distance)
-  have existsQ : exists distance, Q distance := by
-    refine ⟨finish - first, ?_⟩
-    dsimp [Q]
-    have hsub : finish - (finish - first) = first := by omega
-    exact ⟨by omega, le_rfl, by simpa [hsub] using hfirstP⟩
-  let distance := Nat.find existsQ
-  have found : Q distance := Nat.find_spec existsQ
-  refine ⟨finish - distance, by omega, by omega, found.2.2, ?_⟩
-  intro value hlastValue hvalueFinish hvalue
-  have candidate : Q (finish - value) := by
-    dsimp [Q]
-    have hsub : finish - (finish - value) = value := by omega
-    exact ⟨by omega, by omega, by simpa [hsub] using hvalue⟩
-  have minimal := Nat.find_min' existsQ candidate
-  dsimp [distance] at hlastValue
-  omega
-
 /-- Vertical half of the Robinson obstruction geometry, now derived directly
 from the height minimum principle. -/
 theorem CycleShade.verticalBoundary
@@ -375,37 +307,21 @@ theorem CycleShade.verticalBoundary
     ShadedSignals.selectedHorizontalFor
       (componentAt indexGrid column y) (quadrantAt column y)
       (stateGrid column y)
-  by_cases hat : selected row ≠ none
-  · exact Or.inl hat
-  have hatNone : selected row = none := not_ne_iff.mp hat
   have witness : exists boundary,
       quarterSouth south < boundary /\ boundary < quarterNorth north /\
         selected boundary ≠ none := by
     simp only [IsFreeColumn] at notFree
     push Not at notFree
     exact notFree
-  rcases witness with ⟨boundary, hboundarySouth, hboundaryNorth, hselected⟩
-  rcases lt_trichotomy row boundary with habove | hequal | hbelow
-  · rcases exists_first_after (P := fun y => selected y ≠ none) habove hselected with
-      ⟨first, hrowFirst, hfirstBoundary, hfirstSelected, hbetween⟩
-    have hfirstNorth := hfirstBoundary.trans_lt hboundaryNorth
-    have horiented := CycleShade.nearest_above_selected_north
-      shaded cycle valid hwest heast hsouth hrowFirst hfirstNorth free
-      hfirstSelected (fun y hyRow hyFirst =>
-        not_ne_iff.mp (hbetween y hyRow hyFirst))
-    exact Or.inr (Or.inl ⟨first, hrowFirst, hfirstNorth, horiented,
-      fun y hyRow hyFirst => not_ne_iff.mp (hbetween y hyRow hyFirst)⟩)
-  · subst boundary
-    exact False.elim (hselected hatNone)
-  · rcases exists_last_before (P := fun y => selected y ≠ none) hbelow hselected with
-      ⟨last, hboundaryLast, hlastRow, hlastSelected, hbetween⟩
-    have hlastSouth := hboundarySouth.trans_le hboundaryLast
-    have horiented := CycleShade.nearest_below_selected_south
-      shaded cycle valid hwest heast hlastSouth hlastRow hnorth free
-      hatNone hlastSelected (fun y hyLast hyRow =>
-        not_ne_iff.mp (hbetween y hyLast hyRow))
-    exact Or.inr (Or.inr ⟨last, hlastSouth, hlastRow, horiented,
-      fun y hyLast hyRow => not_ne_iff.mp (hbetween y hyLast hyRow)⟩)
+  apply OrientedLightBoundarySearch.boundary_of_exists_selected witness
+  · intro boundary rowBoundary boundaryNorth boundarySelected between
+    exact CycleShade.nearest_above_selected_north
+      shaded cycle valid hwest heast hsouth rowBoundary boundaryNorth free
+      boundarySelected between
+  · intro boundary boundarySouth boundaryRow boundarySelected between rowClear
+    exact CycleShade.nearest_below_selected_south
+      shaded cycle valid hwest heast boundarySouth boundaryRow hnorth free
+      rowClear boundarySelected between
 
 end OrientedLightVerticalGeometry
 end Closed104
