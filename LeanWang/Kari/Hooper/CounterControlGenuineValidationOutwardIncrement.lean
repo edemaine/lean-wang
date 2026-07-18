@@ -1553,6 +1553,85 @@ theorem outwardGap_lt_layoutEnd_of_terminalIncrementAgreement
     rightGap_distance_lt_layoutEnd hcore index (distance + 1) newGap hfound
   omega
 
+/-- Uniform geometry of a completed increment schedule following an
+arbitrary outward validation suffix.  The three cases compare the original
+caller boundary with the increment's terminal shifted boundary. -/
+theorem outwardSuffix_gap_lt_layoutEnd_of_completedIncrement
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (suffix : Suffix current growth source (.increment register next))
+    (hblank : (suffix.progress.suffix.finish.move
+      (orient growth .right)).read = blankSymbol)
+    (completed : IncrementShiftSuffixReached
+      (guardedBodyIncrement base c growth source next register hrule
+        suffix.progress.suffix.finish suffix.finish_read hblank)
+      growth source register)
+    (registers : Registers)
+    (coreTape : FullTM0.Tape (Symbol numTags))
+    (hcore : CoreRepresents registers growth coreTape)
+    (hfinish : completed.finish.move (orient growth .right) =
+      atLogical growth coreTape
+        (boundaryOffset registers
+          (MarkerSchedule.decrementStartBoundary register))) :
+    current.distance < layoutEnd registers := by
+  let guarded := guardedBodyIncrement base c growth source next register
+    hrule suffix.progress.suffix.finish suffix.finish_read hblank
+  have hposition : completed.position.before = [] ∧
+      completed.position.current = 4 ∧
+      completed.position.remaining = incrementRemaining register := by
+    exact bodyIncrementShift_position base c growth source next register hrule
+      suffix.progress.suffix.finish suffix.finish_read completed.position
+  rcases hposition with ⟨hbefore, hcurrent, hremaining⟩
+  have htrace : ShiftTailGaps (orient growth .left)
+      (incrementRemaining register) (guarded.shiftedParentBacking 4)
+      completed.finish := by
+    simpa [guarded, hcurrent, hremaining] using completed.tailGaps
+  have hschedule : DescendingTo 4 (incrementRemaining register)
+      (MarkerSchedule.decrementStartBoundary register) := by
+    have hschedule' := incrementShiftPosition_descendingTo completed.position
+    simpa [hcurrent, hremaining] using hschedule'
+  have hinitial : ShiftedAgainst (orient growth .left) 4
+      (guarded.shiftedParentBacking 4)
+      suffix.progress.suffix.finish := by
+    rw [guardedBodyIncrement_shiftedParentBacking base c growth source next
+      register hrule suffix.progress.suffix.finish suffix.finish_read hblank 4]
+    exact firstIncrementAgreement growth suffix.progress.suffix.finish
+  let last := MarkerSchedule.decrementStartBoundary register
+  rcases lt_trichotomy (suffix.index.succ : Nat) (last : Nat) with
+      hlower | hequal | hupper
+  · exact outwardSuffix_gap_lt_layoutEnd_of_upperIncrementTerminal current
+      growth source next register suffix last (guarded.shiftedParentBacking 4)
+      completed.finish coreTape (incrementRemaining register) registers
+      hinitial htrace hschedule hlower hcore (by simpa [last] using hfinish)
+  · have hterminalEq : MarkerSchedule.decrementStartBoundary register =
+        suffix.index.succ := by
+      apply Fin.ext
+      simpa [last] using hequal.symm
+    rcases alignOutwardRoute suffix.remaining_toFour suffix.current_read
+        suffix.tailGaps hinitial htrace hschedule (by rw [hterminalEq]) with
+      ⟨shifted, remaining, agreement, remainingTrace,
+        remainingSchedule⟩
+    rw [hterminalEq] at remainingSchedule
+    have hremainingNil : remaining = [] :=
+      descendingTo_eq_nil_of_same remainingSchedule
+    rw [hremainingNil] at remainingTrace
+    cases remainingTrace
+    exact outwardGap_lt_layoutEnd_of_terminalIncrementAgreement growth
+      suffix.index current.outer current.foundTape completed.finish coreTape
+      current.distance registers suffix.current_gap suffix.current_foundTape
+      agreement hcore (by simpa [hterminalEq] using hfinish)
+  · have hlast : (last : Nat) ≤ (suffix.index : Nat) := by
+      have hstep : (suffix.index.succ : Nat) =
+          (suffix.index : Nat) + 1 := by simp
+      omega
+    exact outwardSuffix_gap_lt_layoutEnd_of_lowerIncrementTail current growth
+      source next register suffix last (guarded.shiftedParentBacking 4)
+      completed.finish coreTape (incrementRemaining register) registers
+      hinitial htrace hschedule hlast hcore (by simpa [last] using hfinish)
+
 private theorem immortalFrom_of_reaches
     (base : Nat) (c : Nat.Partrec.Code)
     {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
@@ -1565,6 +1644,134 @@ private theorem immortalFrom_of_reaches
   rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
   intro hhalts
   exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
+
+/-- A collision-free increment reached after any retained outward
+validation suffix reconstructs an exact logical core, and the original
+caller gap remains strictly inside that core. -/
+theorem outwardSuffix_incrementSuccess_logical
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source next : Nat) (register : Register)
+    (hrule : (source, .increment register next) ∈
+      GlobalSourceProgram.program)
+    (suffix : Suffix current growth source (.increment register next))
+    (hblank : (suffix.progress.suffix.finish.move
+      (orient growth .right)).read = blankSymbol)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    ∃ core : CounterControlParentEmbedding.LogicalCore base c,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          (foundCfg current) core.cfg ∧
+        current.distance < layoutEnd core.registers := by
+  let T := suffix.progress.suffix.finish
+  let shift := bodyIncrementShift base c growth source next register hrule T
+    suffix.finish_read
+  let guarded := guardedBodyIncrement base c growth source next register hrule
+    T suffix.finish_read hblank
+  have hentry : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current) shift.cfg := by
+    rw [bodyIncrementShift_cfg]
+    simpa [T, bodyEntry, searchRef, CounterControlPlan.resolve] using
+      suffix.reaches_bodyEntry
+  have himmortalEntry : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) shift.cfg :=
+    immortalFrom_of_reaches base c himmortal hentry
+  have hfoundEntry :=
+    CounterControlParentContinuation.reaches_foundCfg_of_immortal
+      shift himmortalEntry
+  have hfound : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current) (foundCfg guarded.current) := by
+    change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current) (foundCfg shift)
+    exact hentry.trans hfoundEntry
+  have himmortalFound : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg guarded.current) :=
+    immortalFrom_of_reaches base c himmortal hfound
+  have hcommand : guarded.selectedRaw ∈
+      incrementShiftCommands growth source register := by
+    change shift.selectedRaw ∈ incrementShiftCommands growth source register
+    rw [bodyIncrementShift_selectedRaw]
+    exact firstIncrementRaw_mem_increment growth source register
+  rcases guarded.incrementShift_suffix_of_immortal base c hmortal growth
+      source register next hrule hcommand himmortalFound with
+    ⟨shiftSuffix⟩
+  rcases incrementDirectCompletion base c guarded growth source register next
+      hrule shiftSuffix with ⟨completion⟩
+  cases completion with
+  | logical direct hroute =>
+      have hregister : register = .clock := by
+        cases register <;>
+          simp_all [AnchoredCounterGeometry.routeFromIncrement]
+      subst register
+      have hlogical := direct.reachesLogical_of_route_eq_nil hroute
+      have himmortalLogical : FullTM0.ImmortalFrom
+          (CounterControlNestingBridge.machine base c)
+          ⟨logicalState base c growth next,
+            incrementAfterShiftTape direct.suffix⟩ :=
+        immortalFrom_of_reaches base c himmortalFound hlogical
+      rcases
+          CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
+            base c hmortal growth next direct.target_lt
+            (incrementAfterShiftTape direct.suffix) himmortalLogical with
+        ⟨instruction, registers, coreTape, limit, target, _nextRule, hcore,
+          hcoreBefore, hrunway, htarget, hcenter, _hbody⟩
+      let represented : CoreTargetRepresents registers growth limit target
+          coreTape := {
+        toCorePrefixRepresents := {
+          toCoreRepresents := hcore
+          core_before_limit := hcoreBefore
+          runway := hrunway }
+        target_matches := htarget }
+      let core : CounterControlParentEmbedding.LogicalCore base c := {
+        growth := growth
+        source := next
+        source_lt := direct.target_lt
+        registers := registers
+        tape := coreTape
+        limit := limit
+        target := target
+        represented := represented }
+      have hreaches : FullTM0.Reaches
+          (CounterControlNestingBridge.machine base c)
+          (foundCfg guarded.current) core.cfg := by
+        rw [hcenter] at hlogical
+        simpa [core, CounterControlParentEmbedding.LogicalCore.cfg,
+          CounterControlParentEmbedding.LogicalCore.frame,
+          CounterControlParentEmbedding.LogicalCore.abstract,
+          prefixLogicalCfg] using hlogical
+      have hfinish : direct.suffix.finish.move (orient growth .right) =
+          atLogical growth coreTape
+            (boundaryOffset registers
+              (MarkerSchedule.decrementStartBoundary .clock)) := by
+        simpa [incrementAfterShiftTape,
+          MarkerSchedule.decrementStartBoundary, boundaryOffset_four] using
+          hcenter
+      have hinside : current.distance < layoutEnd registers := by
+        exact outwardSuffix_gap_lt_layoutEnd_of_completedIncrement base c
+          current growth source next .clock hrule suffix hblank direct.suffix
+          registers coreTape hcore hfinish
+      exact ⟨core, hfound.trans hreaches, hinside⟩
+  | recovery first rest handoff =>
+      rcases incrementRecoveryCenteredEnd base c hmortal guarded
+          himmortalFound growth source register next first rest handoff with
+        ⟨centered⟩
+      have hfinish : handoff.direct.suffix.finish.move
+          (orient growth .right) =
+          atLogical growth centered.core.tape
+            (boundaryOffset centered.core.registers
+              (MarkerSchedule.decrementStartBoundary register)) := by
+        simpa [incrementAfterShiftTape] using centered.shift_center
+      have hinside : current.distance <
+          layoutEnd centered.core.registers := by
+        exact outwardSuffix_gap_lt_layoutEnd_of_completedIncrement base c
+          current growth source next register hrule suffix hblank
+          handoff.direct.suffix centered.core.registers centered.core.tape
+          centered.core_represents hfinish
+      exact ⟨centered.core, hfound.trans centered.reaches, hinside⟩
 
 /-- Collision-free final validation followed by a non-clock increment reaches
 an exact logical core containing the original outward gap. -/
