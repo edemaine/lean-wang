@@ -242,6 +242,65 @@ theorem clockIncrementSuccessTape_eq_outwardShiftedTape
     simp [exactSuccessTape, clockIncrementRaw, outwardShiftedTape,
       shiftStepTape, orient, NestingMachine.opposite]
 
+/-! ## Tape geometry of collision cleanup -/
+
+/-- If the marked end of a blank gap is cleared, any boundary found by
+searching backward from that cell must lie strictly beyond the old origin.
+The cleared endpoint supplies the strict extra cell. -/
+theorem clearedReverseGap_distance_gt
+    {outer : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
+    {distance reverseDistance : Nat} {target replayTarget : Fin 5}
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches outer direction distance)
+    (hreverse : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary replayTarget).Matches
+      ((outer.moveN direction distance).write blankSymbol)
+      (NestingMachine.opposite direction) reverseDistance) :
+    distance < reverseDistance := by
+  by_contra hnot
+  have hle : reverseDistance ≤ distance := Nat.le_of_not_gt hnot
+  cases reverseDistance with
+  | zero =>
+      have hmarked := hreverse.marked
+      have hboundary :
+          ((outer.moveN direction distance).write blankSymbol).read =
+            boundarySymbol replayTarget := by
+        simpa [FullTM0.Tape.read_moveN, Target.Matches] using hmarked
+      have hblank :
+          ((outer.moveN direction distance).write blankSymbol).read =
+            blankSymbol := by simp
+      rw [hblank] at hboundary
+      exact blankSymbol_ne_boundarySymbol replayTarget hboundary
+  | succ reverseDistance =>
+      let index := distance - (reverseDistance + 1)
+      have hindex : index < distance := by
+        dsimp [index]
+        omega
+      have hblank := hgap.blank hindex
+      have hmarked := hreverse.marked
+      have hboundary :
+          (((outer.moveN direction distance).write blankSymbol).moveN
+              (NestingMachine.opposite direction)
+              (reverseDistance + 1)).read =
+            boundarySymbol replayTarget := by
+        simpa [FullTM0.Tape.read_moveN, Target.Matches] using hmarked
+      have hread :
+          (((outer.moveN direction distance).write blankSymbol).moveN
+              (NestingMachine.opposite direction)
+              (reverseDistance + 1)).read =
+            outer (FullTM0.Tape.offset direction index) := by
+        cases direction <;>
+          simp [FullTM0.Tape.read, FullTM0.Tape.moveN,
+            FullTM0.Tape.offset, FullTM0.Tape.write,
+            NestingMachine.opposite, index] <;>
+          split_ifs <;> try omega
+        all_goals
+          apply congrArg outer
+          omega
+      rw [hread] at hboundary
+      rw [hboundary] at hblank
+      exact blankSymbol_ne_boundarySymbol replayTarget hblank.symm
+
 end
 
 end CounterControlGenuineValidationOutward
