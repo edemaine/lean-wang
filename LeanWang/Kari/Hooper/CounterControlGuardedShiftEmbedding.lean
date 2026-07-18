@@ -29,7 +29,7 @@ open CounterControlGlobalUnnesting CounterControlGuardedSearch
 open CounterControlGuardedSearch.GuardedSearch
 open CounterControlGuardedParentContinuation
 open CounterControlParentContinuation CounterControlParentEmbedding
-open CounterControlResumedShiftCoordinates
+open CounterControlResumedShiftCoordinates CounterControlResumedRouteEmbedding
 open CounterControlGuardedShiftCompletion
 open CounterControlLogicalLimitContinuation
 
@@ -813,6 +813,175 @@ theorem decrementPositive_foundGuardedParentOutcome
       source register ifZero ifPositive direct with ⟨endpoint⟩
   exact ⟨FoundGuardedParentOutcome.logical endpoint.core endpoint.reaches
     endpoint.strictly_inside⟩
+
+/-! ## Nonempty increment-recovery routes -/
+
+/-- Exact traversal of the nonempty recovery route entered after an
+increment shift. -/
+structure IncrementRecoveryRouteEnd
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
+    (handoff : IncrementRecoverySearchHandoff current growth source register
+      next first rest) : Type where
+  finish : FullTM0.Tape (Symbol numTags)
+  routeGaps : CounterControlValidationMortality.RouteGaps growth
+    (first :: rest) (incrementRecoverySearchTape handoff.direct.suffix first)
+    finish
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current.current)
+    ⟨logicalState base c growth next, finish⟩
+
+/-- Immortality advances the recovery search entered after an increment
+through all of its remaining preserving legs. -/
+theorem incrementRecoveryRouteEnd
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
+    (handoff : IncrementRecoverySearchHandoff current growth source register
+      next first rest) :
+    Nonempty (IncrementRecoveryRouteEnd current growth source register next
+      first rest handoff) := by
+  have hentry : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current)
+      ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
+        incrementRecoverySearchTape handoff.direct.suffix first⟩ := by
+    simpa [searchRef, resolve] using handoff.reaches
+  have hcommands : ∀ command,
+      command ∈ routeCommandsAux growth source secondarySearchBase
+          (bodyDirectBase + 2) (.logical growth next) (first :: rest) →
+        command ∈ rawCommands := by
+    intro command hcommand
+    apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+      growth handoff.direct.rule_mem
+    have hfull : command ∈ routeCommandsAux growth source
+        secondarySearchBase (bodyDirectBase + 2) (.logical growth next)
+        (AnchoredCounterGeometry.routeFromIncrement register) := by
+      rw [handoff.route_eq]
+      exact hcommand
+    simp [commandsForRule, incrementCommands, hfull]
+  have hcontinuations : ∀ rule,
+      rule ∈ routeContinuationRules growth source secondarySearchBase
+          (bodyDirectBase + 2) (first :: rest) →
+        rule ∈ rawDirectRules := by
+    intro rule hrule
+    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      growth handoff.direct.rule_mem
+    have hfull : rule ∈ routeContinuationRules growth source
+        secondarySearchBase (bodyDirectBase + 2)
+        (AnchoredCounterGeometry.routeFromIncrement register) := by
+      rw [handoff.route_eq]
+      exact hrule
+    simp [directRulesForRule, incrementRules, hfull]
+  rcases CounterControlValidationMortality.reaches_routeGaps_of_immortal
+      base c hmortal himmortal growth source secondarySearchBase
+      (bodyDirectBase + 2) (.logical growth next) first rest
+      (incrementRecoverySearchTape handoff.direct.suffix first) hentry
+      hcommands hcontinuations with
+    ⟨finish, routeGaps, reaches⟩
+  change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current.current)
+    ⟨logicalState base c growth next, finish⟩ at reaches
+  exact ⟨⟨finish, routeGaps, reaches⟩⟩
+
+/-- The recovery source is exactly the boundary at which its consecutive
+rightward route to boundary `4` begins. -/
+private theorem routeFromIncrement_toFour_exact (register : Register) :
+    ToFour (MarkerSchedule.decrementStartBoundary register)
+      (AnchoredCounterGeometry.routeFromIncrement register) := by
+  cases register with
+  | left => exact .step 1 (.step 2 (.step 3 .four))
+  | right => exact .step 2 (.step 3 .four)
+  | temp => exact .step 3 .four
+  | clock => exact .four
+
+/-- Logical reconstruction after a nonempty increment recovery, retaining
+the canonical coordinate of the last shifted boundary. -/
+structure IncrementRecoveryCenteredEnd
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GuardedSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
+    (handoff : IncrementRecoverySearchHandoff current growth source register
+      next first rest) : Type where
+  core : LogicalCore base c
+  core_represents : CoreRepresents core.registers growth core.tape
+  shift_center : incrementAfterShiftTape handoff.direct.suffix =
+    atLogical growth core.tape
+      (boundaryOffset core.registers
+        (MarkerSchedule.decrementStartBoundary register))
+  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    (foundCfg current.current) core.cfg
+
+/-- A completed nonempty increment recovery reconstructs a logical core and
+anchors the recovery source, hence the last shifted boundary, at its
+canonical coordinate. -/
+theorem incrementRecoveryCenteredEnd
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (current : GuardedSearch base c)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current))
+    (growth : Turing.Dir) (source : Nat) (register : Register) (next : Nat)
+    (first : MarkerValidation.Leg) (rest : List MarkerValidation.Leg)
+    (handoff : IncrementRecoverySearchHandoff current growth source register
+      next first rest) :
+    Nonempty (IncrementRecoveryCenteredEnd current growth source register
+      next first rest handoff) := by
+  rcases incrementRecoveryRouteEnd base c hmortal current himmortal growth
+      source register next first rest handoff with ⟨routeEnd⟩
+  have himmortalLogical := immortalFrom_of_reaches base c himmortal
+    routeEnd.reaches
+  rcases CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
+      base c hmortal growth next handoff.direct.target_lt routeEnd.finish
+      himmortalLogical with
+    ⟨instruction, registers, coreTape, limit, target, _hrule, hcore,
+      hcoreBefore, hrunway, htarget, hcenter, _hbody⟩
+  let represented : CoreTargetRepresents registers growth limit target
+      coreTape := {
+    toCorePrefixRepresents := {
+      toCoreRepresents := hcore
+      core_before_limit := hcoreBefore
+      runway := hrunway }
+    target_matches := htarget }
+  let core : LogicalCore base c := {
+    growth := growth
+    source := next
+    source_lt := handoff.direct.target_lt
+    registers := registers
+    tape := coreTape
+    limit := limit
+    target := target
+    represented := represented }
+  have htoFour := routeFromIncrement_toFour_exact register
+  rw [handoff.route_eq] at htoFour
+  have htail : CounterControlRouteSuffixMortality.RouteTailGaps growth
+      (first :: rest) (incrementAfterShiftTape handoff.direct.suffix)
+      routeEnd.finish := by
+    apply CounterControlRouteSuffixMortality.RouteTailGaps.cons first rest
+    simpa [incrementRecoverySearchTape] using routeEnd.routeGaps
+  have hshiftCenter : incrementAfterShiftTape handoff.direct.suffix =
+      atLogical growth coreTape
+        (boundaryOffset registers
+          (MarkerSchedule.decrementStartBoundary register)) := by
+    apply htoFour.start_eq hcore
+      (incrementAfterShiftTape_read handoff.direct.suffix) htail hcenter
+  have hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current.current) core.cfg := by
+    have hrun := routeEnd.reaches
+    rw [hcenter] at hrun
+    simpa [core, LogicalCore.cfg, LogicalCore.frame,
+      LogicalCore.abstract, prefixLogicalCfg] using hrun
+  exact ⟨⟨core, hcore, hshiftCenter, hreaches⟩⟩
 
 end
 
