@@ -181,19 +181,23 @@ theorem south_strips_clear (node : Node) :
     (southStripClear_val node 1).1 clear.2.1,
     (southStripClear_val node 2).1 clear.2.2⟩
 
-@[irreducible] noncomputable def baseNode : Node :=
-  seedNode.child ⟨10, by decide⟩
+def baseNode (node : Node) : Node :=
+  node.child ⟨10, by decide⟩
 
-private theorem evenBaseNode?_eq_baseNode :
-    evenBaseNode? = some baseNode.val := by
+@[simp] theorem evenBaseNode?_val (node : Node) :
+    evenBaseNode? node.val = some (baseNode node).val := by
   unfold evenBaseNode? baseNode
-  change childNode seedNode.val (10 : Fin 16) = _
+  change childNode node.val (10 : Fin 16) = _
   rw [Node.childNode_child]
   simp
 
-theorem baseNode_val : baseNode.val = evenBaseNodeId := by
-  exact Option.some.inj
-    (evenBaseNode?_eq_baseNode.symm.trans evenBaseNode?_eq_some)
+theorem baseNode_clear (node : Node) :
+    RowClear (baseNode node) 1 ∧ ColumnClear (baseNode node) 1 := by
+  have checked := evenBaseValid_of_mem node.property
+  rw [evenBaseValid, evenBaseNode?_val] at checked
+  simp only [Bool.and_eq_true] at checked
+  exact ⟨(rowClear_val (baseNode node) 1).1 checked.1,
+    (columnClear_val (baseNode node) 1).1 checked.2⟩
 
 end CanonicalFreeLineLocal
 end Closed104

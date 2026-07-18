@@ -78,15 +78,9 @@ theorem cycleSourceShade_eq_dark {node : Nat} (hnode : node ∈ reachable) :
       simp [evenLocalChecks])
   exact of_decide_eq_true checked
 
-theorem evenBaseRowClear_eq_true : rowClear evenBaseNodeId 1 = true := by
-  have checked := evenBaseValid_eq_true
-  simp only [evenBaseValid, Bool.and_eq_true] at checked
-  exact checked.1
-
-theorem evenBaseColumnClear_eq_true : columnClear evenBaseNodeId 1 = true := by
-  have checked := evenBaseValid_eq_true
-  simp only [evenBaseValid, Bool.and_eq_true] at checked
-  exact checked.2
+theorem evenBaseValid_of_mem {node : Nat} (hnode : node ∈ reachable) :
+    evenBaseValid node = true :=
+  List.all_eq_true.1 evenBaseComplete_eq_true node hnode
 
 end CanonicalFreeLine
 end Closed104

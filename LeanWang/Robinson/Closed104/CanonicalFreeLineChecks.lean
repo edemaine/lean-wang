@@ -20,11 +20,7 @@ theorem evenLocalComplete_eq_true : evenLocalComplete = true := by
   native_decide
 
 set_option linter.style.nativeDecide false in
-theorem evenBaseValid_eq_true : evenBaseValid = true := by
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem evenBaseNode?_eq_some : evenBaseNode? = some evenBaseNodeId := by
+theorem evenBaseComplete_eq_true : evenBaseComplete = true := by
   native_decide
 
 end CanonicalFreeLine

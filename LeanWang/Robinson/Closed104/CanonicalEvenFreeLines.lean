@@ -28,55 +28,56 @@ open CanonicalFreeLine CanonicalFreeLineCoordinates CanonicalFreeLineLocal
 
 set_option maxRecDepth 20000
 
-def indexGrid (level : Nat) : Nat → Nat → Index :=
-  supertileIndexGrid level seedNode
+def indexGrid (root : Node) (level : Nat) : Nat → Nat → Index :=
+  supertileIndexGrid level root
 
-def shadeGrid (level : Nat) : Nat → Nat → RedShades.State :=
-  fun x y => flipShade (supertileShadeGrid level seedNode x y)
+def shadeGrid (root : Node) (level : Nat) : Nat → Nat → RedShades.State :=
+  fun x y => flipShade (supertileShadeGrid level root x y)
 
-def selectedVerticalAt (level x y : Nat) :
+def selectedVerticalAt (root : Node) (level x y : Nat) :
     Option Signals.HorizontalInterior :=
   ShadedSignals.selectedVerticalFor
-    (componentAt (indexGrid level) x y) (quadrantAt x y)
-    (shadeGrid level x y)
+    (componentAt (indexGrid root level) x y) (quadrantAt x y)
+    (shadeGrid root level x y)
 
-def selectedHorizontalAt (level x y : Nat) :
+def selectedHorizontalAt (root : Node) (level x y : Nat) :
     Option Signals.VerticalInterior :=
   ShadedSignals.selectedHorizontalFor
-    (componentAt (indexGrid level) x y) (quadrantAt x y)
-    (shadeGrid level x y)
+    (componentAt (indexGrid root level) x y) (quadrantAt x y)
+    (shadeGrid root level x y)
 
-theorem selectedVerticalAt_eq_local (level x y : Nat) :
-    selectedVerticalAt level x y =
+theorem selectedVerticalAt_eq_local (root : Node) (level x y : Nat) :
+    selectedVerticalAt root level x y =
       CanonicalFreeLineLocal.selectedVertical
-        (supertileNodeGrid level seedNode (x / 2) (y / 2))
+        (supertileNodeGrid level root (x / 2) (y / 2))
         (x % 2) (y % 2) := by
   simp [selectedVerticalAt, indexGrid, shadeGrid,
     CanonicalFreeLineLocal.selectedVertical, componentAt,
     supertileIndexGrid, supertileShadeGrid, supertileBlockGrid,
     quadrantAt]
 
-theorem selectedHorizontalAt_eq_local (level x y : Nat) :
-    selectedHorizontalAt level x y =
+theorem selectedHorizontalAt_eq_local (root : Node) (level x y : Nat) :
+    selectedHorizontalAt root level x y =
       CanonicalFreeLineLocal.selectedHorizontal
-        (supertileNodeGrid level seedNode (x / 2) (y / 2))
+        (supertileNodeGrid level root (x / 2) (y / 2))
         (x % 2) (y % 2) := by
   simp [selectedHorizontalAt, indexGrid, shadeGrid,
     CanonicalFreeLineLocal.selectedHorizontal, componentAt,
     supertileIndexGrid, supertileShadeGrid, supertileBlockGrid,
     quadrantAt]
 
-theorem selectedVerticalAt_succ_block (level blockX blockY localX localY : Nat)
+theorem selectedVerticalAt_succ_block (root : Node)
+    (level blockX blockY localX localY : Nat)
     (hx : localX < 8) (hy : localY < 8) :
-    selectedVerticalAt (level + 1)
+    selectedVerticalAt root (level + 1)
         (8 * blockX + localX) (8 * blockY + localY) =
       fineSelectedVertical
-        (supertileNodeGrid level seedNode blockX blockY) localX localY := by
+        (supertileNodeGrid level root blockX blockY) localX localY := by
   rw [selectedVerticalAt_eq_local]
   have nodeEq :
-      supertileNodeGrid (level + 1) seedNode
+      supertileNodeGrid (level + 1) root
           ((8 * blockX + localX) / 2) ((8 * blockY + localY) / 2) =
-        fineNode (supertileNodeGrid level seedNode blockX blockY)
+        fineNode (supertileNodeGrid level root blockX blockY)
           localX localY := by
     have hxDiv : ((8 * blockX + localX) / 2) / 4 = blockX := by omega
     have hyDiv : ((8 * blockY + localY) / 2) / 4 = blockY := by omega
@@ -94,17 +95,17 @@ theorem selectedVerticalAt_succ_block (level blockX blockY localX localY : Nat)
   simp [quadrantAt]
 
 theorem selectedHorizontalAt_succ_block
-    (level blockX blockY localX localY : Nat)
+    (root : Node) (level blockX blockY localX localY : Nat)
     (hx : localX < 8) (hy : localY < 8) :
-    selectedHorizontalAt (level + 1)
+    selectedHorizontalAt root (level + 1)
         (8 * blockX + localX) (8 * blockY + localY) =
       fineSelectedHorizontal
-        (supertileNodeGrid level seedNode blockX blockY) localX localY := by
+        (supertileNodeGrid level root blockX blockY) localX localY := by
   rw [selectedHorizontalAt_eq_local]
   have nodeEq :
-      supertileNodeGrid (level + 1) seedNode
+      supertileNodeGrid (level + 1) root
           ((8 * blockX + localX) / 2) ((8 * blockY + localY) / 2) =
-        fineNode (supertileNodeGrid level seedNode blockX blockY)
+        fineNode (supertileNodeGrid level root blockX blockY)
           localX localY := by
     have hxDiv : ((8 * blockX + localX) / 2) / 4 = blockX := by omega
     have hyDiv : ((8 * blockY + localY) / 2) / 4 = blockY := by omega
@@ -121,64 +122,54 @@ theorem selectedHorizontalAt_succ_block
   rw [hxmod, hymod]
   simp [quadrantAt]
 
-@[irreducible] def FreeRowAt (depth row : Nat) : Prop :=
+@[irreducible] def FreeRowAt (root : Node) (depth row : Nat) : Prop :=
   ∀ x, quarterWest (4 ^ depth) < x →
     x < quarterEast (3 * 4 ^ depth) →
-      selectedVerticalAt (depth + 1) x row = none
+      selectedVerticalAt root (depth + 1) x row = none
 
-@[irreducible] def FreeColumnAt (depth column : Nat) : Prop :=
+@[irreducible] def FreeColumnAt (root : Node) (depth column : Nat) : Prop :=
   ∀ y, quarterSouth (4 ^ depth) < y →
     y < quarterNorth (3 * 4 ^ depth) →
-      selectedHorizontalAt (depth + 1) column y = none
+      selectedHorizontalAt root (depth + 1) column y = none
 
-theorem base_free_row : FreeRowAt 0 5 := by
+theorem base_free_row (root : Node) : FreeRowAt root 0 5 := by
   unfold FreeRowAt
   simp only [pow_zero, Nat.mul_one]
   intro x hwest heast
   have hxDiv : x / 2 = 2 := by
     simp only [quarterWest, quarterEast] at hwest heast
     omega
-  have checkedAt : clearVertical evenBaseNodeId (x % 2) 1 = true := by
-    apply List.all_eq_true.1 evenBaseRowClear_eq_true
-    simp only [List.mem_range]
-    exact Nat.mod_lt _ (by decide)
-  have clearAt : clearVertical baseNode.val (x % 2) 1 = true := by
-    simpa only [baseNode_val] using checkedAt
+  have clear := (baseNode_clear root).1
   rw [selectedVerticalAt_eq_local, hxDiv]
-  have nodeEq : supertileNodeGrid 1 seedNode 2 2 = baseNode := by
+  have nodeEq : supertileNodeGrid 1 root 2 2 = baseNode root := by
     unfold baseNode
     simp [supertileNodeGrid, iterateNodeRefine, refineNodeGrid, childPosition]
   rw [nodeEq]
-  exact (clearVertical_val baseNode (x % 2) 1).1 clearAt
+  exact clear (x % 2) (Nat.mod_lt _ (by decide))
 
-theorem base_free_column : FreeColumnAt 0 5 := by
+theorem base_free_column (root : Node) : FreeColumnAt root 0 5 := by
   unfold FreeColumnAt
   simp only [pow_zero, Nat.mul_one]
   intro y hsouth hnorth
   have hyDiv : y / 2 = 2 := by
     simp only [quarterSouth, quarterNorth] at hsouth hnorth
     omega
-  have checkedAt : clearHorizontal evenBaseNodeId 1 (y % 2) = true := by
-    apply List.all_eq_true.1 evenBaseColumnClear_eq_true
-    simp only [List.mem_range]
-    exact Nat.mod_lt _ (by decide)
-  have clearAt : clearHorizontal baseNode.val 1 (y % 2) = true := by
-    simpa only [baseNode_val] using checkedAt
+  have clear := (baseNode_clear root).2
   rw [selectedHorizontalAt_eq_local, hyDiv]
-  have nodeEq : supertileNodeGrid 1 seedNode 2 2 = baseNode := by
+  have nodeEq : supertileNodeGrid 1 root 2 2 = baseNode root := by
     unfold baseNode
     simp [supertileNodeGrid, iterateNodeRefine, refineNodeGrid, childPosition]
   rw [nodeEq]
-  exact (clearHorizontal_val baseNode 1 (y % 2)).1 clearAt
+  exact clear (y % 2) (Nat.mod_lt _ (by decide))
 
-private theorem freeRow_refine {depth old child localY : Nat}
-    (oldFree : FreeRowAt depth old)
+private theorem freeRow_refine {root : Node} {depth old child localY : Nat}
+    (oldFree : FreeRowAt root depth old)
     (child_eq : child = 8 * (old / 2) + localY)
     (localY_lt : localY < 8)
     (refines : ∀ node : Node,
       RowClear node (old % 2) → FineRowClear node localY)
     (westClear : ∀ node : Node, WestStripClear node localY) :
-    FreeRowAt (depth + 1) child := by
+    FreeRowAt root (depth + 1) child := by
   unfold FreeRowAt at oldFree ⊢
   intro x hwest heast
   let blockX := x / 8
@@ -195,7 +186,7 @@ private theorem freeRow_refine {depth old child localY : Nat}
     simp only [quarterEast, pow_succ] at heast
     omega
   rw [x_eq, child_eq,
-    selectedVerticalAt_succ_block (depth + 1) blockX (old / 2)
+    selectedVerticalAt_succ_block root (depth + 1) blockX (old / 2)
       localX localY localX_lt localY_lt]
   by_cases boundary : blockX = 4 ^ depth
   · apply westClear
@@ -203,7 +194,7 @@ private theorem freeRow_refine {depth old child localY : Nat}
       omega
     · exact localX_lt
   · have parentClear : RowClear
-        (supertileNodeGrid (depth + 1) seedNode blockX (old / 2))
+        (supertileNodeGrid (depth + 1) root blockX (old / 2))
         (old % 2) := by
       intro oldLocal oldLocal_lt
       let oldX := 2 * blockX + oldLocal
@@ -226,14 +217,14 @@ private theorem freeRow_refine {depth old child localY : Nat}
       exact clear
     exact (refines _ parentClear) localX localX_lt
 
-private theorem freeColumn_refine {depth old child localX : Nat}
-    (oldFree : FreeColumnAt depth old)
+private theorem freeColumn_refine {root : Node} {depth old child localX : Nat}
+    (oldFree : FreeColumnAt root depth old)
     (child_eq : child = 8 * (old / 2) + localX)
     (localX_lt : localX < 8)
     (refines : ∀ node : Node,
       ColumnClear node (old % 2) → FineColumnClear node localX)
     (southClear : ∀ node : Node, SouthStripClear node localX) :
-    FreeColumnAt (depth + 1) child := by
+    FreeColumnAt root (depth + 1) child := by
   unfold FreeColumnAt at oldFree ⊢
   intro y hsouth hnorth
   let blockY := y / 8
@@ -250,7 +241,7 @@ private theorem freeColumn_refine {depth old child localX : Nat}
     simp only [quarterNorth, pow_succ] at hnorth
     omega
   rw [child_eq, y_eq,
-    selectedHorizontalAt_succ_block (depth + 1) (old / 2) blockY
+    selectedHorizontalAt_succ_block root (depth + 1) (old / 2) blockY
       localX localY localX_lt localY_lt]
   by_cases boundary : blockY = 4 ^ depth
   · apply southClear
@@ -258,7 +249,7 @@ private theorem freeColumn_refine {depth old child localX : Nat}
       omega
     · exact localY_lt
   · have parentClear : ColumnClear
-        (supertileNodeGrid (depth + 1) seedNode (old / 2) blockY)
+        (supertileNodeGrid (depth + 1) root (old / 2) blockY)
         (old % 2) := by
       intro oldLocal oldLocal_lt
       let oldY := 2 * blockY + oldLocal
@@ -281,10 +272,10 @@ private theorem freeColumn_refine {depth old child localX : Nat}
       exact clear
     exact (refines _ parentClear) localY localY_lt
 
-theorem freeRow_child {depth old child : Nat}
-    (oldFree : FreeRowAt depth old)
+theorem freeRow_child {root : Node} {depth old child : Nat}
+    (oldFree : FreeRowAt root depth old)
     (hchild : child ∈ CanonicalFreeLineCoordinates.children old) :
-    FreeRowAt (depth + 1) child := by
+    FreeRowAt root (depth + 1) child := by
   rcases mem_children_cases hchild with
     ⟨odd, rfl | rfl⟩ | ⟨even, rfl⟩
   · apply freeRow_refine oldFree (localY := 1)
@@ -312,10 +303,10 @@ theorem freeRow_child {depth old child : Nat}
     · intro node
       exact (west_strips_clear node).1
 
-theorem freeColumn_child {depth old child : Nat}
-    (oldFree : FreeColumnAt depth old)
+theorem freeColumn_child {root : Node} {depth old child : Nat}
+    (oldFree : FreeColumnAt root depth old)
     (hchild : child ∈ CanonicalFreeLineCoordinates.children old) :
-    FreeColumnAt (depth + 1) child := by
+    FreeColumnAt root (depth + 1) child := by
   rcases mem_children_cases hchild with
     ⟨odd, rfl | rfl⟩ | ⟨even, rfl⟩
   · apply freeColumn_refine oldFree (localX := 1)
@@ -343,46 +334,47 @@ theorem freeColumn_child {depth old child : Nat}
     · intro node
       exact (south_strips_clear node).1
 
-theorem coordinate_free_lines (depth : Nat) {coordinate : Nat}
+theorem coordinate_free_lines (root : Node) (depth : Nat) {coordinate : Nat}
     (hcoordinate : coordinate ∈ coordinates depth) :
-    FreeRowAt depth coordinate ∧ FreeColumnAt depth coordinate := by
+    FreeRowAt root depth coordinate ∧ FreeColumnAt root depth coordinate := by
   induction depth generalizing coordinate with
   | zero =>
       simp only [coordinates_zero, List.mem_singleton] at hcoordinate
       subst coordinate
-      exact ⟨base_free_row, base_free_column⟩
+      exact ⟨base_free_row root, base_free_column root⟩
   | succ depth ih =>
       rw [coordinates_succ, List.mem_flatMap] at hcoordinate
       rcases hcoordinate with ⟨old, hold, hchild⟩
       exact ⟨freeRow_child (ih hold).1 hchild,
         freeColumn_child (ih hold).2 hchild⟩
 
-theorem freeRowAt_iff_isFreeRow (depth row : Nat) :
-    FreeRowAt depth row ↔
-      ShadedPlaneSignalGrid.IsFreeRow (indexGrid (depth + 1))
-        (shadeGrid (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) row := by
+theorem freeRowAt_iff_isFreeRow (root : Node) (depth row : Nat) :
+    FreeRowAt root depth row ↔
+      ShadedPlaneSignalGrid.IsFreeRow (indexGrid root (depth + 1))
+        (shadeGrid root (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) row := by
   unfold FreeRowAt ShadedPlaneSignalGrid.IsFreeRow selectedVerticalAt
   rfl
 
-theorem freeColumnAt_iff_isFreeColumn (depth column : Nat) :
-    FreeColumnAt depth column ↔
-      ShadedPlaneSignalGrid.IsFreeColumn (indexGrid (depth + 1))
-        (shadeGrid (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) column := by
+theorem freeColumnAt_iff_isFreeColumn (root : Node) (depth column : Nat) :
+    FreeColumnAt root depth column ↔
+      ShadedPlaneSignalGrid.IsFreeColumn (indexGrid root (depth + 1))
+        (shadeGrid root (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) column := by
   unfold FreeColumnAt ShadedPlaneSignalGrid.IsFreeColumn selectedHorizontalAt
   rfl
 
-theorem coordinate_isFreeRow (depth : Nat) {row : Nat}
+theorem coordinate_isFreeRow (root : Node) (depth : Nat) {row : Nat}
     (hrow : row ∈ coordinates depth) :
-    ShadedPlaneSignalGrid.IsFreeRow (indexGrid (depth + 1))
-      (shadeGrid (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) row :=
-  (freeRowAt_iff_isFreeRow depth row).1 (coordinate_free_lines depth hrow).1
+    ShadedPlaneSignalGrid.IsFreeRow (indexGrid root (depth + 1))
+      (shadeGrid root (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) row :=
+  (freeRowAt_iff_isFreeRow root depth row).1
+    (coordinate_free_lines root depth hrow).1
 
-theorem coordinate_isFreeColumn (depth : Nat) {column : Nat}
+theorem coordinate_isFreeColumn (root : Node) (depth : Nat) {column : Nat}
     (hcolumn : column ∈ coordinates depth) :
-    ShadedPlaneSignalGrid.IsFreeColumn (indexGrid (depth + 1))
-      (shadeGrid (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) column :=
-  (freeColumnAt_iff_isFreeColumn depth column).1
-    (coordinate_free_lines depth hcolumn).2
+    ShadedPlaneSignalGrid.IsFreeColumn (indexGrid root (depth + 1))
+      (shadeGrid root (depth + 1)) (4 ^ depth) (3 * 4 ^ depth) column :=
+  (freeColumnAt_iff_isFreeColumn root depth column).1
+    (coordinate_free_lines root depth hcolumn).2
 
 end CanonicalEvenFreeLines
 end Closed104

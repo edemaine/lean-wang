@@ -114,14 +114,16 @@ def evenLocalValid (node : Nat) : Bool :=
 def evenLocalComplete : Bool :=
   reachable.all evenLocalValid
 
-def evenBaseNode? : Option Nat :=
-  childNode (encodeNode false 0) 10
+def evenBaseNode? (node : Nat) : Option Nat :=
+  childNode node 10
 
-def evenBaseNodeId : Nat :=
-  evenBaseNode?.getD 0
+def evenBaseValid (node : Nat) : Bool :=
+  match evenBaseNode? node with
+  | none => false
+  | some child => rowClear child 1 && columnClear child 1
 
-def evenBaseValid : Bool :=
-  rowClear evenBaseNodeId 1 && columnClear evenBaseNodeId 1
+def evenBaseComplete : Bool :=
+  reachable.all evenBaseValid
 
 end CanonicalFreeLine
 end Closed104
