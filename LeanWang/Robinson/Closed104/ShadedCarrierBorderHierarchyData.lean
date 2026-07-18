@@ -47,6 +47,9 @@ def patchData (data : DecoratedData) : BorderPatch :=
 def nodePatch (node : Nat) : BorderPatch :=
   ((modelData node).map patchData).getD emptyPatch
 
+def nodeParent (node : Nat) : Option Index :=
+  (modelData node).map DecoratedData.parent
+
 def horizontalOutput (node x y : Nat) : Option Bool :=
   (nodePatch node)[x + 2 * y]?.getD none
 
@@ -223,6 +226,27 @@ def statesValid : Bool := states.all stateValid
 def closedValid : Bool :=
   states.all fun candidate =>
     (stateChildren candidate).all fun child => child ∈ states
+
+/-- Every index-zero child is either inherited from index zero, introduced at
+the center of index four, or the non-carrier copy on a new frame boundary.
+The coordinate parities are the thin-layer information needed to distinguish
+these cases arithmetically. -/
+def cornerTransitionValid (candidate : State) (childX childY : Nat) : Bool :=
+  decide (nodeParent (refineState candidate childX childY).node = some 0 →
+    (childX = 0 ∧ childY = 0 ∧
+      nodeParent candidate.node = some 0 ∧
+      candidate.blockXParity = 0 ∧ candidate.blockYParity = 0) ∨
+    (childX = 0 ∧ childY = 0 ∧
+      nodeParent candidate.node = some 4 ∧
+      candidate.blockXParity = 1 ∧ candidate.blockYParity = 1) ∨
+    (childX = 2 ∧ childY = 2 ∧
+      candidate.blockXParity = 0 ∧ candidate.blockYParity = 0))
+
+def cornerTransitionsValid : Bool :=
+  states.all fun candidate =>
+    (List.range 4).all fun childY =>
+      (List.range 4).all fun childX =>
+        cornerTransitionValid candidate childX childY
 
 end ShadedCarrierBorderHierarchy
 end Closed104

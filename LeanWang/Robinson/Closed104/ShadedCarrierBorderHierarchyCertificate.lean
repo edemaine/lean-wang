@@ -25,6 +25,10 @@ set_option linter.style.nativeDecide false in
 theorem initialState_mem : state 0 0 0 ∈ states := by
   native_decide
 
+set_option linter.style.nativeDecide false in
+theorem cornerTransitionsValid_eq_true : cornerTransitionsValid = true := by
+  native_decide
+
 end ShadedCarrierBorderHierarchy
 end Closed104
 end Figure13Layers

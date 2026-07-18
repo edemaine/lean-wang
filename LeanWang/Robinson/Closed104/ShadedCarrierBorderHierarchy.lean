@@ -49,6 +49,12 @@ theorem generatedNode_seed_eq_supertileNodeGrid
       supertileNodeGrid level seedNode x y := by
   exact generatedNode_eq_supertileNodeGrid level seedNode x y
 
+theorem nodeParent_state (level x y : Nat) :
+    nodeParent (state level x y).node =
+      some (supertileIndexGrid level seedNode x y) := by
+  simp [nodeParent, state, generatedNode_seed_eq_supertileNodeGrid,
+    Node.modelData_data, supertileIndexGrid]
+
 theorem horizontalOutput_node (node : Node) (x y : Nat)
     (hx : x < 2) (hy : y < 2) :
     horizontalOutput node x y =
@@ -333,6 +339,28 @@ theorem refineState_mem_of_mem {candidate : State}
   exact ⟨childY, by simpa using hchildY,
     childX, by simpa using hchildX, rfl⟩
 
+theorem cornerTransition_of_mem {candidate : State}
+    (member : candidate ∈ states) (childX childY : Nat)
+    (hchildX : childX < 4) (hchildY : childY < 4)
+    (childZero :
+      nodeParent (refineState candidate childX childY).node = some 0) :
+    (childX = 0 ∧ childY = 0 ∧
+      nodeParent candidate.node = some 0 ∧
+      candidate.blockXParity = 0 ∧ candidate.blockYParity = 0) ∨
+    (childX = 0 ∧ childY = 0 ∧
+      nodeParent candidate.node = some 4 ∧
+      candidate.blockXParity = 1 ∧ candidate.blockYParity = 1) ∨
+    (childX = 2 ∧ childY = 2 ∧
+      candidate.blockXParity = 0 ∧ candidate.blockYParity = 0) := by
+  have valid := cornerTransitionsValid_eq_true
+  simp only [cornerTransitionsValid, List.all_eq_true] at valid
+  have candidateValid := valid candidate member
+  have childYValid := candidateValid childY (by simpa using hchildY)
+  have transition := childYValid childX (by simpa using hchildX)
+  have implication := transition
+  simp only [cornerTransitionValid, decide_eq_true_eq] at implication
+  exact implication childZero
+
 theorem state_mem (level blockX blockY : Nat)
     (hblockX : blockX < 4 ^ level) (hblockY : blockY < 4 ^ level) :
     state level blockX blockY ∈ states := by
@@ -365,6 +393,56 @@ theorem state_mem (level blockX blockY : Nat)
         have := Nat.mod_add_div blockY 4
         omega
       simpa [decomposeX, decomposeY] using childMember
+
+/-- The three certified ways index zero occurs in a canonical child block.
+This packages the corrected-tile and thin-layer finite analysis together. -/
+theorem supertileIndexGrid_zero_cases
+    (level x y : Nat) (hx : x < 4 ^ (level + 1))
+    (hy : y < 4 ^ (level + 1))
+    (indexZero : supertileIndexGrid (level + 1) seedNode x y = 0) :
+    (x % 4 = 0 ∧ y % 4 = 0 ∧
+      supertileIndexGrid level seedNode (x / 4) (y / 4) = 0 ∧
+      (x / 4) % 2 = 0 ∧ (y / 4) % 2 = 0) ∨
+    (x % 4 = 0 ∧ y % 4 = 0 ∧
+      supertileIndexGrid level seedNode (x / 4) (y / 4) = 4 ∧
+      (x / 4) % 2 = 1 ∧ (y / 4) % 2 = 1) ∨
+    (x % 4 = 2 ∧ y % 4 = 2 ∧
+      (x / 4) % 2 = 0 ∧ (y / 4) % 2 = 0) := by
+  have parentXBound : x / 4 < 4 ^ level := by
+    rw [pow_succ] at hx
+    omega
+  have parentYBound : y / 4 < 4 ^ level := by
+    rw [pow_succ] at hy
+    omega
+  have childXBound : x % 4 < 4 := Nat.mod_lt _ (by decide)
+  have childYBound : y % 4 < 4 := Nat.mod_lt _ (by decide)
+  let candidate := state level (x / 4) (y / 4)
+  have member : candidate ∈ states :=
+    state_mem level (x / 4) (y / 4) parentXBound parentYBound
+  have refinedEq :
+      refineState candidate (x % 4) (y % 4) =
+        state (level + 1) x y := by
+    rw [← state_succ level (x / 4) (y / 4)
+      (x % 4) (y % 4) childXBound childYBound]
+    congr 1 <;>
+      have decomposition := Nat.mod_add_div x 4 <;>
+      have decompositionY := Nat.mod_add_div y 4 <;>
+      omega
+  have childZero :
+      nodeParent (refineState candidate (x % 4) (y % 4)).node = some 0 := by
+    rw [refinedEq, nodeParent_state, indexZero]
+  have transition := cornerTransition_of_mem member
+    (x % 4) (y % 4) childXBound childYBound childZero
+  change
+    (x % 4 = 0 ∧ y % 4 = 0 ∧
+      nodeParent (state level (x / 4) (y / 4)).node = some 0 ∧
+      (x / 4) % 2 = 0 ∧ (y / 4) % 2 = 0) ∨
+    (x % 4 = 0 ∧ y % 4 = 0 ∧
+      nodeParent (state level (x / 4) (y / 4)).node = some 4 ∧
+      (x / 4) % 2 = 1 ∧ (y / 4) % 2 = 1) ∨
+    (x % 4 = 2 ∧ y % 4 = 2 ∧
+      (x / 4) % 2 = 0 ∧ (y / 4) % 2 = 0) at transition
+  simpa only [nodeParent_state, Option.some.injEq] using transition
 
 theorem visiblePatch_state_eq_nodePatch
     (level blockX blockY : Nat)

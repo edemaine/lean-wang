@@ -9,11 +9,10 @@ import LeanWang.Robinson.Closed104.ShadedCarrierHierarchyAddressing
 /-!
 # Centered corner markers in canonical shaded supertiles
 
-The thin layer fixes the parity phase of every corrected tile. In one
-two-substitution block, corrected index `0` is either inherited at local
-position `(0, 0)` or newly created at `(2, 2)`. The new copy lies on a frame
-boundary; an inherited all-clear copy either introduces the centered depth-one
-crossing or lifts a centered crossing from the previous level.
+The finite decorated-node hierarchy classifies each index-zero child as an
+inherited marker, a newly centered marker, or a copy on a frame boundary. The
+last cannot carry both payloads; the other two cases respectively lift an old
+center or introduce a depth-one center.
 -/
 
 noncomputable section
@@ -25,6 +24,7 @@ namespace Closed104
 namespace ShadedCarrierCornerAddressing
 
 open ShadedCarrierHierarchy
+open ShadedCarrierBorderHierarchy
 open ShadedCarrierBorderGeometry
 open ShadedCarrierConcreteRoles
 open ShadedCarrierHierarchyAddressing
@@ -35,114 +35,12 @@ open Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
-/-- Checkerboard phase of the thin layer at a corrected-tile coordinate. -/
-def thinPhase (x y : Nat) : Figure16.Thin :=
-  if x % 2 = 0 then
-    if y % 2 = 0 then .a else .d
-  else if y % 2 = 0 then .c else .b
-
-theorem thinPhase_eq_a_iff (x y : Nat) :
-    thinPhase x y = .a ↔ x % 2 = 0 ∧ y % 2 = 0 := by
-  have xCases : x % 2 = 0 ∨ x % 2 = 1 := by omega
-  have yCases : y % 2 = 0 ∨ y % 2 = 1 := by omega
-  rcases xCases with hx | hx <;> rcases yCases with hy | hy <;>
-    simp [thinPhase, hx, hy]
-
-theorem thinPhase_eq_b_iff (x y : Nat) :
-    thinPhase x y = .b ↔ x % 2 = 1 ∧ y % 2 = 1 := by
-  have xCases : x % 2 = 0 ∨ x % 2 = 1 := by omega
-  have yCases : y % 2 = 0 ∨ y % 2 = 1 := by omega
-  rcases xCases with hx | hx <;> rcases yCases with hy | hy <;>
-    simp [thinPhase, hx, hy]
-
 theorem quadrantAt_eq_northeast_iff (x y : Nat) :
     quadrantAt x y = .northeast ↔ x % 2 = 1 ∧ y % 2 = 1 := by
   have xCases : x % 2 = 0 ∨ x % 2 = 1 := by omega
   have yCases : y % 2 = 0 ∨ y % 2 = 1 := by omega
   rcases xCases with hx | hx <;> rcases yCases with hy | hy <;>
-    simp [quadrantAt, Quadrant.ofBits, hx, hy]
-
-set_option linter.style.nativeDecide false in
-theorem fineGrid_thinPhase (parent : Index) (x y : Fin 4) :
-    (components (fineGrid parent x y)).1 = thinPhase x y := by
-  revert parent x y
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem fineGrid_eq_zero_iff (parent : Index) (x y : Fin 4) :
-    fineGrid parent x y = 0 ↔
-      (x = 0 ∧ y = 0 ∧ (parent = 0 ∨ parent = 4)) ∨
-      (x = 2 ∧ y = 2 ∧ (components parent).1 = .a) := by
-  revert parent x y
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem components_zero_thin : (components (0 : Index)).1 = .a := by
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem components_four_thin : (components (4 : Index)).1 = .b := by
-  native_decide
-
-set_option linter.style.nativeDecide false in
-theorem modelData_seed_parent :
-    (modelData (encodeNode false 0)).map DecoratedData.parent = some 0 := by
-  native_decide
-
-theorem seedNode_parent : seedNode.data.parent = 0 := by
-  have chosen := Node.modelData_data seedNode
-  change modelData (encodeNode false 0) = some seedNode.data at chosen
-  have seedParent := modelData_seed_parent
-  rw [chosen] at seedParent
-  exact Option.some.inj seedParent
-
-theorem childPosition_mod_four (x y : Nat) :
-    (childPosition x y : Nat) % 4 = x % 4 := by
-  simp [childPosition, Nat.add_mod]
-
-theorem childPosition_div_four (x y : Nat) :
-    (childPosition x y : Nat) / 4 = y % 4 := by
-  change (x % 4 + 4 * (y % 4)) / 4 = y % 4
-  have := Nat.mod_lt x (by decide : 0 < 4)
-  omega
-
-theorem supertileIndexGrid_thinPhase
-    (level x y : Nat) (hx : x < 4 ^ level) (hy : y < 4 ^ level) :
-    (components (supertileIndexGrid level seedNode x y)).1 =
-      thinPhase x y := by
-  cases level with
-  | zero =>
-      have xZero : x = 0 := by simpa using hx
-      have yZero : y = 0 := by simpa using hy
-      subst x
-      subst y
-      simp [supertileIndexGrid, supertileNodeGrid, iterateNodeRefine,
-        seedNode_parent, thinPhase, components_zero_thin]
-  | succ level =>
-      let parent := supertileNodeGrid level seedNode (x / 4) (y / 4)
-      have localPhase := fineGrid_thinPhase parent.data.parent
-        ⟨x % 4, Nat.mod_lt _ (by decide)⟩
-        ⟨y % 4, Nat.mod_lt _ (by decide)⟩
-      change (components
-        ((parent.child (childPosition x y)).data.parent)).1 = _
-      rw [Node.child_parent, childPosition_mod_four, childPosition_div_four]
-      simpa [thinPhase, Nat.mod_mod] using localPhase
-
-theorem even_coordinates_of_index_zero
-    {level x y : Nat} (hx : x < 4 ^ level) (hy : y < 4 ^ level)
-    (indexZero : supertileIndexGrid level seedNode x y = 0) :
-    x % 2 = 0 ∧ y % 2 = 0 := by
-  have phase := supertileIndexGrid_thinPhase level x y hx hy
-  rw [indexZero, components_zero_thin] at phase
-  exact (thinPhase_eq_a_iff x y).1 phase.symm
-
-theorem odd_coordinates_of_index_four
-    {level x y : Nat} (hx : x < 4 ^ level) (hy : y < 4 ^ level)
-    (indexFour : supertileIndexGrid level seedNode x y = 4) :
-    x % 2 = 1 ∧ y % 2 = 1 := by
-  have phase := supertileIndexGrid_thinPhase level x y hx hy
-  rw [indexFour, components_four_thin] at phase
-  exact (thinPhase_eq_b_iff x y).1 phase.symm
+      simp [quadrantAt, Quadrant.ofBits, hx, hy]
 
 /-- Fine quarter coordinate of an inherited northeast quarter. -/
 def liftCoordinate (coordinate : Nat) : Nat := 4 * coordinate - 3
@@ -318,21 +216,6 @@ theorem depthAt_eq_one_of_center_one
     simp [depthAt, inside]
   exact depthAt_eq_some_mono atOne boundPositive
 
-theorem center_one_not_boundary
-    {coordinate : Nat}
-    (center : coordinate % period 1 = 2 * scale 1 + 1) :
-    onFrameBoundary 1 coordinate = false := by
-  simp [onFrameBoundary, center, frameStartResidue, frameEndResidue, scale]
-
-theorem supertileIndexGrid_succ (level x y : Nat) :
-    supertileIndexGrid (level + 1) seedNode x y =
-      fineGrid (supertileIndexGrid level seedNode (x / 4) (y / 4))
-        (x % 4) (y % 4) := by
-  change ((supertileNodeGrid level seedNode (x / 4) (y / 4)).child
-      (childPosition x y)).data.parent = _
-  rw [Node.child_parent, childPosition_mod_four, childPosition_div_four]
-  rfl
-
 /-- A crossing lies at the common center of one horizontal and vertical
 carrier frame. -/
 private structure Centered (level x y depth : Nat) : Prop where
@@ -394,24 +277,11 @@ private theorem indexZero_crossing_centered :
       have yDecomposition : y = 4 * (y / 4) + y % 4 := by
         have := Nat.mod_add_div y 4
         omega
-      have fineZero :
-          fineGrid (supertileIndexGrid level seedNode (x / 4) (y / 4))
-              (x % 4) (y % 4) = 0 := by
-        rw [← supertileIndexGrid_succ]
-        exact indexZero
-      have zeroCases :=
-        (fineGrid_eq_zero_iff
-          (supertileIndexGrid level seedNode (x / 4) (y / 4))
-          ⟨x % 4, Nat.mod_lt _ (by decide)⟩
-          ⟨y % 4, Nat.mod_lt _ (by decide)⟩).1 fineZero
-      rcases zeroCases with
-          ⟨xLocal, yLocal, parentZero | parentFour⟩ |
-          ⟨xLocal, yLocal, parentThin⟩
-      · have xMod : x % 4 = 0 := by simpa using congrArg Fin.val xLocal
-        have yMod : y % 4 = 0 := by simpa using congrArg Fin.val yLocal
-        have parentEven := even_coordinates_of_index_zero
-          parentXBound parentYBound parentZero
-        let coarseX := 2 * (x / 4) + 1
+      rcases supertileIndexGrid_zero_cases level x y xBound yBound indexZero with
+          ⟨xMod, yMod, parentZero, parentXEven, parentYEven⟩ |
+          ⟨xMod, yMod, parentFour, parentXOdd, parentYOdd⟩ |
+          ⟨xMod, yMod, parentXEven, parentYEven⟩
+      · let coarseX := 2 * (x / 4) + 1
         let coarseY := 2 * (y / 4) + 1
         have coarseXPositive : 0 < coarseX := by simp [coarseX]
         have coarseYPositive : 0 < coarseY := by simp [coarseY]
@@ -449,11 +319,7 @@ private theorem indexZero_crossing_centered :
           simpa only [fineXEq, fineYEq] using
             coarseCentered.lift levelPositive coarseXPositive coarseYPositive
               coarseXMod coarseYMod⟩
-      · have xMod : x % 4 = 0 := by simpa using congrArg Fin.val xLocal
-        have yMod : y % 4 = 0 := by simpa using congrArg Fin.val yLocal
-        have parentOdd := odd_coordinates_of_index_four
-          parentXBound parentYBound parentFour
-        let coarseX := 2 * (x / 4) + 1
+      · let coarseX := 2 * (x / 4) + 1
         let coarseY := 2 * (y / 4) + 1
         have fineXEq : 2 * x + 1 = liftCoordinate coarseX := by
           simp only [coarseX, liftCoordinate]
@@ -478,15 +344,7 @@ private theorem indexZero_crossing_centered :
         exact ⟨1, by
           simpa only [fineXEq, fineYEq] using
             centeredAtOne levelPositive xCenter yCenter⟩
-      · have xMod : x % 4 = 2 := by simpa using congrArg Fin.val xLocal
-        have yMod : y % 4 = 2 := by simpa using congrArg Fin.val yLocal
-        have parentPhase := supertileIndexGrid_thinPhase level
-          (x / 4) (y / 4) parentXBound parentYBound
-        have parentThinPhase : thinPhase (x / 4) (y / 4) = .a :=
-          parentPhase.symm.trans parentThin
-        have parentEven :=
-          (thinPhase_eq_a_iff (x / 4) (y / 4)).1 parentThinPhase
-        have levelPositive : 0 < level := by
+      · have levelPositive : 0 < level := by
           by_contra notPositive
           have levelZero : level = 0 := by omega
           subst level
