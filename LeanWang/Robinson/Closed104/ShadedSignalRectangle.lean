@@ -114,107 +114,6 @@ structure FlowPath (interior : Nat → Option Bool) (length : Nat) where
   allowed : ∀ i, i < length →
     flowAllowed (interior i) (edge i) (edge (i + 1)) = true
 
-namespace FlowPath
-
-/-- Append one prescribed edge to a finite flow path. -/
-def snoc {interior : Nat → Option Bool} {length : Nat}
-    (path : FlowPath interior length) (last : Signals.Flow)
-    (allowedLast : flowAllowed (interior length) (path.edge length) last = true) :
-    FlowPath interior (length + 1) where
-  edge := fun i => if i = length + 1 then last else path.edge i
-  allowed := by
-    intro i hi
-    by_cases hprefix : i < length
-    · have hiNe : i ≠ length + 1 := by omega
-      have hiNextNe : i + 1 ≠ length + 1 := by omega
-      change flowAllowed (interior i)
-        (if i = length + 1 then last else path.edge i)
-        (if i + 1 = length + 1 then last else path.edge (i + 1)) = true
-      rw [if_neg hiNe, if_neg hiNextNe]
-      exact path.allowed i hprefix
-    · have hiEq : i = length := by omega
-      subst i
-      have hlengthNe : length ≠ length + 1 := by omega
-      change flowAllowed (interior length)
-        (if length = length + 1 then last else path.edge length)
-        (if length + 1 = length + 1 then last else path.edge (length + 1)) = true
-      rw [if_neg hlengthNe, if_pos rfl]
-      exact allowedLast
-
-@[simp] theorem snoc_last {interior : Nat → Option Bool} {length : Nat}
-    (path : FlowPath interior length) (last : Signals.Flow)
-    (allowedLast : flowAllowed (interior length) (path.edge length) last = true) :
-    (path.snoc last allowedLast).edge (length + 1) = last := by
-  simp [snoc]
-
-end FlowPath
-
-/-- Three path endpoint classes sufficient to extend through any next border
-orientation.  Keeping all three makes the signal construction executable
-without backtracking or classical choice. -/
-structure PathFamily (interior : Nat → Option Bool) (length : Nat) where
-  backward : FlowPath interior length
-  backward_end : backward.edge length = .backward
-  notBackward : FlowPath interior length
-  notBackward_end : notBackward.edge length ≠ .backward
-  nonempty : FlowPath interior length
-  nonempty_end : nonempty.edge length ≠ .none
-
-/-- Linear dynamic program constructing the three extendable path classes. -/
-def pathFamily (interior : Nat → Option Bool) :
-    (length : Nat) → PathFamily interior length
-  | 0 =>
-      { backward := { edge := fun _ => .backward, allowed := by omega }
-        backward_end := rfl
-        notBackward := { edge := fun _ => .none, allowed := by omega }
-        notBackward_end := by simp
-        nonempty := { edge := fun _ => .forward, allowed := by omega }
-        nonempty_end := by simp }
-  | length + 1 =>
-      let previous := pathFamily interior length
-      match hlast : interior length with
-      | none =>
-          let backwardNext := previous.backward.snoc
-            (previous.backward.edge length) (by simp [flowAllowed, hlast])
-          let notBackwardNext := previous.notBackward.snoc
-            (previous.notBackward.edge length) (by simp [flowAllowed, hlast])
-          let nonemptyNext := previous.nonempty.snoc
-            (previous.nonempty.edge length) (by simp [flowAllowed, hlast])
-          { backward := backwardNext
-            backward_end := by simp [backwardNext, previous.backward_end]
-            notBackward := notBackwardNext
-            notBackward_end := by
-              simpa [notBackwardNext] using previous.notBackward_end
-            nonempty := nonemptyNext
-            nonempty_end := by
-              simpa [nonemptyNext] using previous.nonempty_end }
-      | some false =>
-          let allowedBackward : flowAllowed (interior length)
-              (previous.notBackward.edge length) .backward = true := by
-            simp [flowAllowed, hlast, previous.notBackward_end]
-          let allowedForward : flowAllowed (interior length)
-              (previous.notBackward.edge length) .forward = true := by
-            simp [flowAllowed, hlast, previous.notBackward_end]
-          { backward := previous.notBackward.snoc .backward allowedBackward
-            backward_end := by simp
-            notBackward := previous.notBackward.snoc .forward allowedForward
-            notBackward_end := by simp
-            nonempty := previous.notBackward.snoc .forward allowedForward
-            nonempty_end := by simp }
-      | some true =>
-          let allowedBackward : flowAllowed (interior length)
-              (previous.nonempty.edge length) .backward = true := by
-            simp [flowAllowed, hlast, previous.nonempty_end]
-          let allowedNone : flowAllowed (interior length)
-              (previous.nonempty.edge length) .none = true := by
-            simp [flowAllowed, hlast, previous.nonempty_end]
-          { backward := previous.nonempty.snoc .backward allowedBackward
-            backward_end := by simp
-            notBackward := previous.nonempty.snoc .none allowedNone
-            notBackward_end := by simp
-            nonempty := previous.nonempty.snoc .backward allowedBackward
-            nonempty_end := by simp }
-
 /-- Orientation of the last selected border strictly before an edge. -/
 def previousInterior (interior : Nat → Option Bool) : Nat → Option Bool
   | 0 => none
@@ -384,29 +283,10 @@ theorem intervalCoordinate_succ_of_adjacent_clear
     intervalStart_succ_of_adjacent_clear interior hposition hleft hright]
   omega
 
-/-- Canonical obstruction path selected by the dynamic program. -/
+/-- Canonical obstruction path given by the nearest-border formula. -/
 def canonicalPath (interior : Nat → Option Bool) (length : Nat) :
     FlowPath interior length :=
   intervalPath interior length
-
-/-- Every finite orientation sequence has paths ending in each of the three
-endpoint classes needed to extend across another selected border. -/
-theorem exists_flowPaths (interior : Nat → Option Bool) (length : Nat) :
-    (∃ path : FlowPath interior length,
-        path.edge length = .backward) ∧
-      (∃ path : FlowPath interior length,
-        path.edge length ≠ .backward) ∧
-      (∃ path : FlowPath interior length,
-        path.edge length ≠ .none) := by
-  let paths := pathFamily interior length
-  exact ⟨⟨paths.backward, paths.backward_end⟩,
-    ⟨paths.notBackward, paths.notBackward_end⟩,
-    ⟨paths.nonempty, paths.nonempty_end⟩⟩
-
-theorem exists_flowPath (interior : Nat → Option Bool) (length : Nat) :
-    Nonempty (FlowPath interior length) := by
-  rcases exists_flowPaths interior length with ⟨⟨path, _⟩, _⟩
-  exact ⟨path⟩
 
 /-- Finite analogue of the compatible shaded plane signal grid. -/
 structure ValidSignalRectangle (indexGrid : Nat → Nat → Index)
