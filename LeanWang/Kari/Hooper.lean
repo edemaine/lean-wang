@@ -33,6 +33,7 @@ import LeanWang.Kari.Hooper.MarkerChain
 import LeanWang.Kari.Hooper.MarkerSchedule
 import LeanWang.Kari.Hooper.BasicLemma
 import LeanWang.Kari.Hooper.NestingMachine
+import LeanWang.Kari.Hooper.BoundedMarkerProgram
 
 /-!
 # Hooper's immortality construction
@@ -53,8 +54,8 @@ positive-decrement schedules, concrete finite-table marker programs with
 independently directed searches and shifts,
 relocatable and reflectable finite tables, a verified finite-table linker,
 concrete arbitrary-entry liveness laws for the complete fixed source program,
-and the abstract strong-induction core of Hooper's nested bounded-search
-construction.
-The remaining files will compile the counter instructions to bounded marker
-searches and connect those searches to the liveness laws.
+a deterministic tagged controller for a finite family of bounded searches,
+and the abstract strong-induction core of Hooper's nested construction.  The
+remaining files will compile the counter instructions to those searches and
+implement the shared canonical core that discharges the nesting laws.
 -/
