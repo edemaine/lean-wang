@@ -430,6 +430,74 @@ theorem eq_seed_of_mem_originPayloads
     payload = seed := by
   exact (by simpa [regionPayloads] using member : payload ∈ T ∧ payload = seed).2
 
+private theorem AxisClass.nonnegative_of_step {left right : AxisClass}
+    (step : Step left right) (nonnegative : left ≠ .negative) :
+    right ≠ .negative := by
+  cases left <;> cases right <;>
+    simp_all [Step, before, after]
+
+/-- A finite axis-class line starting at the origin never becomes negative. -/
+private theorem axisLine_nonnegative {n : Nat} (positive : 0 < n)
+    (line : Fin n → AxisClass)
+    (origin : line ⟨0, positive⟩ = .origin)
+    (step : ∀ (k : Nat) (hk : k + 1 < n),
+      AxisClass.Step (line ⟨k, by omega⟩) (line ⟨k + 1, hk⟩)) :
+    ∀ index, line index ≠ .negative := by
+  intro index
+  have claim : ∀ k : Nat, ∀ hk : k < n,
+      line ⟨k, hk⟩ ≠ .negative := by
+    intro k
+    induction k with
+    | zero =>
+        intro hk
+        have indexEq : (⟨0, hk⟩ : Fin n) = ⟨0, positive⟩ := Fin.ext rfl
+        rw [indexEq, origin]
+        simp
+    | succ k inductionHypothesis =>
+        intro hk
+        have previousBound : k < n := by omega
+        exact AxisClass.nonnegative_of_step (step k hk)
+          (inductionHypothesis previousBound)
+  exact claim index.val index.isLt
+
+/-- Adjacent equality makes a finite line constant from its zeroth entry. -/
+private theorem axisLine_eq_zero {α : Type} {n : Nat} (positive : 0 < n)
+    (line : Fin n → α)
+    (adjacent : ∀ (k : Nat) (hk : k + 1 < n),
+      line ⟨k, by omega⟩ = line ⟨k + 1, hk⟩) :
+    ∀ index, line index = line ⟨0, positive⟩ := by
+  intro index
+  have claim : ∀ k : Nat, ∀ hk : k < n,
+      line ⟨k, hk⟩ = line ⟨0, positive⟩ := by
+    intro k
+    induction k with
+    | zero =>
+        intro hk
+        congr 1
+    | succ k inductionHypothesis =>
+        intro hk
+        have previousBound : k < n := by omega
+        exact (adjacent k hk).symm.trans
+          (inductionHypothesis previousBound)
+  exact claim index.val index.isLt
+
+/-- A position-class grid is nonnegative when its primary axis steps from the
+origin and its perpendicular axis preserves the class. -/
+private theorem axisGrid_nonnegative {n : Nat} (positive : 0 < n)
+    (grid : Fin n → Fin n → AxisClass)
+    (origin : grid ⟨0, positive⟩ ⟨0, positive⟩ = .origin)
+    (alongStep : ∀ (k : Nat) (hk : k + 1 < n),
+      AxisClass.Step (grid ⟨k, by omega⟩ ⟨0, positive⟩)
+        (grid ⟨k + 1, hk⟩ ⟨0, positive⟩))
+    (acrossEq : ∀ (along : Fin n) (k : Nat) (hk : k + 1 < n),
+      grid along ⟨k, by omega⟩ = grid along ⟨k + 1, hk⟩) :
+    ∀ along across, grid along across ≠ .negative := by
+  intro along across
+  rw [axisLine_eq_zero positive (line := grid along) (acrossEq along) across]
+  exact axisLine_nonnegative positive
+    (line := fun along => grid along ⟨0, positive⟩)
+    origin alongStep along
+
 /-- Every square rooted at the pointed tile decodes to a square rooted at the
 source seed. -/
 theorem source_fixedCornerSquare_of_extension
@@ -458,117 +526,36 @@ theorem source_fixedCornerSquare_of_extension
     congrArg (fun classes => classes.2) cornerClasses
   have cornerPayload : (decoded zero zero).payload = seed :=
     congrArg Prod.snd cornerPair
-
-  have horizontalBottom : ∀ k : Nat, ∀ hk : k < n,
-      (decoded ⟨k, hk⟩ zero).horizontal =
-        if k = 0 then .origin else .positive := by
-    intro k
-    induction k with
-    | zero =>
-        intro hk
-        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
-        simpa [indexEq] using cornerHorizontal
-    | succ k inductionHypothesis =>
-        intro hk
-        have previousBound : k < n :=
-          Nat.lt_trans (Nat.lt_succ_self k) hk
-        have step := (Decoded.hMatches
-          (decoded ⟨k, previousBound⟩ zero)
-          (decoded ⟨k + 1, hk⟩ zero)
-          (valid.2.1 ⟨k, previousBound⟩ zero hk)).1
-        by_cases kZero : k = 0
-        · have previousClass :
-              (decoded ⟨k, previousBound⟩ zero).horizontal = .origin := by
-            simpa [kZero] using inductionHypothesis previousBound
-          rw [previousClass] at step
-          simpa using step
-        · have previousClass :
-              (decoded ⟨k, previousBound⟩ zero).horizontal = .positive := by
-            simpa [kZero] using inductionHypothesis previousBound
-          rw [previousClass] at step
-          simpa using step
-
-  have horizontalColumn : ∀ column : Fin n, ∀ k : Nat, ∀ hk : k < n,
-      (decoded column ⟨k, hk⟩).horizontal =
-        (decoded column zero).horizontal := by
-    intro column k
-    induction k with
-    | zero =>
-        intro hk
-        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
-        rw [indexEq]
-    | succ k inductionHypothesis =>
-        intro hk
-        have previousBound : k < n :=
-          Nat.lt_trans (Nat.lt_succ_self k) hk
-        have sameColumn := (Decoded.vMatches
-          (decoded column ⟨k, previousBound⟩)
-          (decoded column ⟨k + 1, hk⟩)
-          (valid.2.2 column ⟨k, previousBound⟩ hk)).2.1
-        exact sameColumn.symm.trans (inductionHypothesis previousBound)
-
   have horizontalNonnegative (column row : Fin n) :
       (decoded column row).horizontal ≠ .negative := by
-    have columnEq := horizontalColumn column row.val row.isLt
-    have bottomClass := horizontalBottom column.val column.isLt
-    rw [columnEq, bottomClass]
-    split <;> simp
-
-  have verticalLeft : ∀ k : Nat, ∀ hk : k < n,
-      (decoded zero ⟨k, hk⟩).vertical =
-        if k = 0 then .origin else .positive := by
-    intro k
-    induction k with
-    | zero =>
-        intro hk
-        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
-        simpa [indexEq] using cornerVertical
-    | succ k inductionHypothesis =>
-        intro hk
-        have previousBound : k < n :=
-          Nat.lt_trans (Nat.lt_succ_self k) hk
-        have step := (Decoded.vMatches
-          (decoded zero ⟨k, previousBound⟩)
-          (decoded zero ⟨k + 1, hk⟩)
-          (valid.2.2 zero ⟨k, previousBound⟩ hk)).1
-        by_cases kZero : k = 0
-        · have previousClass :
-              (decoded zero ⟨k, previousBound⟩).vertical = .origin := by
-            simpa [kZero] using inductionHypothesis previousBound
-          rw [previousClass] at step
-          simpa using step
-        · have previousClass :
-              (decoded zero ⟨k, previousBound⟩).vertical = .positive := by
-            simpa [kZero] using inductionHypothesis previousBound
-          rw [previousClass] at step
-          simpa using step
-
-  have verticalRow : ∀ row : Fin n, ∀ k : Nat, ∀ hk : k < n,
-      (decoded ⟨k, hk⟩ row).vertical =
-        (decoded zero row).vertical := by
-    intro row k
-    induction k with
-    | zero =>
-        intro hk
-        have indexEq : (⟨0, hk⟩ : Fin n) = zero := Fin.ext rfl
-        rw [indexEq]
-    | succ k inductionHypothesis =>
-        intro hk
-        have previousBound : k < n :=
-          Nat.lt_trans (Nat.lt_succ_self k) hk
-        have sameRow := (Decoded.hMatches
-          (decoded ⟨k, previousBound⟩ row)
-          (decoded ⟨k + 1, hk⟩ row)
-          (valid.2.1 ⟨k, previousBound⟩ row hk)).2.1
-        exact sameRow.symm.trans (inductionHypothesis previousBound)
-
+    refine axisGrid_nonnegative positive
+      (grid := fun column row => (decoded column row).horizontal)
+      cornerHorizontal ?_ ?_ column row
+    · intro k hk
+      exact (Decoded.hMatches
+        (decoded ⟨k, by omega⟩ zero)
+        (decoded ⟨k + 1, hk⟩ zero)
+        (valid.2.1 ⟨k, by omega⟩ zero hk)).1
+    · intro fixed k hk
+      exact (Decoded.vMatches
+        (decoded fixed ⟨k, by omega⟩)
+        (decoded fixed ⟨k + 1, hk⟩)
+        (valid.2.2 fixed ⟨k, by omega⟩ hk)).2.1
   have verticalNonnegative (column row : Fin n) :
       (decoded column row).vertical ≠ .negative := by
-    have rowEq := verticalRow row column.val column.isLt
-    have leftClass := verticalLeft row.val row.isLt
-    rw [rowEq, leftClass]
-    split <;> simp
-
+    refine axisGrid_nonnegative positive
+      (grid := fun row column => (decoded column row).vertical)
+      cornerVertical ?_ ?_ row column
+    · intro k hk
+      exact (Decoded.vMatches
+        (decoded zero ⟨k, by omega⟩)
+        (decoded zero ⟨k + 1, hk⟩)
+        (valid.2.2 zero ⟨k, by omega⟩ hk)).1
+    · intro fixed k hk
+      exact (Decoded.hMatches
+        (decoded ⟨k, by omega⟩ fixed)
+        (decoded ⟨k + 1, hk⟩ fixed)
+        (valid.2.1 ⟨k, by omega⟩ fixed hk)).2.1
   let payloadRectangle : Rectangle n n :=
     fun column row => (decoded column row).payload
   refine ⟨positive, payloadRectangle, ?_, ?_⟩
