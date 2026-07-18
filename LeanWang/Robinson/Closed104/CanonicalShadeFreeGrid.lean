@@ -41,6 +41,11 @@ theorem coordinateAt_strictMono (depth : Nat)
   apply CanonicalFreeLineCoordinates.coordinateAt_strictMono depth
   simpa [Fin.cast] using hlt
 
+@[simp] theorem coordinateAt_zero (depth : Nat) :
+    coordinateAt depth (0 : Fin (depth + 1)) = 4 * 4 ^ depth + 1 := by
+  unfold coordinateAt
+  apply CanonicalFreeLineCoordinates.coordinateAt_zero
+
 theorem coordinateAt_bounds (depth : Nat) (index : Fin (depth + 1)) :
     quarterSouth (scale depth) < coordinateAt depth index ∧
       coordinateAt depth index < quarterNorth (3 * scale depth) := by

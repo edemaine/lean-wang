@@ -97,6 +97,19 @@ theorem expansion_internally_valid (node : Node) :
 
 end Node
 
+set_option linter.style.nativeDecide false in
+private theorem modelData_seed_parent :
+    (modelData (encodeNode false 0)).map DecoratedData.parent = some 0 := by
+  native_decide
+
+/-- The concrete selected seed decorates corrected index zero. -/
+theorem seedNode_parent : seedNode.data.parent = 0 := by
+  have chosen := Node.modelData_data seedNode
+  change modelData (encodeNode false 0) = some seedNode.data at chosen
+  have seedParent := modelData_seed_parent
+  rw [chosen] at seedParent
+  exact Option.some.inj seedParent
+
 /-- Row-major position in a `4 x 4` expansion. -/
 def blockPosition (x y : Fin 4) : Fin 16 :=
   ⟨x + 4 * y, by omega⟩

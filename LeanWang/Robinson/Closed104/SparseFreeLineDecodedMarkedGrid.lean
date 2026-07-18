@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.SparseFreeLinePlaneMarkedGrid
+import LeanWang.Robinson.Closed104.CanonicalShadeMarkedFreeGrid
 
 /-! Marked free grids in actual decoded routed-product planes. -/
 
@@ -15,7 +16,8 @@ namespace SparseFreeLineDecodedMarkedGrid
 
 open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths
   RedShadeCrossingBoards ShadedFreeLineRecurrence SparseFreeLinePlaneBase
-  SparseFreeLinePlaneMarkedGrid
+  SparseFreeLinePlaneMarkedGrid CanonicalShadeComparison
+  CanonicalShadeMarkedFreeGrid ShadedSubstitution
 
 set_option maxRecDepth 20000
 
@@ -71,32 +73,36 @@ theorem unboundedMarkedFreeGrid_with_light
     dsimp [level]
     rw [show 2 * (1 + size) - 1 = 1 + 2 * size by omega, pow_add, pow_mul]
     norm_num
-  have hdepthEven : refinementDepth .even (1 + size) = level + 2 := by
-    simp [refinementDepth, Phase.extra, level]
-  have hwestEven : west .even (1 + size) = 2 ^ level := by
-    simp [west, scale, Phase.factor, hlargePow]
-  have heastEven : east .even (1 + size) = 3 * 2 ^ level := by
-    simp [east, scale, Phase.factor, hlargePow]
   have hwestOdd : west .odd size = 2 ^ (level - 1) := by
-    simp [west, scale, Phase.factor, hsmallPow]
+    simp [west, ShadedFreeLineRecurrence.scale, Phase.factor, hsmallPow]
   have heastOdd : east .odd size = 3 * 2 ^ (level - 1) := by
-    simp [east, scale, Phase.factor, hsmallPow]
+    simp [east, ShadedFreeLineRecurrence.scale, Phase.factor, hsmallPow]
   rcases light with largeLight | smallLight
   · left
     have cycle := RedShadeCrossingBoards.largeCycle coarse level
-    have validEven : ValidShadeGrid (refinedGrid .even (1 + size) coarse) state := by
-      simpa only [refinedGrid, hdepthEven] using valid
-    have cycleEven : CycleOn (refinedGrid .even (1 + size) coarse)
-        (west .even (1 + size)) (east .even (1 + size))
-        (west .even (1 + size)) (east .even (1 + size)) := by
-      simpa only [refinedGrid, hdepthEven, hwestEven, heastEven] using cycle
-    have lightEven : CycleShade state
-        (west .even (1 + size)) (east .even (1 + size))
-        (west .even (1 + size)) (east .even (1 + size)) .light := by
-      simpa only [hwestEven, heastEven] using largeLight
+    have directValid : ValidShadeGrid (actualGrid (size + 1) coarse) state := by
+      simpa only [actualGrid, level, Nat.add_comm] using valid
+    have directLight : CycleShade state
+        (CanonicalShadeComparison.scale (size + 1))
+        (3 * CanonicalShadeComparison.scale (size + 1))
+        (CanonicalShadeComparison.scale (size + 1))
+        (3 * CanonicalShadeComparison.scale (size + 1)) .light := by
+      simpa only [CanonicalShadeComparison.scale, hlargePow,
+        Nat.add_comm] using largeLight
     exact ⟨cycle, largeLight, ⟨by
-      simpa only [refinedGrid, hdepthEven, hwestEven, heastEven] using
-        evenMarkedWitness size coarse coarseRoot validEven cycleEven lightEven⟩⟩
+      have witness := markedFreeGrid size coarse state seedNode coarseRoot
+        seedNode_parent directValid directLight
+      have gridEq : actualGrid (size + 1) coarse =
+          iterateRefine (level + 2) coarse := by
+        unfold actualGrid
+        congr 1
+        dsimp [level]
+        omega
+      have hlargePow' : 2 ^ level = 4 ^ (size + 1) := by
+        simpa only [Nat.add_comm] using hlargePow
+      simp only [CanonicalShadeComparison.scale] at witness
+      rw [gridEq, ← hlargePow'] at witness
+      exact witness⟩⟩
   · right
     let shifted := iterateRefine 1 coarse
     have shiftedRoot : shifted 0 0 = 0 := by

@@ -136,6 +136,24 @@ theorem coordinates_length (depth : Nat) :
       rw [coordinates_succ, length_flatMap_children,
         coordinates_oddCount, ih]
 
+private theorem coordinates_cons (depth : Nat) :
+    ∃ tail, coordinates depth = (4 * 4 ^ depth + 1) :: tail := by
+  induction depth with
+  | zero => exact ⟨[], rfl⟩
+  | succ depth ih =>
+      rcases ih with ⟨tail, ih⟩
+      rw [coordinates_succ, ih, List.flatMap_cons]
+      have hodd : (4 * 4 ^ depth + 1) % 2 = 1 := by
+        simp [Nat.add_mod, Nat.mul_mod]
+      unfold children
+      rw [if_pos hodd]
+      have firstEq :
+          4 * (4 * 4 ^ depth + 1) - 3 = 4 * 4 ^ (depth + 1) + 1 := by
+        rw [pow_succ]
+        omega
+      rw [firstEq]
+      exact ⟨_, rfl⟩
+
 theorem mem_coordinates_bounds (depth : Nat) {coordinate : Nat}
     (hcoordinate : coordinate ∈ coordinates depth) :
     quarterSouth (4 ^ depth) < coordinate ∧
@@ -157,6 +175,15 @@ theorem mem_coordinates_bounds (depth : Nat) {coordinate : Nat}
 def coordinateAt (depth : Nat)
     (index : Fin (coordinates depth).length) : Nat :=
   (coordinates depth).get index
+
+/-- The first coordinate is the retained northeast marker coordinate. -/
+theorem coordinateAt_zero (depth : Nat)
+    (positive : 0 < (coordinates depth).length) :
+    coordinateAt depth ⟨0, positive⟩ = 4 * 4 ^ depth + 1 := by
+  rcases coordinates_cons depth with ⟨tail, h⟩
+  unfold coordinateAt
+  rw [List.get_eq_getElem]
+  simp [h]
 
 theorem coordinateAt_mem (depth : Nat)
     (index : Fin (coordinates depth).length) :

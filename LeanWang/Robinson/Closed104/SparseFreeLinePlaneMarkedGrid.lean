@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.SparseFreeLinePlaneFreeGrid
 import LeanWang.Robinson.Closed104.SparseFreeLinePivotMarker
+import LeanWang.Robinson.Closed104.ShadedMarkedFreeGrid
 
 /-! Sparse semantic free grids whose first retained crossing is the marker. -/
 
@@ -19,19 +20,6 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths
   SparseFreeLinePlaneBase Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
-
-structure MarkedFreeGrid
-    (indexGrid : Nat → Nat → Index)
-    (shadeGrid : Nat → Nat → RedShades.State)
-    (west east south north size : Nat) where
-  grid : FreeGrid indexGrid shadeGrid west east south north size
-  positive : 0 < size
-  lowerLeftMarker :
-    (indexGrid (grid.columnAt ⟨0, positive⟩ / 2)
-        (grid.rowAt ⟨0, positive⟩ / 2),
-      quadrantAt (grid.columnAt ⟨0, positive⟩)
-        (grid.rowAt ⟨0, positive⟩)) ∈
-      ShadedSignals.markerQuarters
 
 def castSize
     {indexGrid : Nat → Nat → Index}
