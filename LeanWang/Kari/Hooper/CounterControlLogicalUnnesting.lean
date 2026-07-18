@@ -120,7 +120,7 @@ theorem reaches_resumed_search_of_immortal_logical
         hcollision.toCorePrefixRepresents.toCoreRepresents
         hcollision.toCorePrefixRepresents.runway
         hcollision.target_matches himmortalReturn with
-      ⟨search, distance, hresume, hdirection, hgap, hdistance⟩
+      ⟨search, distance, hresume, hdirection, _htag, hgap, hdistance⟩
     have hreturn' : FullTM0.Reaches
         (CounterControlNestingBridge.machine base c)
         ⟨logicalState base c growth source, logical⟩

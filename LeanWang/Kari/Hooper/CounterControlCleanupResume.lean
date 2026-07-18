@@ -66,6 +66,7 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
         ((searchSystem base c).startCfg search
           ((afterTag spec T).move spec.growth)) ∧
       (command base c search).searchDirection = spec.growth ∧
+      logicalTape spec.growth T 0 = tagSymbol search ∧
       SearchGap (fun symbol => symbol = blankSymbol)
         (command base c search).target.Matches
         ((afterTag spec T).move spec.growth) spec.growth distance ∧
@@ -79,7 +80,7 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
       (CounterControlNestingBridge.machine base c) start).mp
         (by simpa [start, returnTape] using himmortal)
   rcases return_step_or_haltsFrom base c spec.growth returnTape with
-    hhalts | ⟨before, selected, after, hlist, hdirection, _hread, hstep⟩
+    hhalts | ⟨before, selected, after, hlist, hdirection, hread, hstep⟩
   · exact False.elim (hnotHalts hhalts)
   · let radius := CanonicalInitializer.radius c
     let selectedOffset :=
@@ -137,6 +138,50 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
         (command base c search).searchDirection = spec.growth := by
       rw [← hselectedSearch]
       exact hdirection
+    have hreturnTag :
+        logicalTape spec.growth T 0 = tagSymbol search := by
+      have hread' : returnTape.read =
+          tagSymbol (command base c search).returnTag := by
+        rw [← hselectedSearch]
+        exact hread
+      have htagAfter : logicalTape spec.growth (afterZero spec T) 0 =
+          tagSymbol search := by
+        simpa [returnTape, atLogical, command,
+          CounterControlPlan.compileCommand_returnTag] using hread'
+      have hpreserve : logicalTape spec.growth (afterZero spec T) 0 =
+          logicalTape spec.growth T 0 := by
+        have hzero : logicalTape spec.growth (afterZero spec T) (0 : Nat) =
+            logicalTape spec.growth (afterOne spec T) 0 := by
+          simpa [afterZero, clearBoundary] using
+            (writeLogical_of_ne spec.growth (afterOne spec T)
+              (boundaryOffset spec.registers 0) 0 blankSymbol
+              (by simp [boundaryOffset]))
+        have hone : logicalTape spec.growth (afterOne spec T) (0 : Nat) =
+            logicalTape spec.growth (afterTwo spec T) 0 := by
+          simpa [afterOne, clearBoundary] using
+            (writeLogical_of_ne spec.growth (afterTwo spec T)
+              (boundaryOffset spec.registers 1) 0 blankSymbol
+              (by simp [boundaryOffset]))
+        have htwo : logicalTape spec.growth (afterTwo spec T) (0 : Nat) =
+            logicalTape spec.growth (afterThree spec T) 0 := by
+          simpa [afterTwo, clearBoundary] using
+            (writeLogical_of_ne spec.growth (afterThree spec T)
+              (boundaryOffset spec.registers 2) 0 blankSymbol
+              (by simp [boundaryOffset]))
+        have hthree : logicalTape spec.growth (afterThree spec T) (0 : Nat) =
+            logicalTape spec.growth (afterFour spec T) 0 := by
+          simpa [afterThree, clearBoundary] using
+            (writeLogical_of_ne spec.growth (afterFour spec T)
+              (boundaryOffset spec.registers 3) 0 blankSymbol
+              (by simp [boundaryOffset]))
+        have hfour : logicalTape spec.growth (afterFour spec T) (0 : Nat) =
+            logicalTape spec.growth T 0 := by
+          simpa [afterFour, clearBoundary] using
+            (writeLogical_of_ne spec.growth T
+              (boundaryOffset spec.registers 4) 0 blankSymbol
+              (by simp [boundaryOffset]))
+        exact hzero.trans (hone.trans (htwo.trans (hthree.trans hfour)))
+      exact hpreserve.symm.trans htagAfter
     have hcommandOffset : CounterControlSearchSystem.commandOffset
         base c search = selectedOffset := by
       unfold CounterControlSearchSystem.commandOffset
@@ -174,7 +219,7 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
         hfirst hpositive hgap
     exact ⟨search, distance,
       by simpa [start, returnTape] using hsearchReach,
-      hsearchDirection, hgap, hdistance⟩
+      hsearchDirection, hreturnTag, hgap, hdistance⟩
 
 end
 

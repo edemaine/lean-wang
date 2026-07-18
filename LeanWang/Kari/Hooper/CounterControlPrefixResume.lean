@@ -55,6 +55,7 @@ structure PrefixResumedSearch
     start next.cfg
   direction_eq :
     (command base c next.search).searchDirection = frame.growth
+  tag_eq : logicalTape frame.growth tape 0 = tagSymbol next.search
   outer_eq : next.outer =
     (afterTag
       (prefixSpec registers frame.growth frame.limit frame.target
@@ -144,7 +145,7 @@ theorem PrefixReachesReturn.resumes_of_immortal
   rcases CounterControlCleanupResume.reaches_resumed_search_at_first_obstruction_sub_one
       base c hmortal (spec := spec) (T := T) hcore hrunway htarget
       himmortalReturn' with
-    ⟨search, distance, hresume, hdirection, hgap, hdistance⟩
+    ⟨search, distance, hresume, hdirection, htag, hgap, hdistance⟩
   let outer := (afterTag spec T).move spec.growth
   let next : GenuineSearch base c := {
     search := search
@@ -163,6 +164,9 @@ theorem PrefixReachesReturn.resumes_of_immortal
     direction_eq := by
       change (command base c search).searchDirection = spec.growth
       exact hdirection
+    tag_eq := by
+      change logicalTape spec.growth T 0 = tagSymbol search
+      exact htag
     outer_eq := by rfl
     distance_eq := hdistance }⟩
   change FullTM0.Reaches (CounterControlNestingBridge.machine base c)

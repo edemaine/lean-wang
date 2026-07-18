@@ -99,7 +99,7 @@ theorem clearedPrefixUnnests_of_reaches_cleaned_return
   rcases CounterControlCleanupResume.reaches_resumed_search_at_first_obstruction_sub_one
       base c hmortal hcore hrunway htarget
       (by simpa [returnCfg] using himmortalReturn) with
-    ⟨search, distance, hresume, hdirection, hgap, hdistance⟩
+    ⟨search, distance, hresume, hdirection, _htag, hgap, hdistance⟩
   let outer := (afterTag spec T).move spec.growth
   let next : GenuineSearch base c := {
     search := search
