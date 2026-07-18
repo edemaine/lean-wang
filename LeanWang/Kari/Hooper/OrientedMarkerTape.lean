@@ -154,6 +154,102 @@ theorem sweep_executes (growth : Turing.Dir)
       (orientTape growth (MarkerSchedule.boundaryTape registers 4)) :=
   executes_orient growth (MarkerValidation.sweep_executes registers)
 
+/-! ## Oriented marker-shift schedules -/
+
+/-- Reflect both independent directions of a marker move when the nested core
+grows left. -/
+def orientMove (growth : Turing.Dir) (move : MarkerProgram.Move) :
+    MarkerProgram.Move :=
+  { expected := move.expected
+    searchDirection := orientDirection growth move.searchDirection
+    shiftDirection := orientDirection growth move.shiftDirection }
+
+/-- Reflect a chained move and its explicit departure direction. -/
+def orientCommand (growth : Turing.Dir) (command : MarkerChain.Command) :
+    MarkerChain.Command :=
+  { move := orientMove growth command.move
+    depart := orientDirection growth command.depart }
+
+@[simp]
+theorem orientMove_expected (growth : Turing.Dir)
+    (move : MarkerProgram.Move) :
+    (orientMove growth move).expected = move.expected :=
+  rfl
+
+@[simp]
+theorem orientCommand_expected (growth : Turing.Dir)
+    (command : MarkerChain.Command) :
+    (orientCommand growth command).move.expected =
+      command.move.expected :=
+  rfl
+
+@[simp]
+theorem orient_resultTape (growth : Turing.Dir)
+    (command : MarkerChain.Command) (distance : Nat)
+    (T : FullTM0.Tape MarkerMachine.Symbol) :
+    orientTape growth (MarkerChain.resultTape command distance T) =
+      MarkerChain.resultTape (orientCommand growth command) distance
+        (orientTape growth T) := by
+  simp [MarkerChain.resultTape, MarkerProgram.resultTape,
+    orientCommand, orientMove]
+
+/-- Guarded execution of an entire suffix-shift schedule transports to either
+physical orientation. -/
+theorem chain_executes_orient (growth : Turing.Dir)
+    {commands : List MarkerChain.Command}
+    {start finish : FullTM0.Tape MarkerMachine.Symbol}
+    (h : MarkerChain.Executes commands start finish) :
+    MarkerChain.Executes (commands.map (orientCommand growth))
+      (orientTape growth start) (orientTape growth finish) := by
+  induction h with
+  | nil T => exact MarkerChain.Executes.nil _
+  | cons command commands T U distance hgap hdestination hrest ih =>
+      apply MarkerChain.Executes.cons
+        (command := orientCommand growth command)
+        (commands := commands.map (orientCommand growth))
+        (T := orientTape growth T) (U := orientTape growth U)
+        distance
+      · exact (searchGap_orient_iff growth command.move.searchDirection
+          T distance).2 hgap
+      · change
+          (((((orientTape growth T).moveN
+              (orientDirection growth command.move.searchDirection)
+              distance).write MarkerMachine.blankSymbol).move
+                (orientDirection growth command.move.shiftDirection)).read =
+            MarkerMachine.blankSymbol)
+        rw [← orientTape_moveN, ← orientTape_write,
+          ← orientTape_move, orientTape_read]
+        exact hdestination
+      · simpa only [orient_resultTape] using ih
+
+/-- Exact increment schedule in either physical growth orientation. -/
+theorem increment_executes (growth : Turing.Dir)
+    (registers : CounterMachine.Registers)
+    (register : CounterMachine.Register) :
+    MarkerChain.Executes
+      ((MarkerSchedule.incrementCommands register).map
+        (orientCommand growth))
+      (orientTape growth (MarkerSchedule.boundaryTape registers 4))
+      (orientTape growth
+        (MarkerSchedule.incrementFinishTape registers register)) :=
+  chain_executes_orient growth
+    (MarkerSchedule.increment_executes registers register)
+
+/-- Exact positive-decrement schedule in either physical growth orientation. -/
+theorem decrement_executes (growth : Turing.Dir)
+    (registers : CounterMachine.Registers)
+    (register : CounterMachine.Register)
+    (hpositive : 0 < registers.get register) :
+    MarkerChain.Executes
+      ((MarkerSchedule.decrementCommands register).map
+        (orientCommand growth))
+      (orientTape growth
+        (MarkerSchedule.decrementStartTape registers register))
+      (orientTape growth
+        (MarkerSchedule.decrementFinishTape registers register)) :=
+  chain_executes_orient growth
+    (MarkerSchedule.decrement_executes registers register hpositive)
+
 end OrientedMarkerTape
 end Hooper
 end Kari
