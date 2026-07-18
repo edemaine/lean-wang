@@ -863,6 +863,44 @@ theorem classify_monotone_or_outward
   | outwardFour progress hraw =>
       exact ⟨.outward (.four progress hraw)⟩
 
+/-- The sole remaining semantic obligation for arbitrary validation: continue
+one of the four outward-prefix endpoints while preserving the comparison with
+the original genuine gap. -/
+def OutwardContinuationLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (_hmortal : ¬ DominoProblem.FixedNonhalting c) : Prop :=
+  ∀ (current : GenuineSearch base c)
+      (growth : Turing.Dir) (source : Nat)
+      (instruction : CounterMachine.Instruction)
+      (_hrule : (source, instruction) ∈ GlobalSourceProgram.program),
+    OutwardObligation current growth source instruction →
+      FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
+          (foundCfg current) →
+        Nonempty (FoundMonotoneGuardedEntryOutcome current)
+
+/-- An implementation of the exact outward obligation completes the
+validation field required by monotone-entry assembly. -/
+theorem validationContinuation_of_outwardLaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (houtward : OutwardContinuationLaw base c hmortal)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction)
+    (hrule : (source, instruction) ∈ GlobalSourceProgram.program)
+    (hcommand : current.selectedRaw ∈
+      validationCommands growth source instruction)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
+  rcases classify_monotone_or_outward base c hmortal current himmortal growth
+      source instruction hrule hcommand with ⟨outcome⟩
+  cases outcome with
+  | monotone outcome => exact ⟨outcome⟩
+  | outward obligation =>
+      exact houtward current growth source instruction hrule obligation
+        himmortal
+
 end
 
 end CounterControlGenuineValidation
