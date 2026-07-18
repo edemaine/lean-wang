@@ -25,17 +25,7 @@ theorem rowClearComplete_eq_true : rowClearComplete = true :=
 theorem columnClearComplete_eq_true : columnClearComplete = true :=
   check_of_mem (by simp [checks])
 
-theorem rowTransitionsComplete_eq_true : rowTransitionsComplete = true :=
-  check_of_mem (by simp [checks])
-
-theorem columnTransitionsComplete_eq_true :
-    columnTransitionsComplete = true :=
-  check_of_mem (by simp [checks])
-
-theorem rowBoundaryComplete_eq_true : rowBoundaryComplete = true :=
-  check_of_mem (by simp [checks])
-
-theorem columnBoundaryComplete_eq_true : columnBoundaryComplete = true :=
+theorem stripTransitionsComplete_eq_true : stripTransitionsComplete = true :=
   check_of_mem (by simp [checks])
 
 theorem baseComplete_eq_true : baseComplete = true :=
@@ -68,207 +58,57 @@ theorem columnOdd_clear {node : Nat} (hnode : node ∈ columnOdd) :
   simp only [columnClearComplete, Bool.and_eq_true] at checked
   exact List.all_eq_true.1 checked.2 node hnode
 
-private theorem row_child_of_check {sources targets : List Nat}
-    {childY node childX child : Nat}
-    (checked : childrenInRowClass sources targets childY = true)
-    (hnode : node ∈ sources) (hchildX : childX < 4)
-    (hchild : childAt? node childX childY = some child) :
-    child ∈ targets := by
-  have nodeCheck := List.all_eq_true.1 checked node hnode
-  have childCheck := List.all_eq_true.1 nodeCheck childX (by
-    simpa using hchildX)
+private theorem stripTransition_complete (axis : StripAxis)
+    {transition : StripTransition} (htransition : transition ∈ stripTransitions) :
+    stripTransitionComplete axis transition = true := by
+  have checked := stripTransitionsComplete_eq_true
+  simp only [stripTransitionsComplete] at checked
+  have axisChecked := List.all_eq_true.1 checked axis (by
+    cases axis <;> simp)
+  exact List.all_eq_true.1 axisChecked transition htransition
+
+theorem interior_child {axis : StripAxis} {transition : StripTransition}
+    (htransition : transition ∈ stripTransitions) {node localAlong child : Nat}
+    (hnode : node ∈ interiorClass axis transition.source)
+    (hlocalAlong : localAlong < 4)
+    (hchild : childAtAxis? axis node localAlong transition.localFixed =
+      some child) :
+    child ∈ interiorClass axis transition.target := by
+  have checked := stripTransition_complete axis htransition
+  simp only [stripTransitionComplete, Bool.and_eq_true] at checked
+  have nodeCheck := List.all_eq_true.1 checked.1.1 node hnode
+  have childCheck := List.all_eq_true.1 nodeCheck localAlong (by
+    simpa using hlocalAlong)
   rw [hchild] at childCheck
   simpa using childCheck
 
-private theorem column_child_of_check {sources targets : List Nat}
-    {childX node childY child : Nat}
-    (checked : childrenInColumnClass sources targets childX = true)
-    (hnode : node ∈ sources) (hchildY : childY < 4)
-    (hchild : childAt? node childX childY = some child) :
-    child ∈ targets := by
-  have nodeCheck := List.all_eq_true.1 checked node hnode
-  have childCheck := List.all_eq_true.1 nodeCheck childY (by
-    simpa using hchildY)
-  rw [hchild] at childCheck
-  simpa using childCheck
-
-theorem rowEven_child_zero {node childX child : Nat}
-    (hnode : node ∈ rowEven) (hchildX : childX < 4)
-    (hchild : childAt? node childX 0 = some child) : child ∈ rowEven := by
-  have checked := rowTransitionsComplete_eq_true
-  simp only [rowTransitionsComplete, Bool.and_eq_true] at checked
-  exact row_child_of_check checked.1.1 hnode hchildX hchild
-
-theorem rowEven_child_one {node childX child : Nat}
-    (hnode : node ∈ rowEven) (hchildX : childX < 4)
-    (hchild : childAt? node childX 1 = some child) : child ∈ rowOdd := by
-  have checked := rowTransitionsComplete_eq_true
-  simp only [rowTransitionsComplete, Bool.and_eq_true] at checked
-  exact row_child_of_check checked.1.2 hnode hchildX hchild
-
-theorem rowOdd_child_three {node childX child : Nat}
-    (hnode : node ∈ rowOdd) (hchildX : childX < 4)
-    (hchild : childAt? node childX 3 = some child) : child ∈ rowOdd := by
-  have checked := rowTransitionsComplete_eq_true
-  simp only [rowTransitionsComplete, Bool.and_eq_true] at checked
-  exact row_child_of_check checked.2 hnode hchildX hchild
-
-theorem columnEven_child_zero {node childY child : Nat}
-    (hnode : node ∈ columnEven) (hchildY : childY < 4)
-    (hchild : childAt? node 0 childY = some child) : child ∈ columnEven := by
-  have checked := columnTransitionsComplete_eq_true
-  simp only [columnTransitionsComplete, Bool.and_eq_true] at checked
-  exact column_child_of_check checked.1.1 hnode hchildY hchild
-
-theorem columnEven_child_one {node childY child : Nat}
-    (hnode : node ∈ columnEven) (hchildY : childY < 4)
-    (hchild : childAt? node 1 childY = some child) : child ∈ columnOdd := by
-  have checked := columnTransitionsComplete_eq_true
-  simp only [columnTransitionsComplete, Bool.and_eq_true] at checked
-  exact column_child_of_check checked.1.2 hnode hchildY hchild
-
-theorem columnOdd_child_three {node childY child : Nat}
-    (hnode : node ∈ columnOdd) (hchildY : childY < 4)
-    (hchild : childAt? node 3 childY = some child) : child ∈ columnOdd := by
-  have checked := columnTransitionsComplete_eq_true
-  simp only [columnTransitionsComplete, Bool.and_eq_true] at checked
-  exact column_child_of_check checked.2 hnode hchildY hchild
-
-private theorem boundary_child_of_check {sources targets : List Nat}
-    {childX childY node child : Nat}
-    (checked : boundaryChildInClass sources targets childX childY = true)
-    (hnode : node ∈ sources)
-    (hchild : childAt? node childX childY = some child) :
-    child ∈ targets := by
-  have nodeCheck := List.all_eq_true.1 checked node hnode
+theorem boundary_child {axis : StripAxis} {transition : StripTransition}
+    (htransition : transition ∈ stripTransitions) {node child : Nat}
+    (hnode : node ∈ boundaryClass axis transition.source)
+    (hchild : childAtAxis? axis node 0 transition.localFixed = some child) :
+    child ∈ boundaryClass axis transition.target := by
+  have checked := stripTransition_complete axis htransition
+  simp only [stripTransitionComplete, Bool.and_eq_true] at checked
+  have nodeCheck := List.all_eq_true.1 checked.1.2 node hnode
   rw [hchild] at nodeCheck
   simpa using nodeCheck
 
-private theorem row_enters_of_check {sources targets : List Nat}
-    {childY node childX child : Nat}
-    (checked : rowBoundaryEnters sources targets childY = true)
-    (hnode : node ∈ sources) (hchildXLower : 0 < childX)
-    (hchildXUpper : childX < 4)
-    (hchild : childAt? node childX childY = some child) :
-    child ∈ targets := by
-  have nodeCheck := List.all_eq_true.1 checked node hnode
-  have offsetMem : childX - 1 ∈ List.range 3 := by
+theorem boundary_enters {axis : StripAxis} {transition : StripTransition}
+    (htransition : transition ∈ stripTransitions) {node localAlong child : Nat}
+    (hnode : node ∈ boundaryClass axis transition.source)
+    (hlocalAlongPositive : 0 < localAlong) (hlocalAlong : localAlong < 4)
+    (hchild : childAtAxis? axis node localAlong transition.localFixed =
+      some child) :
+    child ∈ interiorClass axis transition.target := by
+  have checked := stripTransition_complete axis htransition
+  simp only [stripTransitionComplete, Bool.and_eq_true] at checked
+  have nodeCheck := List.all_eq_true.1 checked.2 node hnode
+  have offsetMem : localAlong - 1 ∈ List.range 3 := by
     simp only [List.mem_range]
     omega
-  have childCheck := List.all_eq_true.1 nodeCheck (childX - 1) offsetMem
-  rw [show childX - 1 + 1 = childX by omega, hchild] at childCheck
+  have childCheck := List.all_eq_true.1 nodeCheck (localAlong - 1) offsetMem
+  rw [show localAlong - 1 + 1 = localAlong by omega, hchild] at childCheck
   simpa using childCheck
-
-private theorem column_enters_of_check {sources targets : List Nat}
-    {childX node childY child : Nat}
-    (checked : columnBoundaryEnters sources targets childX = true)
-    (hnode : node ∈ sources) (hchildYLower : 0 < childY)
-    (hchildYUpper : childY < 4)
-    (hchild : childAt? node childX childY = some child) :
-    child ∈ targets := by
-  have nodeCheck := List.all_eq_true.1 checked node hnode
-  have offsetMem : childY - 1 ∈ List.range 3 := by
-    simp only [List.mem_range]
-    omega
-  have childCheck := List.all_eq_true.1 nodeCheck (childY - 1) offsetMem
-  rw [show childY - 1 + 1 = childY by omega, hchild] at childCheck
-  simpa using childCheck
-
-theorem rowBoundaryEven_child_zero {node child : Nat}
-    (hnode : node ∈ rowBoundaryEven)
-    (hchild : childAt? node 0 0 = some child) :
-    child ∈ rowBoundaryEven := by
-  have checked := rowBoundaryComplete_eq_true
-  simp only [rowBoundaryComplete, Bool.and_eq_true] at checked
-  exact boundary_child_of_check checked.1.1.1.1.1 hnode hchild
-
-theorem rowBoundaryEven_child_one {node child : Nat}
-    (hnode : node ∈ rowBoundaryEven)
-    (hchild : childAt? node 0 1 = some child) :
-    child ∈ rowBoundaryOdd := by
-  have checked := rowBoundaryComplete_eq_true
-  simp only [rowBoundaryComplete, Bool.and_eq_true] at checked
-  exact boundary_child_of_check checked.1.1.1.1.2 hnode hchild
-
-theorem rowBoundaryOdd_child_three {node child : Nat}
-    (hnode : node ∈ rowBoundaryOdd)
-    (hchild : childAt? node 0 3 = some child) :
-    child ∈ rowBoundaryOdd := by
-  have checked := rowBoundaryComplete_eq_true
-  simp only [rowBoundaryComplete, Bool.and_eq_true] at checked
-  exact boundary_child_of_check checked.1.1.1.2 hnode hchild
-
-theorem rowBoundaryEven_enters_zero {node childX child : Nat}
-    (hnode : node ∈ rowBoundaryEven) (hchildXLower : 0 < childX)
-    (hchildXUpper : childX < 4)
-    (hchild : childAt? node childX 0 = some child) : child ∈ rowEven := by
-  have checked := rowBoundaryComplete_eq_true
-  simp only [rowBoundaryComplete, Bool.and_eq_true] at checked
-  exact row_enters_of_check checked.1.1.2 hnode hchildXLower hchildXUpper hchild
-
-theorem rowBoundaryEven_enters_one {node childX child : Nat}
-    (hnode : node ∈ rowBoundaryEven) (hchildXLower : 0 < childX)
-    (hchildXUpper : childX < 4)
-    (hchild : childAt? node childX 1 = some child) : child ∈ rowOdd := by
-  have checked := rowBoundaryComplete_eq_true
-  simp only [rowBoundaryComplete, Bool.and_eq_true] at checked
-  exact row_enters_of_check checked.1.2 hnode hchildXLower hchildXUpper hchild
-
-theorem rowBoundaryOdd_enters_three {node childX child : Nat}
-    (hnode : node ∈ rowBoundaryOdd) (hchildXLower : 0 < childX)
-    (hchildXUpper : childX < 4)
-    (hchild : childAt? node childX 3 = some child) : child ∈ rowOdd := by
-  have checked := rowBoundaryComplete_eq_true
-  simp only [rowBoundaryComplete, Bool.and_eq_true] at checked
-  exact row_enters_of_check checked.2 hnode hchildXLower hchildXUpper hchild
-
-theorem columnBoundaryEven_child_zero {node child : Nat}
-    (hnode : node ∈ columnBoundaryEven)
-    (hchild : childAt? node 0 0 = some child) :
-    child ∈ columnBoundaryEven := by
-  have checked := columnBoundaryComplete_eq_true
-  simp only [columnBoundaryComplete, Bool.and_eq_true] at checked
-  exact boundary_child_of_check checked.1.1.1.1.1 hnode hchild
-
-theorem columnBoundaryEven_child_one {node child : Nat}
-    (hnode : node ∈ columnBoundaryEven)
-    (hchild : childAt? node 1 0 = some child) :
-    child ∈ columnBoundaryOdd := by
-  have checked := columnBoundaryComplete_eq_true
-  simp only [columnBoundaryComplete, Bool.and_eq_true] at checked
-  exact boundary_child_of_check checked.1.1.1.1.2 hnode hchild
-
-theorem columnBoundaryOdd_child_three {node child : Nat}
-    (hnode : node ∈ columnBoundaryOdd)
-    (hchild : childAt? node 3 0 = some child) :
-    child ∈ columnBoundaryOdd := by
-  have checked := columnBoundaryComplete_eq_true
-  simp only [columnBoundaryComplete, Bool.and_eq_true] at checked
-  exact boundary_child_of_check checked.1.1.1.2 hnode hchild
-
-theorem columnBoundaryEven_enters_zero {node childY child : Nat}
-    (hnode : node ∈ columnBoundaryEven) (hchildYLower : 0 < childY)
-    (hchildYUpper : childY < 4)
-    (hchild : childAt? node 0 childY = some child) : child ∈ columnEven := by
-  have checked := columnBoundaryComplete_eq_true
-  simp only [columnBoundaryComplete, Bool.and_eq_true] at checked
-  exact column_enters_of_check checked.1.1.2 hnode hchildYLower hchildYUpper hchild
-
-theorem columnBoundaryEven_enters_one {node childY child : Nat}
-    (hnode : node ∈ columnBoundaryEven) (hchildYLower : 0 < childY)
-    (hchildYUpper : childY < 4)
-    (hchild : childAt? node 1 childY = some child) : child ∈ columnOdd := by
-  have checked := columnBoundaryComplete_eq_true
-  simp only [columnBoundaryComplete, Bool.and_eq_true] at checked
-  exact column_enters_of_check checked.1.2 hnode hchildYLower hchildYUpper hchild
-
-theorem columnBoundaryOdd_enters_three {node childY child : Nat}
-    (hnode : node ∈ columnBoundaryOdd) (hchildYLower : 0 < childY)
-    (hchildYUpper : childY < 4)
-    (hchild : childAt? node 3 childY = some child) : child ∈ columnOdd := by
-  have checked := columnBoundaryComplete_eq_true
-  simp only [columnBoundaryComplete, Bool.and_eq_true] at checked
-  exact column_enters_of_check checked.2 hnode hchildYLower hchildYUpper hchild
 
 theorem base_row_interior (x : Nat) (hxLower : 3 ≤ x) (hxUpper : x < 6) :
     optionIn (seedNodeAt? x 4) rowEven = true := by

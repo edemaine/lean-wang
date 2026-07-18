@@ -144,10 +144,6 @@ theorem seedNodeAt?_eq (x y : Nat) :
     simp only [iterateNodeRefine, refineNodeGrid]
     rfl
 
-private inductive StripAxis where
-  | row
-  | column
-
 private def orientedPoint : StripAxis → Nat → Nat → Nat × Nat
   | .row, along, fixed => (along, fixed)
   | .column, along, fixed => (fixed, along)
@@ -160,6 +156,18 @@ private def stripChildPosition (axis : StripAxis)
     (along fixed : Nat) : Fin 16 :=
   let point := orientedPoint axis along fixed
   childPosition point.1 point.2
+
+private theorem childAtAxis?_val (axis : StripAxis) (node : Node)
+    (along fixed : Nat) (alongBound : along < 4) (fixedBound : fixed < 4) :
+    childAtAxis? axis node.val along fixed =
+      some (node.child (stripChildPosition axis along fixed)).val := by
+  cases axis with
+  | row =>
+      simpa [childAtAxis?, stripChildPosition, orientedPoint] using
+        childAt?_val node along fixed alongBound fixedBound
+  | column =>
+      simpa [childAtAxis?, stripChildPosition, orientedPoint] using
+        childAt?_val node fixed along fixedBound alongBound
 
 private def StripInterior (axis : StripAxis)
     (depth offset : Nat) (members : List Nat) : Prop :=
@@ -175,21 +183,16 @@ abbrev RowBoundary := StripBoundary .row
 abbrev ColumnInterior := StripInterior .column
 abbrev ColumnBoundary := StripBoundary .column
 
-def RowClassified (depth offset : Nat) : Prop :=
+private def StripClassified (axis : StripAxis) (depth offset : Nat) : Prop :=
   if offset % 2 = 0 then
-    RowInterior depth offset rowEven ∧
-      RowBoundary depth offset rowBoundaryEven
+    StripInterior axis depth offset (interiorClass axis .even) ∧
+      StripBoundary axis depth offset (boundaryClass axis .even)
   else
-    RowInterior depth offset rowOdd ∧
-      RowBoundary depth offset rowBoundaryOdd
+    StripInterior axis depth offset (interiorClass axis .odd) ∧
+      StripBoundary axis depth offset (boundaryClass axis .odd)
 
-def ColumnClassified (depth offset : Nat) : Prop :=
-  if offset % 2 = 0 then
-    ColumnInterior depth offset columnEven ∧
-      ColumnBoundary depth offset columnBoundaryEven
-  else
-    ColumnInterior depth offset columnOdd ∧
-      ColumnBoundary depth offset columnBoundaryOdd
+abbrev RowClassified := StripClassified .row
+abbrev ColumnClassified := StripClassified .column
 
 private theorem stripNode_succ (axis : StripAxis)
     {depth old child localFixed : Nat}
@@ -280,6 +283,31 @@ private theorem strip_step {axis : StripAxis}
     rw [alongDiv, alongMod]
     exact boundaryChild _ oldClassified.2
 
+private theorem strip_transition {axis : StripAxis}
+    {depth old child : Nat} (transition : StripTransition)
+    (transitionMem : transition ∈ stripTransitions)
+    (oldClassified :
+      StripInterior axis depth old (interiorClass axis transition.source) ∧
+        StripBoundary axis depth old (boundaryClass axis transition.source))
+    (childEq : child = 4 * old + transition.localFixed) :
+    StripInterior axis (depth + 1) child
+        (interiorClass axis transition.target) ∧
+      StripBoundary axis (depth + 1) child
+        (boundaryClass axis transition.target) := by
+  apply strip_step oldClassified childEq transition.localFixed.isLt
+  · intro node localAlong hnode localAlongBound
+    exact interior_child transitionMem hnode localAlongBound
+      (childAtAxis?_val axis node localAlong transition.localFixed
+        localAlongBound transition.localFixed.isLt)
+  · intro node hnode
+    exact boundary_child transitionMem hnode
+      (childAtAxis?_val axis node 0 transition.localFixed
+        (by decide) transition.localFixed.isLt)
+  · intro node localAlong hnode localAlongPositive localAlongBound
+    exact boundary_enters transitionMem hnode localAlongPositive localAlongBound
+      (childAtAxis?_val axis node localAlong transition.localFixed
+        localAlongBound transition.localFixed.isLt)
+
 private theorem base_classified : RowClassified 0 2 ∧ ColumnClassified 0 2 := by
   have rowInterior : RowInterior 0 2 rowEven := by
     intro x hxLower hxUpper
@@ -307,12 +335,12 @@ private theorem base_classified : RowClassified 0 2 ∧ ColumnClassified 0 2 := 
     simp only [optionIn, Option.any_some, decide_eq_true_eq] at checked
     change (nodeAt 0 4 2).val ∈ columnBoundaryEven
     exact checked
-  simpa [RowClassified, ColumnClassified] using
+  simpa [StripClassified, interiorClass, boundaryClass] using
     And.intro (And.intro rowInterior rowBoundary)
       (And.intro columnInterior columnBoundary)
 
 set_option maxHeartbeats 1000000 in
--- The dependent parity split instantiates six list-indexed strip transitions.
+-- The parity split selects one of the three checked strip transitions.
 private theorem classified_child {depth old child : Nat}
     (classified : RowClassified depth old ∧ ColumnClassified depth old)
     (hchild : child ∈ CanonicalOddFreeLineCoordinates.children old) :
@@ -322,132 +350,68 @@ private theorem classified_child {depth old child : Nat}
   · have oldRow : RowInterior depth old rowEven ∧
         RowBoundary depth old rowBoundaryEven := by
       have result := classified.1
-      rw [RowClassified, if_pos oldEven] at result
+      simp only [StripClassified, if_pos oldEven, interiorClass,
+        boundaryClass] at result
       exact result
     have oldColumn : ColumnInterior depth old columnEven ∧
         ColumnBoundary depth old columnBoundaryEven := by
       have result := classified.2
-      rw [ColumnClassified, if_pos oldEven] at result
+      simp only [StripClassified, if_pos oldEven, interiorClass,
+        boundaryClass] at result
       exact result
     have newEven : (4 * old) % 2 = 0 := by omega
-    rw [RowClassified, ColumnClassified, if_pos newEven, if_pos newEven]
+    simp only [StripClassified, if_pos newEven, interiorClass, boundaryClass]
     constructor
-    · apply strip_step (axis := .row) (depth := depth) (old := old)
-        (child := 4 * old)
-        (localFixed := 0) (oldInterior := rowEven)
-        (oldBoundary := rowBoundaryEven) (newInterior := rowEven)
-        (newBoundary := rowBoundaryEven) oldRow rfl (by decide)
-      · intro node localX hnode hx
-        apply rowEven_child_zero hnode hx
-        exact childAt?_val node localX 0 hx (by decide)
-      · intro node hnode
-        apply rowBoundaryEven_child_zero hnode
-        exact childAt?_val node 0 0 (by decide) (by decide)
-      · intro node localX hnode hxLower hxUpper
-        apply rowBoundaryEven_enters_zero hnode hxLower hxUpper
-        exact childAt?_val node localX 0 hxUpper (by decide)
-    · apply strip_step (axis := .column) (depth := depth) (old := old)
-        (child := 4 * old)
-        (localFixed := 0) (oldInterior := columnEven)
-        (oldBoundary := columnBoundaryEven) (newInterior := columnEven)
-        (newBoundary := columnBoundaryEven) oldColumn rfl (by decide)
-      · intro node localY hnode hy
-        apply columnEven_child_zero hnode hy
-        exact childAt?_val node 0 localY (by decide) hy
-      · intro node hnode
-        apply columnBoundaryEven_child_zero hnode
-        exact childAt?_val node 0 0 (by decide) (by decide)
-      · intro node localY hnode hyLower hyUpper
-        apply columnBoundaryEven_enters_zero hnode hyLower hyUpper
-        exact childAt?_val node 0 localY (by decide) hyUpper
+    · simpa [evenZeroTransition, interiorClass, boundaryClass] using
+        strip_transition (axis := .row) evenZeroTransition
+          (by simp [stripTransitions]) oldRow rfl
+    · simpa [evenZeroTransition, interiorClass, boundaryClass] using
+        strip_transition (axis := .column) evenZeroTransition
+          (by simp [stripTransitions]) oldColumn rfl
   · have oldRow : RowInterior depth old rowEven ∧
         RowBoundary depth old rowBoundaryEven := by
       have result := classified.1
-      rw [RowClassified, if_pos oldEven] at result
+      simp only [StripClassified, if_pos oldEven, interiorClass,
+        boundaryClass] at result
       exact result
     have oldColumn : ColumnInterior depth old columnEven ∧
         ColumnBoundary depth old columnBoundaryEven := by
       have result := classified.2
-      rw [ColumnClassified, if_pos oldEven] at result
+      simp only [StripClassified, if_pos oldEven, interiorClass,
+        boundaryClass] at result
       exact result
-    have newOdd : (4 * old + 1) % 2 = 1 := by omega
     have newNotEven : (4 * old + 1) % 2 ≠ 0 := by omega
-    rw [RowClassified, ColumnClassified, if_neg newNotEven,
-      if_neg newNotEven]
+    simp only [StripClassified, if_neg newNotEven, interiorClass, boundaryClass]
     constructor
-    · apply strip_step (axis := .row) (depth := depth) (old := old)
-        (child := 4 * old + 1)
-        (localFixed := 1) (oldInterior := rowEven)
-        (oldBoundary := rowBoundaryEven) (newInterior := rowOdd)
-        (newBoundary := rowBoundaryOdd) oldRow rfl (by decide)
-      · intro node localX hnode hx
-        apply rowEven_child_one hnode hx
-        exact childAt?_val node localX 1 hx (by decide)
-      · intro node hnode
-        apply rowBoundaryEven_child_one hnode
-        exact childAt?_val node 0 1 (by decide) (by decide)
-      · intro node localX hnode hxLower hxUpper
-        apply rowBoundaryEven_enters_one hnode hxLower hxUpper
-        exact childAt?_val node localX 1 hxUpper (by decide)
-    · apply strip_step (axis := .column) (depth := depth) (old := old)
-        (child := 4 * old + 1)
-        (localFixed := 1) (oldInterior := columnEven)
-        (oldBoundary := columnBoundaryEven) (newInterior := columnOdd)
-        (newBoundary := columnBoundaryOdd) oldColumn rfl (by decide)
-      · intro node localY hnode hy
-        apply columnEven_child_one hnode hy
-        exact childAt?_val node 1 localY (by decide) hy
-      · intro node hnode
-        apply columnBoundaryEven_child_one hnode
-        exact childAt?_val node 1 0 (by decide) (by decide)
-      · intro node localY hnode hyLower hyUpper
-        apply columnBoundaryEven_enters_one hnode hyLower hyUpper
-        exact childAt?_val node 1 localY (by decide) hyUpper
+    · simpa [evenOneTransition, interiorClass, boundaryClass] using
+        strip_transition (axis := .row) evenOneTransition
+          (by simp [stripTransitions]) oldRow rfl
+    · simpa [evenOneTransition, interiorClass, boundaryClass] using
+        strip_transition (axis := .column) evenOneTransition
+          (by simp [stripTransitions]) oldColumn rfl
   · have oldRow : RowInterior depth old rowOdd ∧
         RowBoundary depth old rowBoundaryOdd := by
       have oldNotEven : old % 2 ≠ 0 := by omega
       have result := classified.1
-      rw [RowClassified, if_neg oldNotEven] at result
+      simp only [StripClassified, if_neg oldNotEven, interiorClass,
+        boundaryClass] at result
       exact result
     have oldColumn : ColumnInterior depth old columnOdd ∧
         ColumnBoundary depth old columnBoundaryOdd := by
       have oldNotEven : old % 2 ≠ 0 := by omega
       have result := classified.2
-      rw [ColumnClassified, if_neg oldNotEven] at result
+      simp only [StripClassified, if_neg oldNotEven, interiorClass,
+        boundaryClass] at result
       exact result
-    have newOdd : (4 * old + 3) % 2 = 1 := by omega
     have newNotEven : (4 * old + 3) % 2 ≠ 0 := by omega
-    rw [RowClassified, ColumnClassified, if_neg newNotEven,
-      if_neg newNotEven]
+    simp only [StripClassified, if_neg newNotEven, interiorClass, boundaryClass]
     constructor
-    · apply strip_step (axis := .row) (depth := depth) (old := old)
-        (child := 4 * old + 3)
-        (localFixed := 3) (oldInterior := rowOdd)
-        (oldBoundary := rowBoundaryOdd) (newInterior := rowOdd)
-        (newBoundary := rowBoundaryOdd) oldRow rfl (by decide)
-      · intro node localX hnode hx
-        apply rowOdd_child_three hnode hx
-        exact childAt?_val node localX 3 hx (by decide)
-      · intro node hnode
-        apply rowBoundaryOdd_child_three hnode
-        exact childAt?_val node 0 3 (by decide) (by decide)
-      · intro node localX hnode hxLower hxUpper
-        apply rowBoundaryOdd_enters_three hnode hxLower hxUpper
-        exact childAt?_val node localX 3 hxUpper (by decide)
-    · apply strip_step (axis := .column) (depth := depth) (old := old)
-        (child := 4 * old + 3)
-        (localFixed := 3) (oldInterior := columnOdd)
-        (oldBoundary := columnBoundaryOdd) (newInterior := columnOdd)
-        (newBoundary := columnBoundaryOdd) oldColumn rfl (by decide)
-      · intro node localY hnode hy
-        apply columnOdd_child_three hnode hy
-        exact childAt?_val node 3 localY (by decide) hy
-      · intro node hnode
-        apply columnBoundaryOdd_child_three hnode
-        exact childAt?_val node 3 0 (by decide) (by decide)
-      · intro node localY hnode hyLower hyUpper
-        apply columnBoundaryOdd_enters_three hnode hyLower hyUpper
-        exact childAt?_val node 3 localY (by decide) hyUpper
+    · simpa [oddThreeTransition, interiorClass, boundaryClass] using
+        strip_transition (axis := .row) oddThreeTransition
+          (by simp [stripTransitions]) oldRow rfl
+    · simpa [oddThreeTransition, interiorClass, boundaryClass] using
+        strip_transition (axis := .column) oddThreeTransition
+          (by simp [stripTransitions]) oldColumn rfl
 
 theorem offset_classified (depth : Nat) {offset : Nat}
     (hoffset : offset ∈ offsets depth) :
@@ -491,13 +455,15 @@ theorem coordinate_free_lines (depth : Nat) {coordinateValue : Nat}
     by_cases heven : offset % 2 = 0
     · have rowClass : RowInterior depth offset rowEven := by
         have rowClassified := classified.1
-        rw [RowClassified, if_pos heven] at rowClassified
+        simp only [StripClassified, if_pos heven, interiorClass,
+          boundaryClass] at rowClassified
         exact rowClassified.1
       rw [if_pos heven]
       exact rowClass _ nodeLower nodeUpper
     · have rowClass : RowInterior depth offset rowOdd := by
         have rowClassified := classified.1
-        rw [RowClassified, if_neg heven] at rowClassified
+        simp only [StripClassified, if_neg heven, interiorClass,
+          boundaryClass] at rowClassified
         exact rowClassified.1
       rw [if_neg heven]
       exact rowClass _ nodeLower nodeUpper
@@ -514,13 +480,15 @@ theorem coordinate_free_lines (depth : Nat) {coordinateValue : Nat}
     by_cases heven : offset % 2 = 0
     · have columnClass : ColumnInterior depth offset columnEven := by
         have columnClassified := classified.2
-        rw [ColumnClassified, if_pos heven] at columnClassified
+        simp only [StripClassified, if_pos heven, interiorClass,
+          boundaryClass] at columnClassified
         exact columnClassified.1
       rw [if_pos heven]
       exact columnClass _ nodeLower nodeUpper
     · have columnClass : ColumnInterior depth offset columnOdd := by
         have columnClassified := classified.2
-        rw [ColumnClassified, if_neg heven] at columnClassified
+        simp only [StripClassified, if_neg heven, interiorClass,
+          boundaryClass] at columnClassified
         exact columnClassified.1
       rw [if_neg heven]
       exact columnClass _ nodeLower nodeUpper

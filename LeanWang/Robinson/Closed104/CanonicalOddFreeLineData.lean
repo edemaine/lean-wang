@@ -46,33 +46,74 @@ def columnOdd : List Nat :=
 def columnBoundaryEven : List Nat := [162, 338]
 def columnBoundaryOdd : List Nat := [218, 42, 230, 54]
 
+inductive StripAxis where
+  | row
+  | column
+deriving DecidableEq
+
+inductive StripParity where
+  | even
+  | odd
+deriving DecidableEq
+
+structure StripTransition where
+  source : StripParity
+  target : StripParity
+  localFixed : Fin 4
+deriving DecidableEq
+
+def evenZeroTransition : StripTransition := ⟨.even, .even, 0⟩
+def evenOneTransition : StripTransition := ⟨.even, .odd, 1⟩
+def oddThreeTransition : StripTransition := ⟨.odd, .odd, 3⟩
+
+def stripTransitions : List StripTransition :=
+  [evenZeroTransition, evenOneTransition, oddThreeTransition]
+
+def interiorClass : StripAxis → StripParity → List Nat
+  | .row, .even => rowEven
+  | .row, .odd => rowOdd
+  | .column, .even => columnEven
+  | .column, .odd => columnOdd
+
+def boundaryClass : StripAxis → StripParity → List Nat
+  | .row, .even => rowBoundaryEven
+  | .row, .odd => rowBoundaryOdd
+  | .column, .even => columnBoundaryEven
+  | .column, .odd => columnBoundaryOdd
+
 def childAt? (node childX childY : Nat) : Option Nat :=
   childNode node (childX + 4 * childY)
 
-def childrenInRowClass (sources targets : List Nat) (childY : Nat) : Bool :=
-  sources.all fun node =>
-    (List.range 4).all fun childX =>
-      (childAt? node childX childY).any fun child => child ∈ targets
+def childAtAxis? : StripAxis → Nat → Nat → Nat → Option Nat
+  | .row, node, along, fixed => childAt? node along fixed
+  | .column, node, along, fixed => childAt? node fixed along
 
-def childrenInColumnClass (sources targets : List Nat) (childX : Nat) : Bool :=
+def childrenInStripClass (axis : StripAxis) (sources targets : List Nat)
+    (localFixed : Nat) : Bool :=
   sources.all fun node =>
-    (List.range 4).all fun childY =>
-      (childAt? node childX childY).any fun child => child ∈ targets
+    (List.range 4).all fun along =>
+      (childAtAxis? axis node along localFixed).any fun child => child ∈ targets
 
-def boundaryChildInClass (sources targets : List Nat)
-    (childX childY : Nat) : Bool :=
+def boundaryChildInStripClass (axis : StripAxis) (sources targets : List Nat)
+    (localFixed : Nat) : Bool :=
   sources.all fun node =>
-    (childAt? node childX childY).any fun child => child ∈ targets
+    (childAtAxis? axis node 0 localFixed).any fun child => child ∈ targets
 
-def rowBoundaryEnters (sources targets : List Nat) (childY : Nat) : Bool :=
+def boundaryEntersStripClass (axis : StripAxis) (sources targets : List Nat)
+    (localFixed : Nat) : Bool :=
   sources.all fun node =>
-    (List.range 3).all fun dx =>
-      (childAt? node (dx + 1) childY).any fun child => child ∈ targets
+    (List.range 3).all fun offset =>
+      (childAtAxis? axis node (offset + 1) localFixed).any fun child =>
+        child ∈ targets
 
-def columnBoundaryEnters (sources targets : List Nat) (childX : Nat) : Bool :=
-  sources.all fun node =>
-    (List.range 3).all fun dy =>
-      (childAt? node childX (dy + 1)).any fun child => child ∈ targets
+def stripTransitionComplete (axis : StripAxis)
+    (transition : StripTransition) : Bool :=
+  childrenInStripClass axis (interiorClass axis transition.source)
+      (interiorClass axis transition.target) transition.localFixed &&
+    boundaryChildInStripClass axis (boundaryClass axis transition.source)
+      (boundaryClass axis transition.target) transition.localFixed &&
+    boundaryEntersStripClass axis (boundaryClass axis transition.source)
+      (interiorClass axis transition.target) transition.localFixed
 
 def seed : Nat := encodeNode false 0
 
@@ -90,31 +131,9 @@ def columnClearComplete : Bool :=
   (columnEven.all fun node => rawColumnClear node 1) &&
     (columnOdd.all fun node => rawColumnClear node 1)
 
-def rowTransitionsComplete : Bool :=
-  childrenInRowClass rowEven rowEven 0 &&
-    childrenInRowClass rowEven rowOdd 1 &&
-    childrenInRowClass rowOdd rowOdd 3
-
-def columnTransitionsComplete : Bool :=
-  childrenInColumnClass columnEven columnEven 0 &&
-    childrenInColumnClass columnEven columnOdd 1 &&
-    childrenInColumnClass columnOdd columnOdd 3
-
-def rowBoundaryComplete : Bool :=
-  boundaryChildInClass rowBoundaryEven rowBoundaryEven 0 0 &&
-    boundaryChildInClass rowBoundaryEven rowBoundaryOdd 0 1 &&
-    boundaryChildInClass rowBoundaryOdd rowBoundaryOdd 0 3 &&
-    rowBoundaryEnters rowBoundaryEven rowEven 0 &&
-    rowBoundaryEnters rowBoundaryEven rowOdd 1 &&
-    rowBoundaryEnters rowBoundaryOdd rowOdd 3
-
-def columnBoundaryComplete : Bool :=
-  boundaryChildInClass columnBoundaryEven columnBoundaryEven 0 0 &&
-    boundaryChildInClass columnBoundaryEven columnBoundaryOdd 1 0 &&
-    boundaryChildInClass columnBoundaryOdd columnBoundaryOdd 3 0 &&
-    columnBoundaryEnters columnBoundaryEven columnEven 0 &&
-    columnBoundaryEnters columnBoundaryEven columnOdd 1 &&
-    columnBoundaryEnters columnBoundaryOdd columnOdd 3
+def stripTransitionsComplete : Bool :=
+  [.row, .column].all fun axis =>
+    stripTransitions.all (stripTransitionComplete axis)
 
 def baseComplete : Bool :=
   ((List.range 3).all fun dx => optionIn (seedNodeAt? (dx + 3) 4) rowEven) &&
@@ -127,9 +146,7 @@ def rootCycleComplete : Bool := oddRootCycleLight seed
 
 def checks : List Bool :=
   [rowClearComplete, columnClearComplete,
-    rowTransitionsComplete, columnTransitionsComplete,
-    rowBoundaryComplete, columnBoundaryComplete,
-    baseComplete, rootCycleComplete]
+    stripTransitionsComplete, baseComplete, rootCycleComplete]
 
 def complete : Bool := checks.all id
 
