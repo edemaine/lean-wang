@@ -30,6 +30,7 @@ open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape FramedCounterGeometry
 open CounterControlPlan CounterControlSearchSystem
 open CounterControlCoreFrame CounterControlFrameBacking
+open CounterControlCleanupSemantics
 open CounterControlPrefixInstructionResolution
 
 noncomputable section
@@ -88,6 +89,47 @@ def recoveredFrame (search : Search) (registers : Registers)
     (T : FullTM0.Tape (Symbol numTags)) :
     (recoveredFrame search registers growth limit target hcore T).distance =
       limit := rfl
+
+/-- Boundary cleanup never touches the tag coordinate `0`. -/
+theorem logicalTape_afterZero_zero {spec : Spec numTags}
+    (T : FullTM0.Tape (Symbol numTags)) :
+    logicalTape spec.growth (afterZero spec T) (0 : Nat) =
+      logicalTape spec.growth T (0 : Nat) := by
+  simp only [afterZero, afterOne, afterTwo, afterThree, afterFour,
+    clearBoundary]
+  rw [writeLogical_of_ne spec.growth _
+    (boundaryOffset spec.registers 0) 0 blankSymbol (by
+      simp only [boundaryOffset]
+      omega)]
+  rw [writeLogical_of_ne spec.growth _
+    (boundaryOffset spec.registers 1) 0 blankSymbol (by
+      simp only [boundaryOffset]
+      omega)]
+  rw [writeLogical_of_ne spec.growth _
+    (boundaryOffset spec.registers 2) 0 blankSymbol (by
+      simp only [boundaryOffset]
+      omega)]
+  rw [writeLogical_of_ne spec.growth _
+    (boundaryOffset spec.registers 3) 0 blankSymbol (by
+      simp only [boundaryOffset]
+      omega)]
+  rw [writeLogical_of_ne spec.growth _
+    (boundaryOffset spec.registers 4) 0 blankSymbol (by
+      simp only [boundaryOffset]
+      omega)]
+
+/-- A tag recognized at the shared-return tape was already present at
+logical coordinate `0` before boundary cleanup. -/
+theorem tag_eq_of_afterZero_read {spec : Spec numTags}
+    (T : FullTM0.Tape (Symbol numTags)) (search : Search)
+    (hread : (atLogical spec.growth (afterZero spec T) 0).read =
+      tagSymbol search) :
+    logicalTape spec.growth T (0 : Nat) = tagSymbol search := by
+  rw [atLogical_read] at hread
+  change logicalTape spec.growth (afterZero spec T) (0 : Nat) =
+    tagSymbol search at hread
+  rw [logicalTape_afterZero_zero] at hread
+  exact hread
 
 /-- A tag-free core target becomes a genuine represented frame once its
 coordinate-`0` tag is identified. -/
