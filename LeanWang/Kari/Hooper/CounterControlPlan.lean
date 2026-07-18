@@ -85,11 +85,11 @@ inductive ControlRef where
   | sharedReturn
   deriving DecidableEq
 
-private def directRef (growth : Turing.Dir) (counterState slot : Nat) :
+def directRef (growth : Turing.Dir) (counterState slot : Nat) :
     ControlRef :=
   .direct ⟨growth, counterState, slot⟩
 
-private def searchRef (growth : Turing.Dir) (counterState slot : Nat) :
+def searchRef (growth : Turing.Dir) (counterState slot : Nat) :
     ControlRef :=
   .search ⟨growth, counterState, slot⟩
 
@@ -146,7 +146,7 @@ structure RawDirectRule where
 
 /-! ## Reusable navigation-route compiler -/
 
-private def routeCommandsAux (growth : Turing.Dir) (counterState : Nat)
+def routeCommandsAux (growth : Turing.Dir) (counterState : Nat)
     (searchSlot directSlot : Nat) (after : ControlRef) :
     List MarkerValidation.Leg → List RawCommand
   | [] => []
@@ -159,7 +159,7 @@ private def routeCommandsAux (growth : Turing.Dir) (counterState : Nat)
         routeCommandsAux growth counterState (searchSlot + 1)
           (directSlot + 1) after legs
 
-private def routeContinuationRulesFrom (growth : Turing.Dir)
+def routeContinuationRulesFrom (growth : Turing.Dir)
     (counterState searchSlot directSlot : Nat) :
     MarkerValidation.Leg → List MarkerValidation.Leg →
       List RawDirectRule
@@ -171,7 +171,7 @@ private def routeContinuationRulesFrom (growth : Turing.Dir)
       routeContinuationRulesFrom growth counterState (searchSlot + 1)
         (directSlot + 1) next legs
 
-private def routeContinuationRules (growth : Turing.Dir)
+def routeContinuationRules (growth : Turing.Dir)
     (counterState searchSlot directSlot : Nat) :
     List MarkerValidation.Leg → List RawDirectRule
   | [] => []
@@ -179,7 +179,7 @@ private def routeContinuationRules (growth : Turing.Dir)
       routeContinuationRulesFrom growth counterState searchSlot directSlot
         first legs
 
-private def routeEntryRules (growth : Turing.Dir) (counterState : Nat)
+def routeEntryRules (growth : Turing.Dir) (counterState : Nat)
     (source : ControlRef) (sourceBoundary : Fin 5) (searchSlot : Nat) :
     List MarkerValidation.Leg → List RawDirectRule
   | [] => []
@@ -187,21 +187,21 @@ private def routeEntryRules (growth : Turing.Dir) (counterState : Nat)
       [⟨growth, source, .boundary sourceBoundary,
         searchRef growth counterState searchSlot, first.direction⟩]
 
-/-! ## Fixed private slot layout -/
+/-! ## Fixed slot layout -/
 
-private def validationSearchBase : Nat := 0
-private def validationDirectBase : Nat := 0
+def validationSearchBase : Nat := 0
+def validationDirectBase : Nat := 0
 
-private def bodySearchBase : Nat := 16
-private def secondarySearchBase : Nat := 24
-private def zeroSearchBase : Nat := 32
-private def cleanupSearchBase : Nat := 40
+def bodySearchBase : Nat := 16
+def secondarySearchBase : Nat := 24
+def zeroSearchBase : Nat := 32
+def cleanupSearchBase : Nat := 40
 
-private def bodyDirectBase : Nat := 16
-private def testDirectSlot : Nat := 24
-private def branchDirectSlot : Nat := 25
-private def finishDirectSlot : Nat := 26
-private def zeroDirectBase : Nat := 32
+def bodyDirectBase : Nat := 16
+def testDirectSlot : Nat := 24
+def branchDirectSlot : Nat := 25
+def finishDirectSlot : Nat := 26
+def zeroDirectBase : Nat := 32
 
 /-- A deliberately roomy fixed stride for all internal states of one source
 counter state.  Generated direct slots occupy only the prefix below `40`. -/
@@ -211,7 +211,7 @@ theorem directStride_pos : 0 < directStride := by decide
 
 /-! ## Validation prefix -/
 
-private def bodyEntry (growth : Turing.Dir) (source : Nat) :
+def bodyEntry (growth : Turing.Dir) (source : Nat) :
     CounterMachine.Instruction → ControlRef
   | .increment _ _ => searchRef growth source bodySearchBase
   | .decrement register _ _ =>
@@ -219,13 +219,13 @@ private def bodyEntry (growth : Turing.Dir) (source : Nat) :
       | [] => directRef growth source testDirectSlot
       | _ :: _ => directRef growth source bodyDirectBase
 
-private def validationCommands (growth : Turing.Dir) (source : Nat)
+def validationCommands (growth : Turing.Dir) (source : Nat)
     (instruction : CounterMachine.Instruction) : List RawCommand :=
   routeCommandsAux growth source validationSearchBase
     validationDirectBase (bodyEntry growth source instruction)
     MarkerValidation.sweep
 
-private def validationRules (growth : Turing.Dir) (source : Nat) :
+def validationRules (growth : Turing.Dir) (source : Nat) :
     List RawDirectRule :=
   routeEntryRules growth source (.logical growth source) 4
       validationSearchBase MarkerValidation.sweep ++
@@ -234,7 +234,7 @@ private def validationRules (growth : Turing.Dir) (source : Nat) :
 
 /-! ## Increment body and collision cleanup -/
 
-private def incrementShiftCommandsAux (growth : Turing.Dir) (source : Nat)
+def incrementShiftCommandsAux (growth : Turing.Dir) (source : Nat)
     (searchSlot : Nat) (first : Bool) : List (Fin 5) → List RawCommand
   | [] => []
   | expected :: labels =>
@@ -248,12 +248,12 @@ private def incrementShiftCommandsAux (growth : Turing.Dir) (source : Nat)
           success (some .left) collision ::
         incrementShiftCommandsAux growth source (searchSlot + 1) false labels
 
-private def incrementShiftCommands (growth : Turing.Dir) (source : Nat)
+def incrementShiftCommands (growth : Turing.Dir) (source : Nat)
     (register : Register) : List RawCommand :=
   incrementShiftCommandsAux growth source bodySearchBase true
     (MarkerShift.incrementOrder register)
 
-private def cleanupCommands (growth : Turing.Dir) (source : Nat) :
+def cleanupCommands (growth : Turing.Dir) (source : Nat) :
     List RawCommand :=
   [ .boundaryNavigation ⟨growth, source, cleanupSearchBase⟩ 3 .left
       (searchRef growth source (cleanupSearchBase + 1)) (.erase (some .left))
@@ -267,7 +267,7 @@ private def cleanupCommands (growth : Turing.Dir) (source : Nat) :
       .sharedReturn
   ]
 
-private def incrementCommands (growth : Turing.Dir) (source next : Nat)
+def incrementCommands (growth : Turing.Dir) (source next : Nat)
     (register : Register) : List RawCommand :=
   incrementShiftCommands growth source register ++
     routeCommandsAux growth source secondarySearchBase
@@ -275,7 +275,7 @@ private def incrementCommands (growth : Turing.Dir) (source next : Nat)
       (AnchoredCounterGeometry.routeFromIncrement register) ++
     cleanupCommands growth source
 
-private def incrementRules (growth : Turing.Dir) (source next : Nat)
+def incrementRules (growth : Turing.Dir) (source next : Nat)
     (register : Register) : List RawDirectRule :=
   let route := AnchoredCounterGeometry.routeFromIncrement register
   let afterShift := match route with
@@ -296,7 +296,7 @@ private def incrementRules (growth : Turing.Dir) (source next : Nat)
 
 /-! ## Conditional-decrement body -/
 
-private def decrementShiftCommandsAux (growth : Turing.Dir) (source : Nat)
+def decrementShiftCommandsAux (growth : Turing.Dir) (source : Nat)
     (searchSlot : Nat) : List (Fin 5) → List RawCommand
   | [] => []
   | expected :: labels =>
@@ -307,12 +307,12 @@ private def decrementShiftCommandsAux (growth : Turing.Dir) (source : Nat)
           success (some .right) none ::
         decrementShiftCommandsAux growth source (searchSlot + 1) labels
 
-private def decrementShiftCommands (growth : Turing.Dir) (source : Nat)
+def decrementShiftCommands (growth : Turing.Dir) (source : Nat)
     (register : Register) : List RawCommand :=
   decrementShiftCommandsAux growth source secondarySearchBase
     (MarkerShift.decrementOrder register)
 
-private def decrementCommands (growth : Turing.Dir) (source : Nat)
+def decrementCommands (growth : Turing.Dir) (source : Nat)
     (register : Register) (ifZero : Nat) : List RawCommand :=
   routeCommandsAux growth source bodySearchBase (bodyDirectBase + 1)
       (directRef growth source testDirectSlot)
@@ -322,7 +322,7 @@ private def decrementCommands (growth : Turing.Dir) (source : Nat)
       (.logical growth ifZero)
       (AnchoredCounterGeometry.routeFromZero register)
 
-private def decrementRules (growth : Turing.Dir) (source : Nat)
+def decrementRules (growth : Turing.Dir) (source : Nat)
     (register : Register) (_ifZero ifPositive : Nat) : List RawDirectRule :=
   let toTest := AnchoredCounterGeometry.routeToDecrementStart register
   let zeroRoute := AnchoredCounterGeometry.routeFromZero register
@@ -346,7 +346,7 @@ private def decrementRules (growth : Turing.Dir) (source : Nat)
 
 /-! ## Enumerating the fixed global counter program -/
 
-private def commandsForRule (growth : Turing.Dir)
+def commandsForRule (growth : Turing.Dir)
     (rule : CounterMachine.Rule) : List RawCommand :=
   validationCommands growth rule.1 rule.2 ++
     match rule.2 with
@@ -355,7 +355,7 @@ private def commandsForRule (growth : Turing.Dir)
     | .decrement register ifZero _ =>
         decrementCommands growth rule.1 register ifZero
 
-private def directRulesForRule (growth : Turing.Dir)
+def directRulesForRule (growth : Turing.Dir)
     (rule : CounterMachine.Rule) : List RawDirectRule :=
   validationRules growth rule.1 ++
     match rule.2 with
@@ -583,7 +583,7 @@ theorem right_direct_ne_left_logical (base : Nat) (c : Nat.Partrec.Code)
 
 /-! ## Executable tagged command list -/
 
-private def compileNavigationAction (growth : Turing.Dir) :
+def compileNavigationAction (growth : Turing.Dir) :
     RawNavigationAction → BoundedMarkerProgram.NavigationAction
   | .preserve => .preserve
   | .erase departure => .erase (departure.map (orient growth))
@@ -698,7 +698,7 @@ theorem initializerExitFor_eq (base : Nat) (c : Nat.Partrec.Code)
     initializerExitFor base c tag =
       canonicalEntry base c (initializerGrowth tag) := rfl
 
-private def symbolsForRead (read : RawRead) : List (Symbol numTags) :=
+def symbolsForRead (read : RawRead) : List (Symbol numTags) :=
   match read with
   | .blank => [blankSymbol]
   | .boundary label => [boundarySymbol label]
