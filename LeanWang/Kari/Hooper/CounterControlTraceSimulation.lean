@@ -76,6 +76,34 @@ def OneStepResolves (base : Nat) (c : Nat.Partrec.Code)
       ReachesBoundary base c frame concrete ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) concrete
 
+/-- Collision-free one-step law.  This is the form used when a uniform bound
+shows that every layout in a finite abstract trace stays strictly inside the
+suspended target. -/
+def OneStepContinues (base : Nat) (c : Nat.Partrec.Code)
+    (frame : Frame (Symbol numTags) Search) : Prop :=
+  ∀ {current next : CounterMachine.Cfg}
+      {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State},
+    step GlobalSourceProgram.program current = some next →
+    LogicalFrame base c frame current concrete →
+      ∃ nextConcrete,
+        FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          concrete nextConcrete ∧
+        LogicalFrame base c frame next nextConcrete
+
+/-- Halting-aware collision-free law used for a bounded mortal abstract
+trace. -/
+def OneStepContinuesOrHalts (base : Nat) (c : Nat.Partrec.Code)
+    (frame : Frame (Symbol numTags) Search) : Prop :=
+  ∀ {current next : CounterMachine.Cfg}
+      {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State},
+    step GlobalSourceProgram.program current = some next →
+    LogicalFrame base c frame current concrete →
+      (∃ nextConcrete,
+        FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+          concrete nextConcrete ∧
+        LogicalFrame base c frame next nextConcrete) ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) concrete
+
 /-! ## Finite trace lifting -/
 
 /-- A forward one-step law lifts over every finite abstract counter trace. -/
@@ -143,6 +171,63 @@ theorem reaches_logical_or_boundary_or_halts
             (FullTM0.HaltsFrom.of_reaches hprefix hhalts))
       · exact Or.inr (Or.inl hboundary)
       · exact Or.inr (Or.inr hhalts)
+
+/-- A collision-free one-step law lifts to an exact represented endpoint over
+every finite abstract trace. -/
+theorem reaches_logical
+    (base : Nat) (c : Nat.Partrec.Code)
+    {frame : Frame (Symbol numTags) Search}
+    (hlaw : OneStepContinues base c frame)
+    {start finish : CounterMachine.Cfg}
+    (hreach : StateTransition.Reaches
+      (step GlobalSourceProgram.program) start finish)
+    {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (hlogical : LogicalFrame base c frame start concrete) :
+    ∃ finishConcrete,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        concrete finishConcrete ∧
+      LogicalFrame base c frame finish finishConcrete := by
+  induction hreach generalizing concrete with
+  | refl =>
+      exact ⟨concrete, Relation.ReflTransGen.refl, hlogical⟩
+  | @tail current next hpath hstep ih =>
+      rcases ih hlogical with ⟨currentConcrete, hprefix, hcurrent⟩
+      have hstep' : step GlobalSourceProgram.program current = some next := by
+        simpa using hstep
+      rcases hlaw hstep' hcurrent with
+        ⟨nextConcrete, hlast, hnext⟩
+      exact ⟨nextConcrete, hprefix.trans hlast, hnext⟩
+
+/-- Halting-aware collision-free semantics likewise lifts over a finite
+abstract trace. -/
+theorem reaches_logical_or_halts
+    (base : Nat) (c : Nat.Partrec.Code)
+    {frame : Frame (Symbol numTags) Search}
+    (hlaw : OneStepContinuesOrHalts base c frame)
+    {start finish : CounterMachine.Cfg}
+    (hreach : StateTransition.Reaches
+      (step GlobalSourceProgram.program) start finish)
+    {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (hlogical : LogicalFrame base c frame start concrete) :
+    (∃ finishConcrete,
+      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        concrete finishConcrete ∧
+      LogicalFrame base c frame finish finishConcrete) ∨
+    FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+      concrete := by
+  induction hreach generalizing concrete with
+  | refl =>
+      exact Or.inl ⟨concrete, Relation.ReflTransGen.refl, hlogical⟩
+  | @tail current next hpath hstep ih =>
+      rcases ih hlogical with hcurrent | hhalts
+      · rcases hcurrent with ⟨currentConcrete, hprefix, hcurrent⟩
+        have hstep' : step GlobalSourceProgram.program current = some next := by
+          simpa using hstep
+        rcases hlaw hstep' hcurrent with hnext | hhalts
+        · rcases hnext with ⟨nextConcrete, hlast, hnext⟩
+          exact Or.inl ⟨nextConcrete, hprefix.trans hlast, hnext⟩
+        · exact Or.inr (FullTM0.HaltsFrom.of_reaches hprefix hhalts)
+      · exact Or.inr hhalts
 
 /-! ## Endpoint eliminations -/
 
@@ -217,6 +302,35 @@ theorem reachesBoundary_or_halts_of_haltsFrom
         hstate hterminal)
   · exact Or.inl hboundary
   · exact Or.inr hhalts
+
+/-- If collision has been excluded throughout a finite abstract halting run,
+the concrete controller itself reaches a terminal configuration. -/
+theorem haltsFrom_of_abstract_haltsFrom
+    (base : Nat) (c : Nat.Partrec.Code)
+    {frame : Frame (Symbol numTags) Search}
+    (hlaw : OneStepContinuesOrHalts base c frame)
+    {start : CounterMachine.Cfg}
+    (hhalts : CounterLiveness.HaltsFrom
+      GlobalSourceProgram.program start)
+    {concrete : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
+    (hlogical : LogicalFrame base c frame start concrete) :
+    FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+      concrete := by
+  rcases hhalts with ⟨terminal, hterminalReach, hterminal⟩
+  rcases reaches_logical_or_halts base c hlaw hterminalReach hlogical with
+    hfinish | hhalts
+  · rcases hfinish with ⟨finishConcrete, hfinishReach, hfinish⟩
+    rcases hfinish with ⟨_hcore, T, _hback, rfl, hstate⟩
+    apply FullTM0.HaltsFrom.of_reaches hfinishReach
+    refine ⟨logicalCfg base c frame terminal T,
+      Relation.ReflTransGen.refl, ?_⟩
+    simpa [logicalCfg] using
+      (CounterControlTerminalSemantics.machine_step_eq_none_of_counter_step_none
+        base c (frameGrowth base c frame) terminal
+        (FramedMarkerTape.atLogical (frameGrowth base c frame) T
+          (FramedMarkerTape.layoutEnd terminal.registers))
+        hstate hterminal)
+  · exact hhalts
 
 end
 
