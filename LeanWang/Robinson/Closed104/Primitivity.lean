@@ -33,21 +33,15 @@ def childrenTable : List (List Index) :=
 def children (parent : Index) : List Index :=
   childrenTable.getD parent.val []
 
-def allChildrenTableCorrectBool : Bool :=
-  (List.finRange 104).all fun parent =>
-    decide (children parent = childrenAt parent)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allChildrenTableCorrectBool_eq_true :
-    allChildrenTableCorrectBool = true := by
+private theorem allChildrenTableCorrect :
+    ∀ parent : Index, children parent = childrenAt parent := by
   native_decide
 
 theorem children_eq_childrenAt (parent : Index) :
-    children parent = childrenAt parent := by
-  have hparent := List.all_eq_true.1 allChildrenTableCorrectBool_eq_true
-    parent (List.mem_finRange parent)
-  exact of_decide_eq_true hparent
+    children parent = childrenAt parent :=
+  allChildrenTableCorrect parent
 
 /-- Set-like list of tile types reached after exactly `level` substitutions. -/
 def descendants : Nat → Index → List Index
@@ -65,23 +59,16 @@ theorem mem_descendants_succ {level : Nat} {parent target : Index} :
       ∃ middle ∈ descendants level parent, target ∈ children middle := by
   simp [descendants]
 
-/-- Executable universal primitivity check at substitution depth five. -/
-def allReachAllAtFiveBool : Bool :=
-  (List.finRange 104).all fun parent =>
-    decide ((descendants 5 parent).toFinset = Finset.univ)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allReachAllAtFiveBool_eq_true : allReachAllAtFiveBool = true := by
+private theorem allReachAllAtFive :
+    ∀ parent : Index, (descendants 5 parent).toFinset = Finset.univ := by
   native_decide
 
 /-- Every tile type occurs below every parent after five substitutions. -/
 theorem mem_descendants_five (parent target : Index) :
     target ∈ descendants 5 parent := by
-  have hparent := List.all_eq_true.1 allReachAllAtFiveBool_eq_true
-    parent (List.mem_finRange parent)
-  have hall : (descendants 5 parent).toFinset = Finset.univ :=
-    of_decide_eq_true hparent
+  have hall := allReachAllAtFive parent
   have htarget : target ∈ (descendants 5 parent).toFinset := by
     rw [hall]
     exact Finset.mem_univ target

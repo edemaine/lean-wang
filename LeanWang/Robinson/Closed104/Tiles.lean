@@ -198,22 +198,15 @@ theorem tile_components_mem (index : Index) :
 def childRectangle (parent : Index) : Rectangle 2 2 :=
   fun i j => tile (components (childBlock parent i j))
 
-/-- Finite certificate that all 104 child blocks are valid Wang rectangles. -/
-def allChildRectanglesValidBool : Bool :=
-  (List.finRange 104).all fun parent =>
-    validRectangleBool tileSet (childRectangle parent)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allChildRectanglesValidBool_eq_true :
-    allChildRectanglesValidBool = true := by
+private theorem allChildRectanglesValid :
+    ∀ parent : Index, ValidRectangle tileSet (childRectangle parent) := by
   native_decide
 
 theorem childRectangle_valid (parent : Index) :
-    ValidRectangle tileSet (childRectangle parent) := by
-  have hparent := List.all_eq_true.1 allChildRectanglesValidBool_eq_true
-    parent (List.mem_finRange parent)
-  exact of_decide_eq_true hparent
+    ValidRectangle tileSet (childRectangle parent) :=
+  allChildRectanglesValid parent
 
 /-- Matching of all two child edges across a horizontal substituted boundary. -/
 def ChildHMatches (left right : Index) : Prop :=
@@ -241,91 +234,57 @@ instance (lower upper : Index) : Decidable (ChildVMatches lower upper) := by
   unfold ChildVMatches
   infer_instance
 
-/-- Finite check that horizontal matching is preserved by substitution. -/
-def allHorizontalBoundariesPreservedBool : Bool :=
-  (List.finRange 104).all fun left =>
-    (List.finRange 104).all fun right =>
-      decide (WangTile.HMatches (tile (components left)) (tile (components right)) →
-        ChildHMatches left right)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allHorizontalBoundariesPreservedBool_eq_true :
-    allHorizontalBoundariesPreservedBool = true := by
+private theorem allHorizontalBoundariesPreserved :
+    ∀ left right : Index,
+      WangTile.HMatches (tile (components left)) (tile (components right)) →
+        ChildHMatches left right := by
   native_decide
 
-/-- Finite check that vertical matching is preserved by substitution. -/
-def allVerticalBoundariesPreservedBool : Bool :=
-  (List.finRange 104).all fun lower =>
-    (List.finRange 104).all fun upper =>
-      decide (WangTile.VMatches (tile (components lower)) (tile (components upper)) →
-        ChildVMatches lower upper)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allVerticalBoundariesPreservedBool_eq_true :
-    allVerticalBoundariesPreservedBool = true := by
+private theorem allVerticalBoundariesPreserved :
+    ∀ lower upper : Index,
+      WangTile.VMatches (tile (components lower)) (tile (components upper)) →
+        ChildVMatches lower upper := by
   native_decide
 
 theorem childHMatches_of_hMatches (left right : Index)
     (hmatch : WangTile.HMatches
       (tile (components left)) (tile (components right))) :
-    ChildHMatches left right := by
-  have hleft := List.all_eq_true.1 allHorizontalBoundariesPreservedBool_eq_true
-    left (List.mem_finRange left)
-  have hright := List.all_eq_true.1 hleft right (List.mem_finRange right)
-  exact (of_decide_eq_true hright) hmatch
+    ChildHMatches left right :=
+  allHorizontalBoundariesPreserved left right hmatch
 
 theorem childVMatches_of_vMatches (lower upper : Index)
     (hmatch : WangTile.VMatches
       (tile (components lower)) (tile (components upper))) :
-    ChildVMatches lower upper := by
-  have hlower := List.all_eq_true.1 allVerticalBoundariesPreservedBool_eq_true
-    lower (List.mem_finRange lower)
-  have hupper := List.all_eq_true.1 hlower upper (List.mem_finRange upper)
-  exact (of_decide_eq_true hupper) hmatch
-
-/-- Finite check that horizontal matching is reflected by substitution. -/
-def allHorizontalBoundariesReflectedBool : Bool :=
-  (List.finRange 104).all fun left =>
-    (List.finRange 104).all fun right =>
-      decide (ChildHMatches left right →
-        WangTile.HMatches (tile (components left)) (tile (components right)))
+    ChildVMatches lower upper :=
+  allVerticalBoundariesPreserved lower upper hmatch
 
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allHorizontalBoundariesReflectedBool_eq_true :
-    allHorizontalBoundariesReflectedBool = true := by
+private theorem allHorizontalBoundariesReflected :
+    ∀ left right : Index, ChildHMatches left right →
+      WangTile.HMatches (tile (components left)) (tile (components right)) := by
   native_decide
 
-/-- Finite check that vertical matching is reflected by substitution. -/
-def allVerticalBoundariesReflectedBool : Bool :=
-  (List.finRange 104).all fun lower =>
-    (List.finRange 104).all fun upper =>
-      decide (ChildVMatches lower upper →
-        WangTile.VMatches (tile (components lower)) (tile (components upper)))
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allVerticalBoundariesReflectedBool_eq_true :
-    allVerticalBoundariesReflectedBool = true := by
+private theorem allVerticalBoundariesReflected :
+    ∀ lower upper : Index, ChildVMatches lower upper →
+      WangTile.VMatches (tile (components lower)) (tile (components upper)) := by
   native_decide
 
 theorem hMatches_of_childHMatches (left right : Index)
     (hmatch : ChildHMatches left right) :
-    WangTile.HMatches (tile (components left)) (tile (components right)) := by
-  have hleft := List.all_eq_true.1 allHorizontalBoundariesReflectedBool_eq_true
-    left (List.mem_finRange left)
-  have hright := List.all_eq_true.1 hleft right (List.mem_finRange right)
-  exact (of_decide_eq_true hright) hmatch
+    WangTile.HMatches (tile (components left)) (tile (components right)) :=
+  allHorizontalBoundariesReflected left right hmatch
 
 theorem vMatches_of_childVMatches (lower upper : Index)
     (hmatch : ChildVMatches lower upper) :
-    WangTile.VMatches (tile (components lower)) (tile (components upper)) := by
-  have hlower := List.all_eq_true.1 allVerticalBoundariesReflectedBool_eq_true
-    lower (List.mem_finRange lower)
-  have hupper := List.all_eq_true.1 hlower upper (List.mem_finRange upper)
-  exact (of_decide_eq_true hupper) hmatch
+    WangTile.VMatches (tile (components lower)) (tile (components upper)) :=
+  allVerticalBoundariesReflected lower upper hmatch
 
 end Closed104
 end Figure13Layers

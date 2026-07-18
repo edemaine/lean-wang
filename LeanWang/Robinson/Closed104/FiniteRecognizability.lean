@@ -46,53 +46,30 @@ def thinTable : List Figure16.Thin := codes.map thinAtCode
 def thinAt (table : List Figure16.Thin) (code : Nat) : Figure16.Thin :=
   table[code]?.getD .a
 
-def allIndexValuesInCodesBool : Bool :=
-  (List.finRange 104).all fun index => decide (index.val ∈ codes)
-
-def allIndexAtCodesCorrectBool : Bool :=
-  (List.finRange 104).all fun index => decide (indexAtCode index.val = index)
-
-def allTileAtCodesCorrectBool : Bool :=
-  (List.finRange 104).all fun index =>
-    decide (tileAtCode index.val = Closed104.tile (components index))
-
-def allThinAtCodesCorrectBool : Bool :=
-  (List.finRange 104).all fun index =>
-    decide (thinAt thinTable index.val = (components index).1)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem finiteCodeInterfaceCorrect :
-    allIndexValuesInCodesBool = true ∧
-      allIndexAtCodesCorrectBool = true ∧
-      allTileAtCodesCorrectBool = true ∧
-      allThinAtCodesCorrectBool = true := by
+private theorem finiteCodeInterfaceCorrect : ∀ index : Index,
+    index.val ∈ codes ∧ indexAtCode index.val = index ∧
+      tileAtCode index.val = Closed104.tile (components index) ∧
+      thinAt thinTable index.val = (components index).1 := by
   native_decide
 
-theorem index_val_mem_codes (index : Index) : index.val ∈ codes := by
-  have h := List.all_eq_true.1 finiteCodeInterfaceCorrect.1
-    index (List.mem_finRange index)
-  exact of_decide_eq_true h
+theorem index_val_mem_codes (index : Index) : index.val ∈ codes :=
+  (finiteCodeInterfaceCorrect index).1
 
 @[simp]
-theorem indexAtCode_val (index : Index) : indexAtCode index.val = index := by
-  have h := List.all_eq_true.1 finiteCodeInterfaceCorrect.2.1
-    index (List.mem_finRange index)
-  exact of_decide_eq_true h
+theorem indexAtCode_val (index : Index) : indexAtCode index.val = index :=
+  (finiteCodeInterfaceCorrect index).2.1
 
 @[simp]
 theorem tileAtCode_val (index : Index) :
-    tileAtCode index.val = Closed104.tile (components index) := by
-  have h := List.all_eq_true.1 finiteCodeInterfaceCorrect.2.2.1
-    index (List.mem_finRange index)
-  exact of_decide_eq_true h
+    tileAtCode index.val = Closed104.tile (components index) :=
+  (finiteCodeInterfaceCorrect index).2.2.1
 
 @[simp]
 theorem thinAtCode_val (index : Index) :
-    thinAt thinTable index.val = (components index).1 := by
-  have h := List.all_eq_true.1 finiteCodeInterfaceCorrect.2.2.2
-    index (List.mem_finRange index)
-  exact of_decide_eq_true h
+    thinAt thinTable index.val = (components index).1 :=
+  (finiteCodeInterfaceCorrect index).2.2.2
 
 private def rawHFollowers (left : Nat) : List Nat :=
   codes.filter fun right =>
@@ -108,49 +85,33 @@ def vFollowerTable : List (List Nat) := codes.map rawVFollowers
 def followersAt (table : List (List Nat)) (code : Nat) : List Nat :=
   table[code]?.getD []
 
-def allHFollowerEntriesCorrectBool : Bool :=
-  (List.finRange 104).all fun left =>
-    (List.finRange 104).all fun right =>
-      decide (right.val ∈ followersAt hFollowerTable left.val ↔
-        WangTile.HMatches (Closed104.tile (components left))
-          (Closed104.tile (components right)))
-
-def allVFollowerEntriesCorrectBool : Bool :=
-  (List.finRange 104).all fun lower =>
-    (List.finRange 104).all fun upper =>
-      decide (upper.val ∈ followersAt vFollowerTable lower.val ↔
-        WangTile.VMatches (Closed104.tile (components lower))
-          (Closed104.tile (components upper)))
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allHFollowerEntriesCorrectBool_eq_true :
-    allHFollowerEntriesCorrectBool = true := by
+private theorem allHFollowerEntriesCorrect : ∀ left right : Index,
+    right.val ∈ followersAt hFollowerTable left.val ↔
+      WangTile.HMatches (Closed104.tile (components left))
+        (Closed104.tile (components right)) := by
   native_decide
 
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allVFollowerEntriesCorrectBool_eq_true :
-    allVFollowerEntriesCorrectBool = true := by
+private theorem allVFollowerEntriesCorrect : ∀ lower upper : Index,
+    upper.val ∈ followersAt vFollowerTable lower.val ↔
+      WangTile.VMatches (Closed104.tile (components lower))
+        (Closed104.tile (components upper)) := by
   native_decide
 
 theorem mem_hFollowersAt_iff (left right : Index) :
     right.val ∈ followersAt hFollowerTable left.val ↔
       WangTile.HMatches (Closed104.tile (components left))
-        (Closed104.tile (components right)) := by
-  have hleft := List.all_eq_true.1 allHFollowerEntriesCorrectBool_eq_true
-    left (List.mem_finRange left)
-  have hright := List.all_eq_true.1 hleft right (List.mem_finRange right)
-  exact of_decide_eq_true hright
+        (Closed104.tile (components right)) :=
+  allHFollowerEntriesCorrect left right
 
 theorem mem_vFollowersAt_iff (lower upper : Index) :
     upper.val ∈ followersAt vFollowerTable lower.val ↔
       WangTile.VMatches (Closed104.tile (components lower))
-        (Closed104.tile (components upper)) := by
-  have hlower := List.all_eq_true.1 allVFollowerEntriesCorrectBool_eq_true
-    lower (List.mem_finRange lower)
-  have hupper := List.all_eq_true.1 hlower upper (List.mem_finRange upper)
-  exact of_decide_eq_true hupper
+        (Closed104.tile (components upper)) :=
+  allVFollowerEntriesCorrect lower upper
 
 def rowTailsAfter (table : List (List Nat)) (left : Nat) : Nat → List (List Nat)
   | 0 => [[]]
@@ -299,20 +260,15 @@ theorem middle_mem_extendableCentralRowPairs
 def codeOfIndex (index : Index) : Nat :=
   codes.find? (fun code => tileAtCode code == Closed104.tile (components index)) |>.getD 0
 
-def allCodeOfIndexCorrectBool : Bool :=
-  (List.finRange 104).all fun index => decide (codeOfIndex index = index.val)
-
 set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
-theorem allCodeOfIndexCorrectBool_eq_true :
-    allCodeOfIndexCorrectBool = true := by
+private theorem allCodeOfIndexCorrect :
+    ∀ index : Index, codeOfIndex index = index.val := by
   native_decide
 
 @[simp]
-theorem codeOfIndex_eq_val (index : Index) : codeOfIndex index = index.val := by
-  have h := List.all_eq_true.1 allCodeOfIndexCorrectBool_eq_true
-    index (List.mem_finRange index)
-  exact of_decide_eq_true h
+theorem codeOfIndex_eq_val (index : Index) : codeOfIndex index = index.val :=
+  allCodeOfIndexCorrect index
 
 abbrev CodeBlock := Nat × Nat × Nat × Nat
 
