@@ -37,19 +37,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Useful continuations measured from the exact found configuration of a
 guarded generated search. -/
 inductive FoundGuardedParentOutcome
@@ -155,9 +142,9 @@ theorem guardedUnnests_of_foundOutcome
   | nextSearch next htail hdistance =>
       exact ⟨next, ⟨hfound.trans htail, hdistance⟩⟩
   | logical core htail hinside =>
-      have himmortalFound := immortalFrom_of_reaches base c
+      have himmortalFound := FullTM0.ImmortalFrom.of_reaches
         himmortal hfound
-      have himmortalCore := immortalFrom_of_reaches base c
+      have himmortalCore := FullTM0.ImmortalFrom.of_reaches
         himmortalFound htail
       rcases core.reaches_resumed_of_immortal base c hmortal
           himmortalCore with ⟨resumed⟩
@@ -228,9 +215,9 @@ theorem entersGuardedSearch_of_foundEntryOutcome
   | nextSearch next htail =>
       exact ⟨next, ⟨hfound.trans htail⟩⟩
   | logical core htail =>
-      have himmortalFound := immortalFrom_of_reaches base c
+      have himmortalFound := FullTM0.ImmortalFrom.of_reaches
         himmortal hfound
-      have himmortalCore := immortalFrom_of_reaches base c
+      have himmortalCore := FullTM0.ImmortalFrom.of_reaches
         himmortalFound htail
       rcases core.reaches_resumed_of_immortal base c hmortal
           himmortalCore with ⟨resumed⟩
@@ -266,9 +253,9 @@ theorem monotoneGuardedEntry_of_foundOutcome
   | nextSearch next htail hdistance =>
       exact ⟨next, ⟨hfound.trans htail, hdistance⟩⟩
   | logical core htail hinside =>
-      have himmortalFound := immortalFrom_of_reaches base c
+      have himmortalFound := FullTM0.ImmortalFrom.of_reaches
         himmortal hfound
-      have himmortalCore := immortalFrom_of_reaches base c
+      have himmortalCore := FullTM0.ImmortalFrom.of_reaches
         himmortalFound htail
       rcases core.reaches_resumed_of_immortal base c hmortal
           himmortalCore with ⟨resumed⟩

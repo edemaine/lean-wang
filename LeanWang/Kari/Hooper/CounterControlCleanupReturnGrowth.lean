@@ -38,19 +38,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) start)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) start finish) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) finish := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- An immortal shared return which reverses an inward cleanup direction
 reaches a genuine generated search beyond every accumulated blank cell. -/
 theorem reaches_genuineSearch_beyond_blankBehind

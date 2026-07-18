@@ -83,6 +83,20 @@ theorem immortalFrom_iff_not (M : Turing.TM0.Machine Γ Λ)
 
 end HaltsFrom
 
+namespace ImmortalFrom
+
+omit [Inhabited Γ] in
+/-- Immortality is inherited by every configuration on a finite forward
+execution. -/
+theorem of_reaches {M : Turing.TM0.Machine Γ Λ} {start current : Cfg Γ Λ}
+    (himmortal : ImmortalFrom M start) (hreach : Reaches M start current) :
+    ImmortalFrom M current := by
+  rw [HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
+  intro hhalts
+  exact himmortal (HaltsFrom.of_reaches hreach hhalts)
+
+end ImmortalFrom
+
 /-- A finite execution either reaches the advertised continuation or exposes
 a terminal configuration reachable from its starting point.  This is the
 common outcome type of the converse bounded-search proofs. -/

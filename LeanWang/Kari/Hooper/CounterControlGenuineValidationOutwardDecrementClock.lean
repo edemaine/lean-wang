@@ -36,19 +36,6 @@ set_option maxRecDepth 10000
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 private theorem outwardFour_gap
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GenuineSearch base c)
@@ -191,7 +178,7 @@ private theorem clockBranchRead_of_immortal
     refine ⟨blankSymbol, ?_, ?_⟩
     · simp [positiveRule, symbolsForRead]
     · simp [positiveRule]
-  have himmortalBranch := immortalFrom_of_reaches base c himmortal hreaches
+  have himmortalBranch := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   rcases CounterControlArbitraryEntry.direct_step_or_haltsFrom base c
       (resolve base c (directRef growth source branchDirectSlot)) T
       hsourceDirect with
@@ -405,7 +392,7 @@ theorem outwardFour_clockDecrement_handoff
         ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
           current.foundTape⟩
       exact hpositiveEntry
-    have himmortalImmediate := immortalFrom_of_reaches base c himmortal hentry
+    have himmortalImmediate := FullTM0.ImmortalFrom.of_reaches himmortal hentry
     have hfoundImmediate := reaches_foundCfg_of_immortal immediate
       himmortalImmediate
     have hfoundTapeNext : next.foundTape = current.foundTape :=
@@ -429,7 +416,7 @@ theorem outwardFour_clockDecrement_handoff
         (foundCfg next) := by
       rw [← hfoundEq]
       exact hentry.trans hfoundImmediate
-    have himmortalNext := immortalFrom_of_reaches base c himmortal
+    have himmortalNext := FullTM0.ImmortalFrom.of_reaches himmortal
       hreachesNext
     have hcommand : next.selectedRaw ∈
         decrementShiftCommands growth source .clock := by
@@ -513,7 +500,7 @@ theorem outwardFour_clockDecrement_handoff
         ⟨searchState base c ⟨growth, source, zeroSearchBase⟩,
           current.foundTape⟩
       exact hzeroEntry
-    have himmortalImmediate := immortalFrom_of_reaches base c himmortal hentry
+    have himmortalImmediate := FullTM0.ImmortalFrom.of_reaches himmortal hentry
     have hfoundImmediate := reaches_foundCfg_of_immortal immediate
       himmortalImmediate
     have hfoundTapeNext : next.foundTape = current.foundTape :=
@@ -537,7 +524,7 @@ theorem outwardFour_clockDecrement_handoff
         (foundCfg next) := by
       rw [← hfoundEq]
       exact hentry.trans hfoundImmediate
-    have himmortalNext := immortalFrom_of_reaches base c himmortal
+    have himmortalNext := FullTM0.ImmortalFrom.of_reaches himmortal
       hreachesNext
     have hcommand : next.selectedRaw ∈
         routeCommandsAux growth source zeroSearchBase zeroDirectBase

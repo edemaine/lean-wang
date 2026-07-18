@@ -204,18 +204,6 @@ structure DecrementShiftSuffixReached
     (foundCfg current.current)
     ⟨resolve base c (directRef growth source finishDirectSlot), finish⟩
 
-private theorem immortalFrom_of_reaches
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Compose a selected guarded increment handoff with immortal traversal of
 the remaining shift suffix. -/
 theorem incrementShift_suffix_of_immortal
@@ -267,7 +255,7 @@ theorem incrementShift_suffix_of_immortal
               ⟨growth, source,
                 bodySearchBase + position.before.length + 1⟩,
             shifted⟩ :=
-        immortalFrom_of_reaches himmortal hhand'
+        FullTM0.ImmortalFrom.of_reaches himmortal hhand'
       have hblank : shifted.read = blankSymbol := by
         exact handoff.source_blank
       have hcommands : ∀ command,
@@ -346,7 +334,7 @@ theorem decrementShift_suffix_of_immortal
               ⟨growth, source,
                 secondarySearchBase + position.before.length + 1⟩,
             shifted⟩ :=
-        immortalFrom_of_reaches himmortal hhand'
+        FullTM0.ImmortalFrom.of_reaches himmortal hhand'
       have hblank : shifted.read = blankSymbol := by
         exact handoff.source_blank
       have hcommands : ∀ command,

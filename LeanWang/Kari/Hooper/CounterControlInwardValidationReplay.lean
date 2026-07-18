@@ -37,19 +37,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) start)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) start finish) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) finish := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 private theorem validationCommand_mem
     (growth : Turing.Dir) (source : Nat)
     (instruction : CounterMachine.Instruction)
@@ -178,68 +165,6 @@ private theorem moveN_move_moveN_opposite
       FullTM0.Tape.offset, FullTM0.Tape.move] <;>
     congr 1 <;> omega
 
-/-- A boundary search starting immediately beyond the found end of a blank
-gap must travel at least as far as that gap before finding any boundary in
-the reverse direction. -/
-theorem reverseBoundaryGap_distance_ge
-    {outer : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {distance replayDistance : Nat} {target replayTarget : Fin 5}
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches outer direction distance)
-    (hreplay : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary replayTarget).Matches
-      ((outer.moveN direction distance).move
-        (NestingMachine.opposite direction))
-      (NestingMachine.opposite direction) replayDistance) :
-    distance ≤ replayDistance := by
-  by_contra hnot
-  have hlt : replayDistance < distance := by omega
-  let index := distance - (replayDistance + 1)
-  have hindex : index < distance := by
-    dsimp [index]
-    omega
-  have hblank := hgap.blank hindex
-  have hmarked := hreplay.marked
-  have htapes := moveN_move_moveN_opposite outer direction distance
-    replayDistance hlt
-  have hread :
-      (((outer.moveN direction distance).move
-          (NestingMachine.opposite direction)).moveN
-            (NestingMachine.opposite direction) replayDistance).read =
-        outer (FullTM0.Tape.offset direction index) := by
-    rw [htapes]
-    simp [index]
-  have hboundary :
-      outer (FullTM0.Tape.offset direction index) =
-        boundarySymbol replayTarget := by
-    rw [← hread]
-    simpa [FullTM0.Tape.read_moveN, Target.Matches] using hmarked
-  rw [hboundary] at hblank
-  exact blankSymbol_ne_boundarySymbol replayTarget hblank.symm
-
-private theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := hsecond.blank hlt
-    have hmarked := hfirst.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by
-          simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := hfirst.blank hlt
-    have hmarked := hsecond.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by
-          simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 private theorem move_move_opposite
     (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir) :
     (T.move direction).move (NestingMachine.opposite direction) = T := by
@@ -333,7 +258,7 @@ private theorem reversePair_continue
     rw [move_move_opposite]
     exact hsource
   have hreverse := reverseGap_of_source_boundary hinward hbehind
-  have hdistance := boundaryGap_distance_unique houtward hreverse
+  have hdistance := BoundedMarkerProgram.boundaryGap_distance_unique houtward hreverse
   subst reverseDistance
   exact ⟨rfl, reverseGap_continue T direction distance⟩
 
@@ -444,7 +369,7 @@ private theorem reachedBoundarySearch_of_immortal
       replay.outer = outer := by
   let raw : RawCommand :=
     .boundaryNavigation address expected direction success .preserve
-  have himmortalEntry := immortalFrom_of_reaches base c himmortal hreach
+  have himmortalEntry := FullTM0.ImmortalFrom.of_reaches himmortal hreach
   rcases CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
       base c hmortal address expected direction success .preserve hraw outer
       himmortalEntry with ⟨distance, hgap⟩

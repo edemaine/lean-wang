@@ -35,19 +35,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Every guarded decrement-entry route caller completes at a logical core
 which strictly contains its original search gap. -/
 theorem foundGuardedParentOutcome_of_decrementEntry
@@ -170,7 +157,7 @@ theorem foundMonotoneGuardedEntryOutcome_of_decrementEntry_zero
       have himmortalNext : FullTM0.ImmortalFrom
           (CounterControlNestingBridge.machine base c)
           handoff.entry.next.current.cfg :=
-        immortalFrom_of_reaches base c himmortal handoff.entry.reaches
+        FullTM0.ImmortalFrom.of_reaches himmortal handoff.entry.reaches
       have himmortalFound := immortalFrom_foundCfg
         handoff.entry.next.current himmortalNext
       rcases CounterControlGuardedShiftEmbedding.decrementPositiveCenteredEnd
@@ -186,7 +173,7 @@ theorem foundMonotoneGuardedEntryOutcome_of_decrementEntry_zero
   | zero entry =>
       have himmortalNext : FullTM0.ImmortalFrom
           (CounterControlNestingBridge.machine base c) entry.next.cfg :=
-        immortalFrom_of_reaches base c himmortal entry.reaches
+        FullTM0.ImmortalFrom.of_reaches himmortal entry.reaches
       have hfound := reaches_foundCfg_of_immortal entry.next himmortalNext
       rcases entry.monotoneOutcome_of_immortal hmortal himmortal with
         ⟨outcome⟩

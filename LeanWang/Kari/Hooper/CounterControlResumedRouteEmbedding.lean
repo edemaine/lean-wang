@@ -39,31 +39,6 @@ private instance : Inhabited (Symbol numTags) :=
 
 /-! ## Reversing one adjacent route leg -/
 
-/-- A boundary target cannot occur at two different first-blank distances
-from the same tape. -/
-private theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := hsecond.blank hlt
-    have hmarked := hfirst.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := hfirst.blank hlt
-    have hmarked := hsecond.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- Reverse a preserving route search, using the labelled boundary under
 the head immediately before its one-cell departure. -/
 private theorem reverseGap_of_source_boundary
@@ -150,7 +125,7 @@ theorem start_eq_of_rightLeg_found
         CounterLayout.boundaryPos_succ]]
     rw [atLogical_move_left]
   have hdistance : distance = RegisterLayout.values registers i := by
-    apply boundaryGap_distance_unique hreverse
+    apply BoundedMarkerProgram.boundaryGap_distance_unique hreverse
     rw [show NestingMachine.opposite (orient growth .right) =
         orient growth .left by cases growth <;> rfl]
     rw [hstart]
@@ -201,7 +176,7 @@ theorem start_eq_of_leftLeg_found
     rw [atLogical_move_right]
     simp [firstGapOffset, boundaryOffset]
   have hdistance : distance = RegisterLayout.values registers i := by
-    apply boundaryGap_distance_unique hreverse
+    apply BoundedMarkerProgram.boundaryGap_distance_unique hreverse
     rw [show NestingMachine.opposite (orient growth .left) =
         orient growth .right by cases growth <;> rfl]
     rw [hstart]
@@ -468,19 +443,6 @@ theorem leftGap_distance_lt_layoutEnd
 
 /-! ## Exact resumed route coordinates -/
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- The selected route command reads the boundary named by its retained
 route position at the exact parent found tape. -/
 theorem ResumedRouteEnd.current_read
@@ -573,7 +535,7 @@ theorem logical_of_toFour_endpoint
   rcases hroute with ⟨routeSource, hroute⟩
   rcases hroute.position progress.suffix.route_eq with
     ⟨i, hcurrent, htail⟩
-  have himmortalLogical := immortalFrom_of_reaches base c himmortal
+  have himmortalLogical := FullTM0.ImmortalFrom.of_reaches himmortal
     progress.reaches
   change FullTM0.ImmortalFrom
     (CounterControlNestingBridge.machine base c)

@@ -432,78 +432,6 @@ theorem bodyIncrementShift_position
     simp [MarkerShift.incrementOrder, incrementRemaining] at hlabels ⊢ <;>
     aesop
 
-/-- The first successful shift entered from a completed validation suffix
-is the pure one-cell outward move used by `firstIncrementAgreement`. -/
-theorem guardedBodyIncrement_shiftedParentBacking
-    (base : Nat) (c : Nat.Partrec.Code)
-    (growth : Turing.Dir) (source next : Nat) (register : Register)
-    (hrule : (source, .increment register next) ∈
-      GlobalSourceProgram.program)
-    (T : FullTM0.Tape (Symbol numTags))
-    (hread : T.read = boundarySymbol 4)
-    (hblank : (T.move (orient growth .right)).read = blankSymbol)
-    (expected : Fin 5) :
-    (guardedBodyIncrement base c growth source next register hrule T hread
-      hblank).shiftedParentBacking expected =
-      shiftStepTape (orient growth .left)
-        (T.move (orient growth .right)) 1 expected := by
-  let shift := bodyIncrementShift base c growth source next register hrule T
-    hread
-  let guarded := guardedBodyIncrement base c growth source next register
-    hrule T hread hblank
-  have hshiftDirection : shift.direction = orient growth .left :=
-    bodyIncrementShift_direction base c growth source next register hrule T
-      hread
-  have hopposite : NestingMachine.opposite (orient growth .left) =
-      orient growth .right := by
-    cases growth <;> rfl
-  unfold GuardedSearch.shiftedParentBacking GuardedSearch.parentOuter
-  change shiftStepTape guarded.direction
-      (guarded.current.outer.move
-        (NestingMachine.opposite guarded.direction))
-      (guarded.current.distance + 1) expected = _
-  rw [show guarded.direction = shift.direction by rfl]
-  rw [show guarded.current = shift by rfl]
-  rw [hshiftDirection, hopposite]
-  dsimp [shift]
-
-/-! ## Mirrored route/shift alignment -/
-
-private theorem outwardFound_moveN_left
-    (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))
-    (distance : Nat) :
-    (((T.move (orient growth .right)).moveN
-      (orient growth .right) distance).moveN
-        (orient growth .left) (distance + 1)) = T := by
-  funext position
-  cases growth <;>
-    simp [orient, FullTM0.Tape.move, FullTM0.Tape.moveN,
-      FullTM0.Tape.offset] <;>
-    congr 1 <;> omega
-
-private theorem boundaryGap_distance_unique_early
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := hsecond.blank hlt
-    have hmarked := hfirst.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := hfirst.blank hlt
-    have hmarked := hsecond.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- Mirrored counterpart of decrement's `ShiftedAgainst.advance`: pair one
 rightward validation leg with the following leftward increment shift. -/
 theorem shiftedAgainst_retreat
@@ -527,7 +455,7 @@ theorem shiftedAgainst_retreat
       (shiftStepTape (orient growth .left) shiftedUpper shiftDistance
         lower.castSucc) lowerOriginal := by
   have hdistance : shiftDistance = routeDistance + 1 := by
-    apply boundaryGap_distance_unique_early shiftGap
+    apply BoundedMarkerProgram.boundaryGap_distance_unique shiftGap
     constructor
     · intro k hk
       by_cases hkzero : k = 0
@@ -1108,50 +1036,6 @@ theorem firstShift_reverse_blank
         apply congrArg outer
         omega
 
-/-- Looking inward from the endpoint of an outward exact gap reads blank
-at every positive distance through the old origin. -/
-theorem outwardFound_reverse_blank
-    (direction : Turing.Dir)
-    (outer : FullTM0.Tape (Symbol numTags)) (distance back : Nat)
-    (target : Fin 5)
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches outer direction distance)
-    (hpositive : 0 < back) (hback : back ≤ distance) :
-    (((outer.moveN direction distance).moveN
-      (NestingMachine.opposite direction) back).read) = blankSymbol := by
-  let index := distance - back
-  have hindex : index < distance := by
-    dsimp [index]
-    omega
-  have hblank := hgap.blank hindex
-  cases direction <;>
-    simp [NestingMachine.opposite, FullTM0.Tape.read,
-      FullTM0.Tape.moveN, FullTM0.Tape.offset, index] at hblank ⊢ <;>
-    rw [← hblank] <;> congr 1 <;> omega
-
-private theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := hsecond.blank hlt
-    have hmarked := hfirst.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := hfirst.blank hlt
-    have hmarked := hsecond.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- Reverse the first remaining shifted gap.  This is the one-step geometry
 used inside the generic canonical backward theorem, exposed here because the
 old outward-validation gap is anchored at its source boundary. -/
@@ -1327,7 +1211,7 @@ theorem outwardGap_lt_layoutEnd_of_incrementTail
         simpa [shifted] using hreverse
       have hdistanceSub : distance - 1 =
           RegisterLayout.values registers i :=
-        boundaryGap_distance_unique hreverse' hcanonical
+        BoundedMarkerProgram.boundaryGap_distance_unique hreverse' hcanonical
       have hdistance : distance = RegisterLayout.values registers i + 1 := by
         omega
       have holdLt : oldDistance < distance := by
@@ -1632,19 +1516,6 @@ theorem outwardSuffix_gap_lt_layoutEnd_of_completedIncrement
       completed.finish coreTape (incrementRemaining register) registers
       hinitial htrace hschedule hlast hcore (by simpa [last] using hfinish)
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- A collision-free increment reached after any retained outward
 validation suffix reconstructs an exact logical core, and the original
 caller gap remains strictly inside that core. -/
@@ -1677,7 +1548,7 @@ theorem outwardSuffix_incrementSuccess_logical
       suffix.reaches_bodyEntry
   have himmortalEntry : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) shift.cfg :=
-    immortalFrom_of_reaches base c himmortal hentry
+    FullTM0.ImmortalFrom.of_reaches himmortal hentry
   have hfoundEntry :=
     CounterControlParentContinuation.reaches_foundCfg_of_immortal
       shift himmortalEntry
@@ -1690,7 +1561,7 @@ theorem outwardSuffix_incrementSuccess_logical
   have himmortalFound : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       (foundCfg guarded.current) :=
-    immortalFrom_of_reaches base c himmortal hfound
+    FullTM0.ImmortalFrom.of_reaches himmortal hfound
   have hcommand : guarded.selectedRaw ∈
       incrementShiftCommands growth source register := by
     change shift.selectedRaw ∈ incrementShiftCommands growth source register
@@ -1712,7 +1583,7 @@ theorem outwardSuffix_incrementSuccess_logical
           (CounterControlNestingBridge.machine base c)
           ⟨logicalState base c growth next,
             incrementAfterShiftTape direct.suffix⟩ :=
-        immortalFrom_of_reaches base c himmortalFound hlogical
+        FullTM0.ImmortalFrom.of_reaches himmortalFound hlogical
       rcases
           CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
             base c hmortal growth next direct.target_lt

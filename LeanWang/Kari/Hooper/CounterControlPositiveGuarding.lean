@@ -117,19 +117,6 @@ def monotone_of_guardedTail_parent
         rw [guardedTail_distance] at hdistance
         omega)
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- If a strict guarded escape temporarily stops at a larger unguarded
 search, any monotone continuation of that replay search completes the
 conversion for the original positive gap. -/
@@ -154,7 +141,7 @@ theorem monotone_of_guardedTail_escape
           (CounterControlNestingBridge.machine base c)
           (foundCfg current) next.cfg := by
         simpa [hfound] using reaches
-      have himmortalNext := immortalFrom_of_reaches base c himmortal
+      have himmortalNext := FullTM0.ImmortalFrom.of_reaches himmortal
         hreachesNext
       have hnextFound := reaches_foundCfg_of_immortal next himmortalNext
       have himmortalNextFound := immortalFrom_foundCfg next himmortalNext

@@ -43,19 +43,6 @@ set_option maxRecDepth 10000
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-! ## Reversing the retained outward route -/
 
 private theorem routeTail_nil_finish
@@ -1031,9 +1018,9 @@ theorem PositiveSearchEntry.centeredEnd_of_immortal
       ifPositive suffix entry) := by
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) entry.next.current.cfg :=
-    immortalFrom_of_reaches base c himmortal entry.reaches
+    FullTM0.ImmortalFrom.of_reaches himmortal entry.reaches
   have hfound := reaches_foundCfg_of_immortal entry.next.current himmortalNext
-  have himmortalFound := immortalFrom_of_reaches base c himmortalNext hfound
+  have himmortalFound := FullTM0.ImmortalFrom.of_reaches himmortalNext hfound
   rcases CounterControlGuardedSearch.GuardedSearch.decrementShift_suffix_of_immortal
       base c hmortal entry.next growth source register ifZero ifPositive
       hrule entry.selectedRaw_mem himmortalFound with ⟨shiftSuffix⟩
@@ -1142,9 +1129,9 @@ theorem ZeroSearchEntry.centeredEnd_of_immortal
       ifPositive suffix entry) := by
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) entry.next.cfg :=
-    immortalFrom_of_reaches base c himmortal entry.reaches
+    FullTM0.ImmortalFrom.of_reaches himmortal entry.reaches
   have hfound := reaches_foundCfg_of_immortal entry.next himmortalNext
-  have himmortalFound := immortalFrom_of_reaches base c himmortalNext hfound
+  have himmortalFound := FullTM0.ImmortalFrom.of_reaches himmortalNext hfound
   have hcommands : ∀ command,
       command ∈ routeCommandsAux growth source zeroSearchBase zeroDirectBase
           (.logical growth ifZero)
@@ -1166,7 +1153,7 @@ theorem ZeroSearchEntry.centeredEnd_of_immortal
       (.logical growth ifZero)
       (AnchoredCounterGeometry.routeFromZero register) entry.selectedRaw_mem
       hcommands hcontinuations with ⟨progress⟩
-  have himmortalLogical := immortalFrom_of_reaches base c himmortalFound
+  have himmortalLogical := FullTM0.ImmortalFrom.of_reaches himmortalFound
     progress.reaches
   change FullTM0.ImmortalFrom
     (CounterControlNestingBridge.machine base c)
@@ -1558,7 +1545,7 @@ theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
       hentryFound, hrouteFinish, hnextFound]
   have himmortalEntry : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) entry.next.current.cfg :=
-    immortalFrom_of_reaches base c himmortal entry.reaches
+    FullTM0.ImmortalFrom.of_reaches himmortal entry.reaches
   have hfoundEntry := reaches_foundCfg_of_immortal entry.next.current
     himmortalEntry
   have hreachesNext : FullTM0.Reaches
@@ -1566,7 +1553,7 @@ theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
       (foundCfg next) := by
     rw [← hfoundEq]
     exact entry.reaches.trans hfoundEntry
-  have himmortalNext := immortalFrom_of_reaches base c himmortal
+  have himmortalNext := FullTM0.ImmortalFrom.of_reaches himmortal
     hreachesNext
   have hcommand : next.selectedRaw ∈
       decrementShiftCommands growth source register := by
@@ -1652,9 +1639,9 @@ private theorem outwardHandoff_of_decrementEntrySearch
     (himmortal : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) (foundCfg current)) :
     Nonempty (OutwardInstructionHandoff current obligation) := by
-  have himmortalNext := immortalFrom_of_reaches base c himmortal hreaches
+  have himmortalNext := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   have hfound := reaches_foundCfg_of_immortal next himmortalNext
-  have himmortalFound := immortalFrom_of_reaches base c himmortalNext hfound
+  have himmortalFound := FullTM0.ImmortalFrom.of_reaches himmortalNext hfound
   rcases
       CounterControlDecrementEntryContinuation.foundMonotoneGuardedEntryOutcome_of_decrementEntry
         base c hmortal next growth source register ifZero ifPositive hrule
@@ -1738,7 +1725,7 @@ private theorem outwardHandoff_of_boundaryThree_core
         current.foundTape.move (orient growth .left)⟩ := by
     rw [hreturned] at hsecond
     exact hsecond
-  have himmortalSecond := immortalFrom_of_reaches base c himmortal hsecond'
+  have himmortalSecond := FullTM0.ImmortalFrom.of_reaches himmortal hsecond'
   rcases CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
       base c hmortal ⟨growth, source, bodySearchBase + 1⟩ 2 .left
       secondSuccess .preserve hraw
@@ -1946,7 +1933,7 @@ private theorem outwardHandoff_of_boundaryTwo_beforeStart
             foundThree.move (orient growth .left)⟩ := by
         rw [hreturnedThree] at hsecond
         exact hsecond
-      have himmortalSecond := immortalFrom_of_reaches base c himmortal
+      have himmortalSecond := FullTM0.ImmortalFrom.of_reaches himmortal
         hsecond'
       have hrawSecond : RawCommand.boundaryNavigation
           ⟨growth, source, bodySearchBase + 1⟩ 2 .left
@@ -1998,7 +1985,7 @@ private theorem outwardHandoff_of_boundaryTwo_beforeStart
             current.foundTape.move (orient growth .left)⟩ := by
         rw [hreturnedTwo] at hthird
         exact hthird
-      have himmortalThird := immortalFrom_of_reaches base c himmortal
+      have himmortalThird := FullTM0.ImmortalFrom.of_reaches himmortal
         hthird'
       let raw : RawCommand := .boundaryNavigation
         ⟨growth, source, bodySearchBase + 2⟩ 1 .left

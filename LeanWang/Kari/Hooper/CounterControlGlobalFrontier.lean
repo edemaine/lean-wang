@@ -30,19 +30,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) start)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) start finish) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) finish := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- A genuine search frontier is, in particular, the entry of the generated
 raw command indexed by that search. -/
 theorem frontier_of_genuineSearch
@@ -84,7 +71,7 @@ theorem reaches_frontier_of_immortalFrom
         exact ⟨⟨logicalState base c growth state, T⟩, hreach,
           .logical growth state hstate T⟩
     | search address T =>
-        have himmortalFinish := immortalFrom_of_reaches base c
+        have himmortalFinish := FullTM0.ImmortalFrom.of_reaches
           himmortal hreach
         rcases reaches_frontier_of_immortal_searchRef base c address T
             himmortalFinish with ⟨final, htail, hfrontier⟩

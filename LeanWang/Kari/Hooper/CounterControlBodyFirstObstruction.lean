@@ -36,19 +36,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- An immortal instruction body on a reconstructed core has a finite first
 nonblank obstruction beyond the core. -/
 theorem exists_coreTarget_of_immortal_body
@@ -100,7 +87,7 @@ theorem foundMonotoneGuardedEntryOutcome_of_reconstructedBody
     (himmortal : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) (foundCfg current)) :
     Nonempty (FoundMonotoneGuardedEntryOutcome current) := by
-  have himmortalBody := immortalFrom_of_reaches base c himmortal hbody
+  have himmortalBody := FullTM0.ImmortalFrom.of_reaches himmortal hbody
   rcases exists_coreTarget_of_immortal_body base c hmortal growth source
       instruction registers T hrule hcore himmortalBody with
     ⟨limit, target, represented⟩
@@ -126,7 +113,7 @@ theorem foundGuardedEscapeOutcome_of_reconstructedBody
       (CounterControlNestingBridge.machine base c)
       (foundCfg current.current)) :
     Nonempty (FoundGuardedEscapeOutcome current) := by
-  have himmortalBody := immortalFrom_of_reaches base c himmortal hbody
+  have himmortalBody := FullTM0.ImmortalFrom.of_reaches himmortal hbody
   rcases exists_coreTarget_of_immortal_body base c hmortal growth source
       instruction registers T hrule hcore himmortalBody with
     ⟨limit, target, represented⟩

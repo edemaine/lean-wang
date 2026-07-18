@@ -34,19 +34,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 private theorem outwardFour_gap
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GenuineSearch base c)
@@ -166,7 +153,7 @@ private theorem outwardFour_nonemptyDecrement_handoff
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
         current.foundTape.move (orient growth .left)⟩ :=
-    immortalFrom_of_reaches base c himmortal hentry
+    FullTM0.ImmortalFrom.of_reaches himmortal hentry
   rcases
       CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
         base c hmortal ⟨growth, source, bodySearchBase⟩ 3 .left success
@@ -213,7 +200,7 @@ private theorem outwardFour_nonemptyDecrement_handoff
     rw [hnextCfg]
     exact himmortalEntry
   have hfoundNext := reaches_foundCfg_of_immortal next himmortalNext
-  have himmortalFoundNext := immortalFrom_of_reaches base c himmortalNext
+  have himmortalFoundNext := FullTM0.ImmortalFrom.of_reaches himmortalNext
     hfoundNext
   rcases
       CounterControlDecrementEntryContinuation.foundMonotoneGuardedEntryOutcome_of_decrementEntry

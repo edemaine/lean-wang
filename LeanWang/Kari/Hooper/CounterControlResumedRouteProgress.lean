@@ -39,63 +39,8 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
 
-private theorem boundaryPreserve_of_mem_routeCommandsAux
-    (growth : Turing.Dir) (source searchSlot directSlot : Nat)
-    (after : ControlRef) (route : List MarkerValidation.Leg)
-    {raw : RawCommand}
-    (hraw : raw ∈ routeCommandsAux growth source searchSlot directSlot
-      after route) :
-    ∃ address expected direction success,
-      raw = .boundaryNavigation address expected direction success
-        .preserve := by
-  induction route generalizing searchSlot directSlot with
-  | nil => simp [routeCommandsAux] at hraw
-  | cons leg route ih =>
-      simp only [routeCommandsAux, List.mem_cons] at hraw
-      rcases hraw with hhead | htail
-      · subst raw
-        exact ⟨_, _, _, _, rfl⟩
-      · exact ih (searchSlot := searchSlot + 1)
-          (directSlot := directSlot + 1) htail
 
-private theorem exactSuccessTape_eq_of_mem_routeCommandsAux
-    (growth : Turing.Dir) (source searchSlot directSlot : Nat)
-    (after : ControlRef) (route : List MarkerValidation.Leg)
-    {raw : RawCommand}
-    (hraw : raw ∈ routeCommandsAux growth source searchSlot directSlot
-      after route)
-    (T : FullTM0.Tape (Symbol numTags)) :
-    exactSuccessTape raw T = T := by
-  rcases boundaryPreserve_of_mem_routeCommandsAux growth source searchSlot
-      directSlot after route hraw with
-    ⟨address, expected, direction, success, rfl⟩
-  rfl
-
-private theorem rawTargetMatches_of_compiled
-    (base : Nat) (c : Nat.Partrec.Code)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands)
-    (T : FullTM0.Tape (Symbol numTags))
-    (hmatch : (CounterControlCommandAt.compileRawCommand base c raw hraw).target.Matches
-      T.read) :
-    RawTargetMatches raw T := by
-  rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
-  cases raw <;>
-    simpa [CounterControlCommandAt.compileRawAtTag,
-      compileNavigationAction, Command.target,
-      RawTargetMatches, Target.Matches] using hmatch
 
 /-- A selected resumed route caller, advanced from its exact found state to
 the route's advertised endpoint. -/
@@ -180,13 +125,13 @@ private theorem progressedRoute
     Nonempty (ResumedRouteEnd resumed growth source searchSlot directSlot
       after route) := by
   have hsuccess := resumed.reaches_selectedRaw_success
-  have htape := exactSuccessTape_eq_of_mem_routeCommandsAux growth source
+  have htape := CounterControlRouteSuffixMortality.exactSuccessTape_eq_of_mem_routeCommandsAux growth source
     searchSlot directSlot after route hroute resumed.parentFoundTape
   rw [htape] at hsuccess
-  have himmortalSuccess := immortalFrom_of_reaches base c himmortal hsuccess
+  have himmortalSuccess := FullTM0.ImmortalFrom.of_reaches himmortal hsuccess
   have htarget : RawTargetMatches resumed.selectedRaw
       resumed.parentFoundTape :=
-    rawTargetMatches_of_compiled base c resumed.selectedRaw
+    CounterControlRouteSuffixMortality.rawTargetMatches_of_compiled base c resumed.selectedRaw
       resumed.selectedRaw_mem resumed.parentFoundTape
       resumed.selectedRaw_target_matches_parentFoundTape
   rcases reaches_routeSuffix_of_immortal base c hmortal growth source

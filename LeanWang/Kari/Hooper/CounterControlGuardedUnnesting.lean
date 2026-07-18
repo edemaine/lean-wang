@@ -35,19 +35,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-! ## The two local laws -/
 
 /-- A guarded returned search reached from an arbitrary genuine search. -/
@@ -135,7 +122,7 @@ theorem guardedUnnestingLaw_of_escape_and_monotoneEntry
     GuardedUnnestingLaw base c := by
   intro current himmortal
   rcases hescape current himmortal with ⟨middle, hmiddle⟩
-  have himmortalMiddle := immortalFrom_of_reaches base c
+  have himmortalMiddle := FullTM0.ImmortalFrom.of_reaches
     himmortal hmiddle.reaches
   rcases hentry middle himmortalMiddle with ⟨next, hnext⟩
   exact ⟨next, ⟨hmiddle.reaches.trans hnext.reaches,
@@ -161,7 +148,7 @@ theorem exists_iterated_guardedUnnesting
       exact ⟨current, Relation.ReflTransGen.refl, by omega⟩
   | succ steps ih =>
       rcases ih with ⟨middle, hmiddle, hdistance⟩
-      have himmortalMiddle := immortalFrom_of_reaches base c
+      have himmortalMiddle := FullTM0.ImmortalFrom.of_reaches
         himmortal hmiddle
       rcases hlaw middle himmortalMiddle with ⟨next, hnext⟩
       refine ⟨next, hmiddle.trans hnext.reaches, ?_⟩
@@ -184,7 +171,7 @@ theorem exists_reached_guardedSearch_of_immortalFrom
         start next.current.cfg := by
   rcases exists_reachedGenuineSearch_of_immortalFrom
       base c hmortal start himmortal with ⟨first⟩
-  have himmortalFirst := immortalFrom_of_reaches base c
+  have himmortalFirst := FullTM0.ImmortalFrom.of_reaches
     himmortal first.reaches
   rcases hentry first.toGenuineSearch himmortalFirst with ⟨next, hnext⟩
   exact ⟨next, first.reaches.trans hnext.reaches⟩
@@ -206,7 +193,7 @@ theorem reaches_unbounded_guardedSearch_of_immortalFrom
   intro bound
   rcases exists_reached_guardedSearch_of_immortalFrom
       base c hmortal hentry start himmortal with ⟨first, hfirst⟩
-  have himmortalFirst := immortalFrom_of_reaches base c himmortal hfirst
+  have himmortalFirst := FullTM0.ImmortalFrom.of_reaches himmortal hfirst
   rcases exists_iterated_guardedUnnesting base c hlaw first
       himmortalFirst (bound + 1) with ⟨current, htail, hdistance⟩
   refine ⟨current, hfirst.trans htail, ?_⟩

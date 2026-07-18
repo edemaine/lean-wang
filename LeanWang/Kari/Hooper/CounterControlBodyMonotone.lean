@@ -35,19 +35,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- A rule of the deterministic global program defines one primitive
 counter step for every register valuation. -/
 private theorem exists_step_of_rule
@@ -183,7 +170,7 @@ theorem foundMonotoneGuardedEntryOutcome_of_body
       · simpa [frame, start, BodyReturnReached] using hreturn
     have himmortalBody : FullTM0.ImmortalFrom
         (CounterControlNestingBridge.machine base c) start :=
-      immortalFrom_of_reaches base c himmortal hbody
+      FullTM0.ImmortalFrom.of_reaches himmortal hbody
     rcases PrefixReachesReturn.resumes_of_immortal base c hmortal hreturn'
         himmortalBody with ⟨resumed⟩
     let next : GuardedSearch base c :=
@@ -263,7 +250,7 @@ theorem foundGuardedEscapeOutcome_of_body
       · simpa [frame, start, BodyReturnReached] using hreturn
     have himmortalBody : FullTM0.ImmortalFrom
         (CounterControlNestingBridge.machine base c) start :=
-      immortalFrom_of_reaches base c himmortal hbody
+      FullTM0.ImmortalFrom.of_reaches himmortal hbody
     rcases PrefixReachesReturn.resumes_of_immortal base c hmortal hreturn'
         himmortalBody with ⟨resumed⟩
     let guarded : GuardedSearch base c :=

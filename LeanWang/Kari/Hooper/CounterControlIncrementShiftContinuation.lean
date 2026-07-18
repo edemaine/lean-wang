@@ -36,19 +36,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-! ## The occupied first-shift branch -/
 
 /-- An occupied first increment shift takes its configured collision edge,
@@ -133,7 +120,7 @@ private theorem foundMonotoneGuardedEntryOutcome_of_firstCollision
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c ⟨growth, source, cleanupSearchBase⟩,
         cleanupOuter⟩ :=
-    immortalFrom_of_reaches base c himmortal (hcollision.trans hentry)
+    FullTM0.ImmortalFrom.of_reaches himmortal (hcollision.trans hentry)
   let cleanupRaw := CounterControlCleanupRoute.command growth source .three
   have hcleanupRaw : cleanupRaw ∈ rawCommands := by
     exact command_mem_rawCommands_of_increment growth source register next

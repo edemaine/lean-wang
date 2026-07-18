@@ -101,31 +101,6 @@ theorem incrementShiftPosition_descendingTo
 
 /-! ## Reversing one shifted gap -/
 
-/-- A labelled target has a unique distance across a blank gap from a fixed
-tape and direction. -/
-private theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := hsecond.blank hlt
-    have hmarked := hfirst.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := hfirst.blank hlt
-    have hmarked := hsecond.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- Viewed from the newly shifted boundary, the old gap reverses into the
 blank gap leading to the previously shifted boundary. -/
 private theorem shiftStepTape_reverseGap
@@ -345,7 +320,7 @@ theorem descendingShift_canonicalBackwardGeometry
             simpa [shifted] using hreverse
           have hdistanceSub : distance - 1 =
               RegisterLayout.values registers i :=
-            boundaryGap_distance_unique hreverse' hcanonicalOnShifted
+            BoundedMarkerProgram.boundaryGap_distance_unique hreverse' hcanonicalOnShifted
           have hdistance : distance =
               RegisterLayout.values registers i + 1 := by
             omega

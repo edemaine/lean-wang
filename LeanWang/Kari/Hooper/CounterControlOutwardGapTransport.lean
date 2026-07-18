@@ -58,31 +58,6 @@ theorem moveN_then_opposite_sub
       FullTM0.Tape.offset] <;>
     congr 1 <;> omega
 
-/-- A labelled boundary cannot occur at two different first-blank
-distances from the same tape. -/
-theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (firstGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (secondGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := secondGap.blank hlt
-    have hmarked := firstGap.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by
-      simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := firstGap.blank hlt
-    have hmarked := secondGap.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by
-      simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- If a new boundary-centered tape agrees inward with the endpoint of an
 old outward blank gap, recentering the new tape at the old gap's origin
 reconstructs an exact gap of the same length. -/
@@ -254,7 +229,7 @@ theorem lowerBoundary_inwardAgreement_of_shiftedUpper
       (orient growth .left) (RegisterLayout.values registers lower)
     exact hcanonical
   have hdistance : distance + 1 = RegisterLayout.values registers lower :=
-    boundaryGap_distance_unique enlargedGap canonicalGap
+    BoundedMarkerProgram.boundaryGap_distance_unique enlargedGap canonicalGap
   have cleared_back_to_lower :
       clearedUpper.moveN (orient growth .left)
           (RegisterLayout.values registers lower) =
@@ -379,7 +354,7 @@ theorem lowerBoundary_inwardAgreement_of_upperAgreement
       (orient growth .left) (RegisterLayout.values registers lower)
     exact hcanonical
   have hdistance : distance = RegisterLayout.values registers lower :=
-    boundaryGap_distance_unique transportedGap canonicalGap
+    BoundedMarkerProgram.boundaryGap_distance_unique transportedGap canonicalGap
   have canonicalUpper_back_to_lower :
       canonicalUpper.moveN (orient growth .left)
           (RegisterLayout.values registers lower + 1) =

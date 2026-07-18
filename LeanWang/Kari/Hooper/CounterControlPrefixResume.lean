@@ -86,19 +86,6 @@ theorem clearedPrefixUnnests
 
 end PrefixResumedSearch
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) start)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) start finish) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) finish := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Exact return cleanup followed by immortal tag dispatch produces a
 level-aware resumed generated search. -/
 theorem PrefixReachesReturn.resumes_of_immortal
@@ -118,7 +105,7 @@ theorem PrefixReachesReturn.resumes_of_immortal
       atLogical frame.growth (afterZero spec T) 0⟩
   have himmortalReturn : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) returnCfg :=
-    immortalFrom_of_reaches base c himmortal
+    FullTM0.ImmortalFrom.of_reaches himmortal
       (by simpa [returnCfg, spec] using hreturn)
   have hcore : CoreRepresents spec.registers spec.growth T := by
     change CoreRepresents registers frame.growth T

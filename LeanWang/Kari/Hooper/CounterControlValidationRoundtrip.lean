@@ -92,31 +92,6 @@ private theorem move_orient_left_right
   cases growth <;>
     simp [orient, FullTM0.Tape.move]
 
-/-- A boundary target cannot occur at two different first-blank-gap
-distances on the same tape. -/
-private theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := hsecond.blank hlt
-    have hmarked := hfirst.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := hfirst.blank hlt
-    have hmarked := hsecond.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- Returning across the one-cell departure exposes the boundary found by
 the preceding preserving search. -/
 private theorem read_return_of_gap
@@ -271,7 +246,7 @@ theorem sweep_routeGaps_roundtrip
                     rw [opposite_orient_left] at hreverse
                     simpa [T4] using hreverse
                   have hd4 : d4 = d3 := by
-                    apply boundaryGap_distance_unique gap4
+                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap4
                     exact hreverse3
                   have hT5 :
                       T5 =
@@ -302,7 +277,7 @@ theorem sweep_routeGaps_roundtrip
                     rw [opposite_orient_left] at hreverse
                     exact hreverse
                   have hd5 : d5 = d2 := by
-                    apply boundaryGap_distance_unique gap5
+                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap5
                     rw [hT5]
                     simpa using hreverse2
                   have hT6 :
@@ -337,7 +312,7 @@ theorem sweep_routeGaps_roundtrip
                     rw [opposite_orient_left] at hreverse
                     exact hreverse
                   have hd6 : d6 = d1 := by
-                    apply boundaryGap_distance_unique gap6
+                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap6
                     rw [hT6]
                     simpa using hreverse1
                   have hT7 :
@@ -366,7 +341,7 @@ theorem sweep_routeGaps_roundtrip
                     rw [opposite_orient_left] at hreverse
                     exact hreverse
                   have hd7 : d7 = d0 := by
-                    apply boundaryGap_distance_unique gap7
+                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap7
                     rw [hT7]
                     simpa using hreverse0
                   subst d7

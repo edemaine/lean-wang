@@ -129,31 +129,6 @@ private theorem inwardFound_moveN_right
       FullTM0.Tape.offset] <;>
     congr 1 <;> omega
 
-/-- A labelled boundary cannot occur at two different first-blank distances
-from one tape. -/
-private theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (hfirst : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (hsecond : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := hsecond.blank hlt
-    have hmarked := hfirst.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := hfirst.blank hlt
-    have hmarked := hsecond.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by simpa [Target.Matches] using hmarked]
-      at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- One paired inward-route leg and outward marker shift advances tape
 agreement to the next boundary. -/
 theorem ShiftedAgainst.advance
@@ -177,7 +152,7 @@ theorem ShiftedAgainst.advance
       (shiftStepTape (orient growth .right) lowerShifted shiftDistance
         lower.succ) upper := by
   have hdistance : shiftDistance = routeDistance + 1 := by
-    apply boundaryGap_distance_unique shiftGap
+    apply BoundedMarkerProgram.boundaryGap_distance_unique shiftGap
     constructor
     · intro k hk
       by_cases hkzero : k = 0

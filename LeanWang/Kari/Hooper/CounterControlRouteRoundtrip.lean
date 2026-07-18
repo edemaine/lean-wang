@@ -82,31 +82,6 @@ theorem reverseGap_of_source_boundary
         FullTM0.Tape.offset_right, FullTM0.Tape.delta_left,
         FullTM0.Tape.delta_right] using source_read
 
-/-- A labelled boundary has a unique first-blank distance from a fixed tape.
--/
-theorem boundaryGap_distance_unique
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {first second : Nat} {target : Fin 5}
-    (firstGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction first)
-    (secondGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction second) :
-    first = second := by
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have hblank := secondGap.blank hlt
-    have hmarked := firstGap.marked
-    rw [show T (FullTM0.Tape.offset direction first) =
-        boundarySymbol target by
-          simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-  · have hblank := firstGap.blank hlt
-    have hmarked := secondGap.marked
-    rw [show T (FullTM0.Tape.offset direction second) =
-        boundarySymbol target by
-          simpa [Target.Matches] using hmarked] at hblank
-    exact blankSymbol_ne_boundarySymbol target hblank.symm
-
 /-- Traversing one preserving boundary gap and then its reverse returns to
 the identical source-centered tape. -/
 theorem reverseRouteLeg_found_eq
@@ -133,7 +108,7 @@ theorem reverseRouteLeg_found_eq
     exact source_read
   have hreverse := reverseGap_of_source_boundary outwardGap hsource
   have hdistance : inwardDistance = outwardDistance :=
-    boundaryGap_distance_unique inwardGap hreverse
+    BoundedMarkerProgram.boundaryGap_distance_unique inwardGap hreverse
   subst inwardDistance
   rw [reverseFound_eq]
   funext position

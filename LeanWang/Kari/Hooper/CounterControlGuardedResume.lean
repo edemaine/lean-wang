@@ -33,19 +33,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- The level-aware result of finite-prefix cleanup carries the smaller
 guarded-search invariant. -/
 def PrefixResumedSearch.toGuardedSearch
@@ -85,7 +72,7 @@ theorem reaches_guardedSearch_of_immortal_return
   have himmortalSearch : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c raw.address, outer⟩ :=
-    immortalFrom_of_reaches base c himmortal (by simpa [outer] using hreach)
+    FullTM0.ImmortalFrom.of_reaches himmortal (by simpa [outer] using hreach)
   rcases gap_of_reachable_search_on_immortal_orbit
       base c hmortal raw hraw outer himmortalSearch with
     ⟨distance, hgap⟩

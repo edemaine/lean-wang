@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlRawCallerClassification
 import LeanWang.Kari.Hooper.CounterControlValidationMortality
+import LeanWang.Kari.Hooper.CounterControlExactCommandContinuation
 
 /-!
 # Preserving route suffixes from an arbitrary generated caller
@@ -30,8 +31,74 @@ open Turing CounterMachine
 open BoundedMarkerProgram CounterControlPlan
 open CounterControlCommandContinuationMortality
 open CounterControlValidationMortality
+open CounterControlExactCommandContinuation
 
 noncomputable section
+
+/-- Every command emitted by a marker route is preserving boundary
+navigation. -/
+theorem boundaryPreserve_of_mem_routeCommandsAux
+    (growth : Turing.Dir) (source searchSlot directSlot : Nat)
+    (after : ControlRef) (route : List MarkerValidation.Leg)
+    {raw : RawCommand}
+    (hraw : raw ∈ routeCommandsAux growth source searchSlot directSlot
+      after route) :
+    ∃ address expected direction success,
+      raw = .boundaryNavigation address expected direction success
+        .preserve := by
+  induction route generalizing searchSlot directSlot with
+  | nil => simp [routeCommandsAux] at hraw
+  | cons leg route ih =>
+      simp only [routeCommandsAux, List.mem_cons] at hraw
+      rcases hraw with hhead | htail
+      · subst raw
+        exact ⟨_, _, _, _, rfl⟩
+      · exact ih (searchSlot := searchSlot + 1)
+          (directSlot := directSlot + 1) htail
+
+/-- Preserving route commands leave the tape unchanged after their exact
+successful continuation. -/
+theorem exactSuccessTape_eq_of_mem_routeCommandsAux
+    (growth : Turing.Dir) (source searchSlot directSlot : Nat)
+    (after : ControlRef) (route : List MarkerValidation.Leg)
+    {raw : RawCommand}
+    (hraw : raw ∈ routeCommandsAux growth source searchSlot directSlot
+      after route)
+    (T : FullTM0.Tape (Symbol numTags)) :
+    exactSuccessTape raw T = T := by
+  rcases boundaryPreserve_of_mem_routeCommandsAux growth source searchSlot
+      directSlot after route hraw with
+    ⟨address, expected, direction, success, rfl⟩
+  rfl
+
+/-- Preserving route commands never have a shift-collision outcome. -/
+theorem destinationFree_of_mem_routeCommandsAux
+    (growth : Turing.Dir) (source searchSlot directSlot : Nat)
+    (after : ControlRef) (route : List MarkerValidation.Leg)
+    {raw : RawCommand}
+    (hraw : raw ∈ routeCommandsAux growth source searchSlot directSlot
+      after route)
+    (T : FullTM0.Tape (Symbol numTags)) :
+    ¬ ShiftDestinationOccupied raw T := by
+  rcases boundaryPreserve_of_mem_routeCommandsAux growth source searchSlot
+      directSlot after route hraw with
+    ⟨address, expected, direction, success, rfl⟩
+  simp [ShiftDestinationOccupied]
+
+/-- The compiled target match implies the corresponding raw-command target
+match. -/
+theorem rawTargetMatches_of_compiled
+    (base : Nat) (c : Nat.Partrec.Code)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hmatch : (CounterControlCommandAt.compileRawCommand base c raw hraw).target.Matches
+      T.read) :
+    RawTargetMatches raw T := by
+  rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
+  cases raw <;>
+    simpa [CounterControlCommandAt.compileRawAtTag,
+      compileNavigationAction, Command.target,
+      RawTargetMatches, Target.Matches] using hmatch
 
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩

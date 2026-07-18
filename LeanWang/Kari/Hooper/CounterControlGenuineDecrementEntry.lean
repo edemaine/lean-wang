@@ -42,19 +42,6 @@ set_option maxRecDepth 10000
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-! ## Retaining the decrement-entry route endpoint -/
 
 /-- The final leg of a nonempty decrement-entry route targets the boundary
@@ -297,7 +284,7 @@ theorem branchRead_of_reaches
     refine ⟨blankSymbol, ?_, ?_⟩
     · simp [positiveRule, symbolsForRead]
     · simp [positiveRule]
-  have himmortalBranch := immortalFrom_of_reaches base c himmortal hreaches
+  have himmortalBranch := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   rcases CounterControlArbitraryEntry.direct_step_or_haltsFrom base c
       (resolve base c (directRef growth source branchDirectSlot))
       T hsourceDirect with
@@ -899,7 +886,7 @@ theorem PositiveShiftSearchHandoff.shiftSuffix_of_immortal
       register) := by
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) entry.next.current.cfg :=
-    immortalFrom_of_reaches base c himmortal entry.reaches
+    FullTM0.ImmortalFrom.of_reaches himmortal entry.reaches
   have himmortalFound := immortalFrom_foundCfg entry.next.current
     himmortalNext
   exact decrementShift_suffix_of_immortal base c hmortal entry.next growth
@@ -938,7 +925,7 @@ theorem PositiveShiftSearchHandoff.logicalHandoff_of_immortal
       ifZero ifPositive) := by
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) entry.next.current.cfg :=
-    immortalFrom_of_reaches base c himmortal entry.reaches
+    FullTM0.ImmortalFrom.of_reaches himmortal entry.reaches
   have hfound := reaches_foundCfg_of_immortal entry.next.current
     himmortalNext
   rcases entry.shiftSuffix_of_immortal hmortal himmortal with ⟨suffix⟩
@@ -965,7 +952,7 @@ theorem ZeroRecoverySearchHandoff.monotoneOutcome_of_immortal
     Nonempty (FoundMonotoneGuardedEntryOutcome entry.next) := by
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) entry.next.cfg :=
-    immortalFrom_of_reaches base c himmortal entry.reaches
+    FullTM0.ImmortalFrom.of_reaches himmortal entry.reaches
   have himmortalFound := immortalFrom_foundCfg entry.next himmortalNext
   exact CounterControlGenuineRouteEmbedding.zeroRecovery_logical_of_rule
     base c hmortal entry.next himmortalFound growth source register ifZero

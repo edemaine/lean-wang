@@ -42,19 +42,6 @@ private theorem opposite_orient_left (growth : Turing.Dir) :
     NestingMachine.opposite (orient growth .left) = growth := by
   cases growth <;> rfl
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) start)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) start finish) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) finish := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-! ## A shared return retaining both growth and the guard -/
 
 /-- An immortal shared return which reverses an inward cleanup direction
@@ -215,7 +202,7 @@ private theorem zero_from_entry
   have himmortalReturn : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       ⟨controllerReturn base c growth, returnTape⟩ := by
-    apply immortalFrom_of_reaches base c himmortal
+    apply FullTM0.ImmortalFrom.of_reaches himmortal
     simpa [returnTape] using herase
   have himmortalReturn' : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
@@ -260,7 +247,7 @@ private theorem one_from_entry
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c ⟨growth, source, Stage.zero.slot⟩, nextOuter⟩ := by
-    apply immortalFrom_of_reaches base c himmortal
+    apply FullTM0.ImmortalFrom.of_reaches himmortal
     simpa [nextOuter] using herase
   rcases gap_stage_of_immortal base c hmortal growth source register next
       hrule .zero nextOuter himmortalNext with ⟨nextDistance, hnextGap⟩
@@ -299,7 +286,7 @@ private theorem two_from_entry
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c ⟨growth, source, Stage.one.slot⟩, nextOuter⟩ := by
-    apply immortalFrom_of_reaches base c himmortal
+    apply FullTM0.ImmortalFrom.of_reaches himmortal
     simpa [nextOuter] using herase
   rcases gap_stage_of_immortal base c hmortal growth source register next
       hrule .one nextOuter himmortalNext with ⟨nextDistance, hnextGap⟩
@@ -338,7 +325,7 @@ private theorem three_from_entry
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c ⟨growth, source, Stage.two.slot⟩, nextOuter⟩ := by
-    apply immortalFrom_of_reaches base c himmortal
+    apply FullTM0.ImmortalFrom.of_reaches himmortal
     simpa [nextOuter] using herase
   rcases gap_stage_of_immortal base c hmortal growth source register next
       hrule .two nextOuter himmortalNext with ⟨nextDistance, hnextGap⟩
@@ -468,7 +455,7 @@ theorem found_reaches_larger_guardedSearch_of_genuine_cleanup
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       ⟨resolve base c (stage.successRef growth source), nextOuter⟩ :=
-    immortalFrom_of_reaches base c himmortalFound herase'
+    FullTM0.ImmortalFrom.of_reaches himmortalFound herase'
   have finish : ∃ finish : GuardedSearch base c,
       FullTM0.Reaches (CounterControlNestingBridge.machine base c)
         ⟨foundState (CanonicalInitializer.radius c)

@@ -165,19 +165,6 @@ def ResumedParentEmbeddingLaw (base : Nat) (c : Nat.Partrec.Code) : Prop :=
       resumed.next.cfg →
       Nonempty (ParentEmbeddingOutcome resumed.next)
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) start)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) start finish) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) finish := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- The parent-embedding classification, together with finite-prefix
 totality, is sufficient for one strict global-unnesting step. -/
 theorem exists_clearedPrefixUnnests_of_parentEmbedding
@@ -198,7 +185,7 @@ theorem exists_clearedPrefixUnnests_of_parentEmbedding
       have himmortalCore : FullTM0.ImmortalFrom
           (CounterControlNestingBridge.machine base c)
           contained.core.cfg :=
-        immortalFrom_of_reaches base c himmortal contained.reaches
+        FullTM0.ImmortalFrom.of_reaches himmortal contained.reaches
       rcases contained.core.reaches_resumed_of_immortal
           base c hmortal himmortalCore with ⟨next⟩
       exact ⟨next.next, contained.clearedPrefixUnnests next⟩

@@ -207,19 +207,6 @@ theorem reachedGenuineSearch_iff_frontier
     exact ⟨ReachedGenuineSearch.mk
       ⟨search, outer, distance, hgap⟩ hreach⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) start)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) start finish) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) finish := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- The global frontier already guarantees at least one reached genuine
 generated search on every arbitrary immortal orbit with mortal source. -/
 theorem exists_reachedGenuineSearch_of_immortalFrom
@@ -295,7 +282,7 @@ theorem exists_iterated_unnesting
       exact ⟨current, Relation.ReflTransGen.refl, by omega⟩
   | succ steps ih =>
       rcases ih with ⟨middle, hmiddle, hdistance⟩
-      have himmortalMiddle := immortalFrom_of_reaches base c
+      have himmortalMiddle := FullTM0.ImmortalFrom.of_reaches
         himmortal hmiddle
       rcases hlaw middle himmortalMiddle with ⟨next, hnext⟩
       refine ⟨next, hmiddle.trans hnext.reaches, ?_⟩
@@ -319,7 +306,7 @@ theorem reaches_unbounded_genuineSearch_of_immortalFrom
   intro bound
   rcases exists_reachedGenuineSearch_of_immortalFrom
       base c hmortal start himmortal with ⟨first⟩
-  have himmortalFirst := immortalFrom_of_reaches base c
+  have himmortalFirst := FullTM0.ImmortalFrom.of_reaches
     himmortal first.reaches
   rcases exists_iterated_unnesting base c hlaw first.toGenuineSearch
       himmortalFirst (bound + 1) with ⟨current, htail, hdistance⟩

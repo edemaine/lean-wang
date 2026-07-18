@@ -966,19 +966,6 @@ structure NextValidationHandoff
             (RegisterLayout.clockBoundary registers)⟩ →
         current.distance < layoutEnd registers
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Existing validation converse and open-body mortality discharge every
 field after an instruction-wide handoff has supplied the old-gap margin. -/
 theorem NextValidationHandoff.monotone
@@ -998,7 +985,7 @@ theorem NextValidationHandoff.monotone
       handoff.outer⟩
   have himmortalNext : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) nextCfg :=
-    immortalFrom_of_reaches base c himmortal (by
+    FullTM0.ImmortalFrom.of_reaches himmortal (by
       simpa [nextCfg] using handoff.reaches)
   rcases CounterControlValidationMortality.validation_reconstructs_of_immortal
       base c hmortal himmortalNext handoff.nextGrowth handoff.nextSource

@@ -260,19 +260,6 @@ private theorem shift_destination_blank_of_gap
   rw [hwrite, hmove]
   simpa [FullTM0.Tape.read_moveN] using hblank
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 private theorem markerShift_gap_of_immortal
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -473,7 +460,7 @@ theorem reaches_incrementShiftTail_of_immortal
           (CounterControlNestingBridge.machine base c)
           ⟨searchState base c ⟨growth, source, searchSlot + 1⟩,
             shifted⟩ :=
-        immortalFrom_of_reaches base c himmortal hstep'
+        FullTM0.ImmortalFrom.of_reaches himmortal hstep'
       have hcommandsTail : ∀ command,
           command ∈ incrementShiftCommandsAux growth source
               (searchSlot + 1) false (next :: tail) →
@@ -580,7 +567,7 @@ theorem reaches_decrementShiftTail_of_immortal
           (CounterControlNestingBridge.machine base c)
           ⟨searchState base c ⟨growth, source, searchSlot + 1⟩,
             shifted⟩ :=
-        immortalFrom_of_reaches base c himmortal hstep'
+        FullTM0.ImmortalFrom.of_reaches himmortal hstep'
       have hcommandsTail : ∀ command,
           command ∈ decrementShiftCommandsAux growth source
               (searchSlot + 1) (next :: tail) → command ∈ rawCommands := by
@@ -930,7 +917,7 @@ theorem incrementShift_suffix_of_immortal
               ⟨growth, source,
                 bodySearchBase + position.before.length + 1⟩,
             shifted⟩ :=
-        immortalFrom_of_reaches base c himmortal hhand'
+        FullTM0.ImmortalFrom.of_reaches himmortal hhand'
       have hblank : shifted.read = blankSymbol := by
         change (atLogical frame.growth
           (shiftedParentBacking resumed position.current)
@@ -1016,7 +1003,7 @@ theorem decrementShift_suffix_of_immortal
               ⟨growth, source,
                 secondarySearchBase + position.before.length + 1⟩,
             shifted⟩ :=
-        immortalFrom_of_reaches base c himmortal hhand'
+        FullTM0.ImmortalFrom.of_reaches himmortal hhand'
       have hblank : shifted.read = blankSymbol := by
         change (atLogical frame.growth
           (shiftedParentBacking resumed position.current)

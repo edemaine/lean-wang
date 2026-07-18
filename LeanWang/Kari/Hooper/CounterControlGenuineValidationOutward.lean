@@ -530,19 +530,6 @@ theorem clearedReverseGap_distance_gt
       rw [hboundary] at hblank
       exact blankSymbol_ne_boundarySymbol replayTarget hblank.symm
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 private theorem reaches_trans
     (base : Nat) (c : Nat.Partrec.Code)
     {first second third : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}

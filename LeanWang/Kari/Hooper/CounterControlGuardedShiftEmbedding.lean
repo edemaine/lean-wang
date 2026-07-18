@@ -693,19 +693,6 @@ theorem decrementShift_distance_lt_layoutEnd
   rw [hblank] at htransport
   exact blankSymbol_ne_boundarySymbol 0 htransport.symm
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Reconstructed logical endpoint of a completed positive-decrement shift,
 retaining strict containment separately from the final parent-outcome sum. -/
 structure DecrementPositiveLogicalEnd
@@ -751,7 +738,7 @@ theorem decrementPositiveCenteredEnd
       ifZero ifPositive) :
     Nonempty (DecrementPositiveCenteredEnd current growth source register
       ifZero ifPositive direct) := by
-  have himmortalLogical := immortalFrom_of_reaches base c himmortal
+  have himmortalLogical := FullTM0.ImmortalFrom.of_reaches himmortal
     direct.reaches
   change FullTM0.ImmortalFrom
     (CounterControlNestingBridge.machine base c)
@@ -955,7 +942,7 @@ theorem incrementRecoveryCenteredEnd
       next first rest handoff) := by
   rcases incrementRecoveryRouteEnd base c hmortal current himmortal growth
       source register next first rest handoff with ⟨routeEnd⟩
-  have himmortalLogical := immortalFrom_of_reaches base c himmortal
+  have himmortalLogical := FullTM0.ImmortalFrom.of_reaches himmortal
     routeEnd.reaches
   rcases CounterControlValidationRoundtrip.logical_reconstructs_coreTarget_fields_of_immortal
       base c hmortal growth next handoff.direct.target_lt routeEnd.finish

@@ -334,19 +334,6 @@ theorem zero_command_mem
   rw [handoff.selectedRaw_eq]
   exact zeroFirstRaw_mem_routeCommandsAux growth source register ifZero
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Immortality at the original guarded found state transfers to the exact
 positive generated-search entry. -/
 theorem positive_immortalFrom
@@ -361,7 +348,7 @@ theorem positive_immortalFrom
       (foundCfg current.current)) :
     FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
       handoff.next.current.cfg :=
-  immortalFrom_of_reaches base c himmortal handoff.reaches
+  FullTM0.ImmortalFrom.of_reaches himmortal handoff.reaches
 
 /-- Immortality at the original guarded found state transfers to the exact
 zero generated-search entry. -/
@@ -377,7 +364,7 @@ theorem zero_immortalFrom
       (foundCfg current.current)) :
     FullTM0.ImmortalFrom (CounterControlNestingBridge.machine base c)
       handoff.next.cfg :=
-  immortalFrom_of_reaches base c himmortal handoff.reaches
+  FullTM0.ImmortalFrom.of_reaches himmortal handoff.reaches
 
 /-- The original guarded found state reaches the positive search's exact
 found configuration. -/

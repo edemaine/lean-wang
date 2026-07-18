@@ -40,19 +40,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-- Reconstructed zero-branch endpoint with the original inward-route
 coordinate and strict margin retained. -/
 structure ZeroRecoveryCenteredEnd
@@ -114,7 +101,7 @@ theorem zeroRecoveryCenteredEnd_of_immortal
       (AnchoredCounterGeometry.routeFromZero register)
       (zero_command_mem entry) hcommands hcontinuations with
     ⟨progress⟩
-  have himmortalLogical := immortalFrom_of_reaches base c himmortalFound
+  have himmortalLogical := FullTM0.ImmortalFrom.of_reaches himmortalFound
     progress.reaches
   change FullTM0.ImmortalFrom
     (CounterControlNestingBridge.machine base c)

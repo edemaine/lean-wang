@@ -34,19 +34,6 @@ open CounterControlCommandContinuationMortality
 
 noncomputable section
 
-private theorem immortalFrom_of_reaches
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first second : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) first)
-    (hreach : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) first second) :
-    FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) second := by
-  rw [FullTM0.HaltsFrom.immortalFrom_iff_not] at himmortal ⊢
-  intro hhalts
-  exact himmortal (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-
 /-! ## Agreement on the inward ray -/
 
 /-- Two tapes agree at and inward from their common head.  Cleanup may have
@@ -486,7 +473,7 @@ private theorem reverseFinalRouteLeg
       (((sourceTape.move (orient growth .right)).moveN
         (orient growth .right) distance).write blankSymbol)
       (orient growth .left) (distance + 1)
-  have himmortalEntry := immortalFrom_of_reaches base c himmortal hreaches
+  have himmortalEntry := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   have hstep := reaches_cleanupSuccess_of_immortal base c growth source
     register targetState hrule .three
     (((sourceTape.move (orient growth .right)).moveN
@@ -558,7 +545,7 @@ private theorem reverseEarlierRouteLeg
     rw [hstage]
     exact agreement.searchGap hideal
   let nextOuter := eraseDepart outer (orient growth .left) distance
-  have himmortalEntry := immortalFrom_of_reaches base c himmortal hreaches
+  have himmortalEntry := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   have hstep := reaches_cleanupSuccess_of_immortal base c growth source
     register targetState hrule stage outer distance hactual himmortalEntry
   have hstep' : FullTM0.Reaches
@@ -601,7 +588,7 @@ theorem handoff_of_cleanupEntry
     Nonempty (OutwardInstructionHandoff current obligation) := by
   have himmortalCleanup : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) cleanup.cfg :=
-    immortalFrom_of_reaches base c himmortal hreaches
+    FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   rcases
       CounterControlGuardedCleanupProgress.reaches_larger_guardedSearch_of_genuine_cleanup
         base c hmortal cleanup growth source register targetState hrule
@@ -637,7 +624,7 @@ theorem handoff_of_cleanupRayEntry
   have himmortalEntry : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c ⟨growth, source, stage.slot⟩, outer⟩ :=
-    immortalFrom_of_reaches base c himmortal hreaches
+    FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   rcases cleanupGap_of_immortal base c hmortal growth source register
       targetState hrule stage outer himmortalEntry with
     ⟨distance, hgap⟩
@@ -707,7 +694,7 @@ theorem handoff_of_clearedCurrentEntry
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c ⟨growth, source, stage.slot⟩,
         current.foundTape.write blankSymbol⟩ :=
-    immortalFrom_of_reaches base c himmortal hreaches
+    FullTM0.ImmortalFrom.of_reaches himmortal hreaches
   rcases cleanupGap_of_immortal base c hmortal growth source register
       targetState hrule stage (current.foundTape.write blankSymbol)
       himmortalEntry with ⟨distance, hgap⟩
@@ -1050,7 +1037,7 @@ theorem handoff_of_firstIncrementCollision
       suffix.reaches_bodyEntry
   have himmortalShift : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) shift.cfg :=
-    immortalFrom_of_reaches base c himmortal hentry
+    FullTM0.ImmortalFrom.of_reaches himmortal hentry
   have hfound := CounterControlParentContinuation.reaches_foundCfg_of_immortal
     shift himmortalShift
   have hshiftRaw : shift.selectedRaw =
