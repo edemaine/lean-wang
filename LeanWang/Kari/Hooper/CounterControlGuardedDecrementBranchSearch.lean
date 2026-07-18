@@ -200,7 +200,8 @@ theorem searchOutcome
           cases growth <;> cases register <;>
             simpa [raw, outer, positiveFirstRaw, positiveFirstSuccess,
               CounterControlCommandAt.compileRawAtTag, Command.target,
-              Target.Matches, branchTape, FullTM0.Tape.read,
+              Target.Matches, branchTape,
+              CounterControlDecrementEntry.branchTape, FullTM0.Tape.read,
               FullTM0.Tape.move] using hfinish }
       let next : GuardedSearch base c := {
         current := genuine
@@ -213,7 +214,8 @@ theorem searchOutcome
             simpa [raw, outer, positiveFirstRaw, positiveFirstSuccess,
               RawCommand.physicalSearchDirection,
               RawCommand.logicalSearchDirection, RawCommand.address,
-              NestingMachine.opposite, branchTape, FullTM0.Tape.read,
+              NestingMachine.opposite, branchTape,
+              CounterControlDecrementEntry.branchTape, FullTM0.Tape.read,
               FullTM0.Tape.move] using hblank }
       refine ⟨SearchOutcome.positive ⟨route, hblank, next, ?_, rfl, rfl,
         ?_⟩⟩
@@ -251,7 +253,8 @@ theorem searchOutcome
           cases growth <;> cases register <;>
             simpa [raw, outer, zeroFirstRaw, zeroFirstSuccess,
               CounterControlCommandAt.compileRawAtTag, Command.target,
-              Target.Matches, branchTape, FullTM0.Tape.read,
+              Target.Matches, branchTape,
+              CounterControlDecrementEntry.branchTape, FullTM0.Tape.read,
               FullTM0.Tape.move] using hfinish }
       refine ⟨SearchOutcome.zero ⟨route, hboundary, next, ?_, rfl, rfl,
         ?_, ?_⟩⟩
@@ -266,7 +269,8 @@ theorem searchOutcome
           simpa [raw, outer, zeroFirstRaw, zeroFirstSuccess,
             RawCommand.physicalSearchDirection,
             RawCommand.logicalSearchDirection, RawCommand.address,
-            NestingMachine.opposite, branchTape, FullTM0.Tape.read,
+            NestingMachine.opposite, branchTape,
+            CounterControlDecrementEntry.branchTape, FullTM0.Tape.read,
             FullTM0.Tape.move] using hboundary
       · change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
           (foundCfg current.current)

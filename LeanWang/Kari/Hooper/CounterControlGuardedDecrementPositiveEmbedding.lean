@@ -335,7 +335,8 @@ private theorem positiveInitialAgreement
     have hmove := entry.next.parentOuter_moveN_one
     rw [hdirection, entry.outer_eq] at hmove
     cases growth <;>
-      simpa [CounterControlGuardedDecrementEntry.branchTape, orient,
+      simpa [CounterControlGuardedDecrementEntry.branchTape,
+        CounterControlDecrementEntry.branchTape, orient,
         FullTM0.Tape.move] using hmove
   refine ⟨suffix.handoff.source_blank, ?_, ?_⟩
   · have hdestination := suffix.handoff.destination_boundary
@@ -463,7 +464,7 @@ theorem positiveOriginal_distance_lt_layoutEnd
   rcases shiftTailGaps_uncons alignedTrace with
     ⟨shiftDistance, shiftGap, shiftPositive, tailTrace⟩
   have hdirection : current.direction = orient growth .left := by
-    have hdirection := current.selectedRaw_direction_eq
+    have hdirection := current.current.selectedRaw_direction_eq
     rw [CounterControlCommandAt.compileRawCommand_searchDirection]
       at hdirection
     rw [handoff.entry.route.route.suffix.raw_eq, hrouteCurrent]

@@ -144,7 +144,8 @@ theorem zeroRecoveryCenteredEnd_of_immortal
     rw [CounterControlGlobalUnnesting.GenuineSearch.foundTape,
       entry.distance_eq, FullTM0.Tape.moveN_zero, entry.outer_eq]
     cases growth <;>
-      simp [branchTape, orient, FullTM0.Tape.move]
+      simp [branchTape, CounterControlDecrementEntry.branchTape,
+        orient, FullTM0.Tape.move]
   have hstartLabel : i.succ =
       MarkerSchedule.decrementStartBoundary register := by
     apply (boundarySymbol_injective _ _).mp

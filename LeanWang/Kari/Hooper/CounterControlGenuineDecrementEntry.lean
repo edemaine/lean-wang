@@ -3,7 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
-import LeanWang.Kari.Hooper.CounterControlGenuineRouteEmbedding
+import LeanWang.Kari.Hooper.CounterControlDecrementEntry
 import LeanWang.Kari.Hooper.CounterControlGuardedDecrementEntry
 import LeanWang.Kari.Hooper.CounterControlGuardedShiftCompletion
 
@@ -26,6 +26,7 @@ open Turing CounterMachine
 open BoundedMarkerProgram CounterControlPlan
 open CounterControlGlobalUnnesting
 open CounterControlGenuineRouteEmbedding
+open CounterControlDecrementEntry
 open CounterControlRouteSuffixMortality CounterControlValidationMortality
 open CounterControlParentContinuation
 open CounterControlGuardedDecrementEntry
@@ -42,59 +43,27 @@ set_option maxRecDepth 10000
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-/-! ## Retaining the decrement-entry route endpoint -/
-
-/-- The final leg of a nonempty decrement-entry route targets the boundary
-immediately after the selected register. -/
-theorem decrementEntry_lastTarget
+/-- Tape after a genuine route's test rule moves into the register gap. -/
+abbrev branchTape
     {base : Nat} {c : Nat.Partrec.Code}
     {current : GenuineSearch base c}
     {growth : Turing.Dir} {source : Nat} {register : Register}
     (progress : GenuineRouteEnd current growth source bodySearchBase
       (bodyDirectBase + 1) (directRef growth source testDirectSlot)
       (AnchoredCounterGeometry.routeToDecrementStart register)) :
-    lastRouteTarget progress.suffix.current progress.suffix.remaining =
-      MarkerSchedule.decrementStartBoundary register := by
-  cases register with
-  | clock =>
-      have himpossible := progress.suffix.route_eq
-      simp [AnchoredCounterGeometry.routeToDecrementStart] at himpossible
-  | left =>
-      have hlast := congrArg List.getLast? progress.suffix.route_eq
-      rw [List.getLast?_append_cons,
-        List.getLast?_eq_some_getLast (by
-          simp [AnchoredCounterGeometry.routeToDecrementStart]),
-        List.getLast?_eq_some_getLast (by simp)] at hlast
-      have htarget := congrArg MarkerValidation.Leg.target
-        (Option.some.inj hlast).symm
-      change lastRouteTarget progress.suffix.current
-        progress.suffix.remaining = 1 at htarget
-      exact htarget
-  | right =>
-      have hlast := congrArg List.getLast? progress.suffix.route_eq
-      rw [List.getLast?_append_cons,
-        List.getLast?_eq_some_getLast (by
-          simp [AnchoredCounterGeometry.routeToDecrementStart]),
-        List.getLast?_eq_some_getLast (by simp)] at hlast
-      have htarget := congrArg MarkerValidation.Leg.target
-        (Option.some.inj hlast).symm
-      change lastRouteTarget progress.suffix.current
-        progress.suffix.remaining = 2 at htarget
-      exact htarget
-  | temp =>
-      have hlast := congrArg List.getLast? progress.suffix.route_eq
-      rw [List.getLast?_append_cons,
-        List.getLast?_eq_some_getLast (by
-          simp [AnchoredCounterGeometry.routeToDecrementStart]),
-        List.getLast?_eq_some_getLast (by simp)] at hlast
-      have htarget := congrArg MarkerValidation.Leg.target
-        (Option.some.inj hlast).symm
-      change lastRouteTarget progress.suffix.current
-        progress.suffix.remaining = 3 at htarget
-      exact htarget
+    FullTM0.Tape (Symbol numTags) :=
+  CounterControlDecrementEntry.branchTape progress
 
-/-- The completed route is centered on the boundary tested by the decrement
-instruction. -/
+/-- A genuine caller's shared decrement-test certificate. -/
+abbrev TestHandoff
+    {base : Nat} {c : Nat.Partrec.Code}
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (source : Nat) (register : Register)
+    (ifZero ifPositive : Nat) : Type :=
+  CounterControlDecrementEntry.TestHandoff current growth source register
+    ifZero ifPositive
+
+/-- The genuine route endpoint is centered on the tested boundary. -/
 theorem decrementEntry_finish_read
     {base : Nat} {c : Nat.Partrec.Code}
     {current : GenuineSearch base c}
@@ -103,122 +72,8 @@ theorem decrementEntry_finish_read
       (bodyDirectBase + 1) (directRef growth source testDirectSlot)
       (AnchoredCounterGeometry.routeToDecrementStart register)) :
     progress.suffix.finish.read =
-      boundarySymbol (MarkerSchedule.decrementStartBoundary register) := by
-  have hread := routeTailGaps_finish_read progress.suffix.tailGaps
-    progress.suffix.current progress.current_read
-  rw [decrementEntry_lastTarget progress] at hread
-  exact hread
-
-/-! ## Exact test and branch handoffs -/
-
-/-- Tape after the test rule moves left into the selected register gap. -/
-def branchTape
-    {base : Nat} {c : Nat.Partrec.Code}
-    {current : GenuineSearch base c}
-    {growth : Turing.Dir} {source : Nat} {register : Register}
-    (progress : GenuineRouteEnd current growth source bodySearchBase
-      (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-      (AnchoredCounterGeometry.routeToDecrementStart register)) :
-    FullTM0.Tape (Symbol numTags) :=
-  progress.suffix.finish.move (orient growth .left)
-
-/-- Exact completion of a guard-free decrement-entry route and its test
-rule. -/
-structure TestHandoff
-    {base : Nat} {c : Nat.Partrec.Code}
-    (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat) (register : Register)
-    (ifZero ifPositive : Nat) : Type where
-  rule_mem : (source, .decrement register ifZero ifPositive) ∈
-    GlobalSourceProgram.program
-  route : GenuineRouteEnd current growth source bodySearchBase
-    (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-    (AnchoredCounterGeometry.routeToDecrementStart register)
-  reaches : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-    (foundCfg current)
-    ⟨resolve base c (directRef growth source branchDirectSlot),
-      branchTape route⟩
-
-/-- Execute the exact boundary test after a completed guard-free
-decrement-entry route. -/
-theorem testHandoff
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c)
-    (growth : Turing.Dir) (source : Nat) (register : Register)
-    (ifZero ifPositive : Nat)
-    (hrule : (source, .decrement register ifZero ifPositive) ∈
-      GlobalSourceProgram.program)
-    (progress : GenuineRouteEnd current growth source bodySearchBase
-      (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-      (AnchoredCounterGeometry.routeToDecrementStart register)) :
-    Nonempty (TestHandoff current growth source register ifZero ifPositive) := by
-  let raw : RawDirectRule :=
-    ⟨growth, directRef growth source testDirectSlot,
-      .boundary (MarkerSchedule.decrementStartBoundary register),
-      directRef growth source branchDirectSlot, .left⟩
-  have hraw : raw ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-      growth hrule
-    change raw ∈ validationRules growth source ++
-      decrementRules growth source register ifZero ifPositive
-    apply List.mem_append_right
-    simp [raw, decrementRules]
-  have hmatch : raw.read.Matches progress.suffix.finish.read := by
-    simpa [raw, RawRead.Matches] using decrementEntry_finish_read progress
-  have htest := CounterControlDirectSemantics.reaches_directRule base c raw
-    hraw progress.suffix.finish hmatch
-  have htest' : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c (directRef growth source testDirectSlot),
-        progress.suffix.finish⟩
-      ⟨resolve base c (directRef growth source branchDirectSlot),
-        branchTape progress⟩ := by
-    change FullTM0.Reaches (FiniteTM0.machine
-      (CounterControlPlan.table base c)) _ _
-    simpa [raw, branchTape] using htest
-  exact ⟨⟨hrule, progress, progress.reaches.trans htest'⟩⟩
-
-/-- Complete any selected guard-free decrement-entry route and execute its
-boundary test. -/
-theorem testHandoff_of_rule
-    (base : Nat) (c : Nat.Partrec.Code)
-    (hmortal : ¬ DominoProblem.FixedNonhalting c)
-    (current : GenuineSearch base c)
-    (himmortal : FullTM0.ImmortalFrom
-      (CounterControlNestingBridge.machine base c) (foundCfg current))
-    (growth : Turing.Dir) (source : Nat) (register : Register)
-    (ifZero ifPositive : Nat)
-    (hrule : (source, .decrement register ifZero ifPositive) ∈
-      GlobalSourceProgram.program)
-    (hcommand : current.selectedRaw ∈
-      routeCommandsAux growth source bodySearchBase (bodyDirectBase + 1)
-        (directRef growth source testDirectSlot)
-        (AnchoredCounterGeometry.routeToDecrementStart register)) :
-    Nonempty (TestHandoff current growth source register ifZero ifPositive) := by
-  have hcommands : ∀ command,
-      command ∈ routeCommandsAux growth source bodySearchBase
-          (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-          (AnchoredCounterGeometry.routeToDecrementStart register) →
-        command ∈ rawCommands := by
-    intro command hmem
-    exact CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
-      growth hrule (by simp [commandsForRule, decrementCommands, hmem])
-  have hcontinuations : ∀ rule,
-      rule ∈ routeContinuationRules growth source bodySearchBase
-          (bodyDirectBase + 1)
-          (AnchoredCounterGeometry.routeToDecrementStart register) →
-        rule ∈ rawDirectRules := by
-    intro rule hmem
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-      growth hrule
-    simp [directRulesForRule, decrementRules, hmem]
-  rcases progressedRoute base c hmortal current himmortal growth source
-      bodySearchBase (bodyDirectBase + 1)
-      (directRef growth source testDirectSlot)
-      (AnchoredCounterGeometry.routeToDecrementStart register) hcommand
-      hcommands hcontinuations with ⟨progress⟩
-  exact testHandoff base c current growth source register ifZero ifPositive
-    hrule progress
+      boundarySymbol (MarkerSchedule.decrementStartBoundary register) :=
+  CounterControlDecrementEntry.decrementEntry_finish_read progress
 
 /-- Exact generated branch selected after the decrement test.  The route
 field retained in the handoff preserves the original caller's coordinates. -/
@@ -632,7 +487,8 @@ theorem branchTape_move_right
     (branchTape progress).move (orient growth .right) =
       progress.suffix.finish := by
   cases growth <;>
-    simp [branchTape, FullTM0.Tape.move, orient]
+    simp [branchTape, CounterControlDecrementEntry.branchTape,
+      FullTM0.Tape.move, orient]
 
 /-- Positive decrement reaches the first marker-shift search with exact
 distance zero and a genuine blank guard behind its target. -/
