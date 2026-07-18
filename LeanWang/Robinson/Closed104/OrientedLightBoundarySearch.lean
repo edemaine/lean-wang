@@ -80,6 +80,48 @@ theorem positive_step_before_false
   rw [stable.symm, positiveWeight] at boundaryStep
   omega
 
+/-- A weight seen on either side of a coordinate can be represented on the
+primary side of that coordinate or its predecessor. -/
+structure AdjacentWeightWitness
+    (primary secondary : Nat → Nat → Int)
+    (coordinate position : Nat) (weight : Int) where
+  scan : Nat
+  scan_eq : scan = coordinate ∨ scan + 1 = coordinate
+  boundaryWeight : primary scan position = weight
+  zero_of_pair : ∀ other,
+    primary coordinate other = 0 → secondary coordinate other = 0 →
+      primary scan other = 0
+
+noncomputable def adjacentWeightWitness
+    {primary secondary : Nat → Nat → Int}
+    {coordinate position : Nat} {weight : Int}
+    (coordinatePositive : 0 < coordinate)
+    (shared : ∀ scan other,
+      primary scan other = secondary (scan + 1) other)
+    (atCoordinate : primary coordinate position = weight ∨
+      secondary coordinate position = weight) :
+    AdjacentWeightWitness primary secondary coordinate position weight := by
+  classical
+  by_cases primaryWeight : primary coordinate position = weight
+  · exact {
+      scan := coordinate
+      scan_eq := Or.inl rfl
+      boundaryWeight := primaryWeight
+      zero_of_pair := fun _ primaryZero _ => primaryZero
+    }
+  · have secondaryWeight := atCoordinate.resolve_left primaryWeight
+    refine {
+      scan := coordinate - 1
+      scan_eq := Or.inr (by omega)
+      boundaryWeight := ?_
+      zero_of_pair := ?_
+    }
+    · rw [shared, show coordinate - 1 + 1 = coordinate by omega,
+        secondaryWeight]
+    · intro other _ secondaryZero
+      rw [shared, show coordinate - 1 + 1 = coordinate by omega,
+        secondaryZero]
+
 theorem exists_first_after
     {P : Nat -> Prop} {start finish : Nat}
     (hstart : start < finish) (hfinish : P finish) :
