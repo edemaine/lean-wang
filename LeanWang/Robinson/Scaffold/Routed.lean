@@ -3,13 +3,13 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
-import LeanWang.Robinson.Scaffold
+import LeanWang.Robinson.Scaffold.Payload
 
 /-!
 Role-sensitive scaffold combination for Robinson's routed free-grid argument.
 
-Unlike the older Boolean scaffold interface, horizontal and vertical channel
-cells constrain their payload layer to transmit the corresponding edge color.
+Horizontal and vertical channel cells constrain their payload layer to
+transmit the corresponding edge color.
 -/
 
 namespace LeanWang
@@ -338,7 +338,7 @@ set_option linter.unusedSimpArgs false in
 private theorem inactivePayloadAround_mem
     {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
     (patch : RoutedCoreBoxLayerPatch S T seed r) (p : Box r) :
-    CombinedBoxLayerPatch.inactivePayloadAround
+    PayloadCompletion.inactiveAround
       patch.constrained patch.core p ∈
       completePayloads T := by
   apply mk_mem_completePayloads
@@ -346,49 +346,49 @@ private theorem inactivePayloadAround_mem
     · rename_i hp
       by_cases hcore : patch.constrained
           ⟨(p.1.1, p.1.2 + 1), hp⟩ = true
-      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp only [PayloadCompletion.inactiveAround,
           dif_pos hp, hcore, if_true]
         exact (edge_mem_payloadPalette_of_mem_completePayloads
           (patch.core_mem_completePayloads _)).2.1
-      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp [PayloadCompletion.inactiveAround,
           hp, hcore, zero_mem_payloadPalette]
-    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+    · simp [PayloadCompletion.inactiveAround,
         zero_mem_payloadPalette]
   · split
     · rename_i hp
       by_cases hcore : patch.constrained
           ⟨(p.1.1, p.1.2 - 1), hp⟩ = true
-      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp only [PayloadCompletion.inactiveAround,
           dif_pos hp, hcore, if_true]
         exact (edge_mem_payloadPalette_of_mem_completePayloads
           (patch.core_mem_completePayloads _)).1
-      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp [PayloadCompletion.inactiveAround,
           hp, hcore, zero_mem_payloadPalette]
-    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+    · simp [PayloadCompletion.inactiveAround,
         zero_mem_payloadPalette]
   · split
     · rename_i hp
       by_cases hcore : patch.constrained
           ⟨(p.1.1 + 1, p.1.2), hp⟩ = true
-      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp only [PayloadCompletion.inactiveAround,
           dif_pos hp, hcore, if_true]
         exact (edge_mem_payloadPalette_of_mem_completePayloads
           (patch.core_mem_completePayloads _)).2.2.2
-      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp [PayloadCompletion.inactiveAround,
           hp, hcore, zero_mem_payloadPalette]
-    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+    · simp [PayloadCompletion.inactiveAround,
         zero_mem_payloadPalette]
   · split
     · rename_i hp
       by_cases hcore : patch.constrained
           ⟨(p.1.1 - 1, p.1.2), hp⟩ = true
-      · simp only [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp only [PayloadCompletion.inactiveAround,
           dif_pos hp, hcore, if_true]
         exact (edge_mem_payloadPalette_of_mem_completePayloads
           (patch.core_mem_completePayloads _)).2.2.1
-      · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+      · simp [PayloadCompletion.inactiveAround,
           hp, hcore, zero_mem_payloadPalette]
-    · simp [CombinedBoxLayerPatch.inactivePayloadAround,
+    · simp [PayloadCompletion.inactiveAround,
         zero_mem_payloadPalette]
 
 /-- Fill all inactive cells around a locally compatible routed core. -/
@@ -397,26 +397,26 @@ def toRoutedCombinedBoxLayerPatch
     (patch : RoutedCoreBoxLayerPatch S T seed r) :
     RoutedCombinedBoxLayerPatch S T seed r where
   base := patch.base
-  payload := CombinedBoxLayerPatch.payloadWithInactiveAround
+  payload := PayloadCompletion.complete
     patch.constrained patch.core
   base_valid := patch.base_valid
   payload_mem := by
     intro p
     by_cases hcore : patch.constrained p = true
-    · simpa [CombinedBoxLayerPatch.payloadWithInactiveAround, hcore] using
+    · simpa [PayloadCompletion.complete, hcore] using
         patch.core_mem p
     · have hfalse : patch.constrained p = false :=
         Bool.eq_false_of_not_eq_true hcore
       have hrole : S.role (patch.base p).1 = .inactive := by
         exact RouteRole.isConstrained_eq_false_iff.mp hfalse
-      simpa [CombinedBoxLayerPatch.payloadWithInactiveAround, hfalse,
+      simpa [PayloadCompletion.complete, hfalse,
         routedPayloads, hrole] using
         patch.inactivePayloadAround_mem p
   payload_hmatch := by
-    exact CombinedBoxLayerPatch.payloadWithInactiveAround_hmatch
+    exact PayloadCompletion.complete_hmatch
       patch.core_hmatch
   payload_vmatch := by
-    exact CombinedBoxLayerPatch.payloadWithInactiveAround_vmatch
+    exact PayloadCompletion.complete_vmatch
       patch.core_vmatch
 
 end RoutedCoreBoxLayerPatch

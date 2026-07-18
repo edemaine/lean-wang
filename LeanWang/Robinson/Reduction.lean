@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Scaffold.Routed.PointedPlane
-import LeanWang.Robinson.Scaffold
 import LeanWang.Robinson.Machine.UniversalTM0.MachineData
 import LeanWang.DominoProblem
 
@@ -53,58 +52,6 @@ theorem fixedDominoReduction_correct (c : Code) :
     (not_congr ((UniversalTM0Machine.halts_iff_tm0_eval_dom
       (UniversalTM0Semantic.input c)).trans
         (UniversalTM0Semantic.tm0_eval_dom_iff c)))
-
-/-- Plane-tiling instance after applying any proved scaffold. -/
-def dominoReduction (S : Scaffold) (c : Code) : TileSet :=
-  combineWithScaffold S (fixedDominoReduction c).1
-    (fixedDominoReduction c).2
-
-theorem dominoReduction_computable (S : Scaffold) :
-    Computable (dominoReduction S) := by
-  exact (combineWithScaffold_computable S).comp fixedDominoReduction_computable
-
-theorem dominoReduction_correct
-    {S : Scaffold} (hS : IsScaffold S) (c : Code) :
-    TilesPlane (dominoReduction S c) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  rw [dominoReduction]
-  exact (scaffold_reduction_correct hS
-    (fixedDominoReduction c).1 (fixedDominoReduction c).2).trans
-      ((tilesQuarterWithSeed_iff_all_fixedCornerSquares
-        (fixedDominoReduction c).1 (fixedDominoReduction c).2).symm.trans
-          (fixedDominoReduction_correct c))
-
-/-- The proof-neutral reduction certificate supplied by any certified scaffold. -/
-def reduction (S : Scaffold) (hS : IsScaffold S) : DominoProblem.Reduction where
-  tiles := dominoReduction S
-  tiles_computable := dominoReduction_computable S
-  correct := dominoReduction_correct hS
-
-def dominoReductionCode (S : Scaffold) (c : Code) : Nat :=
-  encodeTileSet (dominoReduction S c)
-
-theorem dominoReductionCode_computable (S : Scaffold) :
-    Computable (dominoReductionCode S) := by
-  exact encodeTileSet_computable.comp (dominoReduction_computable S)
-
-theorem dominoReductionCode_correct
-    {S : Scaffold} (hS : IsScaffold S) (c : Code) :
-    TilesPlane (decodeTileSet (dominoReductionCode S c)) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  rw [dominoReductionCode, decodeTileSet_encodeTileSet]
-  exact dominoReduction_correct hS c
-
-/-- Encoded domino undecidability from the fixed-universal-machine route. -/
-theorem encoded_domino_problem_undecidable
-    (S : Scaffold) (hS : IsScaffold S) :
-    DominoProblem.EncodedUndecidable :=
-  (reduction S hS).encodedUndecidable
-
-/-- Unencoded domino undecidability from the fixed-universal-machine route. -/
-theorem domino_problem_undecidable
-    (S : Scaffold) (hS : IsScaffold S) :
-    DominoProblem.Undecidable :=
-  (reduction S hS).undecidable
 
 /-- Pointed full-plane form of the fixed universal TM0 instance. -/
 def pointedFixedDominoReduction (c : Code) : TileSet × WangTile :=

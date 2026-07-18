@@ -4,10 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.SignalCorridors
-import LeanWang.Robinson.Scaffold
 
 /-!
-The concrete scaffold carried by the corrected quarter tiles and Robinson
+Clear-signal predicates for the corrected quarter tiles and Robinson
 obstruction signals.
 
 A site is active exactly when all four signal edges are clear. The test reads
@@ -80,32 +79,6 @@ theorem cornerTile_mem : cornerTile ∈ tileSet :=
 
 @[simp] theorem isClear_cornerTile : isClear cornerTile = true :=
   (isClear_tile_eq_true_iff cornerSite).2 rfl
-
-/-- Concrete corrected-Ollinger/Robinson signal scaffold. -/
-@[irreducible] def scaffold : Scaffold where
-  tiles := tileSet
-  active := isClear
-  corner := cornerTile
-  active_primrec := isClear_primrec
-
-@[simp] theorem scaffold_tiles : scaffold.tiles = tileSet := by
-  unfold scaffold
-  rfl
-
-@[simp] theorem scaffold_active : scaffold.active = isClear := by
-  unfold scaffold
-  rfl
-
-@[simp] theorem scaffold_corner : scaffold.corner = cornerTile := by
-  unfold scaffold
-  rfl
-
-theorem scaffold_corner_mem : scaffold.corner ∈ scaffold.tiles :=
-  by simpa only [scaffold_corner, scaffold_tiles] using cornerTile_mem
-
-@[simp] theorem scaffold_corner_active :
-    scaffold.active scaffold.corner = true :=
-  by simpa only [scaffold_active, scaffold_corner] using isClear_cornerTile
 
 end Signals
 end Closed104
