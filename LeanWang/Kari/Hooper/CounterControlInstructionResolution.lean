@@ -31,52 +31,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem reaches_or_halts_trans
-    {base : Nat} {c : Nat.Partrec.Code}
-    {start middle finish :
-      FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (h₁ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        start middle ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start)
-    (h₂ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        middle finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) middle) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        start finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start := by
-  rcases h₁ with h₁ | h₁
-  · rcases h₂ with h₂ | h₂
-    · exact Or.inl (h₁.trans h₂)
-    · exact Or.inr (FullTM0.HaltsFrom.of_reaches h₁ h₂)
-  · exact Or.inr h₁
-
-private theorem reaches_trans_or_halts
-    {base : Nat} {c : Nat.Partrec.Code}
-    {start middle finish :
-      FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (h₁ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-      start middle)
-    (h₂ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        middle finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) middle) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        start finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start := by
-  exact reaches_or_halts_trans (Or.inl h₁) h₂
-
-private theorem reaches_and_or_halts
-    {base : Nat} {c : Nat.Partrec.Code}
-    {start finish : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    {P : Prop}
-    (h : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          start finish ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start)
-    (hP : P) :
-    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          start finish ∧ P) ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start := by
-  exact h.imp (fun hreach => ⟨hreach, hP⟩) id
-
 /-! ## Resolving cleanup navigation -/
 
 private theorem cleanup_boundary_three_eq_lastGap_two_add_one
@@ -503,9 +457,9 @@ theorem machine_reaches_cleanup_return_or_halts
         CounterControlCleanupSemantics.afterZero,
         CounterControlCleanupSemantics.clearBoundary] using hrun
     · exact Or.inr hhalts
-  exact reaches_or_halts_trans hthree
-    (reaches_or_halts_trans htwo
-      (reaches_or_halts_trans hone hzero))
+  exact FullTM0.ResolvesTo.trans hthree
+    (FullTM0.ResolvesTo.trans htwo
+      (FullTM0.ResolvesTo.trans hone hzero))
 
 /-- Resolving cleanup through the shared return dispatcher. -/
 theorem machine_reaches_cleanup_resume_or_halts
@@ -580,7 +534,7 @@ theorem machine_reaches_cleanup_resume_or_halts
           (CounterControlCleanupSemantics.afterTag spec T) 0⟩ := by
     simpa [hreturnDirection, CounterControlCleanupSemantics.afterTag,
       atLogical_write] using hdispatch
-  exact reaches_or_halts_trans hreturn (Or.inl hdispatch')
+  exact FullTM0.ResolvesTo.trans hreturn (Or.inl hdispatch')
 
 /-- Backed-frame form of resolving cleanup: successful erasure restores the
 suspended outer tape exactly. -/
@@ -688,7 +642,7 @@ theorem machine_reaches_collisionCleanup_or_halts
       (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
     simpa [CounterControlCleanupSemantics.cleanupEntryRule, searchRef,
       CounterControlPlan.resolve] using hentryRunLocal
-  exact reaches_trans_or_halts hentryRun
+  exact FullTM0.ResolvesTo.trans_reaches hentryRun
     (machine_reaches_cleanup_outer_or_halts base c source hback
       hreturnDirection hshort hcommands)
 
@@ -1404,7 +1358,7 @@ theorem machine_reaches_incrementSchedule_or_halts
           Registers.get] <;> omega
       rw [← hhead, hfinish] at hthree
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      exact reaches_or_halts_trans hfour hthree
+      exact FullTM0.ResolvesTo.trans hfour hthree
   | right =>
       let clockTape := incrementTape spec .clock T
       let clockSpec := incrementSpec spec .clock hclockRoom
@@ -1525,8 +1479,8 @@ theorem machine_reaches_incrementSchedule_or_halts
       rw [← hheadFour, hhandoffThree] at hthree
       rw [hfinish] at htwo
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      exact reaches_or_halts_trans hfour
-        (reaches_or_halts_trans hthree htwo)
+      exact FullTM0.ResolvesTo.trans hfour
+        (FullTM0.ResolvesTo.trans hthree htwo)
   | left =>
       let clockTape := incrementTape spec .clock T
       let clockSpec := incrementSpec spec .clock hclockRoom
@@ -1700,9 +1654,9 @@ theorem machine_reaches_incrementSchedule_or_halts
       rw [hhandoffTwo] at htwo
       rw [hfinish] at hone
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree htwo
-      exact reaches_or_halts_trans hfour
-        (reaches_or_halts_trans hthree
-          (reaches_or_halts_trans htwo hone))
+      exact FullTM0.ResolvesTo.trans hfour
+        (FullTM0.ResolvesTo.trans hthree
+          (FullTM0.ResolvesTo.trans htwo hone))
 
 /-! ## Increment handoff and recovery -/
 
@@ -1890,9 +1844,9 @@ theorem machine_reaches_incrementInstruction_or_halts
               (boundaryOffset (spec.registers.increment register)
                 (MarkerSchedule.decrementStartBoundary register))⟩ := by
     simpa [nextSpec, incrementSpec, updateSpec] using hrecovery
-  have hrun := reaches_or_halts_trans hvalidation'
-    (reaches_or_halts_trans hschedule
-      (reaches_or_halts_trans (Or.inl hhandoff) hrecovery'))
+  have hrun := FullTM0.ResolvesTo.trans hvalidation'
+    (FullTM0.ResolvesTo.trans hschedule
+      (FullTM0.ResolvesTo.trans (Or.inl hhandoff) hrecovery'))
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨hrun, incrementTape_backedBy hback register hroom⟩
   · exact Or.inr hhalts
@@ -1944,7 +1898,7 @@ theorem machine_reaches_incrementCollisionInstruction_or_halts
           ⟨logicalState base c spec.growth source,
             atLogical spec.growth T (layoutEnd spec.registers)⟩ := by
     simpa [bodyEntry, searchRef, CounterControlPlan.resolve] using hvalidation
-  exact reaches_or_halts_trans hvalidation' (Or.inl hcollisionReach)
+  exact FullTM0.ResolvesTo.trans hvalidation' (Or.inl hcollisionReach)
 
 /-- Complete collision branch of an increment instruction.  Successful
 cleanup restores the suspended outer tape at its exact resume state; any
@@ -1989,7 +1943,7 @@ theorem machine_reaches_incrementCollisionCleanup_or_halts
     simp [commandsForRule, incrementCommands, hraw]
   have hcleanup := machine_reaches_collisionCleanup_or_halts base c source
     hback hreturnDirection hcollision hshort hentry hcleanupCommands
-  exact reaches_or_halts_trans hcollisionEntry hcleanup
+  exact FullTM0.ResolvesTo.trans hcollisionEntry hcleanup
 
 /-! ## Conditional-decrement routing and zero branch -/
 
@@ -2286,9 +2240,9 @@ theorem machine_reaches_decrementZeroInstruction_or_halts
     register hrule T (by rw [atLogical_read]; exact h.boundary _)
   have hzeroRoute := machine_reaches_decrementZeroRecovery_or_halts base c
     source ifZero ifPositive register hrule h hzero hshort
-  have hrun := reaches_or_halts_trans hvalidation
-    (reaches_or_halts_trans hroute
-      (reaches_or_halts_trans (Or.inl htest) hzeroRoute))
+  have hrun := FullTM0.ResolvesTo.trans hvalidation
+    (FullTM0.ResolvesTo.trans hroute
+      (FullTM0.ResolvesTo.trans (Or.inl htest) hzeroRoute))
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨hrun, hback⟩
   · exact Or.inr hhalts
@@ -2504,7 +2458,7 @@ theorem machine_reaches_decrementSchedule_or_halts
           change layoutEnd spec.registers - 1 ≤ layoutEnd next
           omega)
         (by intro _; rfl) hmove hraw
-      apply reaches_and_or_halts ?_ hdesired
+      apply FullTM0.ResolvesTo.and_right ?_ hdesired
       simpa [next, decrementTape, clearOldLayoutEnd,
         MarkerSchedule.decrementStartBoundary,
         boundaryOffset_four] using hrun
@@ -2670,9 +2624,9 @@ theorem machine_reaches_decrementSchedule_or_halts
       rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
         layoutEnd clockRegs by rfl, hclockEnd] at hfour
       simp only [searchRef, CounterControlPlan.resolve] at hthree
-      apply reaches_and_or_halts ?_ hdesired
+      apply FullTM0.ResolvesTo.and_right ?_ hdesired
       simpa only [MarkerSchedule.decrementStartBoundary, hhead'] using
-        reaches_or_halts_trans hthree hfour
+        FullTM0.ResolvesTo.trans hthree hfour
   | right =>
       have hp : 0 < spec.registers.right := by
         simpa [Registers.get] using hpositive
@@ -2915,9 +2869,9 @@ theorem machine_reaches_decrementSchedule_or_halts
       rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
         layoutEnd clockRegs by rfl, hclockEnd] at hfour
       simp only [searchRef, CounterControlPlan.resolve] at htwo hthree
-      apply reaches_and_or_halts ?_ hdesired
+      apply FullTM0.ResolvesTo.and_right ?_ hdesired
       simpa only [MarkerSchedule.decrementStartBoundary, hheadTwo'] using
-        reaches_or_halts_trans htwo (reaches_or_halts_trans hthree hfour)
+        FullTM0.ResolvesTo.trans htwo (FullTM0.ResolvesTo.trans hthree hfour)
   | left =>
       have hp : 0 < spec.registers.left := by
         simpa [Registers.get] using hpositive
@@ -3252,11 +3206,11 @@ theorem machine_reaches_decrementSchedule_or_halts
       rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
         layoutEnd clockRegs by rfl, hclockEnd] at hfour
       simp only [searchRef, CounterControlPlan.resolve] at hone htwo hthree
-      apply reaches_and_or_halts ?_ hdesired
+      apply FullTM0.ResolvesTo.and_right ?_ hdesired
       simpa only [MarkerSchedule.decrementStartBoundary, hheadOne'] using
-        reaches_or_halts_trans hone
-          (reaches_or_halts_trans htwo
-            (reaches_or_halts_trans hthree hfour))
+        FullTM0.ResolvesTo.trans hone
+          (FullTM0.ResolvesTo.trans htwo
+            (FullTM0.ResolvesTo.trans hthree hfour))
 
 
 
@@ -3375,11 +3329,11 @@ theorem machine_reaches_decrementPositiveInstruction_or_halts
     rcases hschedule with hschedule | hhalts
     · exact Or.inl (hschedule.1.trans hfinish)
     · exact Or.inr hhalts
-  have hrun := reaches_or_halts_trans hvalidation
-    (reaches_or_halts_trans hroute
-      (reaches_or_halts_trans (Or.inl htest)
-        (reaches_or_halts_trans (Or.inl hhandoff) hscheduleFinish)))
-  exact reaches_and_or_halts hrun
+  have hrun := FullTM0.ResolvesTo.trans hvalidation
+    (FullTM0.ResolvesTo.trans hroute
+      (FullTM0.ResolvesTo.trans (Or.inl htest)
+        (FullTM0.ResolvesTo.trans (Or.inl hhandoff) hscheduleFinish)))
+  exact FullTM0.ResolvesTo.and_right hrun
     (decrementTape_backedBy hback register hpositive)
 
 /-! ## Abstract-step interface -/
@@ -3553,7 +3507,7 @@ theorem oneStepResolves
     have hcleanup := machine_reaches_collisionCleanup_or_halts base c
       current.state hback hreturnDirection hcollision
       (by simpa [spec] using hshort) hentry hcleanupCommands
-    have hcombined := reaches_or_halts_trans (Or.inl hcollisionReach)
+    have hcombined := FullTM0.ResolvesTo.trans (Or.inl hcollisionReach)
       hcleanup
     rcases hcombined with hboundaryReach | hhalts
     · let boundary : FullTM0.Cfg (Symbol numTags) FiniteTM0.State :=

@@ -123,25 +123,6 @@ def prefixSpec (registers : Registers) (growth : Turing.Dir)
   outerTarget := target
   core_before_target := hcore
 
-private theorem reaches_or_halts_trans
-    {base : Nat} {c : Nat.Partrec.Code}
-    {start middle finish :
-      FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (h₁ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        start middle ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start)
-    (h₂ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        middle finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) middle) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        start finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start := by
-  rcases h₁ with h₁ | h₁
-  · rcases h₂ with h₂ | h₂
-    · exact Or.inl (h₁.trans h₂)
-    · exact Or.inr (FullTM0.HaltsFrom.of_reaches h₁ h₂)
-  · exact Or.inr h₁
-
 /-! ## Target-free primitive boundary updates -/
 
 /-- Moving one represented boundary right and rewriting its old and new
@@ -660,7 +641,7 @@ theorem machine_reaches_incrementSchedule_or_halts_of_prefix
           Registers.get] <;> omega
       rw [← hhead, hfinish] at hthree
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      have hrun := reaches_or_halts_trans
+      have hrun := FullTM0.ResolvesTo.trans
         (hfour.imp (fun hsuccess => hsuccess.1) id)
         (hthree.imp (fun hsuccess => hsuccess.1) id)
       rcases hrun with hrun | hhalts
@@ -776,9 +757,9 @@ theorem machine_reaches_incrementSchedule_or_halts_of_prefix
       rw [← hheadFour, hhandoffThree] at hthree
       rw [hfinish] at htwo
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      have hrun := reaches_or_halts_trans
+      have hrun := FullTM0.ResolvesTo.trans
         (hfour.imp (fun hsuccess => hsuccess.1) id)
-        (reaches_or_halts_trans
+        (FullTM0.ResolvesTo.trans
           (hthree.imp (fun hsuccess => hsuccess.1) id)
           (htwo.imp (fun hsuccess => hsuccess.1) id))
       rcases hrun with hrun | hhalts
@@ -941,11 +922,11 @@ theorem machine_reaches_incrementSchedule_or_halts_of_prefix
       rw [hhandoffTwo] at htwo
       rw [hfinish] at hone
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree htwo
-      have hrun := reaches_or_halts_trans
+      have hrun := FullTM0.ResolvesTo.trans
         (hfour.imp (fun hsuccess => hsuccess.1) id)
-        (reaches_or_halts_trans
+        (FullTM0.ResolvesTo.trans
           (hthree.imp (fun hsuccess => hsuccess.1) id)
-          (reaches_or_halts_trans
+          (FullTM0.ResolvesTo.trans
             (htwo.imp (fun hsuccess => hsuccess.1) id)
             (hone.imp (fun hsuccess => hsuccess.1) id)))
       rcases hrun with hrun | hhalts
@@ -1173,8 +1154,8 @@ theorem machine_reaches_incrementBody_or_halts_of_prefix
   have hnext := incrementCoreTape_preserves_prefix h register hroom
   have hrecovery := machine_reaches_incrementRecovery_or_halts_of_core
     base c source next register hrule hnext.toCoreRepresents
-  have hrun := reaches_or_halts_trans hschedule'
-    (reaches_or_halts_trans (Or.inl hhandoff) hrecovery)
+  have hrun := FullTM0.ResolvesTo.trans hschedule'
+    (FullTM0.ResolvesTo.trans (Or.inl hhandoff) hrecovery)
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨hrun, hnext⟩
   · exact Or.inr hhalts
@@ -1871,7 +1852,7 @@ theorem machine_reaches_decrementTempSchedule_or_halts_of_prefix
   rw [show boundaryOffset clockRegs (4 : Fin 5) =
     layoutEnd clockRegs by rfl, hclockEnd] at hfour
   simp only [searchRef, CounterControlPlan.resolve] at hthree
-  have hrun := reaches_or_halts_trans
+  have hrun := FullTM0.ResolvesTo.trans
     (hthree.imp (fun hsuccess => hsuccess.1) id)
     (hfour.imp (fun hsuccess => hsuccess.1) id)
   rcases hrun with hrun | hhalts
@@ -2061,9 +2042,9 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_prefix
   rw [show boundaryOffset clockRegs (4 : Fin 5) =
     layoutEnd clockRegs by rfl, hclockEnd] at hfour
   simp only [searchRef, CounterControlPlan.resolve] at htwo hthree
-  have hrun := reaches_or_halts_trans
+  have hrun := FullTM0.ResolvesTo.trans
     (htwo.imp (fun hsuccess => hsuccess.1) id)
-    (reaches_or_halts_trans
+    (FullTM0.ResolvesTo.trans
       (hthree.imp (fun hsuccess => hsuccess.1) id)
       (hfour.imp (fun hsuccess => hsuccess.1) id))
   rcases hrun with hrun | hhalts
@@ -2312,11 +2293,11 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_prefix
   rw [show boundaryOffset clockRegs (4 : Fin 5) =
     layoutEnd clockRegs by rfl, hclockEnd] at hfour
   simp only [searchRef, CounterControlPlan.resolve] at hone htwo hthree
-  have hrun := reaches_or_halts_trans
+  have hrun := FullTM0.ResolvesTo.trans
     (hone.imp (fun hsuccess => hsuccess.1) id)
-    (reaches_or_halts_trans
+    (FullTM0.ResolvesTo.trans
       (htwo.imp (fun hsuccess => hsuccess.1) id)
-      (reaches_or_halts_trans
+      (FullTM0.ResolvesTo.trans
         (hthree.imp (fun hsuccess => hsuccess.1) id)
         (hfour.imp (fun hsuccess => hsuccess.1) id)))
   rcases hrun with hrun | hhalts
@@ -2429,8 +2410,8 @@ theorem machine_reaches_decrementZeroBody_or_halts_of_prefix
     machine_reaches_decrementZeroRecovery_or_halts_of_core
       base c growth source ifZero ifPositive register hrule
       h.toCoreRepresents hzero
-  have hrun := reaches_or_halts_trans hroute
-    (reaches_or_halts_trans (Or.inl htest') hzeroRoute)
+  have hrun := FullTM0.ResolvesTo.trans hroute
+    (FullTM0.ResolvesTo.trans (Or.inl htest') hzeroRoute)
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨hrun, h⟩
   · exact Or.inr hhalts
@@ -2513,9 +2494,9 @@ theorem machine_reaches_decrementPositiveBody_or_halts_of_prefix
     rcases hschedule with hschedule | hhalts
     · exact Or.inl (hschedule.1.trans hfinish)
     · exact Or.inr hhalts
-  have hrun := reaches_or_halts_trans hroute
-    (reaches_or_halts_trans (Or.inl htest')
-      (reaches_or_halts_trans (Or.inl hhandoff) hscheduleFinish))
+  have hrun := FullTM0.ResolvesTo.trans hroute
+    (FullTM0.ResolvesTo.trans (Or.inl htest')
+      (FullTM0.ResolvesTo.trans (Or.inl hhandoff) hscheduleFinish))
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨hrun,
       decrementCoreTape_preserves_prefix h register hpositive⟩
@@ -2752,9 +2733,9 @@ theorem machine_reaches_cleanup_return_or_halts_of_prefix
       simpa [rawZero, searchRef, CounterControlPlan.resolve,
         afterZero, clearBoundary, spec, prefixSpec] using hrun
     · exact Or.inr hhalts
-  exact reaches_or_halts_trans hthree
-    (reaches_or_halts_trans htwo
-      (reaches_or_halts_trans hone hzero))
+  exact FullTM0.ResolvesTo.trans hthree
+    (FullTM0.ResolvesTo.trans htwo
+      (FullTM0.ResolvesTo.trans hone hzero))
 
 /-- From the exact outward-collision endpoint, test the nonblank target,
 step back onto erased boundary `4`, and perform exact tag-free cleanup. -/
@@ -2813,7 +2794,7 @@ theorem machine_reaches_collisionReturn_or_halts_of_prefix
       hentryRunLocal
   have hcleanup := machine_reaches_cleanup_return_or_halts_of_prefix
     (target := target) base c source h.toCorePrefixRepresents hcommands
-  exact reaches_or_halts_trans (Or.inl hentryRun) hcleanup
+  exact FullTM0.ResolvesTo.trans (Or.inl hentryRun) hcleanup
 
 /-- Complete body-level collision semantics for a finite tag-free prefix.
 The successful endpoint retains the exact `afterZero` tape needed by global
@@ -2877,7 +2858,7 @@ theorem machine_reaches_incrementCollisionBodyReturn_or_halts_of_prefix
     simp [commandsForRule, incrementCommands, hraw']
   have hcleanup := machine_reaches_collisionReturn_or_halts_of_prefix
     base c source h hcollision hentry hcleanupCommands
-  exact reaches_or_halts_trans (Or.inl hcollisionRun') hcleanup
+  exact FullTM0.ResolvesTo.trans (Or.inl hcollisionRun') hcleanup
 
 /-! ## Uniform post-validation body interface -/
 

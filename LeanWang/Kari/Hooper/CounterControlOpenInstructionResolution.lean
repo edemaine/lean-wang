@@ -54,25 +54,6 @@ def openSpec (registers : Registers) (growth : Turing.Dir) : Spec numTags where
   outerTarget := .anyTag
   core_before_target := by omega
 
-private theorem reaches_or_halts_trans
-    {base : Nat} {c : Nat.Partrec.Code}
-    {start middle finish :
-      FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (h₁ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        start middle ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start)
-    (h₂ : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        middle finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) middle) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        start finish ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) start := by
-  rcases h₁ with h₁ | h₁
-  · rcases h₂ with h₂ | h₂
-    · exact Or.inl (h₁.trans h₂)
-    · exact Or.inr (FullTM0.HaltsFrom.of_reaches h₁ h₂)
-  · exact Or.inr h₁
-
 /-! ## Target-free primitive boundary updates -/
 
 /-- Moving one represented boundary right and rewriting its old and new
@@ -918,7 +899,7 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
           Registers.get] <;> omega
       rw [← hhead, hfinish] at hthree
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      have hrun := reaches_or_halts_trans
+      have hrun := FullTM0.ResolvesTo.trans
         (hfour.imp (fun hsuccess => hsuccess.1) id)
         (hthree.imp (fun hsuccess => hsuccess.1) id)
       rcases hrun with hrun | hhalts
@@ -1026,9 +1007,9 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
       rw [← hheadFour, hhandoffThree] at hthree
       rw [hfinish] at htwo
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      have hrun := reaches_or_halts_trans
+      have hrun := FullTM0.ResolvesTo.trans
         (hfour.imp (fun hsuccess => hsuccess.1) id)
-        (reaches_or_halts_trans
+        (FullTM0.ResolvesTo.trans
           (hthree.imp (fun hsuccess => hsuccess.1) id)
           (htwo.imp (fun hsuccess => hsuccess.1) id))
       rcases hrun with hrun | hhalts
@@ -1179,11 +1160,11 @@ theorem machine_reaches_incrementSchedule_or_halts_of_open
       rw [hhandoffTwo] at htwo
       rw [hfinish] at hone
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree htwo
-      have hrun := reaches_or_halts_trans
+      have hrun := FullTM0.ResolvesTo.trans
         (hfour.imp (fun hsuccess => hsuccess.1) id)
-        (reaches_or_halts_trans
+        (FullTM0.ResolvesTo.trans
           (hthree.imp (fun hsuccess => hsuccess.1) id)
-          (reaches_or_halts_trans
+          (FullTM0.ResolvesTo.trans
             (htwo.imp (fun hsuccess => hsuccess.1) id)
             (hone.imp (fun hsuccess => hsuccess.1) id)))
       rcases hrun with hrun | hhalts
@@ -1512,9 +1493,9 @@ theorem machine_reaches_incrementInstruction_or_halts_of_open
             atLogical growth T (layoutEnd registers)⟩ := by
     simpa [bodyEntry, searchRef, CounterControlPlan.resolve] using hvalidation
   have hschedule' := hschedule.imp (fun hsuccess => hsuccess.1) id
-  have hrun := reaches_or_halts_trans hvalidation'
-    (reaches_or_halts_trans hschedule'
-      (reaches_or_halts_trans (Or.inl hhandoff) hrecovery))
+  have hrun := FullTM0.ResolvesTo.trans hvalidation'
+    (FullTM0.ResolvesTo.trans hschedule'
+      (FullTM0.ResolvesTo.trans (Or.inl hhandoff) hrecovery))
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨hrun, hnext⟩
   · exact Or.inr hhalts
@@ -1979,7 +1960,7 @@ theorem machine_reaches_decrementTempSchedule_or_halts_of_open
   rw [show boundaryOffset clockRegs (4 : Fin 5) =
     layoutEnd clockRegs by rfl, hclockEnd] at hfour
   simp only [searchRef, CounterControlPlan.resolve] at hthree
-  have hrun := reaches_or_halts_trans
+  have hrun := FullTM0.ResolvesTo.trans
     (hthree.imp (fun hsuccess => hsuccess.1) id)
     (hfour.imp (fun hsuccess => hsuccess.1) id)
   rcases hrun with hrun | hhalts
@@ -2171,9 +2152,9 @@ theorem machine_reaches_decrementRightSchedule_or_halts_of_open
   rw [show boundaryOffset clockRegs (4 : Fin 5) =
     layoutEnd clockRegs by rfl, hclockEnd] at hfour
   simp only [searchRef, CounterControlPlan.resolve] at htwo hthree
-  have hrun := reaches_or_halts_trans
+  have hrun := FullTM0.ResolvesTo.trans
     (htwo.imp (fun hsuccess => hsuccess.1) id)
-    (reaches_or_halts_trans
+    (FullTM0.ResolvesTo.trans
       (hthree.imp (fun hsuccess => hsuccess.1) id)
       (hfour.imp (fun hsuccess => hsuccess.1) id))
   rcases hrun with hrun | hhalts
@@ -2425,11 +2406,11 @@ theorem machine_reaches_decrementLeftSchedule_or_halts_of_open
   rw [show boundaryOffset clockRegs (4 : Fin 5) =
     layoutEnd clockRegs by rfl, hclockEnd] at hfour
   simp only [searchRef, CounterControlPlan.resolve] at hone htwo hthree
-  have hrun := reaches_or_halts_trans
+  have hrun := FullTM0.ResolvesTo.trans
     (hone.imp (fun hsuccess => hsuccess.1) id)
-    (reaches_or_halts_trans
+    (FullTM0.ResolvesTo.trans
       (htwo.imp (fun hsuccess => hsuccess.1) id)
-      (reaches_or_halts_trans
+      (FullTM0.ResolvesTo.trans
         (hthree.imp (fun hsuccess => hsuccess.1) id)
         (hfour.imp (fun hsuccess => hsuccess.1) id)))
   rcases hrun with hrun | hhalts
@@ -3016,9 +2997,9 @@ theorem machine_reaches_decrementZeroInstruction_or_halts_of_core
   have hzeroRoute :=
     machine_reaches_decrementZeroRecovery_or_halts_of_core
       base c growth source ifZero ifPositive register hrule h hzero
-  exact reaches_or_halts_trans hvalidation
-    (reaches_or_halts_trans hroute
-      (reaches_or_halts_trans (Or.inl htest') hzeroRoute))
+  exact FullTM0.ResolvesTo.trans hvalidation
+    (FullTM0.ResolvesTo.trans hroute
+      (FullTM0.ResolvesTo.trans (Or.inl htest') hzeroRoute))
 
 /-- Exact target-free positive branch of a compiled conditional decrement. -/
 theorem machine_reaches_decrementPositiveInstruction_or_halts_of_open
@@ -3093,10 +3074,10 @@ theorem machine_reaches_decrementPositiveInstruction_or_halts_of_open
     rcases hschedule with hschedule | hhalts
     · exact Or.inl (hschedule.1.trans hfinish)
     · exact Or.inr hhalts
-  have hrun := reaches_or_halts_trans hvalidation
-    (reaches_or_halts_trans hroute
-      (reaches_or_halts_trans (Or.inl htest')
-        (reaches_or_halts_trans (Or.inl hhandoff) hscheduleFinish)))
+  have hrun := FullTM0.ResolvesTo.trans hvalidation
+    (FullTM0.ResolvesTo.trans hroute
+      (FullTM0.ResolvesTo.trans (Or.inl htest')
+        (FullTM0.ResolvesTo.trans (Or.inl hhandoff) hscheduleFinish)))
   rcases hrun with hrun | hhalts
   · exact Or.inl ⟨hrun,
       decrementCoreTape_preserves_open h register hpositive⟩

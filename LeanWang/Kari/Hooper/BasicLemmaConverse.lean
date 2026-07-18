@@ -82,6 +82,57 @@ theorem immortalFrom_iff_not (M : Turing.TM0.Machine Γ Λ)
     · exact himmortal
 
 end HaltsFrom
+
+/-- A finite execution either reaches the advertised continuation or exposes
+a terminal configuration reachable from its starting point.  This is the
+common outcome type of the converse bounded-search proofs. -/
+abbrev ResolvesTo (M : Turing.TM0.Machine Γ Λ)
+    (start finish : Cfg Γ Λ) : Prop :=
+  Reaches M start finish ∨ HaltsFrom M start
+
+namespace ResolvesTo
+
+omit [Inhabited Γ] in
+/-- An ordinary finite execution is a resolving execution. -/
+theorem of_reaches {M : Turing.TM0.Machine Γ Λ} {start finish : Cfg Γ Λ}
+    (h : Reaches M start finish) : ResolvesTo M start finish :=
+  Or.inl h
+
+omit [Inhabited Γ] in
+/-- A terminal outcome resolves toward every advertised continuation. -/
+theorem of_halts {M : Turing.TM0.Machine Γ Λ} {start finish : Cfg Γ Λ}
+    (h : HaltsFrom M start) : ResolvesTo M start finish :=
+  Or.inr h
+
+omit [Inhabited Γ] in
+/-- Resolving executions compose like ordinary reachability. -/
+theorem trans {M : Turing.TM0.Machine Γ Λ}
+    {start middle finish : Cfg Γ Λ}
+    (h₁ : ResolvesTo M start middle) (h₂ : ResolvesTo M middle finish) :
+    ResolvesTo M start finish := by
+  rcases h₁ with h₁ | h₁
+  · rcases h₂ with h₂ | h₂
+    · exact Or.inl (h₁.trans h₂)
+    · exact Or.inr (HaltsFrom.of_reaches h₁ h₂)
+  · exact Or.inr h₁
+
+omit [Inhabited Γ] in
+/-- Prepending an ordinary finite execution to a resolving execution. -/
+theorem trans_reaches {M : Turing.TM0.Machine Γ Λ}
+    {start middle finish : Cfg Γ Λ}
+    (h₁ : Reaches M start middle) (h₂ : ResolvesTo M middle finish) :
+    ResolvesTo M start finish :=
+  trans (of_reaches h₁) h₂
+
+omit [Inhabited Γ] in
+/-- Attach stable data to the successful side of a resolving execution. -/
+theorem and_right {M : Turing.TM0.Machine Γ Λ}
+    {start finish : Cfg Γ Λ} {P : Prop}
+    (h : ResolvesTo M start finish) (hP : P) :
+    (Reaches M start finish ∧ P) ∨ HaltsFrom M start :=
+  h.imp (fun hreach => ⟨hreach, hP⟩) id
+
+end ResolvesTo
 end FullTM0
 
 namespace SearchSystem
@@ -95,8 +146,7 @@ terminal configuration of the whole machine. -/
 def Resolves (S : SearchSystem Γ Λ Search) (k : Nat) : Prop :=
   ∀ (s : Search) (T : FullTM0.Tape Γ),
     SearchGap S.isBlank (S.isMark s) T (S.direction s) k →
-      FullTM0.Reaches S.machine (S.startCfg s T) (S.successCfg s T k) ∨
-        FullTM0.HaltsFrom S.machine (S.startCfg s T)
+      FullTM0.ResolvesTo S.machine (S.startCfg s T) (S.successCfg s T k)
 
 end SearchSystem
 

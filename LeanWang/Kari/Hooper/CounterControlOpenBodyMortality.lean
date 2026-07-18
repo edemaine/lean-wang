@@ -34,23 +34,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem reaches_or_halts_trans
-    (base : Nat) (c : Nat.Partrec.Code)
-    {first middle last : FullTM0.Cfg (Symbol numTags) FiniteTM0.State}
-    (hfirst : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        first middle ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) first)
-    (hsecond : FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        middle last ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) middle) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c) first last ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c) first := by
-  rcases hfirst with hreach | hhalts
-  · rcases hsecond with htail | hhalts
-    · exact Or.inl (hreach.trans htail)
-    · exact Or.inr (FullTM0.HaltsFrom.of_reaches hreach hhalts)
-  · exact Or.inr hhalts
-
 /-- Under source mortality, an exact post-validation instruction body on an
 open tag-free core cannot be immortal. -/
 theorem haltsFrom_body_of_coreOpen
@@ -78,9 +61,9 @@ theorem haltsFrom_body_of_coreOpen
       have hnext := incrementCoreTape_preserves_open hopen register
       have hrecovery := machine_reaches_incrementRecovery_or_halts_of_core
         base c source next register hrule hnext.toCoreRepresents
-      have hrun := reaches_or_halts_trans base c
+      have hrun := FullTM0.ResolvesTo.trans
         (hschedule.imp (fun hsuccess => hsuccess.1) id)
-        (reaches_or_halts_trans base c (Or.inl hhandoff) hrecovery)
+        (FullTM0.ResolvesTo.trans (Or.inl hhandoff) hrecovery)
       rcases hrun with hreach | hhalts
       · apply FullTM0.HaltsFrom.of_reaches (by
           simpa [bodyCfg, bodyEntry, searchRef,
@@ -123,8 +106,8 @@ theorem haltsFrom_body_of_coreOpen
           machine_reaches_decrementZeroRecovery_or_halts_of_core
             base c growth source ifZero ifPositive register hrule
             hopen.toCoreRepresents hzero
-        have hrun := reaches_or_halts_trans base c hroute
-          (reaches_or_halts_trans base c (Or.inl htest') hzeroRoute)
+        have hrun := FullTM0.ResolvesTo.trans hroute
+          (FullTM0.ResolvesTo.trans (Or.inl htest') hzeroRoute)
         rcases hrun with hreach | hhalts
         · apply FullTM0.HaltsFrom.of_reaches (by
             simpa [bodyCfg] using hreach)
@@ -168,9 +151,9 @@ theorem haltsFrom_body_of_coreOpen
           rcases hschedule with hschedule | hhalts
           · exact Or.inl (hschedule.1.trans hfinish)
           · exact Or.inr hhalts
-        have hrun := reaches_or_halts_trans base c hroute
-          (reaches_or_halts_trans base c (Or.inl htest')
-            (reaches_or_halts_trans base c (Or.inl hhandoff)
+        have hrun := FullTM0.ResolvesTo.trans hroute
+          (FullTM0.ResolvesTo.trans (Or.inl htest')
+            (FullTM0.ResolvesTo.trans (Or.inl hhandoff)
               hscheduleFinish))
         rcases hrun with hreach | hhalts
         · have hnext := decrementCoreTape_preserves_open hopen register
