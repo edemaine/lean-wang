@@ -3,7 +3,10 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
-import LeanWang.Kari.Hooper.CounterControlCleanupSuffixProgress
+import LeanWang.Kari.Hooper.CounterControlCleanupRoute
+import LeanWang.Kari.Hooper.CounterControlCleanupEraseProgress
+import LeanWang.Kari.Hooper.CounterControlGeneratedSearchGap
+import LeanWang.Kari.Hooper.CounterControlCleanupSuffixGeometry
 import LeanWang.Kari.Hooper.CounterControlGuardedParentContinuation
 import LeanWang.Kari.Hooper.CounterControlGuardedResume
 import LeanWang.Kari.Hooper.CounterControlParentContinuation
