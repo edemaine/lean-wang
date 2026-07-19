@@ -629,6 +629,129 @@ structure IncrementEnvelope (growth : Turing.Dir) (limit : Nat) where
           ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
             atLogical growth T (lastGapOffset current i)⟩
 
+/-- Fold the non-clock tail of an increment prefix under an arbitrary open
+increment envelope. -/
+private theorem incrementEnvelopeTail
+    (base : Nat) (c : Nat.Partrec.Code) (source searchSlot : Nat)
+    {growth : Turing.Dir} {limit : Nat}
+    (E : IncrementEnvelope growth limit)
+    {current next target : Register} {tail : List Register}
+    (hnext : IncrementStageNext current next)
+    (hrest : IncrementStageChain next target tail)
+    {registers : Registers} {T : FullTM0.Tape (Symbol numTags)}
+    (h : E.Represents registers T)
+    (hroom : layoutEnd (registers.increment target) < limit)
+    (hcommands : ∀ raw,
+      raw ∈ incrementShiftCommandsAux growth source searchSlot false
+        ((next :: tail).map
+          (fun stage => (incrementStageIndex stage).castSucc)) →
+      raw ∈ rawCommands) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, source, searchSlot⟩,
+          atLogical growth (incrementCoreTape registers growth current T)
+            (lastGapOffset (registers.increment current)
+              (incrementStageIndex next))⟩
+        ⟨resolve base c (directRef growth source bodyDirectBase),
+          atLogical growth (incrementCoreTape registers growth target T)
+            (boundaryOffset registers
+              (MarkerSchedule.decrementStartBoundary target))⟩ ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c ⟨growth, source, searchSlot⟩,
+          atLogical growth (incrementCoreTape registers growth current T)
+            (lastGapOffset (registers.increment current)
+              (incrementStageIndex next))⟩ := by
+  induction hrest generalizing current searchSlot with
+  | done stage =>
+      have hcurrentRoom : layoutEnd (registers.increment current) < limit := by
+        simpa only [layoutEnd_increment] using hroom
+      let currentRegisters := registers.increment current
+      let currentTape := incrementCoreTape registers growth current T
+      have hcurrent : E.Represents currentRegisters currentTape := by
+        simpa [currentRegisters, currentTape] using
+          E.increment current h hcurrentRoom
+      have hraw : RawCommand.markerShift
+          ⟨growth, source, searchSlot⟩
+          (incrementStageIndex stage).castSucc .left .right
+          (directRef growth source bodyDirectBase) (some .left) none ∈
+            rawCommands := by
+        apply hcommands
+        simp [incrementShiftCommandsAux]
+      have hrun := E.internal (next := registers.increment stage) base c
+        source searchSlot (directRef growth source bodyDirectBase) none
+        hcurrent (incrementStageIndex stage)
+        (by
+          simpa [currentRegisters] using
+            incrementStage_positive registers hnext)
+        (AnchoredCounterGeometry.registerValue_lt_of_layoutEnd_lt
+          currentRegisters (incrementStageIndex stage)
+          (E.core_before_limit hcurrent))
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by
+          simpa [currentRegisters] using
+            incrementStage_move registers hnext)
+        hraw
+      have htape : installCore (registers.increment stage) growth currentTape =
+          incrementCoreTape registers growth stage T := by
+        simpa [currentRegisters, currentTape] using
+          installCore_incrementCoreTape_eq registers growth current stage T
+      rw [htape, incrementStage_finish registers
+        (current := current) (next := stage) hnext] at hrun
+      exact hrun.imp (fun hsuccess => hsuccess.1) id
+  | @cons next after target tail hafter htail ih =>
+      have hcurrentRoom : layoutEnd (registers.increment current) < limit := by
+        simpa only [layoutEnd_increment] using hroom
+      let currentRegisters := registers.increment current
+      let currentTape := incrementCoreTape registers growth current T
+      have hcurrent : E.Represents currentRegisters currentTape := by
+        simpa [currentRegisters, currentTape] using
+          E.increment current h hcurrentRoom
+      have hraw : RawCommand.markerShift
+          ⟨growth, source, searchSlot⟩
+          (incrementStageIndex next).castSucc .left .right
+          (searchRef growth source (searchSlot + 1)) (some .left) none ∈
+            rawCommands := by
+        apply hcommands
+        simp [incrementShiftCommandsAux]
+      have hrun := E.internal (next := registers.increment next) base c
+        source searchSlot (searchRef growth source (searchSlot + 1)) none
+        hcurrent (incrementStageIndex next)
+        (by
+          simpa [currentRegisters] using
+            incrementStage_positive registers hnext)
+        (AnchoredCounterGeometry.registerValue_lt_of_layoutEnd_lt
+          currentRegisters (incrementStageIndex next)
+          (E.core_before_limit hcurrent))
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by
+          simpa [currentRegisters] using
+            incrementStage_move registers hnext)
+        hraw
+      have htape : installCore (registers.increment next) growth currentTape =
+          incrementCoreTape registers growth next T := by
+        simpa [currentRegisters, currentTape] using
+          installCore_incrementCoreTape_eq registers growth current next T
+      rw [htape, incrementStage_head registers
+        (current := current) (next := next) (after := after)
+        hnext hafter] at hrun
+      simp only [searchRef, CounterControlPlan.resolve] at hrun
+      have hnextCommands : ∀ raw,
+          raw ∈ incrementShiftCommandsAux growth source
+            (searchSlot + 1) false
+            ((after :: tail).map
+              (fun stage => (incrementStageIndex stage).castSucc)) →
+          raw ∈ rawCommands := by
+        intro raw hraw'
+        apply hcommands raw
+        simpa [incrementShiftCommandsAux] using List.mem_cons_of_mem _ hraw'
+      have htailRun := ih (current := next) (searchSlot := searchSlot + 1)
+        hafter hroom hnextCommands
+      exact FullTM0.ResolvesTo.trans
+        (hrun.imp (fun hsuccess => hsuccess.1) id) htailRun
+
 /-- Every collision-free increment schedule has the same controller trace
 under any increment envelope. -/
 theorem machine_reaches_incrementSchedule_or_halts_of_envelope
@@ -653,12 +776,25 @@ theorem machine_reaches_incrementSchedule_or_halts_of_envelope
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
           atLogical growth T (layoutEnd registers)⟩ := by
-  have hfinal (r : Register) :
-      E.Represents (registers.increment r)
-        (incrementCoreTape registers growth r T) :=
-    E.increment r h (by simpa [layoutEnd_increment] using hroom)
-  cases register with
-  | clock =>
+  have hfinal (stage : Register) :
+      E.Represents (registers.increment stage)
+        (incrementCoreTape registers growth stage T) :=
+    E.increment stage h (by simpa only [layoutEnd_increment] using hroom)
+  generalize hstages : incrementStages register = stages
+  have hlabels :
+      4 :: stages.map
+          (fun stage => (incrementStageIndex stage).castSucc) =
+        MarkerShift.incrementOrder register := by
+    rw [← hstages]
+    exact incrementStages_labels register
+  have hchain : IncrementStageChain .clock register stages := by
+    rw [← hstages]
+    exact incrementStages_chain register
+  clear hstages
+  revert hlabels
+  cases hchain with
+  | done =>
+      intro hlabels
       have hraw : RawCommand.markerShift
           ⟨growth, source, bodySearchBase⟩ 4 .left .right
           (directRef growth source bodyDirectBase) (some .left)
@@ -667,356 +803,57 @@ theorem machine_reaches_incrementSchedule_or_halts_of_envelope
         simp [incrementShiftCommands, incrementShiftCommandsAux,
           MarkerShift.incrementOrder]
       simpa [MarkerSchedule.decrementStartBoundary] using
-        E.clock base c source
-          bodySearchBase (directRef growth source bodyDirectBase)
-          (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hraw
-  | temp =>
-      let clockRegisters := registers.increment .clock
-      let tempRegisters := registers.increment .temp
-      let clockTape := incrementCoreTape registers growth .clock T
-      let tempTape := incrementCoreTape registers growth .temp T
-      have hclockPrefix :
-          E.Represents clockRegisters clockTape := by
-        simpa [clockRegisters, clockTape] using hfinal .clock
-      have hrawFour : RawCommand.markerShift
+        E.clock base c source bodySearchBase
+          (directRef growth source bodyDirectBase)
+          (some (directRef growth source testDirectSlot)) h
+          (by simpa only [layoutEnd_increment] using hroom) hraw
+  | @cons _ next _ tail hnext hrest =>
+      intro hlabels
+      have hraw : RawCommand.markerShift
           ⟨growth, source, bodySearchBase⟩ 4 .left .right
           (searchRef growth source (bodySearchBase + 1)) (some .left)
           (some (directRef growth source testDirectSlot)) ∈ rawCommands := by
         apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hrawThree : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase + 1⟩ 3 .left .right
-          (directRef growth source bodyDirectBase) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hfour := E.clock base c
-        source bodySearchBase (searchRef growth source (bodySearchBase + 1))
-        (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hrawFour
-      have hthree := E.internal
-        (next := tempRegisters) base c
-        source (bodySearchBase + 1)
-        (directRef growth source bodyDirectBase) none hclockPrefix (3 : Fin 4)
-        (by simp [clockRegisters, RegisterLayout.values, Registers.increment,
-          Registers.set, Registers.get])
-        (by
-          have hbound := E.core_before_limit h
-          simp [clockRegisters, layoutEnd, CounterLayout.boundaryPos,
-            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-            Registers.increment, Registers.set, Registers.get] at hbound ⊢
-          omega)
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simpa [clockRegisters, tempRegisters] using
-          MarkerSchedule.moveTempBoundary_after_clock registers)
-        hrawThree
-      have hhead : layoutEnd registers = lastGapOffset clockRegisters 3 := by
-        simp [clockRegisters, lastGapOffset, boundaryOffset,
-          CounterLayout.boundaryPos, layoutEnd,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have htape : installCore tempRegisters growth clockTape = tempTape := by
-        simpa [clockRegisters, tempRegisters, clockTape, tempTape] using
-          installCore_incrementCoreTape_eq registers growth .clock .temp T
-      rw [htape] at hthree
-      have hfinish : boundaryOffset clockRegisters ((3 : Fin 4).castSucc) =
-          boundaryOffset registers 3 := by
-        simp [clockRegisters, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      rw [← hhead, hfinish] at hthree
-      simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      have hrun := FullTM0.ResolvesTo.trans
-        (hfour.imp (fun hsuccess => hsuccess.1) id)
-        (hthree.imp (fun hsuccess => hsuccess.1) id)
-      rcases hrun with hrun | hhalts
-      · exact Or.inl ⟨hrun, hfinal .temp⟩
+        simp only [incrementShiftCommands]
+        rw [← hlabels]
+        simp [incrementShiftCommandsAux]
+      have hclock := E.clock base c source bodySearchBase
+        (searchRef growth source (bodySearchBase + 1))
+        (some (directRef growth source testDirectSlot)) h
+        (by simpa only [layoutEnd_increment] using hroom) hraw
+      have hclock' :
+          FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+              ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
+                atLogical growth T (layoutEnd registers)⟩
+              ⟨searchState base c
+                  ⟨growth, source, bodySearchBase + 1⟩,
+                atLogical growth
+                  (incrementCoreTape registers growth .clock T)
+                  (lastGapOffset (registers.increment .clock)
+                    (incrementStageIndex next))⟩ ∨
+            FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+              ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
+                atLogical growth T (layoutEnd registers)⟩ := by
+        cases hnext
+        simpa [searchRef, CounterControlPlan.resolve, incrementStageIndex,
+          incrementSchedule_clock_start registers] using
+          hclock.imp (fun hsuccess => hsuccess.1) id
+      have htailCommands : ∀ raw,
+          raw ∈ incrementShiftCommandsAux growth source
+            (bodySearchBase + 1) false
+            ((next :: tail).map
+              (fun stage => (incrementStageIndex stage).castSucc)) →
+          raw ∈ rawCommands := by
+        intro raw hraw'
+        apply hcommands raw
+        simp only [incrementShiftCommands]
+        rw [← hlabels]
+        exact List.mem_cons_of_mem _ hraw'
+      have htailRun := incrementEnvelopeTail base c source
+        (bodySearchBase + 1) E hnext hrest h hroom htailCommands
+      rcases FullTM0.ResolvesTo.trans hclock' htailRun with hrun | hhalts
+      · exact Or.inl ⟨hrun, hfinal register⟩
       · exact Or.inr hhalts
-  | right =>
-      let clockRegisters := registers.increment .clock
-      let tempRegisters := registers.increment .temp
-      let rightRegisters := registers.increment .right
-      let clockTape := incrementCoreTape registers growth .clock T
-      let tempTape := incrementCoreTape registers growth .temp T
-      let rightTape := incrementCoreTape registers growth .right T
-      have hclockPrefix :
-          E.Represents clockRegisters clockTape := by
-        simpa [clockRegisters, clockTape] using hfinal .clock
-      have htempPrefix :
-          E.Represents tempRegisters tempTape := by
-        simpa [tempRegisters, tempTape] using hfinal .temp
-      have hrawFour : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase⟩ 4 .left .right
-          (searchRef growth source (bodySearchBase + 1)) (some .left)
-          (some (directRef growth source testDirectSlot)) ∈ rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hrawThree : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase + 1⟩ 3 .left .right
-          (searchRef growth source (bodySearchBase + 2)) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hrawTwo : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase + 2⟩ 2 .left .right
-          (directRef growth source bodyDirectBase) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hfour := E.clock base c
-        source bodySearchBase (searchRef growth source (bodySearchBase + 1))
-        (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hrawFour
-      have hthree := E.internal
-        (next := tempRegisters) base c
-        source (bodySearchBase + 1)
-        (searchRef growth source (bodySearchBase + 2)) none hclockPrefix
-        (3 : Fin 4)
-        (by simp [clockRegisters, RegisterLayout.values, Registers.increment,
-          Registers.set, Registers.get])
-        (by
-          have hbound := E.core_before_limit h
-          simp [clockRegisters, layoutEnd, CounterLayout.boundaryPos,
-            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-            Registers.increment, Registers.set, Registers.get] at hbound ⊢
-          omega)
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simpa [clockRegisters, tempRegisters] using
-          MarkerSchedule.moveTempBoundary_after_clock registers)
-        hrawThree
-      have htwo := E.internal
-        (next := rightRegisters) base c
-        source (bodySearchBase + 2)
-        (directRef growth source bodyDirectBase) none htempPrefix (2 : Fin 4)
-        (by simp [tempRegisters, RegisterLayout.values, Registers.increment,
-          Registers.set, Registers.get])
-        (by
-          have hbound := E.core_before_limit h
-          simp [tempRegisters, layoutEnd, CounterLayout.boundaryPos,
-            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-            Registers.increment, Registers.set, Registers.get] at hbound ⊢
-          omega)
-        (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
-        (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
-        (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
-        (by simpa [tempRegisters, rightRegisters] using
-          MarkerSchedule.moveRightBoundary_after_temp registers)
-        hrawTwo
-      have hheadFour : layoutEnd registers =
-          lastGapOffset clockRegisters 3 := by
-        simp [clockRegisters, lastGapOffset, boundaryOffset,
-          CounterLayout.boundaryPos, layoutEnd,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have hheadThree : boundaryOffset clockRegisters 3 =
-          lastGapOffset tempRegisters 2 := by
-        simp [clockRegisters, tempRegisters, lastGapOffset, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have htapeThree : installCore tempRegisters growth clockTape =
-          tempTape := by
-        simpa [clockRegisters, tempRegisters, clockTape, tempTape] using
-          installCore_incrementCoreTape_eq registers growth .clock .temp T
-      rw [htapeThree] at hthree
-      have htapeTwo : installCore rightRegisters growth tempTape =
-          rightTape := by
-        simpa [tempRegisters, rightRegisters, tempTape, rightTape] using
-          installCore_incrementCoreTape_eq registers growth .temp .right T
-      rw [htapeTwo] at htwo
-      have hhandoffThree :
-          boundaryOffset clockRegisters ((3 : Fin 4).castSucc) =
-            lastGapOffset tempRegisters 2 := by
-        simpa using hheadThree
-      have hfinish :
-          boundaryOffset tempRegisters ((2 : Fin 4).castSucc) =
-            boundaryOffset registers 2 := by
-        simp [tempRegisters, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      rw [← hheadFour, hhandoffThree] at hthree
-      rw [hfinish] at htwo
-      simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
-      have hrun := FullTM0.ResolvesTo.trans
-        (hfour.imp (fun hsuccess => hsuccess.1) id)
-        (FullTM0.ResolvesTo.trans
-          (hthree.imp (fun hsuccess => hsuccess.1) id)
-          (htwo.imp (fun hsuccess => hsuccess.1) id))
-      rcases hrun with hrun | hhalts
-      · exact Or.inl ⟨hrun, hfinal .right⟩
-      · exact Or.inr hhalts
-  | left =>
-      let clockRegisters := registers.increment .clock
-      let tempRegisters := registers.increment .temp
-      let rightRegisters := registers.increment .right
-      let leftRegisters := registers.increment .left
-      let clockTape := incrementCoreTape registers growth .clock T
-      let tempTape := incrementCoreTape registers growth .temp T
-      let rightTape := incrementCoreTape registers growth .right T
-      let leftTape := incrementCoreTape registers growth .left T
-      have hclockPrefix :
-          E.Represents clockRegisters clockTape := by
-        simpa [clockRegisters, clockTape] using hfinal .clock
-      have htempPrefix :
-          E.Represents tempRegisters tempTape := by
-        simpa [tempRegisters, tempTape] using hfinal .temp
-      have hrightPrefix :
-          E.Represents rightRegisters rightTape := by
-        simpa [rightRegisters, rightTape] using hfinal .right
-      have hrawFour : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase⟩ 4 .left .right
-          (searchRef growth source (bodySearchBase + 1)) (some .left)
-          (some (directRef growth source testDirectSlot)) ∈ rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hrawThree : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase + 1⟩ 3 .left .right
-          (searchRef growth source (bodySearchBase + 2)) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hrawTwo : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase + 2⟩ 2 .left .right
-          (searchRef growth source (bodySearchBase + 3)) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hrawOne : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase + 3⟩ 1 .left .right
-          (directRef growth source bodyDirectBase) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      have hfour := E.clock base c
-        source bodySearchBase (searchRef growth source (bodySearchBase + 1))
-        (some (directRef growth source testDirectSlot)) h (by simpa [layoutEnd_increment] using hroom) hrawFour
-      have hthree := E.internal
-        (next := tempRegisters) base c
-        source (bodySearchBase + 1)
-        (searchRef growth source (bodySearchBase + 2)) none hclockPrefix
-        (3 : Fin 4)
-        (by simp [clockRegisters, RegisterLayout.values, Registers.increment,
-          Registers.set, Registers.get])
-        (by
-          have hbound := E.core_before_limit h
-          simp [clockRegisters, layoutEnd, CounterLayout.boundaryPos,
-            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-            Registers.increment, Registers.set, Registers.get] at hbound ⊢
-          omega)
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simp [clockRegisters, tempRegisters, layoutEnd_increment])
-        (by simpa [clockRegisters, tempRegisters] using
-          MarkerSchedule.moveTempBoundary_after_clock registers)
-        hrawThree
-      have htwo := E.internal
-        (next := rightRegisters) base c
-        source (bodySearchBase + 2)
-        (searchRef growth source (bodySearchBase + 3)) none htempPrefix
-        (2 : Fin 4)
-        (by simp [tempRegisters, RegisterLayout.values, Registers.increment,
-          Registers.set, Registers.get])
-        (by
-          have hbound := E.core_before_limit h
-          simp [tempRegisters, layoutEnd, CounterLayout.boundaryPos,
-            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-            Registers.increment, Registers.set, Registers.get] at hbound ⊢
-          omega)
-        (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
-        (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
-        (by simp [tempRegisters, rightRegisters, layoutEnd_increment])
-        (by simpa [tempRegisters, rightRegisters] using
-          MarkerSchedule.moveRightBoundary_after_temp registers)
-        hrawTwo
-      have hone := E.internal
-        (next := leftRegisters) base c
-        source (bodySearchBase + 3)
-        (directRef growth source bodyDirectBase) none hrightPrefix (1 : Fin 4)
-        (by simp [rightRegisters, RegisterLayout.values, Registers.increment,
-          Registers.set, Registers.get])
-        (by
-          have hbound := E.core_before_limit h
-          simp [rightRegisters, layoutEnd, CounterLayout.boundaryPos,
-            RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-            Registers.increment, Registers.set, Registers.get] at hbound ⊢
-          omega)
-        (by simp [rightRegisters, leftRegisters, layoutEnd_increment])
-        (by simp [rightRegisters, leftRegisters, layoutEnd_increment])
-        (by simp [rightRegisters, leftRegisters, layoutEnd_increment])
-        (by simpa [rightRegisters, leftRegisters] using
-          MarkerSchedule.moveLeftBoundary_after_right registers)
-        hrawOne
-      have hheadFour : layoutEnd registers =
-          lastGapOffset clockRegisters 3 := by
-        simp [clockRegisters, lastGapOffset, boundaryOffset,
-          CounterLayout.boundaryPos, layoutEnd,
-          RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have hheadThree : boundaryOffset clockRegisters 3 =
-          lastGapOffset tempRegisters 2 := by
-        simp [clockRegisters, tempRegisters, lastGapOffset, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have hheadTwo : boundaryOffset tempRegisters 2 =
-          lastGapOffset rightRegisters 1 := by
-        simp [tempRegisters, rightRegisters, lastGapOffset, boundaryOffset,
-          CounterLayout.boundaryPos, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have htapeThree : installCore tempRegisters growth clockTape =
-          tempTape := by
-        simpa [clockRegisters, tempRegisters, clockTape, tempTape] using
-          installCore_incrementCoreTape_eq registers growth .clock .temp T
-      rw [htapeThree] at hthree
-      have htapeTwo : installCore rightRegisters growth tempTape =
-          rightTape := by
-        simpa [tempRegisters, rightRegisters, tempTape, rightTape] using
-          installCore_incrementCoreTape_eq registers growth .temp .right T
-      rw [htapeTwo] at htwo
-      have htapeOne : installCore leftRegisters growth rightTape =
-          leftTape := by
-        simpa [rightRegisters, leftRegisters, rightTape, leftTape] using
-          installCore_incrementCoreTape_eq registers growth .right .left T
-      rw [htapeOne] at hone
-      have hhandoffThree :
-          boundaryOffset clockRegisters ((3 : Fin 4).castSucc) =
-            lastGapOffset tempRegisters 2 := by
-        simpa using hheadThree
-      have hhandoffTwo :
-          boundaryOffset tempRegisters ((2 : Fin 4).castSucc) =
-            lastGapOffset rightRegisters 1 := by
-        simpa using hheadTwo
-      have hfinish :
-          boundaryOffset rightRegisters ((1 : Fin 4).castSucc) =
-            boundaryOffset registers 1 := by
-        simp [rightRegisters, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      rw [← hheadFour, hhandoffThree] at hthree
-      rw [hhandoffTwo] at htwo
-      rw [hfinish] at hone
-      simp only [searchRef, CounterControlPlan.resolve] at hfour hthree htwo
-      have hrun := FullTM0.ResolvesTo.trans
-        (hfour.imp (fun hsuccess => hsuccess.1) id)
-        (FullTM0.ResolvesTo.trans
-          (hthree.imp (fun hsuccess => hsuccess.1) id)
-          (FullTM0.ResolvesTo.trans
-            (htwo.imp (fun hsuccess => hsuccess.1) id)
-            (hone.imp (fun hsuccess => hsuccess.1) id)))
-      rcases hrun with hrun | hhalts
-      · exact Or.inl ⟨hrun, hfinal .left⟩
-      · exact Or.inr hhalts
-
-
 /-- Every shift in a collision-free increment schedule resolves on an open
 core.  The arbitrary finite `limit` used by the converse Basic Lemma is chosen
 past the updated core; it is not asserted to contain a target. -/
