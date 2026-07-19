@@ -25,24 +25,6 @@ open OrientedRedCycles RedShadeCycles RedShadePaths
 
 set_option maxRecDepth 20000
 
-private theorem segment_eq_of_entry_exit
-    {component : Figure16.Thick} {quadrant : Quadrant}
-    {state : RedShades.State} {entry exit : Direction} {target : Segment}
-    (allowed : RedShades.allowedFor component quadrant state = true)
-    (hentry : Enters quadrant state entry = true)
-    (hexit : Exits quadrant state exit = true)
-    (unique : forall segment, segment.entry = entry ->
-      segment.exit = exit -> segment = target) :
-    segment? component quadrant state = some target := by
-  rcases (enters_iff_segment _ _ _ _ allowed).1 hentry with
-    ⟨segment, hsegment, segmentEntry⟩
-  rcases (exits_iff_segment _ _ _ _ allowed).1 hexit with
-    ⟨other, hother, segmentExit⟩
-  have heq : segment = other :=
-    Option.some.inj (hsegment.symm.trans hother)
-  subst other
-  simpa [unique segment segmentEntry segmentExit] using hsegment
-
 variable {indexGrid : Nat -> Nat -> Index}
   {stateGrid : Nat -> Nat -> RedShades.State}
   {west east south north : Nat}
@@ -121,16 +103,9 @@ theorem CycleShade.southwest_segment
       (CycleOn.southwest_corner cycle).1
       (CycleOn.southwest_corner cycle).2]
     exact heast
-  apply segment_eq_of_entry_exit (entry := .south) (exit := .east)
-    (target := .southEast) (valid.allowed x y)
-  · have hx : (quadrantAt x y).xBit = true := by
-      simpa [x] using quadrantAt_quarterWest_xBit west y
-    simp only [Enters, hnorth, hx, decide_true, Bool.true_and]
-  · have hy : (quadrantAt x y).yBit = true := by
-      simpa [y] using quadrantAt_quarterSouth_yBit x south
-    simp only [Exits, heast, hy, decide_true, Bool.true_and]
-  · intro segment hentry hexit
-    cases segment <;> simp_all [Segment.entry, Segment.exit]
+  apply segment_eq_southEast_of_turn_edges (valid.allowed x y) heast hnorth
+  · simpa [x] using quadrantAt_quarterWest_xBit west y
+  · simpa [y] using quadrantAt_quarterSouth_yBit x south
 
 theorem CycleShade.southeast_segment
     (shaded : CycleShade stateGrid west east south north .light)
@@ -146,16 +121,9 @@ theorem CycleShade.southeast_segment
       (CycleOn.southeast_corner cycle).1
       (CycleOn.southeast_corner cycle).2]
     exact hwest
-  apply segment_eq_of_entry_exit (entry := .east) (exit := .north)
-    (target := .eastNorth) (valid.allowed x y)
-  · have hy : (quadrantAt x y).yBit = true := by
-      simpa [y] using quadrantAt_quarterSouth_yBit x south
-    simp only [Enters, hwest, hy, decide_true, Bool.true_and]
-  · have hx : (quadrantAt x y).xBit = false := by
-      simpa [x] using quadrantAt_quarterEast_xBit east y
-    simp only [Exits, hnorth, hx, decide_true, Bool.true_and]
-  · intro segment hentry hexit
-    cases segment <;> simp_all [Segment.entry, Segment.exit]
+  apply segment_eq_eastNorth_of_turn_edges (valid.allowed x y) hwest hnorth
+  · simpa [x] using quadrantAt_quarterEast_xBit east y
+  · simpa [y] using quadrantAt_quarterSouth_yBit x south
 
 theorem CycleShade.northeast_segment
     (shaded : CycleShade stateGrid west east south north .light)
@@ -171,16 +139,9 @@ theorem CycleShade.northeast_segment
       (CycleOn.northeast_corner cycle).1
       (CycleOn.northeast_corner cycle).2]
     exact hwest
-  apply segment_eq_of_entry_exit (entry := .north) (exit := .west)
-    (target := .northWest) (valid.allowed x y)
-  · have hx : (quadrantAt x y).xBit = false := by
-      simpa [x] using quadrantAt_quarterEast_xBit east y
-    simp only [Enters, hsouth, hx, decide_true, Bool.true_and]
-  · have hy : (quadrantAt x y).yBit = false := by
-      simpa [y] using quadrantAt_quarterNorth_yBit x north
-    simp only [Exits, hwest, hy, decide_true, Bool.true_and]
-  · intro segment hentry hexit
-    cases segment <;> simp_all [Segment.entry, Segment.exit]
+  apply segment_eq_northWest_of_turn_edges (valid.allowed x y) hwest hsouth
+  · simpa [x] using quadrantAt_quarterEast_xBit east y
+  · simpa [y] using quadrantAt_quarterNorth_yBit x north
 
 theorem CycleShade.northwest_segment
     (shaded : CycleShade stateGrid west east south north .light)
@@ -197,16 +158,9 @@ theorem CycleShade.northwest_segment
       hallowed (CycleOn.northwest_corner cycle).1
         (CycleOn.northwest_corner cycle).2
     exact heq.symm.trans heast
-  apply segment_eq_of_entry_exit (entry := .west) (exit := .south)
-    (target := .westSouth) (valid.allowed x y)
-  · have hy : (quadrantAt x y).yBit = false := by
-      simpa [y] using quadrantAt_quarterNorth_yBit x north
-    simp only [Enters, heast, hy, decide_true, Bool.true_and]
-  · have hx : (quadrantAt x y).xBit = true := by
-      simpa [x] using quadrantAt_quarterWest_xBit west y
-    simp only [Exits, hsouth, hx, decide_true, Bool.true_and]
-  · intro segment hentry hexit
-    cases segment <;> simp_all [Segment.entry, Segment.exit]
+  apply segment_eq_westSouth_of_turn_edges (valid.allowed x y) heast hsouth
+  · simpa [x] using quadrantAt_quarterWest_xBit west y
+  · simpa [y] using quadrantAt_quarterNorth_yBit x north
 
 end OrientedLightBoards
 end Closed104
