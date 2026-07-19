@@ -46,6 +46,102 @@ inductive ToBoundary : Fin 5 → Fin 5 →
       (tail : ToBoundary i.castSucc target rest) :
       ToBoundary i.succ target (⟨i.castSucc, .left⟩ :: rest)
 
+/-- Expose the first leg of a nonempty consecutive inward route. -/
+theorem ToBoundary.uncons
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToBoundary source target route) (hne : source ≠ target) :
+    ∃ i : Fin 4, ∃ rest,
+      source = i.succ ∧ route = ⟨i.castSucc, .left⟩ :: rest ∧
+        ToBoundary i.castSucc target rest := by
+  cases hroute with
+  | here => exact False.elim (hne rfl)
+  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
+
+theorem ToBoundary.target_le
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToBoundary source target route) :
+    (target : Nat) ≤ (source : Nat) := by
+  induction hroute with
+  | here => exact Nat.le_refl _
+  | step i tail ih => exact ih.trans (by simp)
+
+/-- A consecutive inward route with equal endpoints is empty. -/
+theorem ToBoundary.eq_nil
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToBoundary source target route) (heq : source = target) :
+    route = [] := by
+  cases hroute with
+  | here => rfl
+  | step i tail =>
+      have hle := tail.target_le
+      have hval := congrArg Fin.val heq
+      simp at hval hle
+      omega
+
+theorem ToBoundary.four_four_eq
+    {route : List MarkerValidation.Leg} (hroute : ToBoundary 4 4 route) :
+    route = [] := hroute.eq_nil rfl
+
+theorem ToBoundary.four_three_eq
+    {route : List MarkerValidation.Leg} (hroute : ToBoundary 4 3 route) :
+    route = [⟨3, .left⟩] := by
+  rcases hroute.uncons (by decide) with ⟨i, rest, hi, rfl, hrest⟩
+  have : i = (3 : Fin 4) := by
+    apply Fin.ext
+    have := congrArg Fin.val hi
+    simp at this ⊢
+    omega
+  subst i
+  rw [hrest.eq_nil rfl]
+  simp
+
+theorem ToBoundary.four_two_eq
+    {route : List MarkerValidation.Leg} (hroute : ToBoundary 4 2 route) :
+    route = [⟨3, .left⟩, ⟨2, .left⟩] := by
+  rcases hroute.uncons (by decide) with ⟨i, rest, hi, rfl, hrest⟩
+  have : i = (3 : Fin 4) := by
+    apply Fin.ext
+    have := congrArg Fin.val hi
+    simp at this ⊢
+    omega
+  subst i
+  rcases hrest.uncons (by decide) with ⟨j, tail, hj, rfl, htail⟩
+  have : j = (2 : Fin 4) := by
+    apply Fin.ext
+    have := congrArg Fin.val hj
+    simp at this ⊢
+    omega
+  subst j
+  rw [htail.eq_nil rfl]
+  simp
+
+theorem ToBoundary.four_one_eq
+    {route : List MarkerValidation.Leg} (hroute : ToBoundary 4 1 route) :
+    route = [⟨3, .left⟩, ⟨2, .left⟩, ⟨1, .left⟩] := by
+  rcases hroute.uncons (by decide) with ⟨i, rest, hi, rfl, hrest⟩
+  have : i = (3 : Fin 4) := by
+    apply Fin.ext
+    have := congrArg Fin.val hi
+    simp at this ⊢
+    omega
+  subst i
+  rcases hrest.uncons (by decide) with ⟨j, tail, hj, rfl, htail⟩
+  have : j = (2 : Fin 4) := by
+    apply Fin.ext
+    have := congrArg Fin.val hj
+    simp at this ⊢
+    omega
+  subst j
+  rcases htail.uncons (by decide) with ⟨k, final, hk, rfl, hfinal⟩
+  have : k = (1 : Fin 4) := by
+    apply Fin.ext
+    have := congrArg Fin.val hk
+    simp at this ⊢
+    omega
+  subst k
+  rw [hfinal.eq_nil rfl]
+  simp
+
 /-- Any selected position of a nonempty inward route is a leftward leg and
 retains an inward route from its found boundary to the original target. -/
 theorem ToBoundary.position

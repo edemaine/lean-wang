@@ -180,6 +180,59 @@ inductive ToFour : Fin 5 → List MarkerValidation.Leg → Prop where
       (tail : ToFour i.succ rest) :
       ToFour i.castSucc (⟨i.succ, .right⟩ :: rest)
 
+/-- Expose the first leg of a nonempty consecutive route to boundary `4`. -/
+theorem ToFour.uncons
+    {boundary : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToFour boundary route) (hne : boundary ≠ 4) :
+    ∃ i : Fin 4, ∃ rest,
+      boundary = i.castSucc ∧
+      route = ⟨i.succ, .right⟩ :: rest ∧ ToFour i.succ rest := by
+  cases hroute with
+  | four => exact False.elim (hne rfl)
+  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
+
+/-- A consecutive route whose source is boundary `4` is empty. -/
+theorem ToFour.nil_of_eq_four
+    {boundary : Fin 5} {route : List MarkerValidation.Leg}
+    (hroute : ToFour boundary route) (heq : boundary = 4) : route = [] := by
+  cases hroute with
+  | four => rfl
+  | step i tail =>
+      have hval := congrArg Fin.val heq
+      simp at hval
+      omega
+
+theorem ToFour.four_eq_nil
+    {route : List MarkerValidation.Leg} (hroute : ToFour 4 route) :
+    route = [] := hroute.nil_of_eq_four rfl
+
+theorem ToFour.three_eq
+    {route : List MarkerValidation.Leg} (hroute : ToFour 3 route) :
+    route = [⟨4, .right⟩] := by
+  rcases hroute.uncons (by decide) with ⟨i, rest, hi, rfl, hrest⟩
+  have : i = (3 : Fin 4) := Fin.ext (congrArg Fin.val hi).symm
+  subst i
+  rw [hrest.four_eq_nil]
+  simp
+
+theorem ToFour.two_eq
+    {route : List MarkerValidation.Leg} (hroute : ToFour 2 route) :
+    route = [⟨3, .right⟩, ⟨4, .right⟩] := by
+  rcases hroute.uncons (by decide) with ⟨i, rest, hi, rfl, hrest⟩
+  have : i = (2 : Fin 4) := Fin.ext (congrArg Fin.val hi).symm
+  subst i
+  rw [hrest.three_eq]
+  simp
+
+theorem ToFour.one_eq
+    {route : List MarkerValidation.Leg} (hroute : ToFour 1 route) :
+    route = [⟨2, .right⟩, ⟨3, .right⟩, ⟨4, .right⟩] := by
+  rcases hroute.uncons (by decide) with ⟨i, rest, hi, rfl, hrest⟩
+  have : i = (1 : Fin 4) := Fin.ext (congrArg Fin.val hi).symm
+  subst i
+  rw [hrest.two_eq]
+  simp
+
 /-- Any selected position of a nonempty `ToFour` route is a rightward leg
 and leaves another `ToFour` route after its found boundary. -/
 theorem ToFour.position

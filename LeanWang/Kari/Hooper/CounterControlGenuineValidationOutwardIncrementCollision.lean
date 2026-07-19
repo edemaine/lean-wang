@@ -680,91 +680,20 @@ theorem handoff_of_clearedCurrentEntry
 
 /-! ## Collision entry for an arbitrary outward suffix -/
 
-private theorem toFour_uncons
-    {boundary : Fin 5} {route : List MarkerValidation.Leg}
-    (hroute : CounterControlResumedRouteEmbedding.ToFour boundary route)
-    (hne : boundary ≠ 4) :
-    ∃ i : Fin 4, ∃ rest,
-      boundary = i.castSucc ∧
-      route = ⟨i.succ, .right⟩ :: rest ∧
-      CounterControlResumedRouteEmbedding.ToFour i.succ rest := by
-  cases hroute with
-  | four => exact False.elim (hne rfl)
-  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
-
-private theorem toFour_nil_of_eq_four
-    {boundary : Fin 5} {route : List MarkerValidation.Leg}
-    (hroute : CounterControlResumedRouteEmbedding.ToFour boundary route)
-    (heq : boundary = 4) : route = [] := by
-  cases hroute with
-  | four => rfl
-  | step i tail =>
-      have hval := congrArg Fin.val heq
-      simp at hval
-      omega
-
-private theorem toFour_four
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlResumedRouteEmbedding.ToFour 4 route) :
-    route = [] :=
-  toFour_nil_of_eq_four hroute rfl
-
-private theorem toFour_three
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlResumedRouteEmbedding.ToFour 3 route) :
-    route = [⟨4, .right⟩] := by
-  rcases toFour_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (3 : Fin 4) := by
-    apply Fin.ext
-    exact (congrArg Fin.val hi).symm
-  subst i
-  have hnil : rest = [] := by
-    apply toFour_four
-    simpa using hrest
-  rw [hrouteEq, hnil]
-  rfl
-
-private theorem toFour_two
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlResumedRouteEmbedding.ToFour 2 route) :
-    route = [⟨3, .right⟩, ⟨4, .right⟩] := by
-  rcases toFour_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (2 : Fin 4) := by
-    apply Fin.ext
-    exact (congrArg Fin.val hi).symm
-  subst i
-  have htail : rest = [⟨4, .right⟩] := by
-    apply toFour_three
-    simpa using hrest
-  rw [hrouteEq, htail]
-  rfl
-
-private theorem toFour_one
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlResumedRouteEmbedding.ToFour 1 route) :
-    route = [⟨2, .right⟩, ⟨3, .right⟩, ⟨4, .right⟩] := by
-  rcases toFour_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (1 : Fin 4) := by
-    apply Fin.ext
-    exact (congrArg Fin.val hi).symm
-  subst i
-  have htail : rest = [⟨3, .right⟩, ⟨4, .right⟩] := by
-    apply toFour_two
-    simpa using hrest
-  rw [hrouteEq, htail]
-  rfl
-
+private abbrev toFour_four :=
+  @CounterControlResumedRouteEmbedding.ToFour.four_eq_nil
+private abbrev toFour_three :=
+  @CounterControlResumedRouteEmbedding.ToFour.three_eq
+private abbrev toFour_two :=
+  @CounterControlResumedRouteEmbedding.ToFour.two_eq
+private abbrev toFour_one :=
+  @CounterControlResumedRouteEmbedding.ToFour.one_eq
 private theorem routeTail_nil_finish
     {growth : Turing.Dir}
     {start finish : FullTM0.Tape (Symbol numTags)}
     (trace : CounterControlRouteSuffixMortality.RouteTailGaps growth []
-      start finish) : finish = start := by
-  cases trace
-  rfl
-
+      start finish) : finish = start :=
+  trace.nil_finish
 /-- Starting at the boundary-`4` collision-cleanup entry, replay the retained
 outward validation suffix in reverse and hand off from the cleanup stage
 opposite the original caller. -/

@@ -35,6 +35,7 @@ open CounterControlGenuineValidation
 open CounterControlGenuineValidationOutwardSuffix
 open CounterControlRouteSuffixMortality CounterControlValidationMortality
 open CounterControlResumedRouteEmbedding
+open CounterControlGuardedInwardRouteMargin
 
 noncomputable section
 
@@ -48,199 +49,16 @@ private instance : Inhabited (Symbol numTags) :=
 private theorem routeTail_nil_finish
     {growth : Turing.Dir}
     {start finish : FullTM0.Tape (Symbol numTags)}
-    (trace : RouteTailGaps growth [] start finish) : finish = start := by
-  cases trace
-  rfl
-
-private theorem toFour_uncons
-    {boundary : Fin 5} {route : List MarkerValidation.Leg}
-    (hroute : ToFour boundary route) (hne : boundary ≠ 4) :
-    ∃ i : Fin 4, ∃ rest,
-      boundary = i.castSucc ∧
-      route = ⟨i.succ, .right⟩ :: rest ∧ ToFour i.succ rest := by
-  cases hroute with
-  | four => exact False.elim (hne rfl)
-  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
-
-private theorem toFour_nil_of_eq_four
-    {boundary : Fin 5} {route : List MarkerValidation.Leg}
-    (hroute : ToFour boundary route) (heq : boundary = 4) : route = [] := by
-  cases hroute with
-  | four => rfl
-  | step i tail =>
-      have hval := congrArg Fin.val heq
-      simp at hval
-      omega
-
-private theorem toFour_four
-    {route : List MarkerValidation.Leg} (hroute : ToFour 4 route) :
-    route = [] :=
-  toFour_nil_of_eq_four hroute rfl
-
-private theorem toFour_three
-    {route : List MarkerValidation.Leg} (hroute : ToFour 3 route) :
-    route = [⟨4, .right⟩] := by
-  rcases toFour_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (3 : Fin 4) := by
-    apply Fin.ext
-    exact (congrArg Fin.val hi).symm
-  subst i
-  have hnil : rest = [] := by
-    apply toFour_four
-    simpa using hrest
-  rw [hrouteEq, hnil]
-  rfl
-
-private theorem toFour_two
-    {route : List MarkerValidation.Leg} (hroute : ToFour 2 route) :
-    route = [⟨3, .right⟩, ⟨4, .right⟩] := by
-  rcases toFour_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (2 : Fin 4) := by
-    apply Fin.ext
-    exact (congrArg Fin.val hi).symm
-  subst i
-  have htail : rest = [⟨4, .right⟩] := by
-    apply toFour_three
-    simpa using hrest
-  rw [hrouteEq, htail]
-  rfl
-
-private theorem toFour_one
-    {route : List MarkerValidation.Leg} (hroute : ToFour 1 route) :
-    route = [⟨2, .right⟩, ⟨3, .right⟩, ⟨4, .right⟩] := by
-  rcases toFour_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (1 : Fin 4) := by
-    apply Fin.ext
-    exact (congrArg Fin.val hi).symm
-  subst i
-  have htail : rest = [⟨3, .right⟩, ⟨4, .right⟩] := by
-    apply toFour_two
-    simpa using hrest
-  rw [hrouteEq, htail]
-  rfl
-
-private theorem toBoundary_uncons
-    {source target : Fin 5} {route : List MarkerValidation.Leg}
-    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary source target
-      route)
-    (hne : source ≠ target) :
-    ∃ i : Fin 4, ∃ rest,
-      source = i.succ ∧
-      route = ⟨i.castSucc, .left⟩ :: rest ∧
-      CounterControlGuardedInwardRouteMargin.ToBoundary i.castSucc target
-        rest := by
-  cases hroute with
-  | here => exact False.elim (hne rfl)
-  | step i tail => exact ⟨i, _, rfl, rfl, tail⟩
-
-private theorem toBoundary_target_le
-    {source target : Fin 5} {route : List MarkerValidation.Leg}
-    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary source target
-      route) : (target : Nat) ≤ (source : Nat) := by
-  induction hroute with
-  | here => exact Nat.le_refl _
-  | step i tail ih =>
-      exact ih.trans (by simp)
-
-private theorem toBoundary_nil_of_eq
-    {source target : Fin 5} {route : List MarkerValidation.Leg}
-    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary source target
-      route)
-    (heq : source = target) : route = [] := by
-  cases hroute with
-  | here => rfl
-  | step i tail =>
-      have hle := toBoundary_target_le tail
-      have hval := congrArg Fin.val heq
-      simp at hval hle
-      omega
-
-private theorem toBoundary_four_four
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 4 route) :
-    route = [] :=
-  toBoundary_nil_of_eq hroute rfl
-
-private theorem toBoundary_four_three
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 3 route) :
-    route = [⟨3, .left⟩] := by
-  rcases toBoundary_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (3 : Fin 4) := by
-    have hval := congrArg Fin.val hi
-    apply Fin.ext
-    simp at hval ⊢
-    omega
-  subst i
-  have hnil : rest = [] := by
-    apply toBoundary_nil_of_eq hrest
-    rfl
-  rw [hrouteEq, hnil]
-  rfl
-
-private theorem toBoundary_four_two
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 2 route) :
-    route = [⟨3, .left⟩, ⟨2, .left⟩] := by
-  rcases toBoundary_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (3 : Fin 4) := by
-    have hval := congrArg Fin.val hi
-    apply Fin.ext
-    simp at hval ⊢
-    omega
-  subst i
-  rcases toBoundary_uncons hrest (by decide) with
-    ⟨j, tail, hj, hrestEq, htail⟩
-  have hj' : j = (2 : Fin 4) := by
-    have hval := congrArg Fin.val hj
-    apply Fin.ext
-    simp at hval ⊢
-    omega
-  subst j
-  have hnil : tail = [] := by
-    apply toBoundary_nil_of_eq htail
-    rfl
-  rw [hrouteEq, hrestEq, hnil]
-  rfl
-
-private theorem toBoundary_four_one
-    {route : List MarkerValidation.Leg}
-    (hroute : CounterControlGuardedInwardRouteMargin.ToBoundary 4 1 route) :
-    route = [⟨3, .left⟩, ⟨2, .left⟩, ⟨1, .left⟩] := by
-  rcases toBoundary_uncons hroute (by decide) with
-    ⟨i, rest, hi, hrouteEq, hrest⟩
-  have hi' : i = (3 : Fin 4) := by
-    have hval := congrArg Fin.val hi
-    apply Fin.ext
-    simp at hval ⊢
-    omega
-  subst i
-  rcases toBoundary_uncons hrest (by decide) with
-    ⟨j, tail, hj, hrestEq, htail⟩
-  have hj' : j = (2 : Fin 4) := by
-    have hval := congrArg Fin.val hj
-    apply Fin.ext
-    simp at hval ⊢
-    omega
-  subst j
-  rcases toBoundary_uncons htail (by decide) with
-    ⟨k, final, hk, htailEq, hfinal⟩
-  have hk' : k = (1 : Fin 4) := by
-    have hval := congrArg Fin.val hk
-    apply Fin.ext
-    simp at hval ⊢
-    omega
-  subst k
-  have hnil : final = [] := by
-    apply toBoundary_nil_of_eq hfinal
-    rfl
-  rw [hrouteEq, hrestEq, htailEq, hnil]
-  rfl
+    (trace : RouteTailGaps growth [] start finish) : finish = start :=
+  trace.nil_finish
+private abbrev toFour_four := @ToFour.four_eq_nil
+private abbrev toFour_three := @ToFour.three_eq
+private abbrev toFour_two := @ToFour.two_eq
+private abbrev toFour_one := @ToFour.one_eq
+private abbrev toBoundary_four_four := @ToBoundary.four_four_eq
+private abbrev toBoundary_four_three := @ToBoundary.four_three_eq
+private abbrev toBoundary_four_two := @ToBoundary.four_two_eq
+private abbrev toBoundary_four_one := @ToBoundary.four_one_eq
 
 /-- Cancel one outward preserving gap against the first leg of a later
 inward route, retaining the inward tail at the original source tape. -/

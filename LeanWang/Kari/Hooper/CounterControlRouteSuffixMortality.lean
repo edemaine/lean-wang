@@ -132,6 +132,14 @@ inductive RouteTailGaps (growth : Turing.Dir) :
         (T.move (orient growth next.direction)) finish) :
       RouteTailGaps growth (next :: rest) T finish
 
+/-- An empty route tail does not move the tape. -/
+theorem RouteTailGaps.nil_finish
+    {growth : Turing.Dir}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (trace : RouteTailGaps growth [] start finish) : finish = start := by
+  cases trace
+  rfl
+
 /-- Expose the first found tape of a nonempty preserving-route trace. -/
 theorem routeGaps_uncons
     (growth : Turing.Dir) (leg : MarkerValidation.Leg)
