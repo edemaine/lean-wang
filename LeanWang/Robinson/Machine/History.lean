@@ -526,219 +526,72 @@ def localNextCell? (M : Machine) (left center right : MachineCell) : Option Mach
 
 namespace Machine
 
-theorem localNextCell?_at_head {M : Machine} {c : ID}
-    (hstate : c.state ≠ M.halt)
-    (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt) :
-    localNextCell? M (c.cellAtLeft c.head) (c.cellAt c.head) (c.cellAt (c.head + 1)) =
-      some ((M.nextID c).cellAt c.head) := by
-  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
-  cases hhead : c.head with
-  | zero =>
-      cases move with
-      | left =>
-          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.left) := by
-            simpa [hhead] using hstep
-          have hstate' : state' ≠ M.halt := by
-            simpa [hstep] using hnextState
-          simp [ID.cellAt, Machine.nextID, hstate, hhead, hstep0,
-            localNextCell?, Move.apply, hstate']
-      | right =>
-          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.right) := by
-            simpa [hhead] using hstep
-          simp [ID.cellAt, Machine.nextID, hstate, hhead, hstep0,
-            localNextCell?, Move.apply]
-      | stay =>
-          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.stay) := by
-            simpa [hhead] using hstep
-          have hstate' : state' ≠ M.halt := by
-            simpa [hstep] using hnextState
-          simp [ID.cellAt, Machine.nextID, hstate, hhead, hstep0,
-            localNextCell?, Move.apply, hstate']
-  | succ pred =>
-      cases move with
-      | left =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1)) = (write, state', Move.left) := by
-            simpa [hhead] using hstep
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
-            localNextCell?, Move.apply]
-      | right =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1)) = (write, state', Move.right) := by
-            simpa [hhead] using hstep
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
-            localNextCell?, Move.apply]
-      | stay =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1)) = (write, state', Move.stay) := by
-            simpa [hhead] using hstep
-          have hstate' : state' ≠ M.halt := by
-            simpa [hstep] using hnextState
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
-            localNextCell?, Move.apply, hstate']
-
-theorem localNextCell?_left_of_head {M : Machine} {c : ID} {pos : Nat}
-    (hstate : c.state ≠ M.halt)
-    (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt)
-    (hhead : c.head = pos + 1) :
-    localNextCell? M (c.cellAtLeft pos) (c.cellAt pos) (c.cellAt (pos + 1)) =
-      some ((M.nextID c).cellAt pos) := by
-  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
-  cases hpos : pos with
-  | zero =>
-      cases move with
-      | left =>
-          have hstep0 : M.step c.state (c.tape 1) = (write, state', Move.left) := by
-            simpa [hhead, hpos] using hstep
-          have hstate' : state' ≠ M.halt := by
-            simpa [hstep] using hnextState
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
-            hstep0, localNextCell?, Move.apply, hstate']
-      | right =>
-          have hstep0 : M.step c.state (c.tape 1) = (write, state', Move.right) := by
-            simpa [hhead, hpos] using hstep
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
-            hstep0, localNextCell?, Move.apply]
-      | stay =>
-          have hstep0 : M.step c.state (c.tape 1) = (write, state', Move.stay) := by
-            simpa [hhead, hpos] using hstep
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
-            hstep0, localNextCell?, Move.apply]
-  | succ pred =>
-      cases move with
-      | left =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1 + 1)) = (write, state', Move.left) := by
-            simpa [hhead, hpos] using hstep
-          have hpred : pred ≠ pred + 1 + 1 := by
-            exact Nat.ne_of_lt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
-          have hstate' : state' ≠ M.halt := by
-            simpa [hstep] using hnextState
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
-            hstepPred, localNextCell?, Move.apply, hpred, hstate']
-      | right =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1 + 1)) = (write, state', Move.right) := by
-            simpa [hhead, hpos] using hstep
-          have hpred : pred ≠ pred + 1 + 1 := by
-            exact Nat.ne_of_lt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
-            hstepPred, localNextCell?, Move.apply, hpred]
-      | stay =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1 + 1)) = (write, state', Move.stay) := by
-            simpa [hhead, hpos] using hstep
-          have hpred : pred ≠ pred + 1 + 1 := by
-            exact Nat.ne_of_lt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hpos,
-            hstepPred, localNextCell?, Move.apply, hpred]
-
-theorem localNextCell?_right_of_head {M : Machine} {c : ID}
-    (hstate : c.state ≠ M.halt)
-    (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt) :
-    localNextCell? M (c.cellAtLeft (c.head + 1)) (c.cellAt (c.head + 1))
-        (c.cellAt (c.head + 1 + 1)) =
-      some ((M.nextID c).cellAt (c.head + 1)) := by
-  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
-  cases hhead : c.head with
-  | zero =>
-      cases move with
-      | left =>
-          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.left) := by
-            simpa [hhead] using hstep
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstep0,
-            localNextCell?, Move.apply]
-      | right =>
-          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.right) := by
-            simpa [hhead] using hstep
-          have hstate' : state' ≠ M.halt := by
-            simpa [hstep] using hnextState
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstep0,
-            localNextCell?, Move.apply, hstate']
-      | stay =>
-          have hstep0 : M.step c.state (c.tape 0) = (write, state', Move.stay) := by
-            simpa [hhead] using hstep
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstep0,
-            localNextCell?, Move.apply]
-  | succ pred =>
-      cases move with
-      | left =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1)) = (write, state', Move.left) := by
-            simpa [hhead] using hstep
-          have hpred : pred + 1 + 1 ≠ pred := by
-            exact Nat.ne_of_gt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
-            localNextCell?, Move.apply, hpred]
-      | right =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1)) = (write, state', Move.right) := by
-            simpa [hhead] using hstep
-          have hstate' : state' ≠ M.halt := by
-            simpa [hstep] using hnextState
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
-            localNextCell?, Move.apply, hstate']
-      | stay =>
-          have hstepPred :
-              M.step c.state (c.tape (pred + 1)) = (write, state', Move.stay) := by
-            simpa [hhead] using hstep
-          have hpred : pred + 1 + 1 ≠ pred := by
-            exact Nat.ne_of_gt (Nat.lt_add_of_pos_right (by decide : 0 < 1 + 1))
-          simp [ID.cellAt, ID.cellAtLeft, Machine.nextID, hstate, hhead, hstepPred,
-            localNextCell?, Move.apply, hpred]
-
-theorem localNextCell?_away_from_head {M : Machine} {c : ID} {pos : Nat}
-    (hstate : c.state ≠ M.halt)
-    (hcenter : pos ≠ c.head)
-    (hrightOld : pos + 1 ≠ c.head)
-    (hleftOld : c.head + 1 ≠ pos) :
-    localNextCell? M (c.cellAtLeft pos) (c.cellAt pos) (c.cellAt (pos + 1)) =
-      some ((M.nextID c).cellAt pos) := by
-  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
-  cases hpos : pos with
-  | zero =>
-      cases hhead : c.head with
-      | zero =>
-          omega
-      | succ pred =>
-          cases move <;>
-            (simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
-              Move.apply]
-             try omega)
-  | succ posPred =>
-      cases hhead : c.head with
-      | zero =>
-          cases move <;>
-            simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
-              Move.apply]
-      | succ headPred =>
-          have hleftCell : posPred ≠ headPred + 1 := by omega
-          have hcenterCell : posPred ≠ headPred := by omega
-          have hrightCell : posPred + 1 + 1 ≠ headPred + 1 := by omega
-          have hnewLeft : posPred + 1 ≠ headPred := by omega
-          have hnewRight : posPred + 1 ≠ headPred + 1 + 1 := by omega
-          cases move <;>
-            simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
-              Move.apply]
-
 theorem localNextCell?_cellAt {M : Machine} {c : ID} {pos : Nat}
     (hstate : c.state ≠ M.halt)
     (hnextState : (M.step c.state (c.tape c.head)).2.1 ≠ M.halt) :
     localNextCell? M (c.cellAtLeft pos) (c.cellAt pos) (c.cellAt (pos + 1)) =
       some ((M.nextID c).cellAt pos) := by
+  rcases hstep : M.step c.state (c.tape c.head) with ⟨write, state', move⟩
+  have hstate' : state' ≠ M.halt := by
+    simpa [hstep] using hnextState
   by_cases hcenter : pos = c.head
   · subst pos
-    exact localNextCell?_at_head hstate hnextState
+    cases hhead : c.head with
+    | zero =>
+        cases move <;>
+          simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+            Move.apply]
+    | succ pred =>
+        cases move <;>
+          simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+            Move.apply]
   · by_cases hleft : c.head = pos + 1
-    · exact localNextCell?_left_of_head hstate hnextState hleft
+    · cases hpos : pos with
+      | zero =>
+          cases move <;>
+            simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+              Move.apply]
+      | succ pred =>
+          have hpred : pred ≠ pred + 1 + 1 := by omega
+          cases move <;>
+            simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+              Move.apply]
     · by_cases hright : pos = c.head + 1
       · subst pos
-        exact localNextCell?_right_of_head hstate hnextState
-      · exact localNextCell?_away_from_head hstate hcenter (by
-          intro h
-          exact hleft h.symm) (by
-          intro h
-          exact hright h.symm)
+        cases hhead : c.head with
+        | zero =>
+            cases move <;>
+              simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+                Move.apply]
+        | succ pred =>
+            have hpred : pred + 1 + 1 ≠ pred := by omega
+            cases move <;>
+              simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID, localNextCell?,
+                Move.apply]
+      · cases hpos : pos with
+        | zero =>
+            cases hhead : c.head with
+            | zero => omega
+            | succ pred =>
+                cases move <;>
+                  (simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID,
+                    localNextCell?, Move.apply]
+                   try omega)
+        | succ posPred =>
+            cases hhead : c.head with
+            | zero =>
+                cases move <;>
+                  simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID,
+                    localNextCell?, Move.apply]
+            | succ headPred =>
+                have hleftCell : posPred ≠ headPred + 1 := by omega
+                have hcenterCell : posPred ≠ headPred := by omega
+                have hrightCell : posPred + 1 + 1 ≠ headPred + 1 := by omega
+                have hnewLeft : posPred + 1 ≠ headPred := by omega
+                have hnewRight : posPred + 1 ≠ headPred + 1 + 1 := by omega
+                cases move <;>
+                  simp_all [ID.cellAt, ID.cellAtLeft, Machine.nextID,
+                    localNextCell?, Move.apply]
 
 theorem localNextCell?_at_next_halt_head {M : Machine} {c : ID}
     (hstate : c.state ≠ M.halt)
