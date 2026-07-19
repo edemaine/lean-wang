@@ -772,6 +772,584 @@ structure DecrementScheduleRunner
                 (boundaryOffset spec.registers i.succ) blankSymbol))
             (boundaryOffset spec.registers i.succ)⟩
 
+/-! ## Generic positive-decrement stage chains -/
+
+/-- Gap index shifted at one stage of a positive-decrement suffix. -/
+private def decrementStageIndex : Register → Fin 4
+  | .left => 0
+  | .right => 1
+  | .temp => 2
+  | .clock => 3
+
+/-- Intermediate layout: the final tuple with the current suffix register
+still one cell longer. -/
+private def decrementStageRegisters
+    (final : Registers) (stage : Register) : Registers :=
+  final.increment stage
+
+/-- Consecutive registers in the left-to-right decrement suffix. -/
+private inductive DecrementStageNext : Register → Register → Prop
+  | left : DecrementStageNext .left .right
+  | right : DecrementStageNext .right .temp
+  | temp : DecrementStageNext .temp .clock
+
+/-- The suffix of register boundaries shifted by one named decrement. -/
+private def decrementStages : Register → List Register
+  | .left => [.left, .right, .temp, .clock]
+  | .right => [.right, .temp, .clock]
+  | .temp => [.temp, .clock]
+  | .clock => [.clock]
+
+/-- A list follows the fixed left-to-right register order and ends at clock. -/
+private inductive DecrementStageChain : Register → List Register → Prop
+  | clock : DecrementStageChain .clock [.clock]
+  | cons {stage next : Register} {tail : List Register}
+      (hnext : DecrementStageNext stage next)
+      (hrest : DecrementStageChain next (next :: tail)) :
+      DecrementStageChain stage (stage :: next :: tail)
+
+private theorem decrementStages_chain (register : Register) :
+    DecrementStageChain register (decrementStages register) := by
+  cases register with
+  | clock => exact .clock
+  | temp => exact .cons .temp .clock
+  | right => exact .cons .right (.cons .temp .clock)
+  | left => exact .cons .left (.cons .right (.cons .temp .clock))
+
+private theorem decrementStages_labels (register : Register) :
+    (decrementStages register).map
+        (fun stage => (decrementStageIndex stage).succ) =
+      MarkerShift.decrementOrder register := by
+  cases register <;>
+    rfl
+
+private theorem decrementStage_layoutEnd
+    (final : Registers) (stage : Register) :
+    layoutEnd (decrementStageRegisters final stage) = layoutEnd final + 1 := by
+  simp [decrementStageRegisters]
+
+private theorem decrementStage_positive (final : Registers) (stage : Register) :
+    0 < RegisterLayout.values (decrementStageRegisters final stage)
+      (decrementStageIndex stage) := by
+  cases stage <;>
+    simp [decrementStageRegisters, decrementStageIndex,
+      RegisterLayout.values, Registers.increment, Registers.set,
+      Registers.get]
+
+private theorem decrementStage_move {final : Registers} {stage next : Register}
+    (hnext : DecrementStageNext stage next) :
+    MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape (decrementStageRegisters final stage))
+        (MarkerTape.boundaryPosition (decrementStageRegisters final stage)
+          (decrementStageIndex stage).succ)
+        (decrementStageIndex stage).succ =
+      MarkerTape.canonicalTape (decrementStageRegisters final next) := by
+  cases hnext with
+  | left => exact MarkerSchedule.moveLeftBoundary_before_right final
+  | right => exact MarkerSchedule.moveRightBoundary_before_temp final
+  | temp => exact MarkerSchedule.moveTempBoundary_before_clock final
+
+private theorem decrementStage_head {final : Registers} {stage next : Register}
+    (hnext : DecrementStageNext stage next) :
+    boundaryOffset (decrementStageRegisters final stage)
+        (decrementStageIndex stage).succ =
+      firstGapOffset (decrementStageRegisters final next)
+        (decrementStageIndex next) := by
+  cases hnext <;>
+    simp [decrementStageRegisters, decrementStageIndex, boundaryOffset,
+      firstGapOffset, CounterLayout.boundaryPos, RegisterLayout.values,
+      Registers.increment, Registers.set, Registers.get] <;>
+    omega
+
+/-- Execute one noninitial stage and preserve exact outer backing. -/
+private theorem decrementIntermediateStage_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : DecrementScheduleRunner base c Short Failure)
+    (source searchSlot : Nat) (success : ControlRef)
+    (final : Registers) {stage next : Register}
+    (hstage : DecrementStageNext stage next)
+    {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
+    (hback : BackedBy spec T outer)
+    (hregisters : spec.registers = decrementStageRegisters final stage)
+    (hshort : Short spec.outerDistance)
+    (hraw : RawCommand.markerShift
+      ⟨spec.growth, source, searchSlot⟩ (decrementStageIndex stage).succ
+      .right .left success (some .right) none ∈ rawCommands) :
+    let nextRegisters := decrementStageRegisters final next
+    let nextCore : layoutEnd nextRegisters < spec.outerDistance := by
+      rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
+        ← hregisters]
+      exact spec.core_before_target
+    let U := install nextRegisters spec.growth spec.returnTag
+      (writeLogical spec.growth T
+        (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+        blankSymbol)
+    let nextSpec := updateSpec spec nextRegisters nextCore
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+        ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+          atLogical spec.growth T
+            (firstGapOffset spec.registers (decrementStageIndex stage))⟩
+        ⟨resolve base c success,
+          atLogical spec.growth U
+            (boundaryOffset spec.registers
+              (decrementStageIndex stage).succ)⟩ ∧
+      BackedBy nextSpec U outer := by
+  dsimp only
+  have h := hback.represents
+  let nextRegisters := decrementStageRegisters final next
+  have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
+    rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
+      ← hregisters]
+    exact spec.core_before_target
+  have hlayout : layoutEnd nextRegisters = layoutEnd spec.registers := by
+    rw [hregisters, decrementStage_layoutEnd,
+      decrementStage_layoutEnd]
+  have hrun := runner.following spec.outerDistance hshort source searchSlot
+    success h nextRegisters (decrementStageIndex stage)
+    (by rw [hregisters]; exact decrementStage_positive final stage)
+    (registerValue_lt_outerDistance h (decrementStageIndex stage))
+    hnextCore (by omega) (by omega)
+    (boundaryOffset_le_layoutEnd spec.registers _)
+    (by
+      have hbound := boundaryOffset_le_layoutEnd spec.registers
+        (decrementStageIndex stage).succ
+      omega)
+    (by intro hlt; omega)
+    (by simpa [hregisters, nextRegisters] using
+      decrementStage_move (final := final) hstage)
+    hraw
+  let U := install nextRegisters spec.growth spec.returnTag
+    (writeLogical spec.growth T
+      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+      blankSymbol)
+  let nextSpec := updateSpec spec nextRegisters hnextCore
+  have hnextBack : BackedBy nextSpec U outer := by
+    exact install_clear_inside_backedBy hback nextRegisters hnextCore
+      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+      (by simp [boundaryOffset])
+      (by
+        have hbound := boundaryOffset_le_layoutEnd spec.registers
+          (decrementStageIndex stage).succ
+        rw [hlayout]
+        exact hbound)
+      (by omega)
+  exact ⟨hrun, hnextBack⟩
+
+/-- Execute the zero-distance first stage and preserve exact outer backing. -/
+private theorem decrementFirstIntermediateStage_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : DecrementScheduleRunner base c Short Failure)
+    (source searchSlot : Nat) (success : ControlRef)
+    (final : Registers) {stage next : Register}
+    (hstage : DecrementStageNext stage next)
+    {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
+    (hback : BackedBy spec T outer)
+    (hregisters : spec.registers = decrementStageRegisters final stage)
+    (hshort : Short spec.outerDistance)
+    (hraw : RawCommand.markerShift
+      ⟨spec.growth, source, searchSlot⟩ (decrementStageIndex stage).succ
+      .right .left success (some .right) none ∈ rawCommands) :
+    let nextRegisters := decrementStageRegisters final next
+    let nextCore : layoutEnd nextRegisters < spec.outerDistance := by
+      rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
+        ← hregisters]
+      exact spec.core_before_target
+    let U := install nextRegisters spec.growth spec.returnTag
+      (writeLogical spec.growth T
+        (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+        blankSymbol)
+    let nextSpec := updateSpec spec nextRegisters nextCore
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+        ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+          atLogical spec.growth T
+            (boundaryOffset spec.registers
+              (decrementStageIndex stage).succ)⟩
+        ⟨resolve base c success,
+          atLogical spec.growth U
+            (boundaryOffset spec.registers
+              (decrementStageIndex stage).succ)⟩ ∧
+      BackedBy nextSpec U outer := by
+  dsimp only
+  have h := hback.represents
+  let nextRegisters := decrementStageRegisters final next
+  have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
+    rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
+      ← hregisters]
+    exact spec.core_before_target
+  have hlayout : layoutEnd nextRegisters = layoutEnd spec.registers := by
+    rw [hregisters, decrementStage_layoutEnd,
+      decrementStage_layoutEnd]
+  have hlimit : 0 < spec.outerDistance :=
+    Nat.zero_lt_of_lt spec.core_before_target
+  have hrun := runner.first spec.outerDistance hshort source searchSlot
+    success hlimit h nextRegisters (decrementStageIndex stage)
+    (by rw [hregisters]; exact decrementStage_positive final stage)
+    hnextCore (by omega) (by omega)
+    (boundaryOffset_le_layoutEnd spec.registers _)
+    (by
+      have hbound := boundaryOffset_le_layoutEnd spec.registers
+        (decrementStageIndex stage).succ
+      omega)
+    (by intro hlt; omega)
+    (by simpa [hregisters, nextRegisters] using
+      decrementStage_move (final := final) hstage)
+    hraw
+  let U := install nextRegisters spec.growth spec.returnTag
+    (writeLogical spec.growth T
+      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+      blankSymbol)
+  let nextSpec := updateSpec spec nextRegisters hnextCore
+  have hnextBack : BackedBy nextSpec U outer := by
+    exact install_clear_inside_backedBy hback nextRegisters hnextCore
+      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+      (by simp [boundaryOffset])
+      (by
+        have hbound := boundaryOffset_le_layoutEnd spec.registers
+          (decrementStageIndex stage).succ
+        rw [hlayout]
+        exact hbound)
+      (by omega)
+  exact ⟨hrun, hnextBack⟩
+
+/-- Finish a noninitial stage chain by shifting boundary `4`. -/
+private theorem decrementFinalFollowing_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : DecrementScheduleRunner base c Short Failure)
+    (source searchSlot : Nat)
+    (final : Registers)
+    {spec : Spec numTags} {T outer desiredTape :
+      FullTM0.Tape (Symbol numTags)}
+    (hback : BackedBy spec T outer)
+    (hregisters : spec.registers =
+      decrementStageRegisters final .clock)
+    (hshort : Short spec.outerDistance)
+    (hfinalCore : layoutEnd final < spec.outerDistance)
+    (hdesired : BackedBy (updateSpec spec final hfinalCore)
+      desiredTape outer)
+    (hraw : RawCommand.markerShift
+      ⟨spec.growth, source, searchSlot⟩ 4 .right .left
+      (directRef spec.growth source finishDirectSlot) (some .right) none ∈
+        rawCommands) :
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+      ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+        atLogical spec.growth T
+          (firstGapOffset spec.registers (3 : Fin 4))⟩
+      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
+        atLogical spec.growth desiredTape (layoutEnd final + 1)⟩ := by
+  have h := hback.represents
+  have hp : 0 < RegisterLayout.values spec.registers (3 : Fin 4) := by
+    rw [hregisters]
+    exact decrementStage_positive final .clock
+  have hcurrentEnd : layoutEnd spec.registers = layoutEnd final + 1 := by
+    rw [hregisters, decrementStage_layoutEnd]
+  have hmove : MarkerMachine.moveAt .left
+      (MarkerTape.canonicalTape spec.registers)
+      (MarkerTape.boundaryPosition spec.registers 4) 4 =
+      MarkerTape.canonicalTape final := by
+    rw [hregisters]
+    exact MarkerSchedule.moveClockBoundary_after_increment final
+  have hrun := runner.following spec.outerDistance hshort source searchSlot
+    (directRef spec.growth source finishDirectSlot) h final (3 : Fin 4)
+    hp (registerValue_lt_outerDistance h (3 : Fin 4)) hfinalCore
+    (by omega) (by omega) (boundaryOffset_le_layoutEnd spec.registers 4)
+    (by simp [boundaryOffset_four, hcurrentEnd])
+    (by
+      intro _
+      simp [boundaryOffset_four])
+    hmove hraw
+  have hclockPositive : 0 < spec.registers.get .clock := by
+    change 0 < spec.registers.clock
+    simpa [RegisterLayout.values] using hp
+  have hfinalRegisters : spec.registers.decrement .clock = final := by
+    rw [hregisters]
+    simp [decrementStageRegisters, Registers.increment, Registers.decrement,
+      Registers.set, Registers.get]
+  have hfinalBack := decrementTape_backedBy hback .clock hclockPositive
+  have hfinalTape : decrementTape spec .clock T = desiredTape := by
+    rw [hfinalBack.installed, hdesired.installed]
+    simp [decrementSpec, updateSpec, hfinalRegisters]
+  have hrun' : FullTM0.CompletesOr
+      (CounterControlNestingBridge.machine base c) Failure
+      ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+        atLogical spec.growth T
+          (firstGapOffset spec.registers (3 : Fin 4))⟩
+      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
+        atLogical spec.growth (decrementTape spec .clock T)
+          (layoutEnd spec.registers)⟩ := by
+    simpa [decrementTape, clearOldLayoutEnd, hfinalRegisters,
+      boundaryOffset_four] using hrun
+  simpa [hcurrentEnd, hfinalTape] using hrun'
+
+/-- Finish the one-stage clock schedule directly from its tested boundary. -/
+private theorem decrementFinalFirst_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : DecrementScheduleRunner base c Short Failure)
+    (source searchSlot : Nat)
+    (final : Registers)
+    {spec : Spec numTags} {T outer desiredTape :
+      FullTM0.Tape (Symbol numTags)}
+    (hback : BackedBy spec T outer)
+    (hregisters : spec.registers =
+      decrementStageRegisters final .clock)
+    (hshort : Short spec.outerDistance)
+    (hfinalCore : layoutEnd final < spec.outerDistance)
+    (hdesired : BackedBy (updateSpec spec final hfinalCore)
+      desiredTape outer)
+    (hraw : RawCommand.markerShift
+      ⟨spec.growth, source, searchSlot⟩ 4 .right .left
+      (directRef spec.growth source finishDirectSlot) (some .right) none ∈
+        rawCommands) :
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+      ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+        atLogical spec.growth T (boundaryOffset spec.registers 4)⟩
+      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
+        atLogical spec.growth desiredTape (layoutEnd final + 1)⟩ := by
+  have h := hback.represents
+  have hp : 0 < RegisterLayout.values spec.registers (3 : Fin 4) := by
+    rw [hregisters]
+    exact decrementStage_positive final .clock
+  have hcurrentEnd : layoutEnd spec.registers = layoutEnd final + 1 := by
+    rw [hregisters, decrementStage_layoutEnd]
+  have hmove : MarkerMachine.moveAt .left
+      (MarkerTape.canonicalTape spec.registers)
+      (MarkerTape.boundaryPosition spec.registers 4) 4 =
+      MarkerTape.canonicalTape final := by
+    rw [hregisters]
+    exact MarkerSchedule.moveClockBoundary_after_increment final
+  have hrun := runner.first spec.outerDistance hshort source searchSlot
+    (directRef spec.growth source finishDirectSlot)
+    (Nat.zero_lt_of_lt spec.core_before_target) h final (3 : Fin 4) hp
+    hfinalCore (by omega) (by omega)
+    (boundaryOffset_le_layoutEnd spec.registers 4)
+    (by simp [boundaryOffset_four, hcurrentEnd])
+    (by intro _; simp [boundaryOffset_four]) hmove hraw
+  have hclockPositive : 0 < spec.registers.get .clock := by
+    change 0 < spec.registers.clock
+    simpa [RegisterLayout.values] using hp
+  have hfinalRegisters : spec.registers.decrement .clock = final := by
+    rw [hregisters]
+    simp [decrementStageRegisters, Registers.increment, Registers.decrement,
+      Registers.set, Registers.get]
+  have hfinalBack := decrementTape_backedBy hback .clock hclockPositive
+  have hfinalTape : decrementTape spec .clock T = desiredTape := by
+    rw [hfinalBack.installed, hdesired.installed]
+    simp [decrementSpec, updateSpec, hfinalRegisters]
+  have hrun' : FullTM0.CompletesOr
+      (CounterControlNestingBridge.machine base c) Failure
+      ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+        atLogical spec.growth T (boundaryOffset spec.registers 4)⟩
+      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
+        atLogical spec.growth (decrementTape spec .clock T)
+          (layoutEnd spec.registers)⟩ := by
+    simpa [decrementTape, clearOldLayoutEnd, hfinalRegisters,
+      boundaryOffset_four] using hrun
+  simpa [hcurrentEnd, hfinalTape] using hrun'
+
+/-- Fold all noninitial stages of a decrement suffix. -/
+private theorem decrementFollowingChain_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : DecrementScheduleRunner base c Short Failure)
+    (source searchSlot : Nat) (final : Registers)
+    {stage : Register} {stages : List Register}
+    (hchain : DecrementStageChain stage stages)
+    {spec : Spec numTags} {T outer desiredTape :
+      FullTM0.Tape (Symbol numTags)}
+    (hback : BackedBy spec T outer)
+    (hregisters : spec.registers = decrementStageRegisters final stage)
+    (hshort : Short spec.outerDistance)
+    (hfinalCore : layoutEnd final < spec.outerDistance)
+    (hdesired : BackedBy (updateSpec spec final hfinalCore)
+      desiredTape outer)
+    (hcommands : ∀ raw,
+      raw ∈ decrementShiftCommandsAux spec.growth source searchSlot
+        (stages.map
+          (fun current => (decrementStageIndex current).succ)) →
+      raw ∈ rawCommands) :
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+      ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+        atLogical spec.growth T
+          (firstGapOffset spec.registers (decrementStageIndex stage))⟩
+      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
+        atLogical spec.growth desiredTape (layoutEnd final + 1)⟩ := by
+  induction hchain generalizing spec T searchSlot with
+  | clock =>
+      apply decrementFinalFollowing_with base c Short Failure runner source
+        searchSlot final hback hregisters hshort hfinalCore hdesired
+      apply hcommands
+      simp [decrementShiftCommandsAux, decrementStageIndex]
+  | @cons stage next tail hstage hrest ih =>
+      let nextRegisters := decrementStageRegisters final next
+      have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
+        rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
+          ← hregisters]
+        exact spec.core_before_target
+      let U := install nextRegisters spec.growth spec.returnTag
+        (writeLogical spec.growth T
+          (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+          blankSymbol)
+      let nextSpec := updateSpec spec nextRegisters hnextCore
+      have hraw : RawCommand.markerShift
+          ⟨spec.growth, source, searchSlot⟩
+          (decrementStageIndex stage).succ .right .left
+          (searchRef spec.growth source (searchSlot + 1))
+          (some .right) none ∈ rawCommands := by
+        apply hcommands
+        simp [decrementShiftCommandsAux]
+      have hfirst := decrementIntermediateStage_with base c Short Failure
+        runner source searchSlot
+        (searchRef spec.growth source (searchSlot + 1)) final hstage hback
+        hregisters hshort hraw
+      have hfirst' : FullTM0.CompletesOr
+          (CounterControlNestingBridge.machine base c) Failure
+          ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
+            atLogical spec.growth T
+              (firstGapOffset spec.registers
+                (decrementStageIndex stage))⟩
+          ⟨searchState base c ⟨nextSpec.growth, source, searchSlot + 1⟩,
+            atLogical nextSpec.growth U
+              (firstGapOffset nextSpec.registers
+                (decrementStageIndex next))⟩ := by
+        have hhead : boundaryOffset spec.registers
+              (decrementStageIndex stage).succ =
+            firstGapOffset nextRegisters (decrementStageIndex next) := by
+          rw [hregisters]
+          exact decrementStage_head (final := final) hstage
+        simpa [nextSpec, nextRegisters, U, hhead, searchRef,
+          CounterControlPlan.resolve] using hfirst.1
+      have hnextBack : BackedBy nextSpec U outer := by
+        simpa [nextSpec, nextRegisters, U] using hfirst.2
+      have hnextShort : Short nextSpec.outerDistance := by
+        simpa [nextSpec, updateSpec] using hshort
+      have hnextFinalCore : layoutEnd final < nextSpec.outerDistance := by
+        simpa [nextSpec, updateSpec] using hfinalCore
+      have hnextDesired : BackedBy
+          (updateSpec nextSpec final hnextFinalCore) desiredTape outer := by
+        simpa [nextSpec, updateSpec] using hdesired
+      have hnextCommands : ∀ raw,
+          raw ∈ decrementShiftCommandsAux nextSpec.growth source
+            (searchSlot + 1)
+            ((next :: tail).map
+              (fun current => (decrementStageIndex current).succ)) →
+          raw ∈ rawCommands := by
+        intro raw hraw'
+        apply hcommands raw
+        simpa [nextSpec, updateSpec, decrementShiftCommandsAux] using
+          List.mem_cons_of_mem _ hraw'
+      have hrestRun := ih (searchSlot := searchSlot + 1)
+        (spec := nextSpec) (T := U) hnextBack rfl hnextShort
+        hnextFinalCore hnextDesired hnextCommands
+      exact FullTM0.CompletesOr.trans runner.pullback hfirst' hrestRun
+
+/-- Interpret a complete register suffix, using the first-stage runner once
+and the following-stage runner for its tail. -/
+private theorem decrementChain_with
+    (base : Nat) (c : Nat.Partrec.Code)
+    (Short : Nat → Prop)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : DecrementScheduleRunner base c Short Failure)
+    (source : Nat) (final : Registers)
+    {stage : Register} {stages : List Register}
+    (hchain : DecrementStageChain stage stages)
+    {spec : Spec numTags} {T outer desiredTape :
+      FullTM0.Tape (Symbol numTags)}
+    (hback : BackedBy spec T outer)
+    (hregisters : spec.registers = decrementStageRegisters final stage)
+    (hshort : Short spec.outerDistance)
+    (hfinalCore : layoutEnd final < spec.outerDistance)
+    (hdesired : BackedBy (updateSpec spec final hfinalCore)
+      desiredTape outer)
+    (hcommands : ∀ raw,
+      raw ∈ decrementShiftCommandsAux spec.growth source secondarySearchBase
+        (stages.map
+          (fun current => (decrementStageIndex current).succ)) →
+      raw ∈ rawCommands) :
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+      ⟨searchState base c ⟨spec.growth, source, secondarySearchBase⟩,
+        atLogical spec.growth T
+          (boundaryOffset spec.registers (decrementStageIndex stage).succ)⟩
+      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
+        atLogical spec.growth desiredTape (layoutEnd final + 1)⟩ := by
+  cases hchain with
+  | clock =>
+      apply decrementFinalFirst_with base c Short Failure runner source
+        secondarySearchBase final hback hregisters hshort hfinalCore hdesired
+      apply hcommands
+      simp [decrementShiftCommandsAux, decrementStageIndex]
+  | @cons stage next tail hstage hrest =>
+      let nextRegisters := decrementStageRegisters final next
+      have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
+        rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
+          ← hregisters]
+        exact spec.core_before_target
+      let U := install nextRegisters spec.growth spec.returnTag
+        (writeLogical spec.growth T
+          (boundaryOffset spec.registers (decrementStageIndex stage).succ)
+          blankSymbol)
+      let nextSpec := updateSpec spec nextRegisters hnextCore
+      have hraw : RawCommand.markerShift
+          ⟨spec.growth, source, secondarySearchBase⟩
+          (decrementStageIndex stage).succ .right .left
+          (searchRef spec.growth source (secondarySearchBase + 1))
+          (some .right) none ∈ rawCommands := by
+        apply hcommands
+        simp [decrementShiftCommandsAux]
+      have hfirst := decrementFirstIntermediateStage_with base c Short Failure
+        runner source secondarySearchBase
+        (searchRef spec.growth source (secondarySearchBase + 1)) final hstage
+        hback hregisters hshort hraw
+      have hfirst' : FullTM0.CompletesOr
+          (CounterControlNestingBridge.machine base c) Failure
+          ⟨searchState base c
+              ⟨spec.growth, source, secondarySearchBase⟩,
+            atLogical spec.growth T
+              (boundaryOffset spec.registers
+                (decrementStageIndex stage).succ)⟩
+          ⟨searchState base c
+              ⟨nextSpec.growth, source, secondarySearchBase + 1⟩,
+            atLogical nextSpec.growth U
+              (firstGapOffset nextSpec.registers
+                (decrementStageIndex next))⟩ := by
+        have hhead : boundaryOffset spec.registers
+              (decrementStageIndex stage).succ =
+            firstGapOffset nextRegisters (decrementStageIndex next) := by
+          rw [hregisters]
+          exact decrementStage_head (final := final) hstage
+        simpa [nextSpec, nextRegisters, U, hhead, searchRef,
+          CounterControlPlan.resolve] using hfirst.1
+      have hnextBack : BackedBy nextSpec U outer := by
+        simpa [nextSpec, nextRegisters, U] using hfirst.2
+      have hnextShort : Short nextSpec.outerDistance := by
+        simpa [nextSpec, updateSpec] using hshort
+      have hnextFinalCore : layoutEnd final < nextSpec.outerDistance := by
+        simpa [nextSpec, updateSpec] using hfinalCore
+      have hnextDesired : BackedBy
+          (updateSpec nextSpec final hnextFinalCore) desiredTape outer := by
+        simpa [nextSpec, updateSpec] using hdesired
+      have hnextCommands : ∀ raw,
+          raw ∈ decrementShiftCommandsAux nextSpec.growth source
+            (secondarySearchBase + 1)
+            ((next :: tail).map
+              (fun current => (decrementStageIndex current).succ)) →
+          raw ∈ rawCommands := by
+        intro raw hraw'
+        apply hcommands raw
+        simpa [nextSpec, updateSpec, decrementShiftCommandsAux] using
+          List.mem_cons_of_mem _ hraw'
+      have hrestRun := decrementFollowingChain_with base c Short Failure
+        runner source (secondarySearchBase + 1) final hrest hnextBack rfl
+        hnextShort hnextFinalCore hnextDesired hnextCommands
+      exact FullTM0.CompletesOr.trans runner.pullback hfirst' hrestRun
+
 /-- Register-independent positive-decrement scheduling, parameterized by the
 outcome of each constituent bounded search. -/
 theorem machine_reaches_decrementSchedule_with
@@ -803,789 +1381,37 @@ theorem machine_reaches_decrementSchedule_with
           atLogical spec.growth T
             (boundaryOffset spec.registers
               (MarkerSchedule.decrementStartBoundary register))⟩ := by
-  have h := hback.represents
-  have hlimit : 0 < spec.outerDistance := by
-    exact Nat.zero_lt_of_lt spec.core_before_target
+  let final := spec.registers.decrement register
+  have hregisters : spec.registers =
+      decrementStageRegisters final register := by
+    symm
+    exact MarkerSchedule.increment_decrement_registers
+      spec.registers register hpositive
+  have hfinalCore : layoutEnd final < spec.outerDistance :=
+    (layoutEnd_decrement_lt spec.registers register hpositive).trans
+      spec.core_before_target
   have hdesired := decrementTape_backedBy hback register hpositive
-  cases register with
-  | clock =>
-      have hp : 0 < spec.registers.clock := by
-        simpa [Registers.get] using hpositive
-      let next := spec.registers.decrement .clock
-      have hnextCore : layoutEnd next < spec.outerDistance :=
-        (layoutEnd_decrement_lt spec.registers .clock hpositive).trans
-          spec.core_before_target
-      have hend : layoutEnd next + 1 = layoutEnd spec.registers :=
-        layoutEnd_decrement_add_one spec.registers .clock hpositive
-      have hmove : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape spec.registers)
-          (MarkerTape.boundaryPosition spec.registers 4) 4 =
-        MarkerTape.canonicalTape next := by
-        have hm := MarkerSchedule.moveClockBoundary_after_increment next
-        have hinv := MarkerSchedule.increment_decrement_registers
-          spec.registers .clock hpositive
-        rw [hinv] at hm
-        exact hm
-      have hraw : RawCommand.markerShift
-          ⟨spec.growth, source, secondarySearchBase⟩ 4 .right .left
-          (directRef spec.growth source finishDirectSlot) (some .right)
-          none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommands, decrementShiftCommandsAux,
-          MarkerShift.decrementOrder]
-      have hrun := runner.first spec.outerDistance hshort source secondarySearchBase
-        (directRef spec.growth source finishDirectSlot) hlimit h next
-        (3 : Fin 4) (by simpa [RegisterLayout.values] using hp)
-        hnextCore (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd spec.registers 4)
-        (by
-          change layoutEnd spec.registers - 1 ≤ layoutEnd next
-          omega)
-        (by intro _; rfl) hmove hraw
-      apply FullTM0.CompletesOr.and_right ?_ hdesired
-      simpa [next, decrementTape, clearOldLayoutEnd,
-        MarkerSchedule.decrementStartBoundary,
-        boundaryOffset_four] using hrun
-  | temp =>
-      have hp : 0 < spec.registers.temp := by
-        simpa [Registers.get] using hpositive
-      let final := spec.registers.decrement .temp
-      have hinv : final.increment .temp = spec.registers := by
-        exact MarkerSchedule.increment_decrement_registers
-          spec.registers .temp hpositive
-      let clockRegs := final.increment .clock
-      have hclockEnd : layoutEnd clockRegs = layoutEnd spec.registers := by
-        rw [← hinv]
-        simp only [clockRegs, layoutEnd_increment]
-      have hclockCore : layoutEnd clockRegs < spec.outerDistance := by
-        rw [hclockEnd]
-        exact spec.core_before_target
-      have hmoveThree : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape spec.registers)
-          (MarkerTape.boundaryPosition spec.registers 3) 3 =
-        MarkerTape.canonicalTape clockRegs := by
-        have hm := MarkerSchedule.moveTempBoundary_before_clock final
-        rw [hinv] at hm
-        exact hm
-      have hrawThree : RawCommand.markerShift
-          ⟨spec.growth, source, secondarySearchBase⟩ 3 .right .left
-          (searchRef spec.growth source (secondarySearchBase + 1))
-          (some .right) none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommands, decrementShiftCommandsAux,
-          MarkerShift.decrementOrder]
-      have hthree := runner.first spec.outerDistance hshort source secondarySearchBase
-        (searchRef spec.growth source (secondarySearchBase + 1)) hlimit h
-        clockRegs (2 : Fin 4) (by simpa [RegisterLayout.values] using hp)
-        hclockCore (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd spec.registers 3)
-        (by
-          change boundaryOffset spec.registers 3 - 1 ≤ layoutEnd clockRegs
-          rw [hclockEnd]
-          have hbound := boundaryOffset_le_layoutEnd spec.registers (3 : Fin 5)
-          omega)
-        (by
-          intro hlt
-          rw [hclockEnd] at hlt
-          omega)
-        hmoveThree hrawThree
-      let Uclock := install clockRegs spec.growth spec.returnTag
-        (writeLogical spec.growth T (boundaryOffset spec.registers 3)
-          blankSymbol)
-      let clockSpec := updateSpec spec clockRegs hclockCore
-      have hclockBack : BackedBy clockSpec Uclock outer := by
-        exact install_clear_inside_backedBy hback clockRegs hclockCore
-          (boundaryOffset spec.registers 3) (by simp [boundaryOffset])
-          (by rw [hclockEnd]; exact boundaryOffset_le_layoutEnd _ 3)
-          (by omega)
-      have hclockRep := hclockBack.represents
-      have hfinalCore : layoutEnd final < clockSpec.outerDistance := by
-        have hlt := layoutEnd_decrement_lt spec.registers .temp hpositive
-        simpa [clockSpec, updateSpec, final] using
-          hlt.trans spec.core_before_target
-      have hfinalEnd : layoutEnd final + 1 = layoutEnd clockRegs := by
-        rw [hclockEnd]
-        exact layoutEnd_decrement_add_one spec.registers .temp hpositive
-      have hmoveFour : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape clockSpec.registers)
-          (MarkerTape.boundaryPosition clockSpec.registers 4) 4 =
-        MarkerTape.canonicalTape final := by
-        simpa [clockSpec, updateSpec, clockRegs] using
-          MarkerSchedule.moveClockBoundary_after_increment final
-      have hrawFour : RawCommand.markerShift
-          ⟨clockSpec.growth, source, secondarySearchBase + 1⟩ 4 .right .left
-          (directRef clockSpec.growth source finishDirectSlot) (some .right)
-          none ∈ rawCommands := by
-        simpa [clockSpec, updateSpec] using hcommands
-          (.markerShift
-            ⟨spec.growth, source, secondarySearchBase + 1⟩ 4 .right .left
-            (directRef spec.growth source finishDirectSlot) (some .right) none)
-          (by simp [decrementShiftCommands, decrementShiftCommandsAux,
-            MarkerShift.decrementOrder])
-      have hfour := runner.following spec.outerDistance (by simpa [clockSpec, updateSpec] using hshort)
-        source (secondarySearchBase + 1)
-        (directRef clockSpec.growth source finishDirectSlot) hclockRep final
-        (3 : Fin 4)
-        (by simp [clockSpec, updateSpec, clockRegs, final,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get])
-        (by simpa [clockSpec, updateSpec] using
-          registerValue_lt_outerDistance hclockRep (3 : Fin 4))
-        hfinalCore
-        (by
-          dsimp only [clockSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (by
-          dsimp only [clockSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (boundaryOffset_le_layoutEnd clockSpec.registers 4)
-        (by
-          change layoutEnd clockSpec.registers - 1 ≤ layoutEnd final
-          dsimp only [clockSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (by intro _; rfl) hmoveFour hrawFour
-      have hhead : boundaryOffset spec.registers (Fin.succ (2 : Fin 4)) =
-          firstGapOffset clockSpec.registers 3 := by
-        change boundaryOffset spec.registers 3 =
-          firstGapOffset clockSpec.registers 3
-        simp [clockSpec, updateSpec, clockRegs, final, firstGapOffset,
-          boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get]
-        omega
-      have hfourBack := decrementTape_backedBy hclockBack .clock (by
-        simp [clockSpec, updateSpec, clockRegs, final, Registers.get,
-          Registers.increment, Registers.decrement, Registers.set])
-      have hfinalRegs : (decrementSpec clockSpec .clock (by
-          simp [clockSpec, updateSpec, clockRegs, final, Registers.get,
-            Registers.increment, Registers.decrement, Registers.set])).registers =
-          (decrementSpec spec .temp hpositive).registers := by
-        simp [decrementSpec, updateSpec, clockSpec, clockRegs, final,
-          Registers.increment, Registers.decrement, Registers.set,
-          Registers.get]
-      have hfinalTape : decrementTape clockSpec .clock Uclock =
-          decrementTape spec .temp T := by
-        calc
-          decrementTape clockSpec .clock Uclock =
-              install (decrementSpec clockSpec .clock (by
-                simp [clockSpec, updateSpec, clockRegs, final, Registers.get,
-                  Registers.increment, Registers.decrement,
-                  Registers.set])).registers spec.growth spec.returnTag outer :=
-            hfourBack.installed
-          _ = install (decrementSpec spec .temp hpositive).registers
-              spec.growth spec.returnTag outer := by rw [hfinalRegs]
-          _ = decrementTape spec .temp T := hdesired.installed.symm
-      have hclockDecrement : clockSpec.registers.decrement .clock = final := by
-        simp [clockSpec, updateSpec, clockRegs, final, Registers.decrement,
-          Registers.increment, Registers.set, Registers.get]
-      have hresultTape :
-          install final clockSpec.growth clockSpec.returnTag
-              (writeLogical clockSpec.growth Uclock
-                (boundaryOffset clockSpec.registers (Fin.succ (3 : Fin 4)))
-                blankSymbol) =
-            decrementTape clockSpec .clock Uclock := by
-        rw [decrementTape, clearOldLayoutEnd, hclockDecrement]
-        rw [show boundaryOffset clockSpec.registers
-          (Fin.succ (3 : Fin 4)) = layoutEnd clockSpec.registers by rfl]
-      rw [hhead] at hthree
-      rw [hresultTape, hfinalTape] at hfour
-      simp only [clockSpec, updateSpec] at hthree hfour
-      have hhead' : boundaryOffset spec.registers (3 : Fin 5) =
-          firstGapOffset clockRegs 3 := by
-        simpa [clockSpec, updateSpec] using hhead
-      have hUclock :
-          install clockRegs spec.growth spec.returnTag
-              (writeLogical spec.growth T (firstGapOffset clockRegs 3)
-                blankSymbol) = Uclock := by
-        dsimp only [Uclock]
-        rw [← hhead']
-      rw [hUclock] at hthree
-      rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
-        layoutEnd clockRegs by rfl, hclockEnd] at hfour
-      simp only [searchRef, CounterControlPlan.resolve] at hthree
-      apply FullTM0.CompletesOr.and_right ?_ hdesired
-      simpa only [MarkerSchedule.decrementStartBoundary, hhead'] using
-        FullTM0.CompletesOr.trans runner.pullback hthree hfour
-  | right =>
-      have hp : 0 < spec.registers.right := by
-        simpa [Registers.get] using hpositive
-      let final := spec.registers.decrement .right
-      have hinv : final.increment .right = spec.registers :=
-        MarkerSchedule.increment_decrement_registers spec.registers .right
-          hpositive
-      let tempRegs := final.increment .temp
-      let clockRegs := final.increment .clock
-      have htempEnd : layoutEnd tempRegs = layoutEnd spec.registers := by
-        rw [← hinv]
-        simp only [tempRegs, layoutEnd_increment]
-      have hclockEnd : layoutEnd clockRegs = layoutEnd spec.registers := by
-        rw [← hinv]
-        simp only [clockRegs, layoutEnd_increment]
-      have htempCore : layoutEnd tempRegs < spec.outerDistance := by
-        rw [htempEnd]
-        exact spec.core_before_target
-      have hmoveTwo := MarkerSchedule.moveRightBoundary_before_temp final
-      rw [hinv] at hmoveTwo
-      have hrawTwo : RawCommand.markerShift
-          ⟨spec.growth, source, secondarySearchBase⟩ 2 .right .left
-          (searchRef spec.growth source (secondarySearchBase + 1))
-          (some .right) none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommands, decrementShiftCommandsAux,
-          MarkerShift.decrementOrder]
-      have htwo := runner.first spec.outerDistance hshort source secondarySearchBase
-        (searchRef spec.growth source (secondarySearchBase + 1)) hlimit h
-        tempRegs (1 : Fin 4)
-        (by simpa [RegisterLayout.values, Registers.get] using hpositive)
-        htempCore (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd spec.registers 2)
-        (by
-          change boundaryOffset spec.registers 2 - 1 ≤ layoutEnd tempRegs
-          rw [htempEnd]
-          have hbound := boundaryOffset_le_layoutEnd spec.registers (2 : Fin 5)
-          omega)
-        (by
-          intro hlt
-          rw [htempEnd] at hlt
-          omega)
-        hmoveTwo hrawTwo
-      let Utemp := install tempRegs spec.growth spec.returnTag
-        (writeLogical spec.growth T (boundaryOffset spec.registers 2)
-          blankSymbol)
-      let tempSpec := updateSpec spec tempRegs htempCore
-      have htempBack : BackedBy tempSpec Utemp outer :=
-        install_clear_inside_backedBy hback tempRegs htempCore
-          (boundaryOffset spec.registers 2) (by simp [boundaryOffset])
-          (by rw [htempEnd]; exact boundaryOffset_le_layoutEnd _ 2)
-          (by omega)
-      have hclockCore : layoutEnd clockRegs < tempSpec.outerDistance := by
-        simpa [tempSpec, updateSpec, hclockEnd] using spec.core_before_target
-      have hmoveThree : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape tempSpec.registers)
-          (MarkerTape.boundaryPosition tempSpec.registers 3) 3 =
-        MarkerTape.canonicalTape clockRegs := by
-        simpa [tempSpec, updateSpec, tempRegs, clockRegs] using
-          MarkerSchedule.moveTempBoundary_before_clock final
-      have hrawThree : RawCommand.markerShift
-          ⟨tempSpec.growth, source, secondarySearchBase + 1⟩ 3 .right .left
-          (searchRef tempSpec.growth source (secondarySearchBase + 2))
-          (some .right) none ∈ rawCommands := by
-        simpa [tempSpec, updateSpec] using hcommands
-          (.markerShift
-            ⟨spec.growth, source, secondarySearchBase + 1⟩ 3 .right .left
-            (searchRef spec.growth source (secondarySearchBase + 2))
-            (some .right) none)
-          (by simp [decrementShiftCommands, decrementShiftCommandsAux,
-            MarkerShift.decrementOrder])
-      have hthree := runner.following spec.outerDistance (by simpa [tempSpec, updateSpec] using hshort)
-        source (secondarySearchBase + 1)
-        (searchRef tempSpec.growth source (secondarySearchBase + 2))
-        htempBack.represents clockRegs (2 : Fin 4)
-        (by simp [tempSpec, updateSpec, tempRegs, final,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get])
-        (by simpa [tempSpec, updateSpec] using
-          registerValue_lt_outerDistance htempBack.represents (2 : Fin 4))
-        hclockCore
-        (by
-          dsimp only [tempSpec, updateSpec]
-          rw [hclockEnd, htempEnd])
-        (by
-          dsimp only [tempSpec, updateSpec]
-          rw [hclockEnd, htempEnd]
-          omega)
-        (boundaryOffset_le_layoutEnd tempSpec.registers 3)
-        (by
-          dsimp only [tempSpec, updateSpec]
-          have hbound := boundaryOffset_le_layoutEnd tempRegs
-            (Fin.succ (2 : Fin 4))
-          rw [htempEnd] at hbound
-          omega)
-        (by
-          dsimp only [tempSpec, updateSpec]
-          intro hlt
-          rw [hclockEnd, htempEnd] at hlt
-          omega)
-        hmoveThree hrawThree
-      let Uclock := install clockRegs tempSpec.growth tempSpec.returnTag
-        (writeLogical tempSpec.growth Utemp
-          (boundaryOffset tempSpec.registers 3) blankSymbol)
-      let clockSpec := updateSpec tempSpec clockRegs hclockCore
-      have hclockBack : BackedBy clockSpec Uclock outer :=
-        install_clear_inside_backedBy htempBack clockRegs hclockCore
-          (boundaryOffset tempSpec.registers 3) (by simp [boundaryOffset])
-          (by
-            dsimp only [tempSpec, updateSpec]
-            have hbound := boundaryOffset_le_layoutEnd tempRegs (3 : Fin 5)
-            rw [htempEnd] at hbound
-            rw [hclockEnd]
-            exact hbound)
-          (by
-            dsimp only [tempSpec, updateSpec]
-            rw [hclockEnd, htempEnd])
-      have hfinalCore : layoutEnd final < clockSpec.outerDistance := by
-        have hlt := layoutEnd_decrement_lt spec.registers .right hpositive
-        simpa [clockSpec, tempSpec, updateSpec, final] using
-          hlt.trans spec.core_before_target
-      have hfinalEnd : layoutEnd final + 1 = layoutEnd spec.registers := by
-        exact layoutEnd_decrement_add_one spec.registers .right hpositive
-      have hmoveFour : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape clockSpec.registers)
-          (MarkerTape.boundaryPosition clockSpec.registers 4) 4 =
-        MarkerTape.canonicalTape final := by
-        simpa [clockSpec, tempSpec, updateSpec, clockRegs] using
-          MarkerSchedule.moveClockBoundary_after_increment final
-      have hrawFour : RawCommand.markerShift
-          ⟨clockSpec.growth, source, secondarySearchBase + 2⟩ 4 .right .left
-          (directRef clockSpec.growth source finishDirectSlot) (some .right)
-          none ∈ rawCommands := by
-        simpa [clockSpec, tempSpec, updateSpec] using hcommands
-          (.markerShift
-            ⟨spec.growth, source, secondarySearchBase + 2⟩ 4 .right .left
-            (directRef spec.growth source finishDirectSlot) (some .right) none)
-          (by simp [decrementShiftCommands, decrementShiftCommandsAux,
-            MarkerShift.decrementOrder])
-      have hfour := runner.following spec.outerDistance (by simpa [clockSpec, tempSpec, updateSpec] using hshort)
-        source (secondarySearchBase + 2)
-        (directRef clockSpec.growth source finishDirectSlot)
-        hclockBack.represents final (3 : Fin 4)
-        (by simp [clockSpec, tempSpec, updateSpec, clockRegs, final,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get])
-        (by simpa [clockSpec, tempSpec, updateSpec] using
-          registerValue_lt_outerDistance hclockBack.represents (3 : Fin 4))
-        hfinalCore
-        (by
-          dsimp only [clockSpec, tempSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (by
-          dsimp only [clockSpec, tempSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (boundaryOffset_le_layoutEnd clockSpec.registers 4)
-        (by
-          change layoutEnd clockSpec.registers - 1 ≤ layoutEnd final
-          dsimp only [clockSpec, tempSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (by intro _; rfl) hmoveFour hrawFour
-      have hheadTwo :
-          boundaryOffset spec.registers (Fin.succ (1 : Fin 4)) =
-          firstGapOffset tempSpec.registers 2 := by
-        change boundaryOffset spec.registers 2 =
-          firstGapOffset tempSpec.registers 2
-        rw [← hinv]
-        simp [tempSpec, updateSpec, tempRegs, final, firstGapOffset,
-          boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get]
-        omega
-      have hheadThree :
-          boundaryOffset tempSpec.registers (Fin.succ (2 : Fin 4)) =
-          firstGapOffset clockSpec.registers 3 := by
-        change boundaryOffset tempSpec.registers 3 =
-          firstGapOffset clockSpec.registers 3
-        simp [clockSpec, tempSpec, updateSpec, clockRegs, tempRegs, final,
-          firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get]
-        omega
-      have hfourBack := decrementTape_backedBy hclockBack .clock (by
-        simp [clockSpec, tempSpec, updateSpec, clockRegs, final,
-          Registers.get, Registers.increment, Registers.decrement,
-          Registers.set])
-      have hfinalTape : decrementTape clockSpec .clock Uclock =
-          decrementTape spec .right T := by
-        calc
-          _ = install final spec.growth spec.returnTag outer := by
-            simpa [clockSpec, tempSpec, updateSpec, clockRegs, final,
-              decrementSpec, Registers.increment, Registers.decrement,
-              Registers.set, Registers.get] using hfourBack.installed
-          _ = _ := by
-            simpa [final, decrementSpec, updateSpec] using hdesired.installed.symm
-      have hclockDecrement : clockSpec.registers.decrement .clock = final := by
-        simp [clockSpec, tempSpec, updateSpec, clockRegs, final,
-          Registers.decrement, Registers.increment, Registers.set,
-          Registers.get]
-      have hresultTape :
-          install final clockSpec.growth clockSpec.returnTag
-              (writeLogical clockSpec.growth Uclock
-                (boundaryOffset clockSpec.registers (Fin.succ (3 : Fin 4)))
-                blankSymbol) =
-            decrementTape clockSpec .clock Uclock := by
-        rw [decrementTape, clearOldLayoutEnd, hclockDecrement]
-        rw [show boundaryOffset clockSpec.registers
-          (Fin.succ (3 : Fin 4)) = layoutEnd clockSpec.registers by rfl]
-      rw [hresultTape, hfinalTape] at hfour
-      have hheadTwo' : boundaryOffset spec.registers (2 : Fin 5) =
-          firstGapOffset tempRegs 2 := by
-        simpa [tempSpec, updateSpec] using hheadTwo
-      have hheadThree' : boundaryOffset tempRegs (3 : Fin 5) =
-          firstGapOffset clockRegs 3 := by
-        simpa [clockSpec, tempSpec, updateSpec] using hheadThree
-      rw [hheadTwo] at htwo
-      rw [hheadThree] at hthree
-      simp only [tempSpec, clockSpec, updateSpec] at htwo hthree hfour
-      have hUtemp :
-          install tempRegs spec.growth spec.returnTag
-              (writeLogical spec.growth T (firstGapOffset tempRegs 2)
-                blankSymbol) = Utemp := by
-        dsimp only [Utemp]
-        rw [← hheadTwo']
-      have hUclock :
-          install clockRegs spec.growth spec.returnTag
-              (writeLogical spec.growth Utemp (firstGapOffset clockRegs 3)
-                blankSymbol) = Uclock := by
-        dsimp only [Uclock, tempSpec, updateSpec]
-        rw [← hheadThree']
-      rw [hUtemp] at htwo
-      rw [hUclock] at hthree
-      rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
-        layoutEnd clockRegs by rfl, hclockEnd] at hfour
-      simp only [searchRef, CounterControlPlan.resolve] at htwo hthree
-      apply FullTM0.CompletesOr.and_right ?_ hdesired
-      simpa only [MarkerSchedule.decrementStartBoundary, hheadTwo'] using
-        FullTM0.CompletesOr.trans runner.pullback htwo (FullTM0.CompletesOr.trans runner.pullback hthree hfour)
-  | left =>
-      have hp : 0 < spec.registers.left := by
-        simpa [Registers.get] using hpositive
-      let final := spec.registers.decrement .left
-      have hinv : final.increment .left = spec.registers :=
-        MarkerSchedule.increment_decrement_registers spec.registers .left
-          hpositive
-      let rightRegs := final.increment .right
-      let tempRegs := final.increment .temp
-      let clockRegs := final.increment .clock
-      have hrightEnd : layoutEnd rightRegs = layoutEnd spec.registers := by
-        rw [← hinv]
-        simp only [rightRegs, layoutEnd_increment]
-      have htempEnd : layoutEnd tempRegs = layoutEnd spec.registers := by
-        rw [← hinv]
-        simp only [tempRegs, layoutEnd_increment]
-      have hclockEnd : layoutEnd clockRegs = layoutEnd spec.registers := by
-        rw [← hinv]
-        simp only [clockRegs, layoutEnd_increment]
-      have hrightCore : layoutEnd rightRegs < spec.outerDistance := by
-        rw [hrightEnd]
-        exact spec.core_before_target
-      have hmoveOne := MarkerSchedule.moveLeftBoundary_before_right final
-      rw [hinv] at hmoveOne
-      have hrawOne : RawCommand.markerShift
-          ⟨spec.growth, source, secondarySearchBase⟩ 1 .right .left
-          (searchRef spec.growth source (secondarySearchBase + 1))
-          (some .right) none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommands, decrementShiftCommandsAux,
-          MarkerShift.decrementOrder]
-      have hone := runner.first spec.outerDistance hshort source secondarySearchBase
-        (searchRef spec.growth source (secondarySearchBase + 1)) hlimit h
-        rightRegs (0 : Fin 4)
-        (by simpa [RegisterLayout.values, Registers.get] using hpositive)
-        hrightCore (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd spec.registers 1)
-        (by
-          change boundaryOffset spec.registers 1 - 1 ≤ layoutEnd rightRegs
-          rw [hrightEnd]
-          have hbound := boundaryOffset_le_layoutEnd spec.registers (1 : Fin 5)
-          omega)
-        (by
-          intro hlt
-          rw [hrightEnd] at hlt
-          omega)
-        hmoveOne hrawOne
-      let Uright := install rightRegs spec.growth spec.returnTag
-        (writeLogical spec.growth T (boundaryOffset spec.registers 1)
-          blankSymbol)
-      let rightSpec := updateSpec spec rightRegs hrightCore
-      have hrightBack : BackedBy rightSpec Uright outer :=
-        install_clear_inside_backedBy hback rightRegs hrightCore
-          (boundaryOffset spec.registers 1) (by simp [boundaryOffset])
-          (by rw [hrightEnd]; exact boundaryOffset_le_layoutEnd _ 1)
-          (by omega)
-      have htempCore : layoutEnd tempRegs < rightSpec.outerDistance := by
-        simpa [rightSpec, updateSpec, htempEnd] using spec.core_before_target
-      have hmoveTwo : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape rightSpec.registers)
-          (MarkerTape.boundaryPosition rightSpec.registers 2) 2 =
-        MarkerTape.canonicalTape tempRegs := by
-        simpa [rightSpec, updateSpec, rightRegs, tempRegs] using
-          MarkerSchedule.moveRightBoundary_before_temp final
-      have hrawTwo : RawCommand.markerShift
-          ⟨rightSpec.growth, source, secondarySearchBase + 1⟩ 2 .right .left
-          (searchRef rightSpec.growth source (secondarySearchBase + 2))
-          (some .right) none ∈ rawCommands := by
-        simpa [rightSpec, updateSpec] using hcommands
-          (.markerShift
-            ⟨spec.growth, source, secondarySearchBase + 1⟩ 2 .right .left
-            (searchRef spec.growth source (secondarySearchBase + 2))
-            (some .right) none)
-          (by simp [decrementShiftCommands, decrementShiftCommandsAux,
-            MarkerShift.decrementOrder])
-      have htwo := runner.following spec.outerDistance (by simpa [rightSpec, updateSpec] using hshort)
-        source (secondarySearchBase + 1)
-        (searchRef rightSpec.growth source (secondarySearchBase + 2))
-        hrightBack.represents tempRegs (1 : Fin 4)
-        (by simp [rightSpec, updateSpec, rightRegs, final,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get])
-        (by simpa [rightSpec, updateSpec] using
-          registerValue_lt_outerDistance hrightBack.represents (1 : Fin 4))
-        htempCore
-        (by
-          dsimp only [rightSpec, updateSpec]
-          rw [htempEnd, hrightEnd])
-        (by
-          dsimp only [rightSpec, updateSpec]
-          rw [htempEnd, hrightEnd]
-          omega)
-        (boundaryOffset_le_layoutEnd rightSpec.registers 2)
-        (by
-          dsimp only [rightSpec, updateSpec]
-          have hbound := boundaryOffset_le_layoutEnd rightRegs
-            (Fin.succ (1 : Fin 4))
-          rw [hrightEnd] at hbound
-          omega)
-        (by
-          dsimp only [rightSpec, updateSpec]
-          intro hlt
-          rw [htempEnd, hrightEnd] at hlt
-          omega)
-        hmoveTwo hrawTwo
-      let Utemp := install tempRegs rightSpec.growth rightSpec.returnTag
-        (writeLogical rightSpec.growth Uright
-          (boundaryOffset rightSpec.registers 2) blankSymbol)
-      let tempSpec := updateSpec rightSpec tempRegs htempCore
-      have htempBack : BackedBy tempSpec Utemp outer :=
-        install_clear_inside_backedBy hrightBack tempRegs htempCore
-          (boundaryOffset rightSpec.registers 2) (by simp [boundaryOffset])
-          (by
-            dsimp only [rightSpec, updateSpec]
-            have hbound := boundaryOffset_le_layoutEnd rightRegs (2 : Fin 5)
-            rw [hrightEnd] at hbound
-            rw [htempEnd]
-            exact hbound)
-          (by
-            dsimp only [rightSpec, updateSpec]
-            rw [htempEnd, hrightEnd])
-      have hclockCore : layoutEnd clockRegs < tempSpec.outerDistance := by
-        simpa [tempSpec, rightSpec, updateSpec, hclockEnd] using
-          spec.core_before_target
-      have hmoveThree : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape tempSpec.registers)
-          (MarkerTape.boundaryPosition tempSpec.registers 3) 3 =
-        MarkerTape.canonicalTape clockRegs := by
-        simpa [tempSpec, rightSpec, updateSpec, tempRegs, clockRegs] using
-          MarkerSchedule.moveTempBoundary_before_clock final
-      have hrawThree : RawCommand.markerShift
-          ⟨tempSpec.growth, source, secondarySearchBase + 2⟩ 3 .right .left
-          (searchRef tempSpec.growth source (secondarySearchBase + 3))
-          (some .right) none ∈ rawCommands := by
-        simpa [tempSpec, rightSpec, updateSpec] using hcommands
-          (.markerShift
-            ⟨spec.growth, source, secondarySearchBase + 2⟩ 3 .right .left
-            (searchRef spec.growth source (secondarySearchBase + 3))
-            (some .right) none)
-          (by simp [decrementShiftCommands, decrementShiftCommandsAux,
-            MarkerShift.decrementOrder])
-      have hthree := runner.following spec.outerDistance (by simpa [tempSpec, rightSpec, updateSpec] using hshort)
-        source (secondarySearchBase + 2)
-        (searchRef tempSpec.growth source (secondarySearchBase + 3))
-        htempBack.represents clockRegs (2 : Fin 4)
-        (by simp [tempSpec, rightSpec, updateSpec, tempRegs, final,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get])
-        (by simpa [tempSpec, rightSpec, updateSpec] using
-          registerValue_lt_outerDistance htempBack.represents (2 : Fin 4))
-        hclockCore
-        (by
-          dsimp only [tempSpec, rightSpec, updateSpec]
-          rw [hclockEnd, htempEnd])
-        (by
-          dsimp only [tempSpec, rightSpec, updateSpec]
-          rw [hclockEnd, htempEnd]
-          omega)
-        (boundaryOffset_le_layoutEnd tempSpec.registers 3)
-        (by
-          dsimp only [tempSpec, rightSpec, updateSpec]
-          have hbound := boundaryOffset_le_layoutEnd tempRegs
-            (Fin.succ (2 : Fin 4))
-          rw [htempEnd] at hbound
-          omega)
-        (by
-          dsimp only [tempSpec, rightSpec, updateSpec]
-          intro hlt
-          rw [hclockEnd, htempEnd] at hlt
-          omega)
-        hmoveThree hrawThree
-      let Uclock := install clockRegs tempSpec.growth tempSpec.returnTag
-        (writeLogical tempSpec.growth Utemp
-          (boundaryOffset tempSpec.registers 3) blankSymbol)
-      let clockSpec := updateSpec tempSpec clockRegs hclockCore
-      have hclockBack : BackedBy clockSpec Uclock outer :=
-        install_clear_inside_backedBy htempBack clockRegs hclockCore
-          (boundaryOffset tempSpec.registers 3) (by simp [boundaryOffset])
-          (by
-            dsimp only [tempSpec, rightSpec, updateSpec]
-            have hbound := boundaryOffset_le_layoutEnd tempRegs (3 : Fin 5)
-            rw [htempEnd] at hbound
-            rw [hclockEnd]
-            exact hbound)
-          (by
-            dsimp only [tempSpec, rightSpec, updateSpec]
-            rw [hclockEnd, htempEnd])
-      have hfinalCore : layoutEnd final < clockSpec.outerDistance := by
-        have hlt := layoutEnd_decrement_lt spec.registers .left hpositive
-        simpa [clockSpec, tempSpec, rightSpec, updateSpec, final] using
-          hlt.trans spec.core_before_target
-      have hfinalEnd : layoutEnd final + 1 = layoutEnd spec.registers := by
-        exact layoutEnd_decrement_add_one spec.registers .left hpositive
-      have hmoveFour : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape clockSpec.registers)
-          (MarkerTape.boundaryPosition clockSpec.registers 4) 4 =
-        MarkerTape.canonicalTape final := by
-        simpa [clockSpec, tempSpec, rightSpec, updateSpec, clockRegs] using
-          MarkerSchedule.moveClockBoundary_after_increment final
-      have hrawFour : RawCommand.markerShift
-          ⟨clockSpec.growth, source, secondarySearchBase + 3⟩ 4 .right .left
-          (directRef clockSpec.growth source finishDirectSlot) (some .right)
-          none ∈ rawCommands := by
-        simpa [clockSpec, tempSpec, rightSpec, updateSpec] using hcommands
-          (.markerShift
-            ⟨spec.growth, source, secondarySearchBase + 3⟩ 4 .right .left
-            (directRef spec.growth source finishDirectSlot) (some .right) none)
-          (by simp [decrementShiftCommands, decrementShiftCommandsAux,
-            MarkerShift.decrementOrder])
-      have hfour := runner.following spec.outerDistance (by simpa [clockSpec, tempSpec, rightSpec, updateSpec] using hshort)
-        source (secondarySearchBase + 3)
-        (directRef clockSpec.growth source finishDirectSlot)
-        hclockBack.represents final (3 : Fin 4)
-        (by simp [clockSpec, tempSpec, rightSpec, updateSpec, clockRegs, final,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get])
-        (by simpa [clockSpec, tempSpec, rightSpec, updateSpec] using
-          registerValue_lt_outerDistance hclockBack.represents (3 : Fin 4))
-        hfinalCore
-        (by
-          dsimp only [clockSpec, tempSpec, rightSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (by
-          dsimp only [clockSpec, tempSpec, rightSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (boundaryOffset_le_layoutEnd clockSpec.registers 4)
-        (by
-          change layoutEnd clockSpec.registers - 1 ≤ layoutEnd final
-          dsimp only [clockSpec, tempSpec, rightSpec, updateSpec]
-          rw [hclockEnd]
-          omega)
-        (by intro _; rfl) hmoveFour hrawFour
-      have hheadOne :
-          boundaryOffset spec.registers (Fin.succ (0 : Fin 4)) =
-          firstGapOffset rightSpec.registers 1 := by
-        change boundaryOffset spec.registers 1 =
-          firstGapOffset rightSpec.registers 1
-        rw [← hinv]
-        simp [rightSpec, updateSpec, rightRegs, final, firstGapOffset,
-          boundaryOffset, CounterLayout.boundaryPos, RegisterLayout.values,
-          Registers.increment, Registers.decrement, Registers.set,
-          Registers.get]
-      have hheadTwo :
-          boundaryOffset rightSpec.registers (Fin.succ (1 : Fin 4)) =
-          firstGapOffset tempSpec.registers 2 := by
-        change boundaryOffset rightSpec.registers 2 =
-          firstGapOffset tempSpec.registers 2
-        simp [tempSpec, rightSpec, updateSpec, tempRegs, rightRegs, final,
-          firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get]
-        omega
-      have hheadThree :
-          boundaryOffset tempSpec.registers (Fin.succ (2 : Fin 4)) =
-          firstGapOffset clockSpec.registers 3 := by
-        change boundaryOffset tempSpec.registers 3 =
-          firstGapOffset clockSpec.registers 3
-        simp [clockSpec, tempSpec, rightSpec, updateSpec, clockRegs, tempRegs,
-          final, firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.decrement,
-          Registers.set, Registers.get]
-        omega
-      have hfourBack := decrementTape_backedBy hclockBack .clock (by
-        simp [clockSpec, tempSpec, rightSpec, updateSpec, clockRegs, final,
-          Registers.get, Registers.increment, Registers.decrement,
-          Registers.set])
-      have hfinalTape : decrementTape clockSpec .clock Uclock =
-          decrementTape spec .left T := by
-        calc
-          _ = install final spec.growth spec.returnTag outer := by
-            simpa [clockSpec, tempSpec, rightSpec, updateSpec, clockRegs,
-              final, decrementSpec, Registers.increment, Registers.decrement,
-              Registers.set, Registers.get] using hfourBack.installed
-          _ = _ := by
-            simpa [final, decrementSpec, updateSpec] using hdesired.installed.symm
-      have hclockDecrement : clockSpec.registers.decrement .clock = final := by
-        simp [clockSpec, tempSpec, rightSpec, updateSpec, clockRegs, final,
-          Registers.decrement, Registers.increment, Registers.set,
-          Registers.get]
-      have hresultTape :
-          install final clockSpec.growth clockSpec.returnTag
-              (writeLogical clockSpec.growth Uclock
-                (boundaryOffset clockSpec.registers (Fin.succ (3 : Fin 4)))
-                blankSymbol) =
-            decrementTape clockSpec .clock Uclock := by
-        rw [decrementTape, clearOldLayoutEnd, hclockDecrement]
-        rw [show boundaryOffset clockSpec.registers
-          (Fin.succ (3 : Fin 4)) = layoutEnd clockSpec.registers by rfl]
-      rw [hresultTape, hfinalTape] at hfour
-      have hheadOne' : boundaryOffset spec.registers (1 : Fin 5) =
-          firstGapOffset rightRegs 1 := by
-        simpa [rightSpec, updateSpec] using hheadOne
-      have hheadTwo' : boundaryOffset rightRegs (2 : Fin 5) =
-          firstGapOffset tempRegs 2 := by
-        simpa [tempSpec, rightSpec, updateSpec] using hheadTwo
-      have hheadThree' : boundaryOffset tempRegs (3 : Fin 5) =
-          firstGapOffset clockRegs 3 := by
-        simpa [clockSpec, tempSpec, rightSpec, updateSpec] using hheadThree
-      rw [hheadOne] at hone
-      rw [hheadTwo] at htwo
-      rw [hheadThree] at hthree
-      simp only [rightSpec, tempSpec, clockSpec, updateSpec] at hone htwo hthree hfour
-      have hUright :
-          install rightRegs spec.growth spec.returnTag
-              (writeLogical spec.growth T (firstGapOffset rightRegs 1)
-                blankSymbol) = Uright := by
-        dsimp only [Uright]
-        rw [← hheadOne']
-      have hUtemp :
-          install tempRegs spec.growth spec.returnTag
-              (writeLogical spec.growth Uright (firstGapOffset tempRegs 2)
-                blankSymbol) = Utemp := by
-        dsimp only [Utemp, rightSpec, updateSpec]
-        rw [← hheadTwo']
-      have hUclock :
-          install clockRegs spec.growth spec.returnTag
-              (writeLogical spec.growth Utemp (firstGapOffset clockRegs 3)
-                blankSymbol) = Uclock := by
-        dsimp only [Uclock, tempSpec, rightSpec, updateSpec]
-        rw [← hheadThree']
-      rw [hUright] at hone
-      rw [hUtemp] at htwo
-      rw [hUclock] at hthree
-      rw [show boundaryOffset clockRegs (Fin.succ (3 : Fin 4)) =
-        layoutEnd clockRegs by rfl, hclockEnd] at hfour
-      simp only [searchRef, CounterControlPlan.resolve] at hone htwo hthree
-      apply FullTM0.CompletesOr.and_right ?_ hdesired
-      simpa only [MarkerSchedule.decrementStartBoundary, hheadOne'] using
-        FullTM0.CompletesOr.trans runner.pullback hone
-          (FullTM0.CompletesOr.trans runner.pullback htwo
-            (FullTM0.CompletesOr.trans runner.pullback hthree hfour))
-
-
-
+  have hdesired' : BackedBy (updateSpec spec final hfinalCore)
+      (decrementTape spec register T) outer := by
+    simpa [decrementSpec, final] using hdesired
+  have hcommandList :
+      (decrementStages register).map
+          (fun current => (decrementStageIndex current).succ) =
+        MarkerShift.decrementOrder register :=
+    decrementStages_labels register
+  have hrun := decrementChain_with base c Short Failure runner source final
+    (decrementStages_chain register) hback hregisters hshort hfinalCore
+    hdesired' (by
+      intro raw hraw
+      apply hcommands raw
+      simpa [decrementShiftCommands, hcommandList] using hraw)
+  have hend : layoutEnd final + 1 = layoutEnd spec.registers :=
+    layoutEnd_decrement_add_one spec.registers register hpositive
+  have hstart : (decrementStageIndex register).succ =
+      MarkerSchedule.decrementStartBoundary register := by
+    cases register <;> rfl
+  apply FullTM0.CompletesOr.and_right ?_ hdesired
+  simpa [final, hend, hstart] using hrun
 /-- Complete positive-decrement suffix schedule, including exact preservation
 of the suspended outer backing. -/
 theorem machine_reaches_decrementSchedule_solved
