@@ -63,6 +63,18 @@ theorem registerGap_succ (register : Register) :
       registers.get register := by
   cases register <;> rfl
 
+/-- The old source of an incremented boundary is the last cell of the
+enlarged register gap. -/
+theorem incrementSource_eq_lastGap (registers : Registers)
+    (register : Register) :
+    firstGapOffset (registers.increment register) (registerGap register) +
+        registers.get register =
+      boundaryOffset registers (decrementStartBoundary register) := by
+  cases register <;>
+    simp [registerGap, decrementStartBoundary, firstGapOffset,
+      boundaryOffset, CounterLayout.boundaryPos, RegisterLayout.values,
+      Registers.increment, Registers.set, Registers.get] <;> omega
+
 /-- Each register value is bounded by the end of the complete marker layout. -/
 theorem registerValue_lt_of_layoutEnd_lt (registers : Registers)
     (i : Fin 4) {limit : Nat} (h : layoutEnd registers < limit) :

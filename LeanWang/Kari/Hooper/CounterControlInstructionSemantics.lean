@@ -2378,80 +2378,8 @@ theorem incrementSchedule_source_blank
         (boundaryOffset spec.registers
           (MarkerSchedule.decrementStartBoundary register)) =
       blankSymbol := by
-  have hnext := incrementTape_represents h register hroom
-  cases register with
-  | left =>
-      have hb := hnext.gap_blank (0 : Fin 4) spec.registers.left (by
-        simp [incrementSpec, updateSpec, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get])
-      change logicalTape spec.growth (incrementTape spec .left T)
-        (firstGapOffset (spec.registers.increment .left) 0 +
-          spec.registers.left) = blankSymbol at hb
-      have hcoord : firstGapOffset (spec.registers.increment .left) 0 +
-          spec.registers.left = boundaryOffset spec.registers 1 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (spec.registers.increment .left) 0 : Int) + spec.registers.left =
-          boundaryOffset spec.registers 1 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | right =>
-      have hb := hnext.gap_blank (1 : Fin 4) spec.registers.right (by
-        simp [incrementSpec, updateSpec, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get])
-      change logicalTape spec.growth (incrementTape spec .right T)
-        (firstGapOffset (spec.registers.increment .right) 1 +
-          spec.registers.right) = blankSymbol at hb
-      have hcoord : firstGapOffset (spec.registers.increment .right) 1 +
-          spec.registers.right = boundaryOffset spec.registers 2 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (spec.registers.increment .right) 1 : Int) + spec.registers.right =
-          boundaryOffset spec.registers 2 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | temp =>
-      have hb := hnext.gap_blank (2 : Fin 4) spec.registers.temp (by
-        simp [incrementSpec, updateSpec, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get])
-      change logicalTape spec.growth (incrementTape spec .temp T)
-        (firstGapOffset (spec.registers.increment .temp) 2 +
-          spec.registers.temp) = blankSymbol at hb
-      have hcoord : firstGapOffset (spec.registers.increment .temp) 2 +
-          spec.registers.temp = boundaryOffset spec.registers 3 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (spec.registers.increment .temp) 2 : Int) + spec.registers.temp =
-          boundaryOffset spec.registers 3 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
-  | clock =>
-      have hb := hnext.gap_blank (3 : Fin 4) spec.registers.clock (by
-        simp [incrementSpec, updateSpec, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get])
-      change logicalTape spec.growth (incrementTape spec .clock T)
-        (firstGapOffset (spec.registers.increment .clock) 3 +
-          spec.registers.clock) = blankSymbol at hb
-      have hcoord : firstGapOffset (spec.registers.increment .clock) 3 +
-          spec.registers.clock = boundaryOffset spec.registers 4 := by
-        simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hcoordInt : (firstGapOffset
-          (spec.registers.increment .clock) 3 : Int) + spec.registers.clock =
-          boundaryOffset spec.registers 4 := by
-        exact_mod_cast hcoord
-      rw [hcoordInt] at hb
-      simpa [MarkerSchedule.decrementStartBoundary] using hb
+  exact (incrementTape_represents h register hroom).toCoreRepresents
+    |>.increment_source_blank spec.registers register
 
 /-- Recovery from the blank old source cell to boundary `4` after a complete
 increment schedule. -/
