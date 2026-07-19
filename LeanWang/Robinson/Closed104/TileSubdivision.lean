@@ -90,30 +90,20 @@ end Quadrant
 namespace TileSubdivision
 
 private def bitCode (b : Bool) : Nat :=
-  if b then 1 else 0
+  Encodable.encode b
 
 private def tileCode (t : WangTile) : Nat :=
-  Nat.pair t.n (Nat.pair t.s (Nat.pair t.e t.w))
+  Encodable.encode t
 
-private theorem bitCode_primrec : Primrec (fun b : Bool => bitCode b) := by
-  exact (Primrec.cond (α := Bool) (σ := Nat) Primrec.id
-    (Primrec.const (α := Bool) (1 : Nat))
-    (Primrec.const (α := Bool) (0 : Nat))).of_eq fun b => by
-      cases b <;> rfl
+private theorem bitCode_primrec : Primrec (fun b : Bool => bitCode b) :=
+  Primrec.encode
 
-private theorem tileCode_primrec : Primrec (fun t : WangTile => tileCode t) := by
-  unfold tileCode
-  exact Primrec₂.natPair.comp WangTile.n_primrec
-    (Primrec₂.natPair.comp WangTile.s_primrec
-      (Primrec₂.natPair.comp WangTile.e_primrec WangTile.w_primrec))
+private theorem tileCode_primrec : Primrec (fun t : WangTile => tileCode t) :=
+  Primrec.encode
 
 set_option linter.flexible false in
-private theorem tileCode_injective : Function.Injective tileCode := by
-  intro t u h
-  cases t
-  cases u
-  simp [tileCode, Nat.pair_eq_pair] at h ⊢
-  exact h
+private theorem tileCode_injective : Function.Injective tileCode :=
+  Encodable.encode_injective
 
 /-- Horizontal macro-edge colors are split by west/east half. -/
 def horizontalEdgeColor (x : Bool) (color : Nat) : Nat :=

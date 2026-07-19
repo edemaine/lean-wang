@@ -53,6 +53,11 @@ def equivCode : AxisClass ≃ Option Bool where
     | none => rfl
     | some value => cases value <;> rfl
 
+instance instFintype : Fintype AxisClass :=
+  Fintype.ofList [.negative, .origin, .positive] (by
+    intro axis
+    cases axis <;> simp)
+
 instance instPrimcodable : Primcodable AxisClass :=
   Primcodable.ofEquiv (Option Bool) equivCode
 
@@ -67,10 +72,7 @@ def after : AxisClass → Nat
   | .origin | .positive => 1
 
 /-- A separate code keeps the perpendicular class constant across an edge. -/
-def code : AxisClass → Nat
-  | .negative => 0
-  | .origin => 1
-  | .positive => 2
+def code : AxisClass → Nat := Encodable.encode
 
 /-- Consecutive classes have matching axis colors. -/
 def Step (left right : AxisClass) : Prop :=
@@ -80,9 +82,8 @@ instance (left right : AxisClass) : Decidable (Step left right) := by
   unfold Step
   infer_instance
 
-theorem code_injective : Function.Injective code := by
-  intro first second equal
-  cases first <;> cases second <;> simp [code] at equal ⊢
+theorem code_injective : Function.Injective code :=
+  Encodable.encode_injective
 
 @[simp] theorem code_eq_code {first second : AxisClass} :
     first.code = second.code ↔ first = second :=
@@ -104,26 +105,14 @@ theorem code_injective : Function.Injective code := by
     Step previous .negative ↔ previous = .negative := by
   cases previous <;> simp [Step, before, after]
 
-theorem before_primrec : Primrec before := by
-  have positive : PrimrecPred (fun axis : AxisClass => axis = .positive) :=
-    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.positive)
-  exact (Primrec.ite positive (Primrec.const 1) (Primrec.const 0)).of_eq
-    fun axis => by cases axis <;> rfl
+theorem before_primrec : Primrec before :=
+  Primrec.dom_finite _
 
-theorem after_primrec : Primrec after := by
-  have negative : PrimrecPred (fun axis : AxisClass => axis = .negative) :=
-    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.negative)
-  exact (Primrec.ite negative (Primrec.const 0) (Primrec.const 1)).of_eq
-    fun axis => by cases axis <;> rfl
+theorem after_primrec : Primrec after :=
+  Primrec.dom_finite _
 
-theorem code_primrec : Primrec code := by
-  have negative : PrimrecPred (fun axis : AxisClass => axis = .negative) :=
-    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.negative)
-  have origin : PrimrecPred (fun axis : AxisClass => axis = .origin) :=
-    Primrec.eq.comp Primrec.id (Primrec.const AxisClass.origin)
-  exact (Primrec.ite negative (Primrec.const 0)
-    (Primrec.ite origin (Primrec.const 1) (Primrec.const 2))).of_eq
-      fun axis => by cases axis <;> rfl
+theorem code_primrec : Primrec code :=
+  Primrec.encode
 
 end AxisClass
 

@@ -49,12 +49,16 @@ def equivCode : RouteRole ≃ Option (Bool × Bool) where
     · rfl
     · cases first <;> cases second <;> rfl
 
+instance instFintype : Fintype RouteRole :=
+  Fintype.ofList [.inactive, .horizontal, .vertical, .active, .corner] (by
+    intro role
+    cases role <;> simp)
+
 instance instPrimcodable : Primcodable RouteRole :=
   Primcodable.ofEquiv (Option (Bool × Bool)) equivCode
 
-theorem toCode_primrec : Primrec toCode := by
-  simpa [equivCode] using
-    (Primrec.of_equiv (e := equivCode) : Primrec equivCode)
+theorem toCode_primrec : Primrec toCode :=
+  Primrec.dom_finite _
 
 def isHorizontal : RouteRole → Bool
   | .horizontal => true
@@ -95,26 +99,17 @@ def isVerticalCarrier : RouteRole → Bool
     role.isConstrained = true ↔ role ≠ .inactive := by
   cases role <;> simp [isConstrained]
 
-theorem isHorizontal_primrec : Primrec isHorizontal := by
-  exact (Primrec.eq.decide.comp Primrec.id
-    (Primrec.const RouteRole.horizontal)).of_eq fun role => by
-      cases role <;> rfl
+theorem isHorizontal_primrec : Primrec isHorizontal :=
+  Primrec.dom_finite _
 
-theorem isVertical_primrec : Primrec isVertical := by
-  exact (Primrec.eq.decide.comp Primrec.id
-    (Primrec.const RouteRole.vertical)).of_eq fun role => by
-      cases role <;> rfl
+theorem isVertical_primrec : Primrec isVertical :=
+  Primrec.dom_finite _
 
-theorem isActive_primrec : Primrec isActive := by
-  exact (Primrec.or.comp
-    (Primrec.eq.decide.comp Primrec.id (Primrec.const RouteRole.active))
-    (Primrec.eq.decide.comp Primrec.id (Primrec.const RouteRole.corner))).of_eq
-      fun role => by cases role <;> rfl
+theorem isActive_primrec : Primrec isActive :=
+  Primrec.dom_finite _
 
-theorem isCorner_primrec : Primrec isCorner := by
-  exact (Primrec.eq.decide.comp Primrec.id
-    (Primrec.const RouteRole.corner)).of_eq fun role => by
-      cases role <;> rfl
+theorem isCorner_primrec : Primrec isCorner :=
+  Primrec.dom_finite _
 
 end RouteRole
 

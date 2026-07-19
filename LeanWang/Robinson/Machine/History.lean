@@ -78,54 +78,18 @@ def Mem (M : Machine) : MachineCell → Prop
   | plain a => a ∈ M.symbols
   | head q a => q ∈ M.states ∧ q ≠ M.halt ∧ a ∈ M.symbols
 
-/-- Encode machine cells as Wang colors. -/
-def code : MachineCell → Nat
-  | boundary => Nat.pair 2 0
-  | plain a => Nat.pair 0 a
-  | head q a => Nat.pair 1 (Nat.pair q a)
-
-theorem code_injective : Function.Injective code := by
-  intro c d h
-  cases c with
-  | boundary =>
-      cases d with
-      | boundary => rfl
-      | plain b =>
-          have htag : 2 = 0 := (Nat.pair_eq_pair.mp h).1
-          cases htag
-      | head q b =>
-          have htag : 2 = 1 := (Nat.pair_eq_pair.mp h).1
-          cases htag
-  | plain a =>
-      cases d with
-      | boundary =>
-          have htag : 0 = 2 := (Nat.pair_eq_pair.mp h).1
-          cases htag
-      | plain b =>
-          have hb : a = b := (Nat.pair_eq_pair.mp h).2
-          simp [hb]
-      | head q b =>
-          have htag : 0 = 1 := (Nat.pair_eq_pair.mp h).1
-          cases htag
-  | head q a =>
-      cases d with
-      | boundary =>
-          have htag : 1 = 2 := (Nat.pair_eq_pair.mp h).1
-          cases htag
-      | plain b =>
-          have htag : 1 = 0 := (Nat.pair_eq_pair.mp h).1
-          cases htag
-      | head r b =>
-          have hpair : Nat.pair q a = Nat.pair r b := (Nat.pair_eq_pair.mp h).2
-          rcases Nat.pair_eq_pair.mp hpair with ⟨hq, ha⟩
-          simp [hq, ha]
-
 end MachineCell
 
 instance instPrimcodableMachineCell : Primcodable MachineCell :=
   Primcodable.ofEquiv MachineCell.CodeType MachineCell.equivSum
 
 namespace MachineCell
+
+/-- Use the canonical primitive-recursive encoding for machine-cell colors. -/
+def code : MachineCell → Nat := Encodable.encode
+
+theorem code_injective : Function.Injective code :=
+  Encodable.encode_injective
 
 theorem toSum_primrec : Primrec MachineCell.toSum := by
   simpa [MachineCell.equivSum] using
@@ -149,37 +113,8 @@ theorem head_primrec : Primrec (fun p : Nat × Nat => MachineCell.head p.1 p.2) 
     ofSum_primrec.comp (Primrec.sumInr.comp (Primrec.sumInr.comp Primrec.id))
   exact h.of_eq fun _ => rfl
 
-theorem code_primrec : Primrec MachineCell.code := by
-  have hrest :
-      Primrec₂ (fun (_ : MachineCell) (r : Nat ⊕ Nat × Nat) =>
-        match r with
-        | Sum.inl a => Nat.pair 0 a
-        | Sum.inr p => Nat.pair 1 (Nat.pair p.1 p.2)) := by
-    apply Primrec₂.mk
-    refine (Primrec.sumCasesOn
-      (α := MachineCell × (Nat ⊕ Nat × Nat)) (β := Nat) (γ := Nat × Nat) (σ := Nat)
-      (f := fun p : MachineCell × (Nat ⊕ Nat × Nat) => p.2)
-      (g := fun _ a => Nat.pair 0 a)
-      (h := fun _ p => Nat.pair 1 (Nat.pair p.1 p.2))
-      Primrec.snd ?_ ?_).of_eq ?_
-    · exact Primrec₂.natPair.comp (Primrec.const 0) Primrec.snd
-    · exact Primrec₂.natPair.comp (Primrec.const 1)
-        (Primrec₂.natPair.comp (Primrec.fst.comp Primrec.snd)
-          (Primrec.snd.comp Primrec.snd))
-    · intro p
-      cases p.2 <;> rfl
-  refine (Primrec.sumCasesOn
-    (α := MachineCell) (β := Unit) (γ := Nat ⊕ Nat × Nat) (σ := Nat)
-    (f := MachineCell.toSum)
-    (g := fun _ _ => Nat.pair 2 0)
-    (h := fun _ r =>
-      match r with
-      | Sum.inl a => Nat.pair 0 a
-      | Sum.inr p => Nat.pair 1 (Nat.pair p.1 p.2))
-    toSum_primrec ?_ hrest).of_eq ?_
-  · exact (Primrec.const (Nat.pair 2 0)).to₂
-  · intro c
-    cases c <;> rfl
+theorem code_primrec : Primrec MachineCell.code :=
+  Primrec.encode
 
 theorem isBoundary_primrec : Primrec MachineCell.isBoundary := by
   exact (Primrec.eq.decide.comp Primrec.id (Primrec.const MachineCell.boundary)).of_eq
