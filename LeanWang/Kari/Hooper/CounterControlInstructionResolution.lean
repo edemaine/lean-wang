@@ -75,67 +75,10 @@ theorem machine_reaches_boundary_erase_or_halts
                 blankSymbol).move (orient address.growth departure)⟩ ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c address, outer⟩ := by
-  let raw : RawCommand :=
-    .boundaryNavigation address expected direction success (.erase departure)
-  have hspec := compileRawCommand_spec base c raw hraw
-  have hcompiledGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (compileRawCommand base c raw hraw).target.Matches outer
-      (compileRawCommand base c raw hraw).searchDirection distance := by
-    rw [hspec]
-    simpa [raw, compileRawAtTag, Command.target, Command.searchDirection,
-      compileNavigationAction] using hgap
-  have hsearch := rawSearch_reaches_found_or_halts base c limit hshort raw
-    hraw outer distance hdistance hcompiledGap
-  rcases hsearch with hfound | hhalts
-  · left
-    have hfound' : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c address, outer⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c address),
-          outer.moveN (orient address.growth direction) distance⟩ := by
-      rw [hspec] at hfound
-      simpa [raw, compileRawAtTag, RawCommand.address,
-        Command.searchDirection, compileNavigationAction] using hfound
-    have hatRaw := CommandAt.compileRawCommand base c raw hraw
-    have hat : CommandAt (CanonicalInitializer.radius c) base
-        (searchState base c address)
-        (.boundaryNavigation expected (orient address.growth direction)
-          (resolve base c success) (rawTag raw hraw)
-          (.erase (departure.map (orient address.growth))))
-        (commands base c) := by
-      rw [hspec] at hatRaw
-      simpa [raw, compileRawAtTag, RawCommand.address,
-        compileNavigationAction] using hatRaw
-    have hread :
-        (outer.moveN (orient address.growth direction) distance).read =
-          boundarySymbol expected := by
-      simpa [FullTM0.Tape.read, Target.Matches] using hgap.marked
-    have hcontinue : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c address),
-          outer.moveN (orient address.growth direction) distance⟩
-        ⟨resolve base c success,
-          match departure with
-          | none =>
-              (outer.moveN (orient address.growth direction) distance).write
-                blankSymbol
-          | some departure =>
-              ((outer.moveN (orient address.growth direction) distance).write
-                blankSymbol).move (orient address.growth departure)⟩ := by
-      have hrun := BoundedMarkerContinuation.machine_reaches_erase_native
-        (coreTable base c) expected (orient address.growth direction)
-        (resolve base c success) (rawTag raw hraw)
-        (departure.map (orient address.growth)) hat
-        (outer.moveN (orient address.growth direction) distance) hread
-      cases departure <;>
-        simpa [CounterControlNestingBridge.machine,
-          BoundedMarkerProgram.machine, CounterControlPlan.table] using hrun
-    cases departure <;>
-      exact hfound'.trans hcontinue
-  · right
-    simpa [raw, RawCommand.address] using hhalts
+  exact machine_reaches_boundary_erase_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) address expected direction
+    success departure hraw outer distance hdistance hgap
 
 /-- Resolving-search form of the cleanup tag command. -/
 theorem machine_reaches_tag_or_halts
@@ -155,47 +98,10 @@ theorem machine_reaches_tag_or_halts
           outer.moveN (orient address.growth direction) distance⟩ ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c address, outer⟩ := by
-  let raw : RawCommand := .tagNavigation address direction success
-  have hspec := compileRawCommand_spec base c raw hraw
-  have hcompiledGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (compileRawCommand base c raw hraw).target.Matches outer
-      (compileRawCommand base c raw hraw).searchDirection distance := by
-    rw [hspec]
-    simpa [raw, compileRawAtTag, Command.target,
-      Command.searchDirection] using hgap
-  have hsearch := rawSearch_reaches_found_or_halts base c limit hshort raw
-    hraw outer distance hdistance hcompiledGap
-  rcases hsearch with hfound | hhalts
-  · left
-    have hfound' : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c address, outer⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c address),
-          outer.moveN (orient address.growth direction) distance⟩ := by
-      rw [hspec] at hfound
-      simpa [raw, compileRawAtTag, RawCommand.address,
-        Command.searchDirection] using hfound
-    have hatRaw := CommandAt.compileRawCommand base c raw hraw
-    have hat : CommandAt (CanonicalInitializer.radius c) base
-        (searchState base c address)
-        (.tagNavigation (orient address.growth direction)
-          (resolve base c success) (rawTag raw hraw))
-        (commands base c) := by
-      rw [hspec] at hatRaw
-      simpa [raw, compileRawAtTag, RawCommand.address] using hatRaw
-    have hmatch : (Target.anyTag : Target numTags).Matches
-        (outer.moveN (orient address.growth direction) distance).read := by
-      simpa [FullTM0.Tape.read] using hgap.marked
-    have hcontinue :=
-      BoundedMarkerContinuation.machine_reaches_navigation_native
-        (coreTable base c) (Target.anyTag : Target numTags)
-        (orient address.growth direction) (resolve base c success)
-        (rawTag raw hraw) hat
-        (outer.moveN (orient address.growth direction) distance) hmatch
-    exact hfound'.trans hcontinue
-  · right
-    simpa [raw, RawCommand.address] using hhalts
+  exact machine_reaches_tag_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) address direction success hraw
+    outer distance hdistance hgap
 
 /-- The four erasing boundary searches either reach the directional return
 dispatcher or halt from the cleanup entry.  The last erase lands directly on
@@ -722,94 +628,10 @@ theorem machine_reaches_incrementShift_or_halts
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
           atLogical growth T (source + distance)⟩ := by
-  let raw : RawCommand :=
-    .markerShift ⟨growth, counterState, searchSlot⟩ expected .left .right
-      success (some .left) collision
-  let move : MarkerProgram.Move :=
-    ⟨expected, CounterControlPlan.orient growth .left,
-      CounterControlPlan.orient growth .right⟩
-  have hspec := compileRawCommand_spec base c raw hraw
-  have hcommand : compileRawCommand base c raw hraw =
-      .markerShift move (resolve base c success) (rawTag raw hraw)
-        (some (CounterControlPlan.orient growth .left))
-        (collision.map (resolve base c)) := by
-    rw [hspec]
-    simp [raw, move, compileRawAtTag, CounterControlPlan.orient]
-  have hcompiledGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (compileRawCommand base c raw hraw).target.Matches
-      (atLogical growth T (source + distance))
-      (compileRawCommand base c raw hraw).searchDirection distance := by
-    rw [hcommand]
-    simpa [move, Command.target, Command.searchDirection,
-      orient_eq_orientDirection] using hgap
-  have hsearch := rawSearch_reaches_found_or_halts base c limit hshort raw hraw
-    (atLogical growth T (source + distance)) distance hdistance hcompiledGap
-  rcases hsearch with hfound | hhalts
-  · left
-    have hmove :
-        (atLogical growth T (source + distance)).moveN
-            (CounterControlPlan.orient growth .left) distance =
-          atLogical growth T source := by
-      simpa only [orient_eq_orientDirection] using
-        atLogical_moveN_left growth T source distance
-    have hfound' : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
-          atLogical growth T (source + distance)⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c ⟨growth, counterState, searchSlot⟩),
-          atLogical growth T source⟩ := by
-      rw [hcommand] at hfound
-      change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c raw.address,
-          atLogical growth T (source + distance)⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c raw.address),
-          (atLogical growth T (source + distance)).moveN
-            move.searchDirection distance⟩ at hfound
-      rw [show move.searchDirection =
-        CounterControlPlan.orient growth .left from rfl, hmove] at hfound
-      simpa [raw, RawCommand.address] using hfound
-    have hatRaw := CommandAt.compileRawCommand base c raw hraw
-    have hat : CommandAt (CanonicalInitializer.radius c) base
-        (searchState base c ⟨growth, counterState, searchSlot⟩)
-        (.markerShift move (resolve base c success) (rawTag raw hraw)
-          (some (CounterControlPlan.orient growth .left))
-          (collision.map (resolve base c)))
-        (commands base c) := by
-      rw [hspec] at hatRaw
-      simpa [raw, move, compileRawAtTag, RawCommand.address] using hatRaw
-    have hread :
-        (atLogical growth T source).read = boundarySymbol expected := by
-      rw [← hmove]
-      simpa [Target.Matches] using hgap.marked
-    have hblankPhysical :
-        ((((atLogical growth T source).write blankSymbol).move
-              move.shiftDirection).read = blankSymbol) := by
-      change (((atLogical growth T source).write blankSymbol).move
-        (CounterControlPlan.orient growth .right)).read = blankSymbol
-      rw [atLogical_write]
-      rw [show CounterControlPlan.orient growth .right =
-        OrientedMarkerTape.orientDirection growth .right by
-          exact orient_eq_orientDirection growth .right]
-      rw [atLogical_move_right, atLogical_read]
-      rw [writeLogical_of_ne growth T source (source + 1) blankSymbol
-        (by omega)]
-      exact hblank
-    have hcontinue :=
-      BoundedMarkerContinuation.machine_reaches_shift_success_native
-        (coreTable base c) move (resolve base c success) (rawTag raw hraw)
-        (some (CounterControlPlan.orient growth .left))
-        (collision.map (resolve base c)) hat
-        (atLogical growth T source) hread hblankPhysical
-    have hrun := hfound'.trans hcontinue
-    dsimp only [move] at hrun
-    rw [orient_eq_orientDirection growth .right,
-      orient_eq_orientDirection growth .left] at hrun
-    rw [shiftRight_departLeft_atLogical] at hrun
-    exact hrun
-  · right
-    simpa [raw, RawCommand.address] using hhalts
+  exact machine_reaches_incrementShift_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) growth counterState searchSlot
+    source expected success collision hraw T distance hdistance hgap hblank
 
 /-- Resolving-search counterpart of the native inward marker shift. -/
 theorem machine_reaches_decrementShift_or_halts
@@ -839,96 +661,11 @@ theorem machine_reaches_decrementShift_or_halts
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
           atLogical growth T origin⟩ := by
-  let raw : RawCommand :=
-    .markerShift ⟨growth, counterState, searchSlot⟩ expected .right .left
-      success (some .right) collision
-  let move : MarkerProgram.Move :=
-    ⟨expected, CounterControlPlan.orient growth .right,
-      CounterControlPlan.orient growth .left⟩
-  have hspec := compileRawCommand_spec base c raw hraw
-  have hcommand : compileRawCommand base c raw hraw =
-      .markerShift move (resolve base c success) (rawTag raw hraw)
-        (some (CounterControlPlan.orient growth .right))
-        (collision.map (resolve base c)) := by
-    rw [hspec]
-    simp [raw, move, compileRawAtTag, CounterControlPlan.orient]
-  have hcompiledGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (compileRawCommand base c raw hraw).target.Matches
-      (atLogical growth T origin)
-      (compileRawCommand base c raw hraw).searchDirection distance := by
-    rw [hcommand]
-    simpa [move, Command.target, Command.searchDirection,
-      orient_eq_orientDirection] using hgap
-  have hsearch := rawSearch_reaches_found_or_halts base c limit hshort raw hraw
-    (atLogical growth T origin) distance hdistance hcompiledGap
-  rcases hsearch with hfound | hhalts
-  · left
-    have hmove :
-        (atLogical growth T origin).moveN
-            (CounterControlPlan.orient growth .right) distance =
-          atLogical growth T (destination + 1) := by
-      rw [show CounterControlPlan.orient growth .right =
-        OrientedMarkerTape.orientDirection growth .right by
-          exact orient_eq_orientDirection growth .right]
-      rw [atLogical_moveN_right, hposition]
-    have hfound' : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
-          atLogical growth T origin⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c ⟨growth, counterState, searchSlot⟩),
-          atLogical growth T (destination + 1)⟩ := by
-      rw [hcommand] at hfound
-      change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c raw.address, atLogical growth T origin⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c raw.address),
-          (atLogical growth T origin).moveN move.searchDirection distance⟩
-        at hfound
-      rw [show move.searchDirection =
-        CounterControlPlan.orient growth .right from rfl, hmove] at hfound
-      simpa [raw, RawCommand.address] using hfound
-    have hatRaw := CommandAt.compileRawCommand base c raw hraw
-    have hat : CommandAt (CanonicalInitializer.radius c) base
-        (searchState base c ⟨growth, counterState, searchSlot⟩)
-        (.markerShift move (resolve base c success) (rawTag raw hraw)
-          (some (CounterControlPlan.orient growth .right))
-          (collision.map (resolve base c)))
-        (commands base c) := by
-      rw [hspec] at hatRaw
-      simpa [raw, move, compileRawAtTag, RawCommand.address] using hatRaw
-    have hread :
-        (atLogical growth T (destination + 1)).read =
-          boundarySymbol expected := by
-      rw [← hmove]
-      simpa [Target.Matches] using hgap.marked
-    have hblankPhysical :
-        ((((atLogical growth T (destination + 1)).write blankSymbol).move
-              move.shiftDirection).read = blankSymbol) := by
-      change (((atLogical growth T (destination + 1)).write blankSymbol).move
-        (CounterControlPlan.orient growth .left)).read = blankSymbol
-      rw [atLogical_write]
-      rw [show CounterControlPlan.orient growth .left =
-        OrientedMarkerTape.orientDirection growth .left by
-          exact orient_eq_orientDirection growth .left]
-      rw [atLogical_move_left, atLogical_read]
-      rw [writeLogical_of_ne growth T (destination + 1) destination blankSymbol
-        (by omega)]
-      exact hblank
-    have hcontinue :=
-      BoundedMarkerContinuation.machine_reaches_shift_success_native
-        (coreTable base c) move (resolve base c success) (rawTag raw hraw)
-        (some (CounterControlPlan.orient growth .right))
-        (collision.map (resolve base c)) hat
-        (atLogical growth T (destination + 1)) hread hblankPhysical
-    have hrun := hfound'.trans hcontinue
-    dsimp only [move] at hrun
-    rw [orient_eq_orientDirection growth .left,
-      orient_eq_orientDirection growth .right] at hrun
-    rw [shiftLeft_departRight_atLogical] at hrun
-    exact hrun
-  · right
-    simpa [raw, RawCommand.address] using hhalts
+  exact machine_reaches_decrementShift_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) growth counterState searchSlot
+    origin destination distance expected success collision hraw T hposition
+    hdistance hgap hblank
 
 /-! ## Canonical shift normalization -/
 

@@ -65,11 +65,49 @@ theorem rawSearch_reaches_found
   exact CounterControlSearchExecution.reaches_found_of_solves base c raw hraw
     outer distance (hshort distance hdistance) hgap
 
-/-- Solved-search form of an erasing boundary command, with its exact
-optional-departure endpoint. -/
-theorem machine_reaches_boundary_erase_solved
+/-- A uniform implementation of compiled bounded searches.  The same
+continuation proofs can be instantiated with solved searches, resolving
+searches, or any other failure predicate stable under finite prefixes. -/
+structure CompiledSearchRunner
     (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
-    (hshort : ShortSearches base c limit)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop) where
+  pullback : ∀ {start current},
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c) start current →
+      Failure current → Failure start
+  search : ∀ (raw : RawCommand) (hraw : raw ∈ rawCommands)
+      (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat),
+    distance < limit →
+    SearchGap (fun symbol => symbol = blankSymbol)
+      (compileRawCommand base c raw hraw).target.Matches outer
+      (compileRawCommand base c raw hraw).searchDirection distance →
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
+      ⟨searchState base c raw.address, outer⟩
+      ⟨foundState (CanonicalInitializer.radius c)
+          (searchState base c raw.address),
+        outer.moveN
+          (compileRawCommand base c raw hraw).searchDirection distance⟩
+
+/-- The simultaneous solved-search hypothesis is a failure-free compiled
+search runner. -/
+def solvedSearchRunner
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (hshort : ShortSearches base c limit) :
+    CompiledSearchRunner base c limit (fun _ => False) where
+  pullback := by
+    intro _ _ _ hfailure
+    exact hfailure.elim
+  search := by
+    intro raw hraw outer distance hdistance hgap
+    exact Or.inl (rawSearch_reaches_found base c limit hshort raw hraw outer
+      distance hdistance hgap)
+
+/-! ## Failure-parametric compiled continuations -/
+
+/-- Execute an erasing boundary command using any compiled-search runner. -/
+theorem machine_reaches_boundary_erase_with
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : CompiledSearchRunner base c limit Failure)
     (address : SearchAddress) (expected : Fin 5)
     (direction : Turing.Dir) (success : ControlRef)
     (departure : Option Turing.Dir)
@@ -80,7 +118,7 @@ theorem machine_reaches_boundary_erase_solved
     (hgap : SearchGap (fun symbol => symbol = blankSymbol)
       (Target.boundary expected).Matches outer
       (orient address.growth direction) distance) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
         ⟨searchState base c address, outer⟩
         ⟨resolve base c success,
           match departure with
@@ -99,8 +137,9 @@ theorem machine_reaches_boundary_erase_solved
     rw [hspec]
     simpa [raw, compileRawAtTag, Command.target, Command.searchDirection,
       compileNavigationAction] using hgap
-  have hfound := rawSearch_reaches_found base c limit hshort raw hraw outer
-    distance hdistance hcompiledGap
+  have hfound := runner.search raw hraw outer distance hdistance hcompiledGap
+  refine hfound.imp ?_ id
+  intro hfound
   have hfound' : FullTM0.Reaches
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c address, outer⟩
@@ -133,10 +172,43 @@ theorem machine_reaches_boundary_erase_solved
   cases departure <;>
     exact hfound'.trans hcontinue
 
-/-- Solved-search form of navigation back to the saved physical tag. -/
-theorem machine_reaches_tag_solved
+/-- Solved-search form of an erasing boundary command, with its exact
+optional-departure endpoint. -/
+theorem machine_reaches_boundary_erase_solved
     (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
     (hshort : ShortSearches base c limit)
+    (address : SearchAddress) (expected : Fin 5)
+    (direction : Turing.Dir) (success : ControlRef)
+    (departure : Option Turing.Dir)
+    (hraw : RawCommand.boundaryNavigation address expected direction success
+      (.erase departure) ∈ rawCommands)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hdistance : distance < limit)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary expected).Matches outer
+      (orient address.growth direction) distance) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c address, outer⟩
+        ⟨resolve base c success,
+          match departure with
+          | none =>
+              (outer.moveN (orient address.growth direction) distance).write
+                blankSymbol
+          | some departure =>
+              ((outer.moveN (orient address.growth direction) distance).write
+                blankSymbol).move (orient address.growth departure)⟩ := by
+  rcases machine_reaches_boundary_erase_with base c limit (fun _ => False)
+      (solvedSearchRunner base c limit hshort) address expected direction
+      success departure hraw outer distance hdistance hgap with hrun | hfailure
+  · exact hrun
+  · exact hfailure.elim
+
+/-- Execute navigation back to the saved physical tag using any compiled
+search runner. -/
+theorem machine_reaches_tag_with
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : CompiledSearchRunner base c limit Failure)
     (address : SearchAddress) (direction : Turing.Dir)
     (success : ControlRef)
     (hraw : RawCommand.tagNavigation address direction success ∈ rawCommands)
@@ -145,7 +217,7 @@ theorem machine_reaches_tag_solved
     (hgap : SearchGap (fun symbol => symbol = blankSymbol)
       (Target.anyTag : Target numTags).Matches outer
       (orient address.growth direction) distance) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
         ⟨searchState base c address, outer⟩
         ⟨resolve base c success,
           outer.moveN (orient address.growth direction) distance⟩ := by
@@ -157,8 +229,9 @@ theorem machine_reaches_tag_solved
     rw [hspec]
     simpa [raw, compileRawAtTag, Command.target,
       Command.searchDirection] using hgap
-  have hfound := rawSearch_reaches_found base c limit hshort raw hraw outer
-    distance hdistance hcompiledGap
+  have hfound := runner.search raw hraw outer distance hdistance hcompiledGap
+  refine hfound.imp ?_ id
+  intro hfound
   have hfound' : FullTM0.Reaches
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c address, outer⟩
@@ -187,10 +260,33 @@ theorem machine_reaches_tag_solved
       (outer.moveN (orient address.growth direction) distance) hmatch
   exact hfound'.trans hcontinue
 
-/-- Solved-search form of a preserving boundary command. -/
-theorem machine_reaches_boundary_preserve_solved
+/-- Solved-search form of navigation back to the saved physical tag. -/
+theorem machine_reaches_tag_solved
     (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
     (hshort : ShortSearches base c limit)
+    (address : SearchAddress) (direction : Turing.Dir)
+    (success : ControlRef)
+    (hraw : RawCommand.tagNavigation address direction success ∈ rawCommands)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hdistance : distance < limit)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.anyTag : Target numTags).Matches outer
+      (orient address.growth direction) distance) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨searchState base c address, outer⟩
+        ⟨resolve base c success,
+          outer.moveN (orient address.growth direction) distance⟩ := by
+  rcases machine_reaches_tag_with base c limit (fun _ => False)
+      (solvedSearchRunner base c limit hshort) address direction success hraw
+      outer distance hdistance hgap with hrun | hfailure
+  · exact hrun
+  · exact hfailure.elim
+
+/-- Execute a preserving boundary command using any compiled-search runner. -/
+theorem machine_reaches_boundary_preserve_with
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : CompiledSearchRunner base c limit Failure)
     (address : SearchAddress) (expected : Fin 5)
     (direction : Turing.Dir) (success : ControlRef)
     (hraw : RawCommand.boundaryNavigation address expected direction success
@@ -200,7 +296,7 @@ theorem machine_reaches_boundary_preserve_solved
     (hgap : SearchGap (fun symbol => symbol = blankSymbol)
       (Target.boundary expected).Matches outer
       (orient address.growth direction) distance) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
       ⟨searchState base c address, outer⟩
       ⟨resolve base c success,
         outer.moveN (orient address.growth direction) distance⟩ := by
@@ -213,8 +309,9 @@ theorem machine_reaches_boundary_preserve_solved
     rw [hspec]
     simpa [raw, compileRawAtTag, Command.target,
       Command.searchDirection, compileNavigationAction] using hgap
-  have hfound := rawSearch_reaches_found base c limit hshort raw hraw outer
-    distance hdistance hcompiledGap
+  have hfound := runner.search raw hraw outer distance hdistance hcompiledGap
+  refine hfound.imp ?_ id
+  intro hfound
   have hfound' : FullTM0.Reaches
       (CounterControlNestingBridge.machine base c)
       ⟨searchState base c address, outer⟩
@@ -244,12 +341,35 @@ theorem machine_reaches_boundary_preserve_solved
       (outer.moveN (orient address.growth direction) distance) hmatch
   exact hfound'.trans hcontinue
 
-/-- Solved-search counterpart of the native outward marker-shift theorem.
-The expected marker may lie beyond the local finite radius, provided its
-distance is covered by the simultaneous strong-induction hypothesis. -/
-theorem machine_reaches_incrementShift_solved
+/-- Solved-search form of a preserving boundary command. -/
+theorem machine_reaches_boundary_preserve_solved
     (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
-    (hshort : ShortSearches base c limit) (growth : Turing.Dir)
+    (hshort : ShortSearches base c limit)
+    (address : SearchAddress) (expected : Fin 5)
+    (direction : Turing.Dir) (success : ControlRef)
+    (hraw : RawCommand.boundaryNavigation address expected direction success
+      .preserve ∈ rawCommands)
+    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hdistance : distance < limit)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary expected).Matches outer
+      (orient address.growth direction) distance) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c address, outer⟩
+      ⟨resolve base c success,
+        outer.moveN (orient address.growth direction) distance⟩ := by
+  rcases machine_reaches_boundary_preserve_with base c limit (fun _ => False)
+      (solvedSearchRunner base c limit hshort) address expected direction
+      success hraw outer distance hdistance hgap with hrun | hfailure
+  · exact hrun
+  · exact hfailure.elim
+
+/-- Execute an outward marker shift using any compiled-search runner. -/
+theorem machine_reaches_incrementShift_with
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : CompiledSearchRunner base c limit Failure)
+    (growth : Turing.Dir)
     (counterState searchSlot source : Nat) (expected : Fin 5)
     (success : ControlRef) (collision : Option ControlRef)
     (hraw : RawCommand.markerShift
@@ -262,7 +382,7 @@ theorem machine_reaches_incrementShift_solved
       (atLogical growth T (source + distance))
       (OrientedMarkerTape.orientDirection growth .left) distance)
     (hblank : logicalTape growth T (source + 1) = blankSymbol) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
       ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
         atLogical growth T (source + distance)⟩
       ⟨resolve base c success,
@@ -290,8 +410,10 @@ theorem machine_reaches_incrementShift_solved
     rw [hcommand]
     simpa [move, Command.target, Command.searchDirection,
       orient_eq_orientDirection] using hgap
-  have hfound := rawSearch_reaches_found base c limit hshort raw hraw
+  have hfound := runner.search raw hraw
     (atLogical growth T (source + distance)) distance hdistance hcompiledGap
+  refine hfound.imp ?_ id
+  intro hfound
   have hmove :
       (atLogical growth T (source + distance)).moveN
           (CounterControlPlan.orient growth .left) distance =
@@ -354,10 +476,45 @@ theorem machine_reaches_incrementShift_solved
   rw [shiftRight_departLeft_atLogical] at hrun
   exact hrun
 
-/-- Solved-search counterpart of the native inward marker-shift theorem. -/
-theorem machine_reaches_decrementShift_solved
+/-- Solved-search counterpart of the native outward marker-shift theorem.
+The expected marker may lie beyond the local finite radius, provided its
+distance is covered by the simultaneous strong-induction hypothesis. -/
+theorem machine_reaches_incrementShift_solved
     (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
     (hshort : ShortSearches base c limit) (growth : Turing.Dir)
+    (counterState searchSlot source : Nat) (expected : Fin 5)
+    (success : ControlRef) (collision : Option ControlRef)
+    (hraw : RawCommand.markerShift
+      ⟨growth, counterState, searchSlot⟩ expected .left .right success
+        (some .left) collision ∈ rawCommands)
+    (T : FullTM0.Tape (Symbol numTags)) (distance : Nat)
+    (hdistance : distance < limit)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary expected).Matches
+      (atLogical growth T (source + distance))
+      (OrientedMarkerTape.orientDirection growth .left) distance)
+    (hblank : logicalTape growth T (source + 1) = blankSymbol) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+        atLogical growth T (source + distance)⟩
+      ⟨resolve base c success,
+        atLogical growth
+          (writeLogical growth
+            (writeLogical growth T source blankSymbol) (source + 1)
+              (boundarySymbol expected)) source⟩ := by
+  rcases machine_reaches_incrementShift_with base c limit (fun _ => False)
+      (solvedSearchRunner base c limit hshort) growth counterState searchSlot
+      source expected success collision hraw T distance hdistance hgap hblank
+      with hrun | hfailure
+  · exact hrun
+  · exact hfailure.elim
+
+/-- Execute an inward marker shift using any compiled-search runner. -/
+theorem machine_reaches_decrementShift_with
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
+    (runner : CompiledSearchRunner base c limit Failure)
+    (growth : Turing.Dir)
     (counterState searchSlot origin destination distance : Nat)
     (expected : Fin 5) (success : ControlRef)
     (collision : Option ControlRef)
@@ -371,7 +528,7 @@ theorem machine_reaches_decrementShift_solved
       (Target.boundary expected).Matches (atLogical growth T origin)
       (OrientedMarkerTape.orientDirection growth .right) distance)
     (hblank : logicalTape growth T destination = blankSymbol) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
       ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
         atLogical growth T origin⟩
       ⟨resolve base c success,
@@ -399,8 +556,10 @@ theorem machine_reaches_decrementShift_solved
     rw [hcommand]
     simpa [move, Command.target, Command.searchDirection,
       orient_eq_orientDirection] using hgap
-  have hfound := rawSearch_reaches_found base c limit hshort raw hraw
-    (atLogical growth T origin) distance hdistance hcompiledGap
+  have hfound := runner.search raw hraw (atLogical growth T origin) distance
+    hdistance hcompiledGap
+  refine hfound.imp ?_ id
+  intro hfound
   have hmove :
       (atLogical growth T origin).moveN
           (CounterControlPlan.orient growth .right) distance =
@@ -464,6 +623,38 @@ theorem machine_reaches_decrementShift_solved
     orient_eq_orientDirection growth .right] at hrun
   rw [shiftLeft_departRight_atLogical] at hrun
   exact hrun
+
+/-- Solved-search counterpart of the native inward marker-shift theorem. -/
+theorem machine_reaches_decrementShift_solved
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (hshort : ShortSearches base c limit) (growth : Turing.Dir)
+    (counterState searchSlot origin destination distance : Nat)
+    (expected : Fin 5) (success : ControlRef)
+    (collision : Option ControlRef)
+    (hraw : RawCommand.markerShift
+      ⟨growth, counterState, searchSlot⟩ expected .right .left success
+        (some .right) collision ∈ rawCommands)
+    (T : FullTM0.Tape (Symbol numTags))
+    (hposition : origin + distance = destination + 1)
+    (hdistance : distance < limit)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary expected).Matches (atLogical growth T origin)
+      (OrientedMarkerTape.orientDirection growth .right) distance)
+    (hblank : logicalTape growth T destination = blankSymbol) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
+        atLogical growth T origin⟩
+      ⟨resolve base c success,
+        atLogical growth
+          (writeLogical growth
+            (writeLogical growth T (destination + 1) blankSymbol) destination
+              (boundarySymbol expected)) (destination + 1)⟩ := by
+  rcases machine_reaches_decrementShift_with base c limit (fun _ => False)
+      (solvedSearchRunner base c limit hshort) growth counterState searchSlot
+      origin destination distance expected success collision hraw T hposition
+      hdistance hgap hblank with hrun | hfailure
+  · exact hrun
+  · exact hfailure.elim
 
 /-- One internal canonical increment shift, discharged by solved shorter
 searches instead of the local-radius bound. -/

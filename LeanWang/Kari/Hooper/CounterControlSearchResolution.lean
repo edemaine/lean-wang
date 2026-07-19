@@ -66,6 +66,19 @@ theorem rawSearch_reaches_found_or_halts
   exact CounterControlSearchExecution.reaches_found_or_halts_of_resolves
     base c raw hraw outer distance (hshort distance hdistance) hgap
 
+/-- The simultaneous resolving-search hypothesis as a compiled-search
+runner whose failure predicate is halting. -/
+def resolvingSearchRunner
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (hshort : ShortResolves base c limit) :
+    CompiledSearchRunner base c limit
+      (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)) where
+  pullback := FullTM0.HaltsFrom.of_reaches
+  search := by
+    intro raw hraw outer distance hdistance hgap
+    exact rawSearch_reaches_found_or_halts base c limit hshort raw hraw outer
+      distance hdistance hgap
+
 /-- Resolving-search form of a preserving boundary command.  The continuation
 is executed only in the successful branch; an already halting search is
 returned unchanged. -/
@@ -87,49 +100,10 @@ theorem machine_reaches_boundary_preserve_or_halts
           outer.moveN (orient address.growth direction) distance⟩ ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c address, outer⟩ := by
-  let raw : RawCommand :=
-    .boundaryNavigation address expected direction success .preserve
-  have hspec := compileRawCommand_spec base c raw hraw
-  have hcompiledGap : SearchGap (fun symbol => symbol = blankSymbol)
-      (compileRawCommand base c raw hraw).target.Matches outer
-      (compileRawCommand base c raw hraw).searchDirection distance := by
-    rw [hspec]
-    simpa [raw, compileRawAtTag, Command.target,
-      Command.searchDirection, compileNavigationAction] using hgap
-  have hsearch := rawSearch_reaches_found_or_halts base c limit hshort
-    raw hraw outer distance hdistance hcompiledGap
-  rcases hsearch with hfound | hhalts
-  · left
-    have hfound' : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c address, outer⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (searchState base c address),
-          outer.moveN (orient address.growth direction) distance⟩ := by
-      rw [hspec] at hfound
-      simpa [raw, compileRawAtTag, RawCommand.address,
-        Command.searchDirection, compileNavigationAction] using hfound
-    have hatRaw := CommandAt.compileRawCommand base c raw hraw
-    have hat : CommandAt (CanonicalInitializer.radius c) base
-        (searchState base c address)
-        (.boundaryNavigation expected (orient address.growth direction)
-          (resolve base c success) (rawTag raw hraw) .preserve)
-        (commands base c) := by
-      rw [hspec] at hatRaw
-      simpa [raw, compileRawAtTag, RawCommand.address,
-        compileNavigationAction] using hatRaw
-    have hmatch : (Target.boundary expected).Matches
-        (outer.moveN (orient address.growth direction) distance).read := by
-      simpa [FullTM0.Tape.moveN, FullTM0.Tape.read] using hgap.marked
-    have hcontinue :=
-      BoundedMarkerContinuation.machine_reaches_navigation_native
-        (coreTable base c) (Target.boundary expected)
-        (orient address.growth direction) (resolve base c success)
-        (rawTag raw hraw) hat
-        (outer.moveN (orient address.growth direction) distance) hmatch
-    exact hfound'.trans hcontinue
-  · right
-    simpa [raw, RawCommand.address] using hhalts
+  exact machine_reaches_boundary_preserve_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) address expected direction
+    success hraw outer distance hdistance hgap
 
 /-! ## Resolving marker routes -/
 
