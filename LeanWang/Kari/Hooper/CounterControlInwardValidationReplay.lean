@@ -146,14 +146,6 @@ private theorem reaches_validationNext_of_immortal
     (directRef growth source slot) ⟨growth, source, slot + 1⟩
     nextDirection hraw hcontinuation outer hreach
 
-@[simp] private theorem opposite_orient_left (growth : Turing.Dir) :
-    NestingMachine.opposite (orient growth .left) = orient growth .right := by
-  cases growth <;> rfl
-
-@[simp] private theorem opposite_orient_right (growth : Turing.Dir) :
-    NestingMachine.opposite (orient growth .right) = orient growth .left := by
-  cases growth <;> rfl
-
 private theorem moveN_move_moveN_opposite
     (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir)
     (distance reverseDistance : Nat) (hreverse : reverseDistance < distance) :

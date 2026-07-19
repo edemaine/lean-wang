@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 import LeanWang.Kari.Hooper.CounterControlGuardedRouteEmbedding
 import LeanWang.Kari.Hooper.CounterControlDecrementEntry
 import LeanWang.Kari.Hooper.CounterControlArbitraryEntry
+import LeanWang.Kari.Hooper.CounterControlGenuineDecrementEntry
 
 /-!
 # Guarded conditional-decrement entry
@@ -92,29 +93,15 @@ theorem testHandoff_of_rule
     current.current himmortal growth source register ifZero ifPositive hrule
     hcommand
 
-/-- Exact branch selected after the decrement test. -/
-inductive BranchOutcome
+/-- A guarded branch outcome is the ordinary outcome of its underlying
+genuine search. -/
+abbrev BranchOutcome
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GuardedSearch base c)
     (growth : Turing.Dir) (source : Nat) (register : Register)
-    (ifZero ifPositive : Nat) : Type where
-  | positive (handoff : TestHandoff current growth source register
-      ifZero ifPositive)
-      (read_blank : (branchTape handoff.route).read = blankSymbol)
-      (reaches : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        (foundCfg current.current)
-        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
-          (branchTape handoff.route).move (orient growth .right)⟩)
-  | zero (handoff : TestHandoff current growth source register
-      ifZero ifPositive)
-      (read_boundary : (branchTape handoff.route).read = boundarySymbol
-        (AnchoredCounterGeometry.registerGap register).castSucc)
-      (reaches : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c)
-        (foundCfg current.current)
-        ⟨searchState base c ⟨growth, source, zeroSearchBase⟩,
-          (branchTape handoff.route).move (orient growth .right)⟩)
+    (ifZero ifPositive : Nat) : Type :=
+  CounterControlGenuineDecrementEntry.BranchOutcome current.current growth
+    source register ifZero ifPositive
 
 /-- Immortality forces the decrement branch cell to carry exactly one of
 the two symbols for which this instruction generated an outgoing rule. -/
@@ -130,9 +117,8 @@ theorem branchRead_of_immortal
     (branchTape handoff.route).read = blankSymbol ∨
       (branchTape handoff.route).read = boundarySymbol
         (AnchoredCounterGeometry.registerGap register).castSucc :=
-  CounterControlDecrementEntry.branchRead_of_reaches base c
-    handoff.rule_mem (foundCfg current.current) (branchTape handoff.route)
-    handoff.reaches himmortal
+  CounterControlGenuineDecrementEntry.branchRead_of_immortal base c handoff
+    himmortal
 
 /-- Given the symbol selected at the branch cell, execute the corresponding
 generated direct rule to the first positive-shift or zero-recovery search. -/
@@ -146,16 +132,9 @@ theorem branchOutcome_of_read
       (branchTape handoff.route).read = boundarySymbol
         (AnchoredCounterGeometry.registerGap register).castSucc) :
     Nonempty (BranchOutcome current growth source register
-      ifZero ifPositive) := by
-  rcases CounterControlDecrementEntry.branchStep_of_read base c
-      handoff.rule_mem (branchTape handoff.route) hread with ⟨step⟩
-  cases step with
-  | positive hblank hstep =>
-      exact ⟨BranchOutcome.positive handoff hblank
-        (handoff.reaches.trans hstep)⟩
-  | zero hboundary hstep =>
-      exact ⟨BranchOutcome.zero handoff hboundary
-        (handoff.reaches.trans hstep)⟩
+      ifZero ifPositive) :=
+  CounterControlGenuineDecrementEntry.branchOutcome_of_read base c handoff
+    hread
 
 /-- Complete a guarded decrement-entry caller and select its exact generated
 branch.  Immortality excludes every disabled branch symbol. -/
@@ -175,11 +154,10 @@ theorem branchOutcome_of_rule
         (directRef growth source testDirectSlot)
         (AnchoredCounterGeometry.routeToDecrementStart register)) :
     Nonempty (BranchOutcome current growth source register
-      ifZero ifPositive) := by
-  rcases testHandoff_of_rule base c hmortal current himmortal growth source
-      register ifZero ifPositive hrule hcommand with ⟨handoff⟩
-  exact branchOutcome_of_read base c handoff
-    (branchRead_of_immortal base c handoff himmortal)
+      ifZero ifPositive) :=
+  CounterControlGenuineDecrementEntry.branchOutcome_of_rule base c hmortal
+    current.current himmortal growth source register ifZero ifPositive hrule
+    hcommand
 
 end
 

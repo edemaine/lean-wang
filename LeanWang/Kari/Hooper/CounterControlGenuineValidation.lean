@@ -37,6 +37,7 @@ open CounterControlValidationMortality
 open CounterControlRouteSuffixMortality
 open CounterControlParentContinuation
 open CounterControlGuardedParentContinuation
+open CounterControlRouteRoundtrip
 
 noncomputable section
 
@@ -240,10 +241,6 @@ private theorem foundTape_read_of_boundaryRaw
   rw [CounterControlCommandAt.compileRawCommand_spec] at hmatch
   simpa [hraw, CounterControlCommandAt.compileRawAtTag,
     compileNavigationAction, Command.target, Target.Matches] using hmatch
-
-@[simp] private theorem opposite_orient_left (growth : Turing.Dir) :
-    NestingMachine.opposite (orient growth .left) = orient growth .right := by
-  cases growth <;> rfl
 
 private theorem atLogical_boundaryZero_to_core
     (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))

@@ -35,44 +35,6 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-@[simp] private theorem opposite_orient_left (growth : Turing.Dir) :
-    NestingMachine.opposite (orient growth .left) = orient growth .right := by
-  cases growth <;> rfl
-
-@[simp] private theorem opposite_orient_right (growth : Turing.Dir) :
-    NestingMachine.opposite (orient growth .right) = orient growth .left := by
-  cases growth <;> rfl
-
-/-- Moving back across a reversed search gap returns to the cell immediately
-behind the original search head. -/
-private theorem reverseGap_finish
-    (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir)
-    (distance : Nat) :
-    (((T.moveN direction distance).move
-        (NestingMachine.opposite direction)).moveN
-      (NestingMachine.opposite direction) distance) =
-        T.move (NestingMachine.opposite direction) := by
-  funext position
-  cases direction <;>
-    simp [NestingMachine.opposite, FullTM0.Tape.moveN,
-      FullTM0.Tape.offset, FullTM0.Tape.move] <;>
-    congr 1 <;> ring
-
-/-- A departure, an arbitrary preserving search, its reversed search, and a
-second departure end one cell beyond the original boundary. -/
-private theorem reverseGap_continue
-    (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir)
-    (distance : Nat) :
-    (((((T.move direction).moveN direction distance).move
-        (NestingMachine.opposite direction)).moveN
-      (NestingMachine.opposite direction) distance).move
-        (NestingMachine.opposite direction)) =
-      T.move (NestingMachine.opposite direction) := by
-  rw [reverseGap_finish]
-  funext position
-  cases direction <;>
-    simp [NestingMachine.opposite, FullTM0.Tape.move]
-
 /-- Moving the boundary-zero view one logical cell inward and compensating
 in the logical coordinate leaves every recentered tape unchanged. -/
 private theorem atLogical_boundaryZero_to_core
@@ -93,22 +55,6 @@ private theorem move_orient_left_right
   funext coordinate
   cases growth <;>
     simp [orient, FullTM0.Tape.move]
-
-/-- Returning across the one-cell departure exposes the boundary found by
-the preceding preserving search. -/
-private theorem read_return_of_gap
-    {T : FullTM0.Tape (Symbol numTags)} {direction : Turing.Dir}
-    {distance : Nat} {target : Fin 5}
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches T direction distance) :
-    (((T.moveN direction distance).move direction).move
-      (NestingMachine.opposite direction)).read = boundarySymbol target := by
-  have hmarked : (T.moveN direction distance).read =
-      boundarySymbol target := by
-    simpa [FullTM0.Tape.read_moveN, Target.Matches] using hgap.marked
-  cases direction <;>
-    simpa [NestingMachine.opposite, FullTM0.Tape.read,
-      FullTM0.Tape.move] using hmarked
 
 /-- The outward half of a successful full validation trace retraces the four
 inward preserving gaps exactly.  Hence the trace finishes on the boundary-`4`
@@ -183,127 +129,76 @@ theorem sweep_routeGaps_roundtrip
                     (orient growth .right) d7 at gap7
                   change T7.moveN (orient growth .right) d7 =
                     outer.move (orient growth .right)
-                  have hsource1 :
-                      (T3.move (orient growth .right)).read =
+                  have hmarked2 :
+                      (T2.moveN (orient growth .left) d2).read =
                         boundarySymbol 1 := by
-                    have hreturn := read_return_of_gap gap2
-                    rw [opposite_orient_left] at hreturn
-                    simpa [T3] using hreturn
-                  have hreverse3 : SearchGap
-                      (fun symbol => symbol = blankSymbol)
-                      (Target.boundary 1).Matches T4
-                      (orient growth .right) d3 := by
-                    have hreverse := reverseGap_of_source_boundary
-                      (source := (1 : Fin 5)) gap3 (by
-                        rw [opposite_orient_left]
-                        exact hsource1)
-                    rw [opposite_orient_left] at hreverse
-                    simpa [T4] using hreverse
-                  have hd4 : d4 = d3 := by
-                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap4
-                    exact hreverse3
+                    simpa [FullTM0.Tape.read_moveN, Target.Matches] using
+                      gap2.marked
+                  have hpair3 := reverseGap_pair_continue
+                    (T := T2.moveN (orient growth .left) d2)
+                    (direction := orient growth .left)
+                    (source := (1 : Fin 5)) hmarked2
+                    (by simpa only [T3] using gap3)
+                    (by simpa only [T3, T4, opposite_orient_left] using gap4)
                   have hT5 :
-                      T5 =
-                        (T2.moveN (orient growth .left) d2).move
-                          (orient growth .right) := by
-                    subst d4
-                    have hcontinue := reverseGap_continue
-                      (T2.moveN (orient growth .left) d2)
-                      (orient growth .left) d3
-                    rw [opposite_orient_left] at hcontinue
-                    simpa [T3, T4, T5] using hcontinue
-                  have hsource2 :
-                      (T2.move (orient growth .right)).read =
+                      T5 = (T2.moveN (orient growth .left) d2).move
+                        (orient growth .right) := by
+                    change (T4.moveN (orient growth .right) d4).move
+                      (orient growth .right) = _
+                    simpa only [T3, T4, opposite_orient_left] using hpair3.2
+                  have hmarked1 :
+                      (T1.moveN (orient growth .left) d1).read =
                         boundarySymbol 2 := by
-                    have hreturn := read_return_of_gap gap1
-                    rw [opposite_orient_left] at hreturn
-                    simpa [T2] using hreturn
-                  have hreverse2 : SearchGap
-                      (fun symbol => symbol = blankSymbol)
-                      (Target.boundary 2).Matches
-                      ((T2.moveN (orient growth .left) d2).move
-                        (orient growth .right))
-                      (orient growth .right) d2 := by
-                    have hreverse := reverseGap_of_source_boundary
-                      (source := (2 : Fin 5)) gap2 (by
-                        rw [opposite_orient_left]
-                        exact hsource2)
-                    rw [opposite_orient_left] at hreverse
-                    exact hreverse
-                  have hd5 : d5 = d2 := by
-                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap5
-                    rw [hT5]
-                    simpa using hreverse2
+                    simpa [FullTM0.Tape.read_moveN, Target.Matches] using
+                      gap1.marked
+                  have hpair2 := reverseGap_pair_continue
+                    (T := T1.moveN (orient growth .left) d1)
+                    (direction := orient growth .left)
+                    (source := (2 : Fin 5)) hmarked1
+                    (by simpa only [T2] using gap2)
+                    (by rw [hT5] at gap5
+                        simpa only [T2, opposite_orient_left] using gap5)
                   have hT6 :
-                      T6 =
-                        (T1.moveN (orient growth .left) d1).move
-                          (orient growth .right) := by
-                    subst d5
-                    change (T5.moveN (orient growth .right) d2).move
-                        (orient growth .right) = _
+                      T6 = (T1.moveN (orient growth .left) d1).move
+                        (orient growth .right) := by
+                    change (T5.moveN (orient growth .right) d5).move
+                      (orient growth .right) = _
                     rw [hT5]
-                    have hcontinue := reverseGap_continue
-                      (T1.moveN (orient growth .left) d1)
-                      (orient growth .left) d2
-                    rw [opposite_orient_left] at hcontinue
-                    simpa [T2] using hcontinue
-                  have hsource3 :
-                      (T1.move (orient growth .right)).read =
+                    simpa only [T2, opposite_orient_left] using hpair2.2
+                  have hmarked0 :
+                      (outer.moveN (orient growth .left) d0).read =
                         boundarySymbol 3 := by
-                    have hreturn := read_return_of_gap gap0
-                    rw [opposite_orient_left] at hreturn
-                    simpa [T1] using hreturn
-                  have hreverse1 : SearchGap
-                      (fun symbol => symbol = blankSymbol)
-                      (Target.boundary 3).Matches
-                      ((T1.moveN (orient growth .left) d1).move
-                        (orient growth .right))
-                      (orient growth .right) d1 := by
-                    have hreverse := reverseGap_of_source_boundary
-                      (source := (3 : Fin 5)) gap1 (by
-                        rw [opposite_orient_left]
-                        exact hsource3)
-                    rw [opposite_orient_left] at hreverse
-                    exact hreverse
-                  have hd6 : d6 = d1 := by
-                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap6
-                    rw [hT6]
-                    simpa using hreverse1
+                    simpa [FullTM0.Tape.read_moveN, Target.Matches] using
+                      gap0.marked
+                  have hpair1 := reverseGap_pair_continue
+                    (T := outer.moveN (orient growth .left) d0)
+                    (direction := orient growth .left)
+                    (source := (3 : Fin 5)) hmarked0
+                    (by simpa only [T1] using gap1)
+                    (by rw [hT6] at gap6
+                        simpa only [T1, opposite_orient_left] using gap6)
                   have hT7 :
-                      T7 =
-                        (outer.moveN (orient growth .left) d0).move
-                          (orient growth .right) := by
-                    subst d6
-                    change (T6.moveN (orient growth .right) d1).move
-                        (orient growth .right) = _
+                      T7 = (outer.moveN (orient growth .left) d0).move
+                        (orient growth .right) := by
+                    change (T6.moveN (orient growth .right) d6).move
+                      (orient growth .right) = _
                     rw [hT6]
-                    have hcontinue := reverseGap_continue
-                      (outer.moveN (orient growth .left) d0)
-                      (orient growth .left) d1
-                    rw [opposite_orient_left] at hcontinue
-                    simpa [T1] using hcontinue
-                  have hreverse0 : SearchGap
-                      (fun symbol => symbol = blankSymbol)
-                      (Target.boundary 4).Matches
-                      ((outer.moveN (orient growth .left) d0).move
-                        (orient growth .right))
-                      (orient growth .right) d0 := by
-                    have hreverse := reverseGap_of_source_boundary
-                      (source := (4 : Fin 5)) gap0 (by
-                        rw [opposite_orient_left]
-                        exact hsource)
-                    rw [opposite_orient_left] at hreverse
-                    exact hreverse
-                  have hd7 : d7 = d0 := by
-                    apply BoundedMarkerProgram.boundaryGap_distance_unique gap7
-                    rw [hT7]
-                    simpa using hreverse0
-                  subst d7
+                    simpa only [T1, opposite_orient_left] using hpair1.2
+                  have hcancel :
+                      (outer.move (orient growth .right)).move
+                          (orient growth .left) = outer := by
+                    simpa only [opposite_orient_right] using
+                      move_move_opposite outer (orient growth .right)
+                  have hpair0 := reverseGap_pair_finish
+                    (T := outer.move (orient growth .right))
+                    (direction := orient growth .left)
+                    (source := (4 : Fin 5)) hsource
+                    (by rw [hcancel]
+                        exact gap0)
+                    (by rw [hcancel, opposite_orient_left, ← hT7]
+                        exact gap7)
                   rw [hT7]
-                  have hfinish := reverseGap_finish outer
-                    (orient growth .left) d0
-                  rw [opposite_orient_left] at hfinish
-                  exact hfinish
+                  simpa only [hcancel, opposite_orient_left] using hpair0.2
 
 /-- A full successful validation trace simultaneously reconstructs the
 finite core and identifies its boundary-`4` view with the tape from which

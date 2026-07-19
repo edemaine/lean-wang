@@ -146,6 +146,54 @@ theorem reaches_routeGaps_of_immortal
       exact ⟨finish, .cons first next tail outer distance hgap finish htail,
         hfinish⟩
 
+/-- Convert any nonempty all-right tape trace into its coordinate-level route
+on a single logical tape. -/
+theorem routeExecutesAt_of_routeGaps_allRight
+    (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags))
+    {route : List MarkerValidation.Leg}
+    {outer finishTape : FullTM0.Tape (Symbol numTags)} {source : Nat}
+    (hdirections : ∀ leg, leg ∈ route → leg.direction = .right)
+    (houter : outer = atLogical growth T (source + 1))
+    (htrace : RouteGaps growth route outer finishTape) :
+    ∃ finish, RouteExecutesAt growth T route source finish ∧
+      finishTape = atLogical growth T finish := by
+  induction htrace generalizing source with
+  | last leg outer distance gap =>
+      have hright : leg.direction = .right := hdirections leg (by simp)
+      let finish := source + distance + 1
+      have hfirst : LegExecutesAt growth T leg source finish := by
+        simp only [LegExecutesAt, hright]
+        refine ⟨distance, ?_, by simp [finish]⟩
+        simpa only [houter, hright, orient_eq_orientDirection] using gap
+      refine ⟨finish, .cons leg [] source finish finish hfirst (.nil finish), ?_⟩
+      rw [houter, hright, orient_eq_orientDirection, atLogical_moveN_right]
+      congr 1
+      omega
+  | cons leg next rest outer distance gap finishTape tail ih =>
+      have hright : leg.direction = .right := hdirections leg (by simp)
+      have hnext : next.direction = .right := hdirections next (by simp)
+      let middle := source + distance + 1
+      have hfirst : LegExecutesAt growth T leg source middle := by
+        simp only [LegExecutesAt, hright]
+        refine ⟨distance, ?_, by simp [middle]⟩
+        simpa only [houter, hright, orient_eq_orientDirection] using gap
+      have hnextOuter :
+          ((outer.moveN (orient growth leg.direction) distance).move
+              (orient growth next.direction)) =
+            atLogical growth T (middle + 1) := by
+        rw [houter, hright, hnext, orient_eq_orientDirection,
+          atLogical_moveN_right, atLogical_move_right]
+        congr 1
+        omega
+      have htailDirections : ∀ candidate, candidate ∈ next :: rest →
+          candidate.direction = .right := by
+        intro candidate hcandidate
+        exact hdirections candidate (List.mem_cons_of_mem leg hcandidate)
+      rcases ih htailDirections hnextOuter with
+        ⟨finish, htail, hfinish⟩
+      exact ⟨finish,
+        .cons leg (next :: rest) source middle finish hfirst htail, hfinish⟩
+
 /-- The tape-level trace of the four outward validation legs is the native
 coordinate-level route required by the validation converse. -/
 theorem outwardSweep_executesAt_of_routeGaps
@@ -157,127 +205,16 @@ theorem outwardSweep_executesAt_of_routeGaps
       RouteExecutesAt growth T
           CounterControlValidationConverse.outwardSweep 0 finish ∧
         finishTape = atLogical growth T finish := by
-  unfold CounterControlValidationConverse.outwardSweep at htrace
-  cases htrace with
-  | cons _ _ _ _ d0 gap0 _ tail0 =>
-    cases tail0 with
-    | cons _ _ _ _ d1 gap1 _ tail1 =>
-      cases tail1 with
-      | cons _ _ _ _ d2 gap2 _ tail2 =>
-        cases tail2 with
-        | last _ _ d3 gap3 =>
-          let p1 := d0 + 1
-          let p2 := p1 + d1 + 1
-          let p3 := p2 + d2 + 1
-          let p4 := p3 + d3 + 1
-          have houter0 : T.move (orient growth .right) =
-              atLogical growth T 1 := by
-            simpa [orient_eq_orientDirection, atLogical] using
-              (atLogical_move_right growth T 0)
-          have houter1 :
-              ((T.move (orient growth .right)).moveN
-                  (orient growth .right) d0).move
-                    (orient growth .right) =
-                atLogical growth T (p1 + 1) := by
-            rw [houter0, orient_eq_orientDirection,
-              atLogical_moveN_right, atLogical_move_right]
-            congr 1
-            omega
-          have houter2 :
-              (((((T.move (orient growth .right)).moveN
-                    (orient growth .right) d0).move
-                      (orient growth .right)).moveN
-                        (orient growth .right) d1).move
-                          (orient growth .right)) =
-                atLogical growth T (p2 + 1) := by
-            rw [houter1, orient_eq_orientDirection,
-              atLogical_moveN_right, atLogical_move_right]
-            congr 1
-            omega
-          have houter3 :
-              (((((((T.move (orient growth .right)).moveN
-                    (orient growth .right) d0).move
-                      (orient growth .right)).moveN
-                        (orient growth .right) d1).move
-                          (orient growth .right)).moveN
-                            (orient growth .right) d2).move
-                              (orient growth .right)) =
-                atLogical growth T (p3 + 1) := by
-            rw [houter2, orient_eq_orientDirection,
-              atLogical_moveN_right, atLogical_move_right]
-            congr 1
-            omega
-          have gap0' : SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 1).Matches (atLogical growth T (0 + 1))
-              (OrientedMarkerTape.orientDirection growth .right) d0 := by
-            change SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 1).Matches (T.move (orient growth .right))
-              (orient growth .right) d0 at gap0
-            rw [houter0] at gap0
-            simpa only [orient_eq_orientDirection] using gap0
-          have gap1' : SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 2).Matches (atLogical growth T (p1 + 1))
-              (OrientedMarkerTape.orientDirection growth .right) d1 := by
-            change SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 2).Matches
-                (((T.move (orient growth .right)).moveN
-                  (orient growth .right) d0).move (orient growth .right))
-              (orient growth .right) d1 at gap1
-            rw [houter1] at gap1
-            simpa only [orient_eq_orientDirection] using gap1
-          have gap2' : SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 3).Matches (atLogical growth T (p2 + 1))
-              (OrientedMarkerTape.orientDirection growth .right) d2 := by
-            change SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 3).Matches
-                (((((T.move (orient growth .right)).moveN
-                    (orient growth .right) d0).move
-                      (orient growth .right)).moveN
-                        (orient growth .right) d1).move
-                          (orient growth .right))
-              (orient growth .right) d2 at gap2
-            rw [houter2] at gap2
-            simpa only [orient_eq_orientDirection] using gap2
-          have gap3' : SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 4).Matches (atLogical growth T (p3 + 1))
-              (OrientedMarkerTape.orientDirection growth .right) d3 := by
-            change SearchGap (fun symbol => symbol = blankSymbol)
-              (Target.boundary 4).Matches
-                (((((((T.move (orient growth .right)).moveN
-                    (orient growth .right) d0).move
-                      (orient growth .right)).moveN
-                        (orient growth .right) d1).move
-                          (orient growth .right)).moveN
-                            (orient growth .right) d2).move
-                              (orient growth .right))
-              (orient growth .right) d3 at gap3
-            rw [houter3] at gap3
-            simpa only [orient_eq_orientDirection] using gap3
-          have hfinal :
-              (((((((T.move (orient growth .right)).moveN
-                    (orient growth .right) d0).move
-                      (orient growth .right)).moveN
-                        (orient growth .right) d1).move
-                          (orient growth .right)).moveN
-                            (orient growth .right) d2).move
-                              (orient growth .right)).moveN
-                                (orient growth .right) d3 =
-                atLogical growth T p4 := by
-            rw [houter3, orient_eq_orientDirection,
-              atLogical_moveN_right]
-            congr 1
-            omega
-          refine ⟨p4, ?_, hfinal⟩
-          unfold CounterControlValidationConverse.outwardSweep
-          apply RouteExecutesAt.cons (middle := p1)
-          · exact ⟨d0, gap0', by simp [p1]⟩
-          · apply RouteExecutesAt.cons (middle := p2)
-            · exact ⟨d1, gap1', by simp [p2]⟩
-            · apply RouteExecutesAt.cons (middle := p3)
-              · exact ⟨d2, gap2', by simp [p3]⟩
-              · apply RouteExecutesAt.cons (middle := p4)
-                · exact ⟨d3, gap3', by simp [p4]⟩
-                · exact .nil p4
+  apply routeExecutesAt_of_routeGaps_allRight growth T
+    (route := CounterControlValidationConverse.outwardSweep)
+    (outer := T.move (orient growth .right))
+    (source := 0) (finishTape := finishTape)
+  · intro leg hleg
+    simp [CounterControlValidationConverse.outwardSweep] at hleg
+    rcases hleg with rfl | rfl | rfl | rfl <;> rfl
+  · simpa [orient_eq_orientDirection, atLogical] using
+      (atLogical_move_right growth T 0)
+  · exact htrace
 
 /-- Four successful outward validation searches reconstruct both the
 boundary-zero view and the ordinary tag-free finite counter core.  The final
