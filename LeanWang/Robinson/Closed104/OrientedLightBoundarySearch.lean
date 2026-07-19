@@ -328,6 +328,88 @@ theorem boundary_of_exists_selected
       fun value lastValue valueCoordinate =>
         not_ne_iff.mp (between value lastValue valueCoordinate)⟩)
 
+/-- Combine nearest-boundary search with the common unit-height argument.
+The caller supplies one axis's selected directions, local weights, potential,
+and the facts that the potential is one on the free line and positive inside
+the surrounding board. -/
+theorem boundary_of_unit_height
+    {Direction : Type} {selected : Nat -> Option Direction}
+    {primary secondary potential : Nat -> Nat -> Int}
+    {lower point upper scanCoordinate beforeFinish : Nat}
+    {after before rejectedAfter rejectedBefore : Direction}
+    (witness : exists boundary, lower < boundary /\ boundary < upper /\
+      selected boundary ≠ none)
+    (directionsAfter : forall direction,
+      direction = after \/ direction = rejectedAfter)
+    (directionsBefore : forall direction,
+      direction = before \/ direction = rejectedBefore)
+    (scanPositive : 0 < scanCoordinate)
+    (pointInside : lower < point /\ point < upper)
+    (beforeFinishLe : beforeFinish <= point)
+    (beforeFinishUpper : beforeFinish < upper)
+    (boundaryLeBeforeFinish : forall boundary,
+      lower < boundary -> boundary < point -> boundary <= beforeFinish)
+    (rejectedAfterWeight : forall boundary,
+      selected boundary = some rejectedAfter ->
+        primary scanCoordinate boundary = -1 \/
+          secondary scanCoordinate boundary = -1)
+    (rejectedBeforeWeight : forall boundary,
+      selected boundary = some rejectedBefore ->
+        primary scanCoordinate boundary = 1 \/
+          secondary scanCoordinate boundary = 1)
+    (shared : forall scan position,
+      primary scan position = secondary (scan + 1) position)
+    (pointHeight : forall scan,
+      scan = scanCoordinate \/ scan + 1 = scanCoordinate ->
+        potential scan point = 1)
+    (beforeHeight : forall scan,
+      scan = scanCoordinate \/ scan + 1 = scanCoordinate ->
+        potential scan beforeFinish = 1)
+    (step : forall scan position,
+      scan = scanCoordinate \/ scan + 1 = scanCoordinate ->
+      lower < position -> position < upper ->
+        potential scan position =
+          potential scan (position - 1) + primary scan position)
+    (zeroWeights : forall position, selected position = none ->
+      primary scanCoordinate position = 0 /\
+        secondary scanCoordinate position = 0)
+    (positive : forall scan position,
+      scan = scanCoordinate \/ scan + 1 = scanCoordinate ->
+      lower <= position -> position < upper -> 1 <= potential scan position) :
+    selected point ≠ none \/
+      (exists boundary, point < boundary /\ boundary < upper /\
+        selected boundary = some after /\
+        forall value, point < value -> value < boundary ->
+          selected value = none) \/
+      (exists boundary, lower < boundary /\ boundary < point /\
+        selected boundary = some before /\
+        forall value, boundary < value -> value < point ->
+          selected value = none) := by
+  apply boundary_of_exists_selected witness
+  · intro boundary pointBoundary boundaryUpper boundarySelected between
+    apply selected_after_eq_of_negative_rejected directionsAfter scanPositive
+      pointBoundary boundarySelected (rejectedAfterWeight boundary) shared
+      pointHeight
+    · intro scan position scanEq lowerPosition upperPosition
+      exact step scan position scanEq (by omega) (by omega)
+    · intro position pointPosition positionBoundary
+      exact zeroWeights position (between position pointPosition positionBoundary)
+    · intro scan scanEq
+      exact positive scan boundary scanEq (by omega) boundaryUpper
+  · intro boundary boundaryLower boundaryPoint boundarySelected between pointClear
+    apply selected_before_eq_of_positive_rejected directionsBefore scanPositive
+      (boundaryLeBeforeFinish boundary boundaryLower boundaryPoint)
+      boundarySelected (rejectedBeforeWeight boundary) shared beforeHeight
+    · intro scan position scanEq boundaryPosition positionFinish
+      exact step scan position scanEq (by omega) (by omega)
+    · intro position boundaryPosition positionFinish
+      apply zeroWeights
+      by_cases positionPoint : position = point
+      · simpa [positionPoint] using pointClear
+      · exact between position boundaryPosition (by omega)
+    · intro scan scanEq
+      exact positive scan (boundary - 1) scanEq (by omega) (by omega)
+
 end OrientedLightBoundarySearch
 end Closed104
 end Figure13Layers

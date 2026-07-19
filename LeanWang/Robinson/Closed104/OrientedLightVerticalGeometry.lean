@@ -67,129 +67,6 @@ private theorem faceHeight_step_up {scan position : Nat}
   congr 2
   omega
 
-private theorem CycleShade.nearest_above_selected_north
-    (shaded : CycleShade stateGrid west east south north .light)
-    (cycle : CycleOn indexGrid west east south north)
-    (valid : ValidShadeGrid indexGrid stateGrid)
-    {column row boundary : Nat}
-    (hwest : quarterWest west < column)
-    (heast : column < quarterEast east)
-    (hsouth : quarterSouth south < row)
-    (hrowBoundary : row < boundary)
-    (hboundaryNorth : boundary < quarterNorth north)
-    (free : IsFreeRow indexGrid stateGrid west east row)
-    (hselected : ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column boundary) (quadrantAt column boundary)
-      (stateGrid column boundary) ≠ none)
-    (hbetween : forall y, row < y -> y < boundary ->
-      ShadedSignals.selectedHorizontalFor
-        (componentAt indexGrid column y) (quadrantAt column y)
-        (stateGrid column y) = none) :
-    ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column boundary) (quadrantAt column boundary)
-      (stateGrid column boundary) = some .north := by
-  apply OrientedLightBoundarySearch.selected_after_eq_of_negative_rejected
-    (selected := fun y => ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column y) (quadrantAt column y)
-      (stateGrid column y))
-    (primary := fun scan y => rightWeightAt stateGrid scan y)
-    (secondary := fun scan y => leftWeightAt stateGrid scan y)
-    (potential := fun scan y => faceHeight stateGrid scan (quarterSouth south)
-      (y - quarterSouth south))
-    (coordinate := column) (start := row) (boundary := boundary)
-    (expected := .north) (rejected := .south)
-  · intro direction
-    cases direction <;> simp
-  · omega
-  · exact hrowBoundary
-  · exact hselected
-  · exact ValidShadeGrid.horizontal_south_has_negative_weightAt valid
-  · exact fun scan y =>
-      OrientedLightHeight.ValidShadeGrid.rightWeightAt_eq_leftWeightAt_succ
-        valid scan y
-  · intro scan scanEq
-    exact OrientedLightFreeHeight.CycleShade.faceHeight_eq_one_of_freeRow
-      shaded cycle valid (column := scan) (row := row)
-      (by rcases scanEq with h | h <;> omega)
-      (by rcases scanEq with h | h <;> omega)
-      (le_of_lt hsouth) (hrowBoundary.trans hboundaryNorth) free
-  · intro scan position scanEq lower upper
-    exact faceHeight_step_up (by omega)
-  · intro y hyRow hyBoundary
-    exact ValidShadeGrid.horizontal_none_weightsAt_zero valid
-      (hbetween y hyRow hyBoundary)
-  · intro scan scanEq
-    exact OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
-      shaded cycle valid
-      (by rcases scanEq with h | h <;> omega)
-      (by rcases scanEq with h | h <;> omega)
-      (row := boundary) (by omega) hboundaryNorth
-
-private theorem CycleShade.nearest_below_selected_south
-    (shaded : CycleShade stateGrid west east south north .light)
-    (cycle : CycleOn indexGrid west east south north)
-    (valid : ValidShadeGrid indexGrid stateGrid)
-    {column row boundary : Nat}
-    (hwest : quarterWest west < column)
-    (heast : column < quarterEast east)
-    (hboundarySouth : quarterSouth south < boundary)
-    (hboundaryRow : boundary < row)
-    (hnorth : row < quarterNorth north)
-    (free : IsFreeRow indexGrid stateGrid west east row)
-    (hat : ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column row) (quadrantAt column row)
-      (stateGrid column row) = none)
-    (hselected : ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column boundary) (quadrantAt column boundary)
-      (stateGrid column boundary) ≠ none)
-    (hbetween : forall y, boundary < y -> y < row ->
-      ShadedSignals.selectedHorizontalFor
-        (componentAt indexGrid column y) (quadrantAt column y)
-        (stateGrid column y) = none) :
-    ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column boundary) (quadrantAt column boundary)
-      (stateGrid column boundary) = some .south := by
-  apply OrientedLightBoundarySearch.selected_before_eq_of_positive_rejected
-    (selected := fun y => ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column y) (quadrantAt column y)
-      (stateGrid column y))
-    (primary := fun scan y => rightWeightAt stateGrid scan y)
-    (secondary := fun scan y => leftWeightAt stateGrid scan y)
-    (potential := fun scan y => faceHeight stateGrid scan (quarterSouth south)
-      (y - quarterSouth south))
-    (coordinate := column) (boundary := boundary) (finish := row)
-    (expected := .south) (rejected := .north)
-  · intro direction
-    cases direction <;> simp
-  · omega
-  · omega
-  · exact hselected
-  · exact ValidShadeGrid.horizontal_north_has_positive_weightAt valid
-  · exact fun scan y =>
-      OrientedLightHeight.ValidShadeGrid.rightWeightAt_eq_leftWeightAt_succ
-        valid scan y
-  · intro scan scanEq
-    exact OrientedLightFreeHeight.CycleShade.faceHeight_eq_one_of_freeRow
-      shaded cycle valid (column := scan) (row := row)
-      (by rcases scanEq with h | h <;> omega)
-      (by rcases scanEq with h | h <;> omega)
-      (by omega) hnorth free
-  · intro scan position scanEq lower upper
-    exact faceHeight_step_up (by omega)
-  · intro y hyBoundary hyRow
-    have hnone : ShadedSignals.selectedHorizontalFor
-        (componentAt indexGrid column y) (quadrantAt column y)
-        (stateGrid column y) = none :=
-      if hy : y = row then by simpa [hy] using hat
-      else hbetween y hyBoundary (lt_of_le_of_ne hyRow hy)
-    exact ValidShadeGrid.horizontal_none_weightsAt_zero valid hnone
-  · intro scan scanEq
-    exact OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
-      shaded cycle valid
-      (by rcases scanEq with h | h <;> omega)
-      (by rcases scanEq with h | h <;> omega)
-      (row := boundary - 1) (by omega) (by omega)
-
 /-- Vertical half of the Robinson obstruction geometry, now derived directly
 from the height minimum principle. -/
 theorem CycleShade.verticalBoundary
@@ -231,15 +108,55 @@ theorem CycleShade.verticalBoundary
     simp only [IsFreeColumn] at notFree
     push Not at notFree
     exact notFree
-  apply OrientedLightBoundarySearch.boundary_of_exists_selected witness
-  · intro boundary rowBoundary boundaryNorth boundarySelected between
-    exact CycleShade.nearest_above_selected_north
-      shaded cycle valid hwest heast hsouth rowBoundary boundaryNorth free
-      boundarySelected between
-  · intro boundary boundarySouth boundaryRow boundarySelected between rowClear
-    exact CycleShade.nearest_below_selected_south
-      shaded cycle valid hwest heast boundarySouth boundaryRow hnorth free
-      rowClear boundarySelected between
+  apply OrientedLightBoundarySearch.boundary_of_unit_height
+    (selected := selected)
+    (primary := fun scan y => rightWeightAt stateGrid scan y)
+    (secondary := fun scan y => leftWeightAt stateGrid scan y)
+    (potential := fun scan y => faceHeight stateGrid scan (quarterSouth south)
+      (y - quarterSouth south))
+    (lower := quarterSouth south) (point := row)
+    (upper := quarterNorth north) (scanCoordinate := column)
+    (beforeFinish := row)
+    (after := .north) (before := .south)
+    (rejectedAfter := .south) (rejectedBefore := .north) witness
+  · intro direction
+    cases direction <;> simp
+  · intro direction
+    cases direction <;> simp
+  · omega
+  · exact ⟨hsouth, hnorth⟩
+  · omega
+  · exact hnorth
+  · omega
+  · intro boundary rejected
+    exact ValidShadeGrid.horizontal_south_has_negative_weightAt valid rejected
+  · intro boundary rejected
+    exact ValidShadeGrid.horizontal_north_has_positive_weightAt valid rejected
+  · exact fun scan y =>
+      OrientedLightHeight.ValidShadeGrid.rightWeightAt_eq_leftWeightAt_succ
+        valid scan y
+  · intro scan scanEq
+    exact OrientedLightFreeHeight.CycleShade.faceHeight_eq_one_of_freeRow
+      shaded cycle valid (column := scan) (row := row)
+      (by rcases scanEq with h | h <;> omega)
+      (by rcases scanEq with h | h <;> omega)
+      (le_of_lt hsouth) hnorth free
+  · intro scan scanEq
+    exact OrientedLightFreeHeight.CycleShade.faceHeight_eq_one_of_freeRow
+      shaded cycle valid (column := scan) (row := row)
+      (by rcases scanEq with h | h <;> omega)
+      (by rcases scanEq with h | h <;> omega)
+      (le_of_lt hsouth) hnorth free
+  · intro scan position scanEq positionSouth positionNorth
+    exact faceHeight_step_up positionSouth
+  · intro position clear
+    exact ValidShadeGrid.horizontal_none_weightsAt_zero valid clear
+  · intro scan position scanEq positionSouth positionNorth
+    exact OrientedLightFreeHeight.CycleShade.one_le_faceHeight_at
+      shaded cycle valid
+      (by rcases scanEq with h | h <;> omega)
+      (by rcases scanEq with h | h <;> omega)
+      (row := position) positionSouth positionNorth
 
 end OrientedLightVerticalGeometry
 end Closed104
