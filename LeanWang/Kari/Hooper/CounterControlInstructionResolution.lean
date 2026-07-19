@@ -445,70 +445,10 @@ theorem machine_reaches_incrementInternal_or_halts
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
           atLogical spec.growth T (lastGapOffset spec.registers i)⟩ := by
-  let source := boundaryOffset spec.registers i.castSucc
-  let distance := RegisterLayout.values spec.registers i
-  let U := writeLogical spec.growth
-    (writeLogical spec.growth T source blankSymbol) (source + 1)
-      (boundarySymbol i.castSucc)
-  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary i.castSucc).Matches
-      (atLogical spec.growth T (lastGapOffset spec.registers i))
-      (OrientedMarkerTape.orientDirection spec.growth .left) distance := by
-    change SearchGap (fun symbol => symbol = blankSymbol)
-      (fun symbol => symbol = boundarySymbol i.castSucc) _ _ _
-    exact h.searchGap_adjacent_left i
-  have hstart : lastGapOffset spec.registers i = source + distance := by
-    exact lastGapOffset_eq_boundaryOffset_add_value spec.registers i
-  have hblank : logicalTape spec.growth T (source + 1) = blankSymbol := by
-    have hgapBlank := h.gap_blank i 0 hpositive
-    have hcoordinate : source + 1 = firstGapOffset spec.registers i := by
-      simp [source, firstGapOffset, boundaryOffset]
-    have hcoordinateInt : (source : Int) + 1 =
-        firstGapOffset spec.registers i := by
-      exact_mod_cast hcoordinate
-    rw [hcoordinateInt]
-    simpa using hgapBlank
-  have hrun := machine_reaches_incrementShift_or_halts base c limit hshort
-    spec.growth counterState searchSlot source i.castSucc success collision
-    hraw T distance hdistance (by simpa [hstart] using hgap) hblank
-  rcases hrun with hrun | hhalts
-  · left
-    have hsourceBound : source ≤ layoutEnd spec.registers := by
-      change CounterLayout.boundaryPos
-          (RegisterLayout.values spec.registers) i + 1 ≤
-        CounterLayout.boundaryPos (RegisterLayout.values spec.registers) 4 + 1
-      apply Nat.add_le_add_right
-      exact CounterLayout.boundaryPos_mono
-        (RegisterLayout.values spec.registers) (show (i : Nat) ≤ 4 by omega)
-    have htargetBound : source + 1 ≤ layoutEnd next := by
-      rw [hsameEnd]
-      have hnext := CounterLayout.boundaryPos_succ
-        (RegisterLayout.values spec.registers) i
-      change CounterLayout.boundaryPos
-          (RegisterLayout.values spec.registers) i + 1 + 1 ≤
-        CounterLayout.boundaryPos (RegisterLayout.values spec.registers) 4 + 1
-      have hmono := CounterLayout.boundaryPos_mono
-        (RegisterLayout.values spec.registers)
-        (show (i : Nat) + 1 ≤ 4 by omega)
-      omega
-    have hrep : Represents (updateSpec spec next hnextCore) U := by
-      apply moveRight_represents h next i.castSucc hnextCore
-      · omega
-      · omega
-      · exact hsourceBound
-      · exact htargetBound
-      · intro hlt
-        omega
-      · exact hmove
-    have hU : U = install next spec.growth spec.returnTag T := by
-      apply moveRight_eq_install next i.castSucc hnextCore
-      · simp [boundaryOffset]
-      · exact hsourceBound.trans (by omega)
-      · exact htargetBound
-      · exact hrep
-    simpa [U, hU, hstart] using hrun
-  · right
-    simpa [hstart] using hhalts
+  exact machine_reaches_incrementInternal_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) counterState searchSlot success
+    collision h next i hpositive hdistance hnextCore hsameEnd hmove hraw
 
 /-- One canonical inward shift resolves to the normalized installed frame, or
 halts at the shift's search entry. -/
