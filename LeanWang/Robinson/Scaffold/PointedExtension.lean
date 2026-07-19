@@ -288,24 +288,14 @@ theorem tilesForRegion_primrec : Primrec tilesForRegion := by
         (Primrec.snd.comp (Primrec.snd.comp Primrec.fst)))
   exact WangTile.product_primrec.comp (Primrec.pair position Primrec.snd)
 
-/-- Enumerate all vertical regions for one horizontal axis class. -/
-def tilesForHorizontal
-    (input : (TileSet × WangTile) × AxisClass) : TileSet :=
-  axisClasses.flatMap fun vertical =>
-    tilesForRegion (input.1, input.2, vertical)
-
-theorem tilesForHorizontal_primrec : Primrec tilesForHorizontal := by
-  refine Primrec.list_flatMap (Primrec.const axisClasses) ?_
-  apply Primrec₂.mk
-  exact tilesForRegion_primrec.comp
-    (Primrec.pair
-      (Primrec.fst.comp Primrec.fst)
-      (Primrec.pair (Primrec.snd.comp Primrec.fst) Primrec.snd))
+/-- The nine horizontal and vertical position regions. -/
+def axisPairs : List (AxisClass × AxisClass) :=
+  axisClasses.product axisClasses
 
 /-- Extend every allowed region payload by its finite position layer. -/
 def tiles (T : TileSet) (seed : WangTile) : TileSet :=
-  axisClasses.flatMap fun horizontal =>
-    tilesForHorizontal ((T, seed), horizontal)
+  axisPairs.flatMap fun classes =>
+    tilesForRegion ((T, seed), classes)
 
 /-- The original seed at the crossing of the two distinguished axes. -/
 def pointedSeed (seed : WangTile) : WangTile :=
@@ -314,9 +304,9 @@ def pointedSeed (seed : WangTile) : WangTile :=
 theorem tiles_primrec :
     Primrec (fun input : TileSet × WangTile => tiles input.1 input.2) := by
   unfold tiles
-  refine Primrec.list_flatMap (Primrec.const axisClasses) ?_
+  refine Primrec.list_flatMap (Primrec.const axisPairs) ?_
   apply Primrec₂.mk
-  exact tilesForHorizontal_primrec
+  exact tilesForRegion_primrec
 
 theorem pointedSeed_primrec : Primrec pointedSeed := by
   exact WangTile.product_primrec.comp
@@ -338,16 +328,16 @@ theorem mem_tiles_iff {T : TileSet} {seed tile : WangTile} :
         payload ∈ regionPayloads T seed horizontal vertical ∧
           WangTile.product (positionTile horizontal vertical) payload = tile := by
   constructor
-  · simp only [tiles, tilesForHorizontal, tilesForRegion,
+  · simp only [tiles, axisPairs, tilesForRegion,
       List.mem_flatMap, List.mem_map]
-    rintro ⟨horizontal, _horizontalMem, vertical, _verticalMem,
+    rintro ⟨⟨horizontal, vertical⟩, _classesMem,
       payload, payloadMem, rfl⟩
     exact ⟨horizontal, vertical, payload, payloadMem, rfl⟩
   · rintro ⟨horizontal, vertical, payload, payloadMem, rfl⟩
-    simp only [tiles, tilesForHorizontal, tilesForRegion,
+    simp only [tiles, axisPairs, tilesForRegion,
       List.mem_flatMap, List.mem_map]
-    exact ⟨horizontal, mem_axisClasses horizontal,
-      vertical, mem_axisClasses vertical, payload, payloadMem, rfl⟩
+    exact ⟨(horizontal, vertical), by
+      simp [mem_axisClasses], payload, payloadMem, rfl⟩
 
 /-- A membership witness split into position and payload layers. -/
 structure Decoded (T : TileSet) (seed tile : WangTile) where
@@ -405,12 +395,20 @@ theorem mem_source_of_mem_regionPayloads
     (verticalNonnegative : vertical ≠ .negative)
     (member : payload ∈ regionPayloads T seed horizontal vertical) :
     payload ∈ T := by
-  cases horizontal <;> cases vertical <;>
-    simp [regionPayloads] at horizontalNonnegative verticalNonnegative member ⊢
-  exact member.1
-  exact member
-  exact member
-  exact member
+  cases horizontal with
+  | negative => exact (horizontalNonnegative rfl).elim
+  | origin =>
+      cases vertical with
+      | negative => exact (verticalNonnegative rfl).elim
+      | origin =>
+          exact (by simpa [regionPayloads] using member :
+            payload ∈ T ∧ payload = seed).1
+      | positive => simpa [regionPayloads] using member
+  | positive =>
+      cases vertical with
+      | negative => exact (verticalNonnegative rfl).elim
+      | origin => simpa [regionPayloads] using member
+      | positive => simpa [regionPayloads] using member
 
 /-- The origin region contains only the prescribed source seed. -/
 theorem eq_seed_of_mem_originPayloads
