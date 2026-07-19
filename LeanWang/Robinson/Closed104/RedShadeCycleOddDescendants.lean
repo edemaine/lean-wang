@@ -82,7 +82,7 @@ theorem rootDescendantBridge
   rw [hsub] at first
   have first' := first
   simp only [Nat.mul_zero, Nat.zero_add] at first'
-  have composed := odd_trans_even middle first' second
+  have composed := CycleBridge.trans middle first' second
   have hpowOdd : 2 ^ (2 * depth + 1) = 2 * 4 ^ depth := by
     rw [pow_succ, pow_mul]
     norm_num

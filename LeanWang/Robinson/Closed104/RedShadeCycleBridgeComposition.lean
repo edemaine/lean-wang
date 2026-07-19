@@ -47,72 +47,25 @@ theorem EvenCycleBridge.refl
       omega
   exact ⟨port, port, onCycle, onCycle, Path.refl port⟩
 
-/-- Even bridges compose through their common oriented cycle. -/
-theorem even_trans_even
+/-- Bridges compose through a common oriented cycle, with crossing parities
+combined by exclusive or. -/
+theorem CycleBridge.trans
     {grid : Nat → Nat → Index}
     {firstWest firstEast firstSouth firstNorth : Nat}
     {middleWest middleEast middleSouth middleNorth : Nat}
     {lastWest lastEast lastSouth lastNorth : Nat}
+    {firstParity secondParity : Bool}
     (middle : CycleOn grid middleWest middleEast middleSouth middleNorth)
-    (first : EvenCycleBridge grid
+    (first : CycleBridge grid
       firstWest firstEast firstSouth firstNorth
-      middleWest middleEast middleSouth middleNorth)
-    (second : EvenCycleBridge grid
+      middleWest middleEast middleSouth middleNorth firstParity)
+    (second : CycleBridge grid
       middleWest middleEast middleSouth middleNorth
-      lastWest lastEast lastSouth lastNorth) :
-    EvenCycleBridge grid
+      lastWest lastEast lastSouth lastNorth secondParity) :
+    CycleBridge grid
       firstWest firstEast firstSouth firstNorth
-      lastWest lastEast lastSouth lastNorth := by
-  rcases first with ⟨firstPort, middleEntry, firstOnCycle,
-    entryOnCycle, firstPath⟩
-  rcases second with ⟨middleExit, lastPort, exitOnCycle,
-    lastOnCycle, secondPath⟩
-  have middlePath := onCycle_connected middle entryOnCycle exitOnCycle
-  refine ⟨firstPort, lastPort, firstOnCycle, lastOnCycle, ?_⟩
-  simpa [Bool.xor_assoc] using
-    Path.trans firstPath (Path.trans middlePath secondPath)
-
-/-- Two odd bridges compose evenly through their common oriented cycle. -/
-theorem odd_trans_odd
-    {grid : Nat → Nat → Index}
-    {firstWest firstEast firstSouth firstNorth : Nat}
-    {middleWest middleEast middleSouth middleNorth : Nat}
-    {lastWest lastEast lastSouth lastNorth : Nat}
-    (middle : CycleOn grid middleWest middleEast middleSouth middleNorth)
-    (first : OddCycleBridge grid
-      firstWest firstEast firstSouth firstNorth
-      middleWest middleEast middleSouth middleNorth)
-    (second : OddCycleBridge grid
-      middleWest middleEast middleSouth middleNorth
-      lastWest lastEast lastSouth lastNorth) :
-    EvenCycleBridge grid
-      firstWest firstEast firstSouth firstNorth
-      lastWest lastEast lastSouth lastNorth := by
-  rcases first with ⟨firstPort, middleEntry, firstOnCycle,
-    entryOnCycle, firstPath⟩
-  rcases second with ⟨middleExit, lastPort, exitOnCycle,
-    lastOnCycle, secondPath⟩
-  have middlePath := onCycle_connected middle entryOnCycle exitOnCycle
-  refine ⟨firstPort, lastPort, firstOnCycle, lastOnCycle, ?_⟩
-  simpa [Bool.xor_assoc] using
-    Path.trans firstPath (Path.trans middlePath secondPath)
-
-/-- An odd bridge followed by an even bridge remains odd. -/
-theorem odd_trans_even
-    {grid : Nat → Nat → Index}
-    {firstWest firstEast firstSouth firstNorth : Nat}
-    {middleWest middleEast middleSouth middleNorth : Nat}
-    {lastWest lastEast lastSouth lastNorth : Nat}
-    (middle : CycleOn grid middleWest middleEast middleSouth middleNorth)
-    (first : OddCycleBridge grid
-      firstWest firstEast firstSouth firstNorth
-      middleWest middleEast middleSouth middleNorth)
-    (second : EvenCycleBridge grid
-      middleWest middleEast middleSouth middleNorth
-      lastWest lastEast lastSouth lastNorth) :
-    OddCycleBridge grid
-      firstWest firstEast firstSouth firstNorth
-      lastWest lastEast lastSouth lastNorth := by
+      lastWest lastEast lastSouth lastNorth
+      (Bool.xor firstParity secondParity) := by
   rcases first with ⟨firstPort, middleEntry, firstOnCycle,
     entryOnCycle, firstPath⟩
   rcases second with ⟨middleExit, lastPort, exitOnCycle,
@@ -158,32 +111,7 @@ theorem twoCornerBridge
     omega
   rw [hgrid] at second
   simpa [middleX, middleY, Nat.sub_sub] using
-    odd_trans_odd middle first second
-
-/-- An even bridge transports an odd route out of its descendant cycle. -/
-theorem even_trans_odd
-    {grid : Nat → Nat → Index}
-    {firstWest firstEast firstSouth firstNorth : Nat}
-    {secondWest secondEast secondSouth secondNorth : Nat}
-    (secondCycle : CycleOn grid
-      secondWest secondEast secondSouth secondNorth)
-    (bridge : EvenCycleBridge grid
-      firstWest firstEast firstSouth firstNorth
-      secondWest secondEast secondSouth secondNorth)
-    {secondStart target : Port}
-    (secondStartOnCycle : OnCycle
-      secondWest secondEast secondSouth secondNorth secondStart)
-    (tail : Path grid secondStart target true) :
-    ∃ firstStart,
-      OnCycle firstWest firstEast firstSouth firstNorth firstStart ∧
-        Path grid firstStart target true := by
-  rcases bridge with ⟨firstStart, secondEntry, firstStartOnCycle,
-    secondEntryOnCycle, bridgePath⟩
-  have alongSecond := onCycle_connected secondCycle
-    secondEntryOnCycle secondStartOnCycle
-  refine ⟨firstStart, firstStartOnCycle, ?_⟩
-  simpa [Bool.xor_assoc] using
-    Path.trans bridgePath (Path.trans alongSecond tail)
+    CycleBridge.trans middle first second
 
 end RedShadeCycleBridgeComposition
 end Closed104

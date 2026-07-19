@@ -157,7 +157,7 @@ theorem descendantBridge : ∀ (depth : Nat) (grid : Nat → Nat → Index)
           (2 ^ (2 * depth) * (4 * middleY + 3)) := by
         rw [hlevel, hbitsX, hbitsY] at first
         exact first
-      exact even_trans_even middleCycle first' second
+      exact CycleBridge.trans middleCycle first' second
 
 /-- Root-block form of `descendantBridge`. -/
 theorem rootDescendantBridge
