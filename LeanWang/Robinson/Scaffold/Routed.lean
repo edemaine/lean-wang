@@ -148,8 +148,11 @@ theorem edge_mem_payloadPalette_of_mem_completePayloads
     tile.n ∈ payloadPalette T ∧ tile.s ∈ payloadPalette T ∧
       tile.e ∈ payloadPalette T ∧ tile.w ∈ payloadPalette T := by
   rcases tile with ⟨n, s, e, w⟩
-  simpa [completePayloads, completePayloadsFromColors,
-    payloadsWithNParams, payloadsWithNSParams, payloadsWithNSEParams] using htile
+  have colors :
+      (n ∈ payloadPalette T ∧ s ∈ payloadPalette T) ∧
+        e ∈ payloadPalette T ∧ w ∈ payloadPalette T := by
+    simpa [completePayloads, completePayloadsFromColors] using htile
+  exact ⟨colors.1.1, colors.1.2, colors.2.1, colors.2.2⟩
 
 theorem horizontalPayloadWires_primrec : Primrec horizontalPayloadWires := by
   have hpredicate : PrimrecPred (fun tile : WangTile => tile.w = tile.e) :=
