@@ -351,63 +351,30 @@ theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
     exact present_value_eq depth coarse states coarseRoot valid shaded
       port portWest portEast portSouth portNorth portPresent
 
-private theorem coordinate_isFreeLine
-    (axis : PhaseComparison.FreeAxis) (depth : Nat)
+/-- Every coordinate in the canonical family is a free row and column in the
+arbitrary light-root shade assignment. -/
+theorem freeCoordinates (depth : Nat)
     (coarse : Nat → Nat → Index)
     (states : Nat → Nat → RedShades.State)
     (coarseRoot : coarse 0 0 = 0)
     (valid : ValidShadeGrid (actualGrid depth coarse) states)
     (shaded : CycleShade states
       (scale depth) (3 * scale depth)
-      (scale depth) (3 * scale depth) .light)
-    {line : Nat} (lineMem : line ∈ coordinates depth) :
-    axis.IsFreeLine (actualGrid depth coarse) states
-      (scale depth) (3 * scale depth) line := by
-  apply (comparison depth coarse states coarseRoot valid shaded).isFreeLine_of_mem
-    axis (coordinates depth)
+      (scale depth) (3 * scale depth) .light) :
+    PhaseComparison.FreeCoordinateFamily
+      (actualGrid depth coarse) states (scale depth) (coordinates depth) := by
+  apply (comparison depth coarse states coarseRoot valid shaded)
+    |>.freeCoordinateFamily (coordinates depth)
   · intro selected selectedMem
-    have selectedBounds := mem_coordinates_bounds depth selectedMem
-    constructor
-    · unfold quarterSouth at selectedBounds
-      simp only [scale] at selectedBounds ⊢
-      omega
-    · unfold quarterNorth at selectedBounds
-      simp only [scale] at selectedBounds ⊢
-      omega
-  · intro selected selectedMem
+    simpa only [scale, show 3 * (2 * 4 ^ depth) = 6 * 4 ^ depth by omega] using
+      mem_coordinates_bounds depth selectedMem
+  · intro axis selected selectedMem
     rw [show 3 * scale depth = 6 * 4 ^ depth by
       unfold scale
       omega]
     cases axis
     · exact CanonicalOddFreeLines.coordinate_isFreeRow depth selectedMem
     · exact CanonicalOddFreeLines.coordinate_isFreeColumn depth selectedMem
-  · exact lineMem
-
-theorem coordinate_isFreeRow (depth : Nat)
-    (coarse : Nat → Nat → Index)
-    (states : Nat → Nat → RedShades.State)
-    (coarseRoot : coarse 0 0 = 0)
-    (valid : ValidShadeGrid (actualGrid depth coarse) states)
-    (shaded : CycleShade states
-      (scale depth) (3 * scale depth)
-      (scale depth) (3 * scale depth) .light)
-    {row : Nat} (rowMem : row ∈ coordinates depth) :
-    ShadedPlaneSignalGrid.IsFreeRow (actualGrid depth coarse) states
-      (scale depth) (3 * scale depth) row :=
-  coordinate_isFreeLine .row depth coarse states coarseRoot valid shaded rowMem
-
-theorem coordinate_isFreeColumn (depth : Nat)
-    (coarse : Nat → Nat → Index)
-    (states : Nat → Nat → RedShades.State)
-    (coarseRoot : coarse 0 0 = 0)
-    (valid : ValidShadeGrid (actualGrid depth coarse) states)
-    (shaded : CycleShade states
-      (scale depth) (3 * scale depth)
-      (scale depth) (3 * scale depth) .light)
-    {column : Nat} (columnMem : column ∈ coordinates depth) :
-    ShadedPlaneSignalGrid.IsFreeColumn (actualGrid depth coarse) states
-      (scale depth) (3 * scale depth) column :=
-  coordinate_isFreeLine .column depth coarse states coarseRoot valid shaded columnMem
 
 end CanonicalOddShadeComparison
 end Closed104

@@ -67,10 +67,10 @@ def freeGrid (depth : Nat) (coarse : Nat → Nat → Index)
   column_east := fun index => (coordinateAt_bounds depth index).2
   row_south := fun index => (coordinateAt_bounds depth index).1
   row_north := fun index => (coordinateAt_bounds depth index).2
-  freeColumn := fun index => coordinate_isFreeColumn depth coarse states
-    coarseRoot valid shaded (coordinateAt_mem depth index)
-  freeRow := fun index => coordinate_isFreeRow depth coarse states
-    coarseRoot valid shaded (coordinateAt_mem depth index)
+  freeColumn := fun index => (freeCoordinates depth coarse states
+    coarseRoot valid shaded).freeColumn (coordinateAt_mem depth index)
+  freeRow := fun index => (freeCoordinates depth coarse states
+    coarseRoot valid shaded).freeRow (coordinateAt_mem depth index)
 
 end CanonicalOddShadeFreeGrid
 end Closed104

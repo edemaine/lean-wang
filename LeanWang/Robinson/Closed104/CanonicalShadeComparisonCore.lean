@@ -542,13 +542,46 @@ theorem isFreeLine_of_mem
       actualStates canonicalStates scale extent)
     (axis : FreeAxis) (coordinates : List Nat)
     (bounds : ∀ {line}, line ∈ coordinates →
-      2 * scale ≤ line ∧ line < 6 * scale)
+      quarterSouth scale < line ∧ line < quarterNorth (3 * scale))
     (canonicalFree : ∀ {line}, line ∈ coordinates →
       axis.IsFreeLine canonicalGrid canonicalStates scale (3 * scale) line)
     {line : Nat} (lineMem : line ∈ coordinates) :
-    axis.IsFreeLine actualGrid actualStates scale (3 * scale) line :=
-  comparison.isFreeLine axis (canonicalFree lineMem)
-    (bounds lineMem).1 (bounds lineMem).2
+    axis.IsFreeLine actualGrid actualStates scale (3 * scale) line := by
+  have lineBounds := bounds lineMem
+  apply comparison.isFreeLine axis (canonicalFree lineMem)
+  · unfold quarterSouth at lineBounds
+    omega
+  · unfold quarterNorth at lineBounds
+    omega
+
+/-- A family of coordinates that are free in both directions. -/
+structure FreeCoordinateFamily
+    (indexGrid : Nat → Nat → Index)
+    (shadeGrid : Nat → Nat → RedShades.State)
+    (scale : Nat) (coordinates : List Nat) : Prop where
+  freeRow : ∀ {line}, line ∈ coordinates →
+    FreeAxis.row.IsFreeLine indexGrid shadeGrid scale (3 * scale) line
+  freeColumn : ∀ {line}, line ∈ coordinates →
+    FreeAxis.column.IsFreeLine indexGrid shadeGrid scale (3 * scale) line
+
+/-- Transfer a canonical family of free rows and columns through one phase
+comparison. -/
+theorem freeCoordinateFamily
+    {actualGrid canonicalGrid : Nat → Nat → Index}
+    {actualStates canonicalStates : Nat → Nat → RedShades.State}
+    {scale extent : Nat}
+    (comparison : PhaseComparison actualGrid canonicalGrid
+      actualStates canonicalStates scale extent)
+    (coordinates : List Nat)
+    (bounds : ∀ {line}, line ∈ coordinates →
+      quarterSouth scale < line ∧ line < quarterNorth (3 * scale))
+    (canonicalFree : ∀ axis : FreeAxis, ∀ {line}, line ∈ coordinates →
+      axis.IsFreeLine canonicalGrid canonicalStates scale (3 * scale) line) :
+    FreeCoordinateFamily actualGrid actualStates scale coordinates where
+  freeRow lineMem := comparison.isFreeLine_of_mem FreeAxis.row coordinates bounds
+    (canonicalFree FreeAxis.row) lineMem
+  freeColumn lineMem := comparison.isFreeLine_of_mem FreeAxis.column coordinates bounds
+    (canonicalFree FreeAxis.column) lineMem
 
 end PhaseComparison
 
