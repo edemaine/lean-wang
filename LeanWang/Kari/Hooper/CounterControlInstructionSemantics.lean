@@ -1539,21 +1539,12 @@ theorem directRule_mem_rawDirectRules_of_rule
     raw ∈ rawDirectRules :=
   (mem_rawDirectRules_iff raw).2 ⟨growth, rule, hrule, hraw⟩
 
-private theorem validationCommand_mem
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction) {raw : RawCommand}
-    (hraw : raw ∈ validationCommands growth source instruction) :
-    raw ∈ commandsForRule growth (source, instruction) := by
-  cases instruction <;> simp [commandsForRule, hraw]
-
-private theorem validationRule_mem
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction) {raw : RawDirectRule}
-    (hraw : raw ∈ validationRules growth source) :
-    raw ∈ directRulesForRule growth (source, instruction) := by
-  cases instruction <;> simp [directRulesForRule, hraw]
-
 /-! ## Validation prefix -/
+
+private abbrev validationCommand_mem :=
+  validationCommand_mem_commandsForRule
+private abbrev validationRule_mem :=
+  validationRule_mem_directRulesForRule
 
 /-- One rule's mandatory eight-leg validation sweep returns to boundary `4`
 and enters the instruction body, unless its first long gap launches a nested

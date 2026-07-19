@@ -262,21 +262,12 @@ theorem machine_reaches_collisionCleanup_or_halts
 
 /-! ## Validation -/
 
-private theorem validationCommand_mem
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction) {raw : RawCommand}
-    (hraw : raw ∈ validationCommands growth source instruction) :
-    raw ∈ commandsForRule growth (source, instruction) := by
-  cases instruction <;> simp [commandsForRule, hraw]
-
-private theorem validationRule_mem
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction) {raw : RawDirectRule}
-    (hraw : raw ∈ validationRules growth source) :
-    raw ∈ directRulesForRule growth (source, instruction) := by
-  cases instruction <;> simp [directRulesForRule, hraw]
-
 /-- Whole-list wrapper for a nonempty resolving route. -/
+private abbrev validationCommand_mem :=
+  validationCommand_mem_commandsForRule
+private abbrev validationRule_mem :=
+  validationRule_mem_directRulesForRule
+
 theorem route_reaches_or_halts_at_of_ne_nil
     (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
     (hshort : ShortResolves base c limit) (growth : Turing.Dir)

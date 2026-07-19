@@ -362,6 +362,24 @@ def directRulesForRule (growth : Turing.Dir)
     | .decrement register ifZero ifPositive =>
         decrementRules growth rule.1 register ifZero ifPositive
 
+/-- The mandatory validation commands are the common prefix of every
+instruction's command family. -/
+theorem validationCommand_mem_commandsForRule
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction) {raw : RawCommand}
+    (hraw : raw ∈ validationCommands growth source instruction) :
+    raw ∈ commandsForRule growth (source, instruction) := by
+  cases instruction <;> simp [commandsForRule, hraw]
+
+/-- The mandatory validation rules are the common prefix of every
+instruction's direct-rule family. -/
+theorem validationRule_mem_directRulesForRule
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction) {raw : RawDirectRule}
+    (hraw : raw ∈ validationRules growth source) :
+    raw ∈ directRulesForRule growth (source, instruction) := by
+  cases instruction <;> simp [directRulesForRule, hraw]
+
 def rawCommandsFor (growth : Turing.Dir) : List RawCommand :=
   GlobalSourceProgram.program.flatMap (commandsForRule growth)
 
