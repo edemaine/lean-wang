@@ -496,38 +496,11 @@ theorem machine_reaches_decrementCanonical_or_halts
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
           atLogical spec.growth T origin⟩ := by
-  let source := boundaryOffset spec.registers label
-  let destination := source - 1
-  let U := writeLogical spec.growth
-    (writeLogical spec.growth T source blankSymbol) destination
-      (boundarySymbol label)
-  have hposition : origin + distance = destination + 1 := by
-    simp only [destination]
-    omega
-  have hsourceEq : destination + 1 = source := by
-    simp only [destination]
-    omega
-  have hrun := machine_reaches_decrementShift_or_halts base c limit hshort
-    spec.growth counterState searchSlot origin destination distance label
-    success collision hraw T hposition hdistance hgap
-    (by simpa [source, destination] using hblank)
-  rcases hrun with hrun | hhalts
-  · left
-    have hrep : Represents (updateSpec spec next hnextCore) U := by
-      apply moveLeft_represents h next label hnextCore hlower hupper
-        hsourcePositive hsource hdestination hshrink hmove
-    have hU : U = install next spec.growth spec.returnTag
-        (writeLogical spec.growth T source blankSymbol) := by
-      apply moveLeft_eq_install_cleared next label hnextCore
-      · omega
-      · exact hdestination
-      · exact hrep
-    rw [hsourceEq] at hrun
-    change FullTM0.Reaches _ _
-      ⟨resolve base c success, atLogical spec.growth U source⟩ at hrun
-    rw [hU] at hrun
-    exact hrun
-  · exact Or.inr hhalts
+  exact machine_reaches_decrementCanonical_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) counterState searchSlot success collision h next label origin distance
+      hsourcePositive horigin hdistance hgap hblank hnextCore hlower hupper
+      hsource hdestination hshrink hmove hraw
 
 /-- The outward clock shift resolves to the exact incremented tape, or halts
 at its search entry. -/
@@ -552,63 +525,9 @@ theorem machine_reaches_incrementClock_or_halts
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
           atLogical spec.growth T (layoutEnd spec.registers)⟩ := by
-  let next := spec.registers.increment .clock
-  let U := writeLogical spec.growth
-    (writeLogical spec.growth T (layoutEnd spec.registers) blankSymbol)
-    (layoutEnd spec.registers + 1) (boundarySymbol 4)
-  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary 4).Matches
-      (atLogical spec.growth T (layoutEnd spec.registers))
-      (OrientedMarkerTape.orientDirection spec.growth .left) 0 := by
-    rw [SearchGap.zero]
-    change (atLogical spec.growth T (layoutEnd spec.registers)).read =
-      boundarySymbol 4
-    exact h.read_boundary_four
-  have hblank : logicalTape spec.growth T
-      (layoutEnd spec.registers + 1) = blankSymbol := by
-    simpa [next, layoutEnd_increment] using
-      increment_destination_blank h .clock hroom
-  have hrun := machine_reaches_incrementShift_or_halts base c limit hshort
-    spec.growth counterState searchSlot (layoutEnd spec.registers) 4
-    success collision hraw T 0 hlimit hgap hblank
-  rcases hrun with hrun | hhalts
-  · left
-    have hmove : MarkerMachine.moveAt .right
-        (MarkerTape.canonicalTape spec.registers)
-        (MarkerTape.boundaryPosition spec.registers 4) 4 =
-        MarkerTape.canonicalTape next := by
-      rw [MarkerMachine.moveAt_clock_eq_incrementTape]
-      exact MarkerShift.incrementTape_canonical spec.registers .clock
-    have hrep : Represents (updateSpec spec next hroom) U := by
-      apply moveRight_represents h next 4 hroom
-      · dsimp only [next]
-        rw [layoutEnd_increment]
-        omega
-      · dsimp only [next]
-        rw [layoutEnd_increment]
-      · exact boundaryOffset_four spec.registers |>.le
-      · simp only [boundaryOffset_four]
-        dsimp only [next]
-        rw [layoutEnd_increment]
-      · intro _
-        simp only [boundaryOffset_four]
-        dsimp only [next]
-        rw [layoutEnd_increment]
-      · exact hmove
-    have hU : U = incrementTape spec .clock T := by
-      change U = install next spec.growth spec.returnTag T
-      apply moveRight_eq_install next 4 hroom
-      · simp [boundaryOffset]
-      · simp only [boundaryOffset_four]
-        dsimp only [next]
-        rw [layoutEnd_increment]
-        omega
-      · simp only [boundaryOffset_four]
-        dsimp only [next]
-        rw [layoutEnd_increment]
-      · exact hrep
-    simpa [U, hU] using hrun
-  · exact Or.inr hhalts
+  exact machine_reaches_incrementClock_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) counterState searchSlot success collision h hroom hlimit hraw
 
 /-! ## Collision-free increment schedule -/
 
@@ -1255,34 +1174,10 @@ theorem machine_reaches_decrementFirst_or_halts
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
           atLogical spec.growth T (boundaryOffset spec.registers i.succ)⟩ := by
-  have hsourcePositive : 1 < boundaryOffset spec.registers i.succ := by
-    simp [boundaryOffset]
-  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary i.succ).Matches
-      (atLogical spec.growth T (boundaryOffset spec.registers i.succ))
-      (OrientedMarkerTape.orientDirection spec.growth .right) 0 := by
-    rw [SearchGap.zero]
-    change (atLogical spec.growth T
-      (boundaryOffset spec.registers i.succ)).read = boundarySymbol i.succ
-    rw [atLogical_read]
-    exact h.boundary i.succ
-  have hblank : logicalTape spec.growth T
-      ((boundaryOffset spec.registers i.succ - 1 : Nat) : Int) =
-        blankSymbol := by
-    have hb := h.gap_blank i (RegisterLayout.values spec.registers i - 1)
-      (by omega)
-    have hcoord : (firstGapOffset spec.registers i : Int) +
-        (RegisterLayout.values spec.registers i - 1 : Nat) =
-        (boundaryOffset spec.registers i.succ - 1 : Nat) := by
-      simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos_succ]
-      omega
-    rw [hcoord] at hb
-    exact hb
-  apply machine_reaches_decrementCanonical_or_halts base c limit hshort
-    counterState searchSlot success none h next i.succ
-    (boundaryOffset spec.registers i.succ) 0 hsourcePositive
-    (by simp) hlimit hgap hblank hnextCore hlower hupper hsource hdestination
-      hshrink hmove hraw
+  exact machine_reaches_decrementFirst_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) counterState searchSlot success hlimit h next i hpositive hnextCore
+      hlower hupper hsource hdestination hshrink hmove hraw
 
 /-- Every later positive-decrement shift searches one represented gap before
 installing its exact next canonical core, or halts. -/
@@ -1322,39 +1217,10 @@ theorem machine_reaches_decrementFollowing_or_halts
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c ⟨spec.growth, counterState, searchSlot⟩,
           atLogical spec.growth T (firstGapOffset spec.registers i)⟩ := by
-  have hsourcePositive : 1 < boundaryOffset spec.registers i.succ := by
-    simp [boundaryOffset]
-  have horigin : firstGapOffset spec.registers i +
-      RegisterLayout.values spec.registers i =
-      boundaryOffset spec.registers i.succ := by
-    simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos_succ]
-    omega
-  have hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary i.succ).Matches
-      (atLogical spec.growth T (firstGapOffset spec.registers i))
-      (OrientedMarkerTape.orientDirection spec.growth .right)
-      (RegisterLayout.values spec.registers i) := by
-    change SearchGap (fun symbol => symbol = blankSymbol)
-      (fun symbol => symbol = boundarySymbol i.succ) _ _ _
-    exact h.searchGap_adjacent_right i
-  have hblank : logicalTape spec.growth T
-      ((boundaryOffset spec.registers i.succ - 1 : Nat) : Int) =
-        blankSymbol := by
-    have hb := h.gap_blank i (RegisterLayout.values spec.registers i - 1)
-      (by omega)
-    have hcoord : (firstGapOffset spec.registers i : Int) +
-        (RegisterLayout.values spec.registers i - 1 : Nat) =
-        (boundaryOffset spec.registers i.succ - 1 : Nat) := by
-      simp [firstGapOffset, boundaryOffset, CounterLayout.boundaryPos_succ]
-      omega
-    rw [hcoord] at hb
-    exact hb
-  exact machine_reaches_decrementCanonical_or_halts base c limit hshort
-    counterState searchSlot success none h next i.succ
-    (firstGapOffset spec.registers i)
-    (RegisterLayout.values spec.registers i) hsourcePositive horigin
-    hdistance hgap hblank hnextCore hlower hupper hsource hdestination
-    hshrink hmove hraw
+  exact machine_reaches_decrementFollowing_with base c limit
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingSearchRunner base c limit hshort) counterState searchSlot success h next i hpositive hdistance hnextCore
+      hlower hupper hsource hdestination hshrink hmove hraw
 
 /-! ## Positive conditional-decrement schedule -/
 
