@@ -198,26 +198,6 @@ theorem path_refine {grid : Nat → Nat → Index} {first second : Port}
   | trans firstPath secondPath firstIH secondIH =>
       exact Path.trans firstIH secondIH
 
-/-- Live endpoints may be kept on their literal sparse quarter copies. -/
-theorem path_refine_sparse {grid : Nat → Nat → Index} {first second : Port}
-    {parity : Bool} (path : Path grid first second parity)
-    (hfirst : portPresent grid first = true)
-    (hsecond : portPresent grid second = true) :
-    Path (iterateRefine 2 grid) (sparsePort first) (sparsePort second) parity := by
-  have firstConnector := livePortPath grid first hfirst
-  have refined := path_refine path
-  have secondConnector := path_symm (livePortPath grid second hsecond)
-  simpa using Path.trans firstConnector (Path.trans refined secondConnector)
-
-theorem sparseCoordinate_strictMono {first second : Nat} (hlt : first < second) :
-    sparseCoordinate first < sparseCoordinate second := by
-  have hfirstMod := Nat.mod_lt first (by decide : 0 < 2)
-  have hsecondMod := Nat.mod_lt second (by decide : 0 < 2)
-  have hfirstDecompose := Nat.mod_add_div first 2
-  have hsecondDecompose := Nat.mod_add_div second 2
-  unfold sparseCoordinate macroOrigin localCoordinate
-  omega
-
 @[simp] theorem sparseCoordinate_quarterWest (west : Nat) :
     sparseCoordinate (quarterWest west) = quarterWest (4 * west) := by
   simp [sparseCoordinate, macroOrigin, localCoordinate, quarterWest]
@@ -237,102 +217,6 @@ theorem sparseCoordinate_strictMono {first second : Nat} (hlt : first < second) 
     sparseCoordinate (quarterNorth north) = quarterNorth (4 * north) := by
   simp [sparseCoordinate, macroOrigin, localCoordinate, quarterNorth]
   omega
-
-/-- Strict board-side ports remain on the board scaled by four. -/
-theorem onCycle_sparse
-    {west east south north : Nat} {port : Port}
-    (onCycle : OnCycle west east south north port) :
-    OnCycle (4 * west) (4 * east) (4 * south) (4 * north)
-      (sparsePort port) := by
-  cases onCycle with
-  | southWest qx hwest heast =>
-      have hwest' : quarterWest (4 * west) < sparseCoordinate qx := by
-        rw [← sparseCoordinate_quarterWest]
-        exact sparseCoordinate_strictMono hwest
-      have heast' : sparseCoordinate qx < quarterEast (4 * east) := by
-        rw [← sparseCoordinate_quarterEast]
-        exact sparseCoordinate_strictMono heast
-      simpa [sparsePort] using OnCycle.southWest
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qx) hwest' heast'
-  | southEast qx hwest heast =>
-      have hwest' : quarterWest (4 * west) < sparseCoordinate qx := by
-        rw [← sparseCoordinate_quarterWest]
-        exact sparseCoordinate_strictMono hwest
-      have heast' : sparseCoordinate qx < quarterEast (4 * east) := by
-        rw [← sparseCoordinate_quarterEast]
-        exact sparseCoordinate_strictMono heast
-      simpa [sparsePort] using OnCycle.southEast
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qx) hwest' heast'
-  | northWest qx hwest heast =>
-      have hwest' : quarterWest (4 * west) < sparseCoordinate qx := by
-        rw [← sparseCoordinate_quarterWest]
-        exact sparseCoordinate_strictMono hwest
-      have heast' : sparseCoordinate qx < quarterEast (4 * east) := by
-        rw [← sparseCoordinate_quarterEast]
-        exact sparseCoordinate_strictMono heast
-      simpa [sparsePort] using OnCycle.northWest
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qx) hwest' heast'
-  | northEast qx hwest heast =>
-      have hwest' : quarterWest (4 * west) < sparseCoordinate qx := by
-        rw [← sparseCoordinate_quarterWest]
-        exact sparseCoordinate_strictMono hwest
-      have heast' : sparseCoordinate qx < quarterEast (4 * east) := by
-        rw [← sparseCoordinate_quarterEast]
-        exact sparseCoordinate_strictMono heast
-      simpa [sparsePort] using OnCycle.northEast
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qx) hwest' heast'
-  | westSouth qy hsouth hnorth =>
-      have hsouth' : quarterSouth (4 * south) < sparseCoordinate qy := by
-        rw [← sparseCoordinate_quarterSouth]
-        exact sparseCoordinate_strictMono hsouth
-      have hnorth' : sparseCoordinate qy < quarterNorth (4 * north) := by
-        rw [← sparseCoordinate_quarterNorth]
-        exact sparseCoordinate_strictMono hnorth
-      simpa [sparsePort] using OnCycle.westSouth
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qy) hsouth' hnorth'
-  | westNorth qy hsouth hnorth =>
-      have hsouth' : quarterSouth (4 * south) < sparseCoordinate qy := by
-        rw [← sparseCoordinate_quarterSouth]
-        exact sparseCoordinate_strictMono hsouth
-      have hnorth' : sparseCoordinate qy < quarterNorth (4 * north) := by
-        rw [← sparseCoordinate_quarterNorth]
-        exact sparseCoordinate_strictMono hnorth
-      simpa [sparsePort] using OnCycle.westNorth
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qy) hsouth' hnorth'
-  | eastSouth qy hsouth hnorth =>
-      have hsouth' : quarterSouth (4 * south) < sparseCoordinate qy := by
-        rw [← sparseCoordinate_quarterSouth]
-        exact sparseCoordinate_strictMono hsouth
-      have hnorth' : sparseCoordinate qy < quarterNorth (4 * north) := by
-        rw [← sparseCoordinate_quarterNorth]
-        exact sparseCoordinate_strictMono hnorth
-      simpa [sparsePort] using OnCycle.eastSouth
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qy) hsouth' hnorth'
-  | eastNorth qy hsouth hnorth =>
-      have hsouth' : quarterSouth (4 * south) < sparseCoordinate qy := by
-        rw [← sparseCoordinate_quarterSouth]
-        exact sparseCoordinate_strictMono hsouth
-      have hnorth' : sparseCoordinate qy < quarterNorth (4 * north) := by
-        rw [← sparseCoordinate_quarterNorth]
-        exact sparseCoordinate_strictMono hnorth
-      simpa [sparsePort] using OnCycle.eastNorth
-        (west := 4 * west) (east := 4 * east)
-        (south := 4 * south) (north := 4 * north)
-        (sparseCoordinate qy) hsouth' hnorth'
 
 end RedShadeGraphRefinement
 end Closed104
