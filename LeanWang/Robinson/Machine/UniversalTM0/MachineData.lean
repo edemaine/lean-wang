@@ -39,34 +39,18 @@ private def firstState (symbol : Symbol) : Nat :=
 private def firstHead (symbol : Symbol) : Nat :=
   (firstAction symbol).2.2.apply 0
 
-def nextTapeData (source : List Symbol) (position : Nat) : Nat :=
-  if position = 0 then firstWrite (source.getI 0)
-  else tapeData source position
+private def firstWriteData (source : List Symbol) : Nat :=
+  firstWrite source.headI
 
-def initialMachineCellData (source : List Symbol) (position : Nat) : MachineCell :=
-  if position = 0 then .head machine.start (tapeData source position)
-  else .plain (tapeData source position)
+private def firstStateData (source : List Symbol) : Nat :=
+  firstState source.headI
 
-def nextMachineCellData (source : List Symbol) (position : Nat) : MachineCell :=
-  let head := firstHead (source.getI 0)
-  let state := firstState (source.getI 0)
-  if position = head then .head state (nextTapeData source position)
-  else .plain (nextTapeData source position)
+private def firstHeadData (source : List Symbol) : Nat :=
+  firstHead source.headI
 
-def initialMachineLeftData (source : List Symbol) (position : Nat) : MachineCell :=
-  if position = 0 then .boundary else initialMachineCellData source (position - 1)
-
-def nextMachineLeftData (source : List Symbol) (position : Nat) : MachineCell :=
-  if position = 0 then .boundary else nextMachineCellData source (position - 1)
-
-def historyMachineTileData (source : List Symbol) (position : Nat) :
-    MachineHistoryTile where
-  prevLeft := initialMachineLeftData source position
-  prevCenter := initialMachineCellData source position
-  prevRight := initialMachineCellData source (position + 1)
-  nextLeft := nextMachineLeftData source position
-  nextCenter := nextMachineCellData source position
-  nextRight := nextMachineCellData source (position + 1)
+def historyMachineTileData : List Symbol -> Nat -> MachineHistoryTile :=
+  MachineInput.InitialHistoryData.historyTile machine tapeData
+    firstWriteData firstStateData firstHeadData
 
 private theorem tapeData_eq (source : List Symbol) (position : Nat) :
     tapeData source position =
@@ -80,76 +64,15 @@ private theorem tapeData_eq (source : List Symbol) (position : Nat) :
 private theorem machine_start_ne_halt : machine.start ≠ machine.halt := by
   exact stateCode_run_ne_halt .right ⟨default, tm0_supports.1⟩
 
-private theorem initial_state_ne_halt (source : List Symbol) :
-    (MachineInput.initialID machine (input source)).state ≠ machine.halt := by
-  simpa [MachineInput.initialID] using machine_start_ne_halt
-
-private theorem initial_step_eq (source : List Symbol) :
-    machine.step (MachineInput.initialID machine (input source)).state
-        ((MachineInput.initialID machine (input source)).tape
-          (MachineInput.initialID machine (input source)).head) =
-      firstAction (source.getI 0) := by
-  change machine.step machine.start
-      (MachineInput.tape machine.blank (input source) 0) = _
-  rw [← tapeData_eq]
-  simp [tapeData, firstAction, inputCode]
-
-private theorem run_one_tape_eq (source : List Symbol) (position : Nat) :
-    (MachineInput.run machine (input source) 1).tape position =
-      nextTapeData source position := by
-  rw [show 1 = 0 + 1 by omega, MachineInput.run_succ, MachineInput.run_zero]
-  by_cases hposition : position = 0
-  · subst position
-    change (machine.nextID
-      (MachineInput.initialID machine (input source))).tape
-        (MachineInput.initialID machine (input source)).head = _
-    rw [Machine.nextID_tape_head_of_ne_halt (initial_state_ne_halt source)]
-    rw [initial_step_eq]
-    rfl
-  · rw [Machine.nextID_tape_of_ne_head (by
-        simpa [MachineInput.initialID] using hposition)]
-    change MachineInput.tape machine.blank (input source) position = _
-    rw [← tapeData_eq]
-    simp [nextTapeData, hposition]
-
-private theorem run_one_head_eq (source : List Symbol) :
-    (MachineInput.run machine (input source) 1).head =
-      firstHead (source.getI 0) := by
-  rw [show 1 = 0 + 1 by omega, MachineInput.run_succ, MachineInput.run_zero]
-  rw [Machine.nextID_head_of_ne_halt (initial_state_ne_halt source)]
-  rw [initial_step_eq]
-  rfl
-
-private theorem run_one_state_eq (source : List Symbol) :
-    (MachineInput.run machine (input source) 1).state =
-      firstState (source.getI 0) := by
-  rw [show 1 = 0 + 1 by omega, MachineInput.run_succ, MachineInput.run_zero]
-  rw [Machine.nextID_state_of_ne_halt (initial_state_ne_halt source)]
-  rw [initial_step_eq]
-  rfl
-
-theorem initialMachineCellData_eq (source : List Symbol) (position : Nat) :
-    initialMachineCellData source position =
-      (MachineInput.run machine (input source) 0).cellAt position := by
-  rw [MachineInput.run_zero]
-  by_cases hposition : position = 0 <;>
-    simp [initialMachineCellData, MachineInput.initialID, ID.cellAt,
-      hposition, tapeData_eq]
-
-theorem nextMachineCellData_eq (source : List Symbol) (position : Nat) :
-    nextMachineCellData source position =
-      (MachineInput.run machine (input source) 1).cellAt position := by
-  unfold nextMachineCellData ID.cellAt
-  rw [run_one_head_eq, run_one_state_eq, run_one_tape_eq]
-
 theorem historyMachineTileData_eq (source : List Symbol) (position : Nat) :
     historyMachineTileData source position =
       MachineInput.historyTile machine (input source) 0 position := by
-  cases position <;>
-    simp [historyMachineTileData, MachineInput.historyTile,
-      MachineInput.runCell, MachineInput.runCellLeft,
-      initialMachineLeftData, nextMachineLeftData,
-      initialMachineCellData_eq, nextMachineCellData_eq, ID.cellAtLeft]
+  apply MachineInput.InitialHistoryData.historyTile_eq machine input source position
+    tapeData firstWriteData firstStateData firstHeadData machine_start_ne_halt
+    (tapeData_eq source)
+  all_goals simp [firstWriteData, firstStateData, firstHeadData,
+    firstWrite, firstState, firstHead, firstAction, tapeData,
+    List.getI_zero_eq_headI]
 
 private theorem inputCode_primrec :
     Primrec (fun p : Bool × Symbol => inputCode p.1 p.2) :=
@@ -189,69 +112,20 @@ private theorem firstState_primrec : Primrec firstState :=
 private theorem firstHead_primrec : Primrec firstHead :=
   Primrec.dom_finite _
 
-theorem nextTapeData_primrec :
-    Primrec (fun p : List Symbol × Nat => nextTapeData p.1 p.2) := by
-  have hzero : PrimrecPred (fun p : List Symbol × Nat => p.2 = 0) :=
-    Primrec.eq.comp Primrec.snd (Primrec.const 0)
-  have hgetZero : Primrec (fun p : List Symbol × Nat => p.1.getI 0) :=
-    Primrec.list_getI.comp Primrec.fst (Primrec.const 0)
-  exact Primrec.ite hzero (firstWrite_primrec.comp hgetZero) tapeData_primrec
+private theorem firstWriteData_primrec : Primrec firstWriteData :=
+  firstWrite_primrec.comp Primrec.list_headI
 
-theorem initialMachineCellData_primrec :
-    Primrec (fun p : List Symbol × Nat =>
-      initialMachineCellData p.1 p.2) := by
-  have hzero : PrimrecPred (fun p : List Symbol × Nat => p.2 = 0) :=
-    Primrec.eq.comp Primrec.snd (Primrec.const 0)
-  exact Primrec.ite hzero
-    (MachineCell.head_primrec.comp
-      (Primrec.pair (Primrec.const machine.start) tapeData_primrec))
-    (MachineCell.plain_primrec.comp tapeData_primrec)
+private theorem firstStateData_primrec : Primrec firstStateData :=
+  firstState_primrec.comp Primrec.list_headI
 
-theorem nextMachineCellData_primrec :
-    Primrec (fun p : List Symbol × Nat => nextMachineCellData p.1 p.2) := by
-  have hgetZero : Primrec (fun p : List Symbol × Nat => p.1.getI 0) :=
-    Primrec.list_getI.comp Primrec.fst (Primrec.const 0)
-  have hhead := firstHead_primrec.comp hgetZero
-  have hstate := firstState_primrec.comp hgetZero
-  have hatHead : PrimrecPred (fun p : List Symbol × Nat =>
-      p.2 = firstHead (p.1.getI 0)) :=
-    Primrec.eq.comp Primrec.snd hhead
-  exact Primrec.ite hatHead
-    (MachineCell.head_primrec.comp
-      (Primrec.pair hstate nextTapeData_primrec))
-    (MachineCell.plain_primrec.comp nextTapeData_primrec)
-
-theorem initialMachineLeftData_primrec :
-    Primrec (fun p : List Symbol × Nat =>
-      initialMachineLeftData p.1 p.2) := by
-  have hzero : PrimrecPred (fun p : List Symbol × Nat => p.2 = 0) :=
-    Primrec.eq.comp Primrec.snd (Primrec.const 0)
-  have hpred : Primrec (fun p : List Symbol × Nat => (p.1, p.2 - 1)) :=
-    Primrec.pair Primrec.fst (Primrec.pred.comp Primrec.snd)
-  exact Primrec.ite hzero (Primrec.const MachineCell.boundary)
-    (initialMachineCellData_primrec.comp hpred)
-
-theorem nextMachineLeftData_primrec :
-    Primrec (fun p : List Symbol × Nat =>
-      nextMachineLeftData p.1 p.2) := by
-  have hzero : PrimrecPred (fun p : List Symbol × Nat => p.2 = 0) :=
-    Primrec.eq.comp Primrec.snd (Primrec.const 0)
-  have hpred : Primrec (fun p : List Symbol × Nat => (p.1, p.2 - 1)) :=
-    Primrec.pair Primrec.fst (Primrec.pred.comp Primrec.snd)
-  exact Primrec.ite hzero (Primrec.const MachineCell.boundary)
-    (nextMachineCellData_primrec.comp hpred)
+private theorem firstHeadData_primrec : Primrec firstHeadData :=
+  firstHead_primrec.comp Primrec.list_headI
 
 theorem historyMachineTileData_primrec :
-    Primrec (fun p : List Symbol × Nat => historyMachineTileData p.1 p.2) := by
-  have hsucc : Primrec (fun p : List Symbol × Nat => (p.1, p.2 + 1)) :=
-    Primrec.pair Primrec.fst (Primrec.succ.comp Primrec.snd)
-  exact MachineHistoryTile.mk_primrec.comp
-    (Primrec.pair initialMachineLeftData_primrec
-      (Primrec.pair initialMachineCellData_primrec
-        (Primrec.pair (initialMachineCellData_primrec.comp hsucc)
-          (Primrec.pair nextMachineLeftData_primrec
-            (Primrec.pair nextMachineCellData_primrec
-              (nextMachineCellData_primrec.comp hsucc))))))
+    Primrec (fun p : List Symbol × Nat => historyMachineTileData p.1 p.2) :=
+  MachineInput.InitialHistoryData.historyTile_primrec machine tapeData
+    firstWriteData firstStateData firstHeadData tapeData_primrec
+    firstWriteData_primrec firstStateData_primrec firstHeadData_primrec
 
 def tailData (source : List Symbol) : Nat :=
   MachineInputTiles.tailPosition (input source)

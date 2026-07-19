@@ -147,5 +147,144 @@ theorem historyTile_mem_machineHistoryTiles {M : Machine} {input : List Nat}
     (historyTile_local notHalts time position)
     (historyTile_boundaryOK M input time position)
 
+namespace InitialHistoryData
+
+variable {Input : Type}
+
+/-- Tape contents after the first step, represented by executable input data. -/
+def nextTape (tapeData : Input -> Nat -> Nat) (firstWrite : Input -> Nat)
+    (source : Input) (position : Nat) : Nat :=
+  if position = 0 then firstWrite source else tapeData source position
+
+/-- Cell representation of the initial configuration. -/
+def initialCell (M : Machine) (tapeData : Input -> Nat -> Nat)
+    (source : Input) (position : Nat) : MachineCell :=
+  if position = 0 then .head M.start (tapeData source position)
+  else .plain (tapeData source position)
+
+/-- Cell representation after the first machine step. -/
+def nextCell (tapeData : Input -> Nat -> Nat) (firstWrite firstState firstHead : Input -> Nat)
+    (source : Input) (position : Nat) : MachineCell :=
+  let tape := nextTape tapeData firstWrite source position
+  if position = firstHead source then .head (firstState source) tape else .plain tape
+
+def leftCell (cells : Input -> Nat -> MachineCell)
+    (source : Input) (position : Nat) : MachineCell :=
+  if position = 0 then .boundary else cells source (position - 1)
+
+/-- The bottom history tile obtained from executable initial and first-step data. -/
+def historyTile (M : Machine) (tapeData : Input -> Nat -> Nat)
+    (firstWrite firstState firstHead : Input -> Nat)
+    (source : Input) (position : Nat) : MachineHistoryTile where
+  prevLeft := leftCell (initialCell M tapeData) source position
+  prevCenter := initialCell M tapeData source position
+  prevRight := initialCell M tapeData source (position + 1)
+  nextLeft := leftCell (nextCell tapeData firstWrite firstState firstHead) source position
+  nextCenter := nextCell tapeData firstWrite firstState firstHead source position
+  nextRight := nextCell tapeData firstWrite firstState firstHead source (position + 1)
+
+theorem historyTile_eq (M : Machine) (encodeInput : Input -> List Nat)
+    (source : Input) (position : Nat)
+    (tapeData : Input -> Nat -> Nat) (firstWrite firstState firstHead : Input -> Nat)
+    (startNeHalt : M.start ≠ M.halt)
+    (tape_eq : forall position,
+      tapeData source position = tape M.blank (encodeInput source) position)
+    (write_eq : firstWrite source =
+      (M.step M.start (tapeData source 0)).1)
+    (state_eq : firstState source =
+      (M.step M.start (tapeData source 0)).2.1)
+    (head_eq : firstHead source =
+      (M.step M.start (tapeData source 0)).2.2.apply 0) :
+    historyTile M tapeData firstWrite firstState firstHead source position =
+      MachineInput.historyTile M (encodeInput source) 0 position := by
+  let initial := MachineInput.initialID M (encodeInput source)
+  have initialNe : initial.state ≠ M.halt := by
+    simpa [initial, MachineInput.initialID] using startNeHalt
+  have initialCellEq (position : Nat) :
+      initialCell M tapeData source position = initial.cellAt position := by
+    by_cases atHead : position = 0 <;>
+      simp [initialCell, initial, MachineInput.initialID, ID.cellAt, atHead, tape_eq]
+  have runTapeEq (position : Nat) :
+      (MachineInput.run M (encodeInput source) 1).tape position =
+        nextTape tapeData firstWrite source position := by
+    rw [show 1 = 0 + 1 by omega, MachineInput.run_succ, MachineInput.run_zero]
+    by_cases atHead : position = 0
+    · subst position
+      change (M.nextID initial).tape initial.head = _
+      rw [Machine.nextID_tape_head_of_ne_halt initialNe]
+      simpa [initial, MachineInput.initialID, nextTape, tape_eq] using write_eq.symm
+    · rw [Machine.nextID_tape_of_ne_head (by
+          simpa [initial, MachineInput.initialID] using atHead)]
+      simp [MachineInput.initialID, nextTape, atHead, tape_eq]
+  have runHeadEq :
+      (MachineInput.run M (encodeInput source) 1).head = firstHead source := by
+    rw [show 1 = 0 + 1 by omega, MachineInput.run_succ, MachineInput.run_zero,
+      Machine.nextID_head_of_ne_halt initialNe]
+    simpa [initial, MachineInput.initialID, tape_eq] using head_eq.symm
+  have runStateEq :
+      (MachineInput.run M (encodeInput source) 1).state = firstState source := by
+    rw [show 1 = 0 + 1 by omega, MachineInput.run_succ, MachineInput.run_zero,
+      Machine.nextID_state_of_ne_halt initialNe]
+    simpa [initial, MachineInput.initialID, tape_eq] using state_eq.symm
+  have nextCellEq (position : Nat) :
+      nextCell tapeData firstWrite firstState firstHead source position =
+        (MachineInput.run M (encodeInput source) 1).cellAt position := by
+    unfold nextCell ID.cellAt
+    rw [runHeadEq, runStateEq, runTapeEq]
+  cases position <;>
+    simp [historyTile, MachineInput.historyTile, MachineInput.runCell,
+      MachineInput.runCellLeft, leftCell, initial, initialCellEq, nextCellEq,
+      ID.cellAtLeft]
+
+theorem historyTile_primrec
+    [Primcodable Input] (M : Machine) (tapeData : Input -> Nat -> Nat)
+    (firstWrite firstState firstHead : Input -> Nat)
+    (tapePrimrec : Primrec (fun p : Input × Nat => tapeData p.1 p.2))
+    (writePrimrec : Primrec firstWrite) (statePrimrec : Primrec firstState)
+    (headPrimrec : Primrec firstHead) :
+    Primrec (fun p : Input × Nat =>
+      historyTile M tapeData firstWrite firstState firstHead p.1 p.2) := by
+  have zero : PrimrecPred (fun p : Input × Nat => p.2 = 0) :=
+    Primrec.eq.comp Primrec.snd (Primrec.const 0)
+  have nextTapePrimrec : Primrec (fun p : Input × Nat =>
+      nextTape tapeData firstWrite p.1 p.2) :=
+    Primrec.ite zero (writePrimrec.comp Primrec.fst) tapePrimrec
+  have initialCellPrimrec : Primrec (fun p : Input × Nat =>
+      initialCell M tapeData p.1 p.2) :=
+    Primrec.ite zero
+      (MachineCell.head_primrec.comp
+        (Primrec.pair (Primrec.const M.start) tapePrimrec))
+      (MachineCell.plain_primrec.comp tapePrimrec)
+  have atNextHead : PrimrecPred (fun p : Input × Nat =>
+      p.2 = firstHead p.1) :=
+    Primrec.eq.comp Primrec.snd (headPrimrec.comp Primrec.fst)
+  have nextCellPrimrec : Primrec (fun p : Input × Nat =>
+      nextCell tapeData firstWrite firstState firstHead p.1 p.2) :=
+    Primrec.ite atNextHead
+      (MachineCell.head_primrec.comp
+        (Primrec.pair (statePrimrec.comp Primrec.fst) nextTapePrimrec))
+      (MachineCell.plain_primrec.comp nextTapePrimrec)
+  have predecessor : Primrec (fun p : Input × Nat => (p.1, p.2 - 1)) :=
+    Primrec.pair Primrec.fst (Primrec.pred.comp Primrec.snd)
+  have initialLeftPrimrec : Primrec (fun p : Input × Nat =>
+      leftCell (initialCell M tapeData) p.1 p.2) :=
+    Primrec.ite zero (Primrec.const MachineCell.boundary)
+      (initialCellPrimrec.comp predecessor)
+  have nextLeftPrimrec : Primrec (fun p : Input × Nat =>
+      leftCell (nextCell tapeData firstWrite firstState firstHead) p.1 p.2) :=
+    Primrec.ite zero (Primrec.const MachineCell.boundary)
+      (nextCellPrimrec.comp predecessor)
+  have successor : Primrec (fun p : Input × Nat => (p.1, p.2 + 1)) :=
+    Primrec.pair Primrec.fst (Primrec.succ.comp Primrec.snd)
+  exact MachineHistoryTile.mk_primrec.comp
+    (Primrec.pair initialLeftPrimrec
+      (Primrec.pair initialCellPrimrec
+        (Primrec.pair (initialCellPrimrec.comp successor)
+          (Primrec.pair nextLeftPrimrec
+            (Primrec.pair nextCellPrimrec
+              (nextCellPrimrec.comp successor))))))
+
+end InitialHistoryData
+
 end MachineInput
 end LeanWang
