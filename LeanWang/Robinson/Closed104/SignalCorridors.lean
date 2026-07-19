@@ -76,14 +76,15 @@ theorem vertical_interiorSouth_rules {state : State}
     state.north ≠ .none ∧ state.south ≠ .backward := by
   simpa [verticalAllowed] using of_decide_eq_true h
 
-/-- Equality of horizontal flow across a corridor of transmitting cells. -/
-theorem horizontal_flow_across
-    (state : Nat → State) (start count : Nat)
+/-- Matching edges and transmitting intermediate cells preserve any value
+across a one-dimensional corridor. -/
+theorem value_across {α β : Type*}
+    (state : Nat → α) (outgoing incoming : α → β) (start count : Nat)
     (hmatch : ∀ i, i ≤ count →
-      (state (start + i)).east = (state (start + i + 1)).west)
+      outgoing (state (start + i)) = incoming (state (start + i + 1)))
     (htransmit : ∀ i, i < count →
-      (state (start + i + 1)).west = (state (start + i + 1)).east) :
-    (state start).east = (state (start + count + 1)).west := by
+      incoming (state (start + i + 1)) = outgoing (state (start + i + 1))) :
+    outgoing (state start) = incoming (state (start + count + 1)) := by
   induction count with
   | zero => simpa using hmatch 0 (by omega)
   | succ count ih =>
@@ -91,30 +92,27 @@ theorem horizontal_flow_across
         (fun i hi => hmatch i (by omega))
         (fun i hi => htransmit i (by omega))
       calc
-        (state start).east = (state (start + count + 1)).west := hprefix
-        _ = (state (start + count + 1)).east := htransmit count (by omega)
-        _ = (state (start + (count + 1) + 1)).west := by
+        outgoing (state start) = incoming (state (start + count + 1)) := hprefix
+        _ = outgoing (state (start + count + 1)) := htransmit count (by omega)
+        _ = incoming (state (start + (count + 1) + 1)) := by
           simpa [Nat.add_assoc] using hmatch (count + 1) (by omega)
 
-/-- Equality of vertical flow across a corridor of transmitting cells. -/
-theorem vertical_flow_across
-    (state : Nat → State) (start count : Nat)
-    (hmatch : ∀ i, i ≤ count →
-      (state (start + i)).north = (state (start + i + 1)).south)
-    (htransmit : ∀ i, i < count →
-      (state (start + i + 1)).south = (state (start + i + 1)).north) :
-    (state start).north = (state (start + count + 1)).south := by
-  induction count with
-  | zero => simpa using hmatch 0 (by omega)
-  | succ count ih =>
-      have hprefix := ih
-        (fun i hi => hmatch i (by omega))
-        (fun i hi => htransmit i (by omega))
-      calc
-        (state start).north = (state (start + count + 1)).south := hprefix
-        _ = (state (start + count + 1)).north := htransmit count (by omega)
-        _ = (state (start + (count + 1) + 1)).south := by
-          simpa [Nat.add_assoc] using hmatch (count + 1) (by omega)
+/-- Endpoint form of `value_across`, with matching and transmission hypotheses
+stated directly on the open interval. -/
+theorem value_between {α β : Type*}
+    (state : Nat → α) (outgoing incoming : α → β)
+    {start finish : Nat} (hlt : start < finish)
+    (hmatch : ∀ position, start ≤ position → position < finish →
+      outgoing (state position) = incoming (state (position + 1)))
+    (htransmit : ∀ position, start < position → position < finish →
+      incoming (state position) = outgoing (state position)) :
+    outgoing (state start) = incoming (state finish) := by
+  have hflow := value_across state outgoing incoming
+    start (finish - start - 1)
+    (fun offset _ => hmatch (start + offset) (by omega) (by omega))
+    (fun offset _ => htransmit (start + offset + 1) (by omega) (by omega))
+  have hend : start + (finish - start - 1) + 1 = finish := by omega
+  simpa only [hend] using hflow
 
 /-- Two horizontal inner edges cannot support a signal between them. -/
 theorem horizontal_clear_of_inner_edges {left right : State}

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.ShadedConsecutiveFreeGrid
+import LeanWang.Robinson.Closed104.SignalCorridors
 
 /-!
 # Payload corridors through complete Robinson free grids
@@ -100,19 +101,8 @@ theorem horizontal_payload_across
       WangTile.HMatches (tiles (start + i)) (tiles (start + i + 1)))
     (hwire : forall i, i < count ->
       (tiles (start + i + 1)).w = (tiles (start + i + 1)).e) :
-    WangTile.HMatches (tiles start) (tiles (start + count + 1)) := by
-  induction count with
-  | zero => simpa [WangTile.HMatches] using hmatch 0 (by omega)
-  | succ count ih =>
-      have hprefix := ih
-        (fun i hi => hmatch i (by omega))
-        (fun i hi => hwire i (by omega))
-      change (tiles start).e = (tiles (start + (count + 1) + 1)).w
-      calc
-        (tiles start).e = (tiles (start + count + 1)).w := hprefix
-        _ = (tiles (start + count + 1)).e := hwire count (by omega)
-        _ = (tiles (start + (count + 1) + 1)).w := by
-          simpa [WangTile.HMatches, Nat.add_assoc] using hmatch (count + 1) (by omega)
+    WangTile.HMatches (tiles start) (tiles (start + count + 1)) :=
+  Signals.value_across tiles WangTile.e WangTile.w start count hmatch hwire
 
 theorem vertical_payload_across
     (tiles : Nat -> WangTile) (start count : Nat)
@@ -120,19 +110,8 @@ theorem vertical_payload_across
       WangTile.VMatches (tiles (start + i)) (tiles (start + i + 1)))
     (hwire : forall i, i < count ->
       (tiles (start + i + 1)).s = (tiles (start + i + 1)).n) :
-    WangTile.VMatches (tiles start) (tiles (start + count + 1)) := by
-  induction count with
-  | zero => simpa [WangTile.VMatches] using hmatch 0 (by omega)
-  | succ count ih =>
-      have hprefix := ih
-        (fun i hi => hmatch i (by omega))
-        (fun i hi => hwire i (by omega))
-      change (tiles start).n = (tiles (start + (count + 1) + 1)).s
-      calc
-        (tiles start).n = (tiles (start + count + 1)).s := hprefix
-        _ = (tiles (start + count + 1)).n := hwire count (by omega)
-        _ = (tiles (start + (count + 1) + 1)).s := by
-          simpa [WangTile.VMatches, Nat.add_assoc] using hmatch (count + 1) (by omega)
+    WangTile.VMatches (tiles start) (tiles (start + count + 1)) :=
+  Signals.value_across tiles WangTile.n WangTile.s start count hmatch hwire
 
 set_option maxHeartbeats 1000000 in
 -- Elaborating the variable-length payload corridor and decoded point arithmetic.

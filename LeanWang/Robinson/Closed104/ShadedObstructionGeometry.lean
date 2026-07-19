@@ -76,7 +76,17 @@ structure Geometry
         ∀ x, boundary < x -> x < column ->
           ShadedSignals.selectedVerticalFor
             (componentAt indexGrid x row) (quadrantAt x row)
-            (shadeGrid x row) = none)
+          (shadeGrid x row) = none)
+
+private theorem blocked_at_selected_boundary {α : Type*}
+    {selected : Option α} {before after : Signals.Flow}
+    (hselected : selected ≠ none)
+    (houter : ∀ value, selected = some value →
+      before ≠ .none ∨ after ≠ .none) :
+    before ≠ .none ∨ after ≠ .none := by
+  cases hvalue : selected with
+  | none => contradiction
+  | some value => exact houter value hvalue
 
 theorem vertical_blocked_at_boundary
     {indexGrid : Nat -> Nat -> Index}
@@ -89,18 +99,15 @@ theorem vertical_blocked_at_boundary
       (shadeGrid column row) ≠ none) :
     (signalGrid column row).south ≠ .none ∨
       (signalGrid column row).north ≠ .none := by
-  cases hvalue : ShadedSignals.selectedHorizontalFor
-      (componentAt indexGrid column row) (quadrantAt column row)
-      (shadeGrid column row) with
-  | none => contradiction
-  | some interior =>
-      cases interior with
-      | north =>
-          exact Or.inl (Signals.vertical_interiorNorth_rules (by
-            simpa only [hvalue] using valid.verticalAllowed column row)).1
-      | south =>
-          exact Or.inr (Signals.vertical_interiorSouth_rules (by
-            simpa only [hvalue] using valid.verticalAllowed column row)).1
+  apply blocked_at_selected_boundary hselected
+  intro interior hvalue
+  cases interior with
+  | north =>
+      exact Or.inl (Signals.vertical_interiorNorth_rules (by
+        simpa only [hvalue] using valid.verticalAllowed column row)).1
+  | south =>
+      exact Or.inr (Signals.vertical_interiorSouth_rules (by
+        simpa only [hvalue] using valid.verticalAllowed column row)).1
 
 theorem horizontal_blocked_at_boundary
     {indexGrid : Nat -> Nat -> Index}
@@ -113,18 +120,15 @@ theorem horizontal_blocked_at_boundary
       (shadeGrid column row) ≠ none) :
     (signalGrid column row).west ≠ .none ∨
       (signalGrid column row).east ≠ .none := by
-  cases hvalue : ShadedSignals.selectedVerticalFor
-      (componentAt indexGrid column row) (quadrantAt column row)
-      (shadeGrid column row) with
-  | none => contradiction
-  | some interior =>
-      cases interior with
-      | west =>
-          exact Or.inr (Signals.horizontal_interiorWest_rules (by
-            simpa only [hvalue] using valid.horizontalAllowed column row)).1
-      | east =>
-          exact Or.inl (Signals.horizontal_interiorEast_rules (by
-            simpa only [hvalue] using valid.horizontalAllowed column row)).1
+  apply blocked_at_selected_boundary hselected
+  intro interior hvalue
+  cases interior with
+  | west =>
+      exact Or.inr (Signals.horizontal_interiorWest_rules (by
+        simpa only [hvalue] using valid.horizontalAllowed column row)).1
+  | east =>
+      exact Or.inl (Signals.horizontal_interiorEast_rules (by
+        simpa only [hvalue] using valid.horizontalAllowed column row)).1
 
 theorem vertical_blocked_of_upper
     {indexGrid : Nat -> Nat -> Index}
@@ -144,14 +148,13 @@ theorem vertical_blocked_of_upper
   have houter : (signalGrid column boundary).south ≠ .none :=
     (Signals.vertical_interiorNorth_rules (by
       simpa only [hselected] using valid.verticalAllowed column boundary)).1
-  have hflow := Signals.vertical_flow_across
-    (fun y => signalGrid column y) row (boundary - row - 1)
-    (fun i hi => valid.vmatch column (row + i))
-    (fun i hi => Signals.vertical_transmits_of_allowed (by
-      have hnone := hbetween (row + i + 1) (by omega) (by omega)
-      simpa only [hnone] using valid.verticalAllowed column (row + i + 1)))
-  have hend : row + (boundary - row - 1) + 1 = boundary := by omega
-  rw [hend] at hflow
+  have hflow := Signals.value_between
+    (state := fun y => signalGrid column y)
+    Signals.State.north Signals.State.south hrb
+    (fun y _ _ => valid.vmatch column y)
+    (fun y hry hyr => Signals.vertical_transmits_of_allowed (by
+      have hnone := hbetween y hry hyr
+      simpa only [hnone] using valid.verticalAllowed column y))
   exact hflow ▸ houter
 
 theorem vertical_blocked_of_lower
@@ -172,14 +175,13 @@ theorem vertical_blocked_of_lower
   have houter : (signalGrid column boundary).north ≠ .none :=
     (Signals.vertical_interiorSouth_rules (by
       simpa only [hselected] using valid.verticalAllowed column boundary)).1
-  have hflow := Signals.vertical_flow_across
-    (fun y => signalGrid column y) boundary (row - boundary - 1)
-    (fun i hi => valid.vmatch column (boundary + i))
-    (fun i hi => Signals.vertical_transmits_of_allowed (by
-      have hnone := hbetween (boundary + i + 1) (by omega) (by omega)
-      simpa only [hnone] using valid.verticalAllowed column (boundary + i + 1)))
-  have hend : boundary + (row - boundary - 1) + 1 = row := by omega
-  rw [hend] at hflow
+  have hflow := Signals.value_between
+    (state := fun y => signalGrid column y)
+    Signals.State.north Signals.State.south hbr
+    (fun y _ _ => valid.vmatch column y)
+    (fun y hby hyr => Signals.vertical_transmits_of_allowed (by
+      have hnone := hbetween y hby hyr
+      simpa only [hnone] using valid.verticalAllowed column y))
   exact hflow.symm ▸ houter
 
 theorem horizontal_blocked_of_right
@@ -200,14 +202,13 @@ theorem horizontal_blocked_of_right
   have houter : (signalGrid boundary row).west ≠ .none :=
     (Signals.horizontal_interiorEast_rules (by
       simpa only [hselected] using valid.horizontalAllowed boundary row)).1
-  have hflow := Signals.horizontal_flow_across
-    (fun x => signalGrid x row) column (boundary - column - 1)
-    (fun i hi => valid.hmatch (column + i) row)
-    (fun i hi => Signals.horizontal_transmits_of_allowed (by
-      have hnone := hbetween (column + i + 1) (by omega) (by omega)
-      simpa only [hnone] using valid.horizontalAllowed (column + i + 1) row))
-  have hend : column + (boundary - column - 1) + 1 = boundary := by omega
-  rw [hend] at hflow
+  have hflow := Signals.value_between
+    (state := fun x => signalGrid x row)
+    Signals.State.east Signals.State.west hcb
+    (fun x _ _ => valid.hmatch x row)
+    (fun x hcx hxb => Signals.horizontal_transmits_of_allowed (by
+      have hnone := hbetween x hcx hxb
+      simpa only [hnone] using valid.horizontalAllowed x row))
   exact hflow ▸ houter
 
 theorem horizontal_blocked_of_left
@@ -228,14 +229,13 @@ theorem horizontal_blocked_of_left
   have houter : (signalGrid boundary row).east ≠ .none :=
     (Signals.horizontal_interiorWest_rules (by
       simpa only [hselected] using valid.horizontalAllowed boundary row)).1
-  have hflow := Signals.horizontal_flow_across
-    (fun x => signalGrid x row) boundary (column - boundary - 1)
-    (fun i hi => valid.hmatch (boundary + i) row)
-    (fun i hi => Signals.horizontal_transmits_of_allowed (by
-      have hnone := hbetween (boundary + i + 1) (by omega) (by omega)
-      simpa only [hnone] using valid.horizontalAllowed (boundary + i + 1) row))
-  have hend : boundary + (column - boundary - 1) + 1 = column := by omega
-  rw [hend] at hflow
+  have hflow := Signals.value_between
+    (state := fun x => signalGrid x row)
+    Signals.State.east Signals.State.west hbc
+    (fun x _ _ => valid.hmatch x row)
+    (fun x hbx hxc => Signals.horizontal_transmits_of_allowed (by
+      have hnone := hbetween x hbx hxc
+      simpa only [hnone] using valid.horizontalAllowed x row))
   exact hflow.symm ▸ houter
 
 theorem Geometry.crossingObstruction

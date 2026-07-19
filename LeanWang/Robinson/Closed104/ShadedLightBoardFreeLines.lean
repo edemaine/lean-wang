@@ -64,28 +64,26 @@ theorem CycleShade.clear_at_free_row
     simp [left, right, quarterWest, quarterEast]
     omega
   have hwhole : (signalGrid left row).east = (signalGrid right row).west := by
-    have hflow := Signals.horizontal_flow_across
-      (fun x => signalGrid x row) left (right - left - 1)
-      (fun i hi => valid.hmatch (left + i) row)
-      (fun i hi => Signals.horizontal_transmits_of_allowed (by
-        have hfree := free (left + i + 1) (by omega) (by omega)
-        simpa only [hfree] using valid.horizontalAllowed (left + i + 1) row))
-    have hend : left + (right - left - 1) + 1 = right := by omega
-    simpa only [hend] using hflow
+    exact Signals.value_between
+      (state := fun x => signalGrid x row)
+      Signals.State.east Signals.State.west hleftRight
+      (fun x _ _ => valid.hmatch x row)
+      (fun x hlx hxr => Signals.horizontal_transmits_of_allowed (by
+        have hfree := free x (by simpa [left] using hlx) (by simpa [right] using hxr)
+        simpa only [hfree] using valid.horizontalAllowed x row))
   have hleftRule := west_signal_rules shaded cycle valid hsouth hnorth
   have hrightRule := east_signal_rules shaded cycle valid hsouth hnorth
   have hends := Signals.horizontal_clear_of_inner_edges hwhole
     hleftRule.2 hrightRule.2
   have hprefix : (signalGrid left row).east =
       (signalGrid quarterX row).west := by
-    have hflow := Signals.horizontal_flow_across
-      (fun x => signalGrid x row) left (quarterX - left - 1)
-      (fun i hi => valid.hmatch (left + i) row)
-      (fun i hi => Signals.horizontal_transmits_of_allowed (by
-        have hfree := free (left + i + 1) (by omega) (by omega)
-        simpa only [hfree] using valid.horizontalAllowed (left + i + 1) row))
-    have hend : left + (quarterX - left - 1) + 1 = quarterX := by omega
-    simpa only [hend] using hflow
+    exact Signals.value_between
+      (state := fun x => signalGrid x row)
+      Signals.State.east Signals.State.west (by simpa [left] using hwest)
+      (fun x _ _ => valid.hmatch x row)
+      (fun x hlx hxq => Signals.horizontal_transmits_of_allowed (by
+        have hfree := free x (by simpa [left] using hlx) (hxq.trans heast)
+        simpa only [hfree] using valid.horizontalAllowed x row))
   have hwestClear : (signalGrid quarterX row).west = .none :=
     hprefix.symm.trans hends.1
   have htransmit := Signals.horizontal_transmits_of_allowed (by
@@ -115,28 +113,26 @@ theorem CycleShade.clear_at_free_column
     omega
   have hwhole : (signalGrid column lower).north =
       (signalGrid column upper).south := by
-    have hflow := Signals.vertical_flow_across
-      (fun y => signalGrid column y) lower (upper - lower - 1)
-      (fun i hi => valid.vmatch column (lower + i))
-      (fun i hi => Signals.vertical_transmits_of_allowed (by
-        have hfree := free (lower + i + 1) (by omega) (by omega)
-        simpa only [hfree] using valid.verticalAllowed column (lower + i + 1)))
-    have hend : lower + (upper - lower - 1) + 1 = upper := by omega
-    simpa only [hend] using hflow
+    exact Signals.value_between
+      (state := fun y => signalGrid column y)
+      Signals.State.north Signals.State.south hlowerUpper
+      (fun y _ _ => valid.vmatch column y)
+      (fun y hly hyu => Signals.vertical_transmits_of_allowed (by
+        have hfree := free y (by simpa [lower] using hly) (by simpa [upper] using hyu)
+        simpa only [hfree] using valid.verticalAllowed column y))
   have hlowerRule := south_signal_rules shaded cycle valid hwest heast
   have hupperRule := north_signal_rules shaded cycle valid hwest heast
   have hends := Signals.vertical_clear_of_inner_edges hwhole
     hlowerRule.2 hupperRule.2
   have hprefix : (signalGrid column lower).north =
       (signalGrid column quarterY).south := by
-    have hflow := Signals.vertical_flow_across
-      (fun y => signalGrid column y) lower (quarterY - lower - 1)
-      (fun i hi => valid.vmatch column (lower + i))
-      (fun i hi => Signals.vertical_transmits_of_allowed (by
-        have hfree := free (lower + i + 1) (by omega) (by omega)
-        simpa only [hfree] using valid.verticalAllowed column (lower + i + 1)))
-    have hend : lower + (quarterY - lower - 1) + 1 = quarterY := by omega
-    simpa only [hend] using hflow
+    exact Signals.value_between
+      (state := fun y => signalGrid column y)
+      Signals.State.north Signals.State.south (by simpa [lower] using hsouth)
+      (fun y _ _ => valid.vmatch column y)
+      (fun y hly hyq => Signals.vertical_transmits_of_allowed (by
+        have hfree := free y (by simpa [lower] using hly) (hyq.trans hnorth)
+        simpa only [hfree] using valid.verticalAllowed column y))
   have hsouthClear : (signalGrid column quarterY).south = .none :=
     hprefix.symm.trans hends.1
   have htransmit := Signals.vertical_transmits_of_allowed (by
