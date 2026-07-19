@@ -403,6 +403,18 @@ noncomputable def incrementCoreTape {numTags : Nat} (registers : Registers)
     (T : FullTM0.Tape (Symbol numTags)) : FullTM0.Tape (Symbol numTags) :=
   installCore (registers.increment register) growth T
 
+/-- Reinstalling any incremented core absorbs an earlier incremented-core
+overlay, because every incremented layout has the same endpoint. -/
+theorem installCore_incrementCoreTape_eq {numTags : Nat}
+    (registers : Registers) (growth : Turing.Dir)
+    (earlier later : Register) (T : FullTM0.Tape (Symbol numTags)) :
+    installCore (registers.increment later) growth
+        (incrementCoreTape registers growth earlier T) =
+      incrementCoreTape registers growth later T := by
+  unfold incrementCoreTape
+  apply installCore_over_installCore
+  simp [layoutEnd_increment]
+
 /-- Clear the old far boundary without changing any other logical cell. -/
 def clearOldCoreEnd {numTags : Nat} (registers : Registers)
     (growth : Turing.Dir) (T : FullTM0.Tape (Symbol numTags)) :

@@ -667,9 +667,8 @@ theorem machine_reaches_incrementSchedule_or_halts_of_envelope
           RegisterLayout.clockBoundary_eq, RegisterLayout.values,
           Registers.increment, Registers.set, Registers.get] <;> omega
       have htape : installCore tempRegisters growth clockTape = tempTape := by
-        simp only [clockTape, tempTape, incrementCoreTape]
-        apply installCore_over_installCore
-        simp [clockRegisters, tempRegisters, layoutEnd_increment]
+        simpa [clockRegisters, tempRegisters, clockTape, tempTape] using
+          installCore_incrementCoreTape_eq registers growth .clock .temp T
       rw [htape] at hthree
       have hfinish : boundaryOffset clockRegisters ((3 : Fin 4).castSucc) =
           boundaryOffset registers 3 := by
@@ -771,15 +770,13 @@ theorem machine_reaches_incrementSchedule_or_halts_of_envelope
           Registers.increment, Registers.set, Registers.get] <;> omega
       have htapeThree : installCore tempRegisters growth clockTape =
           tempTape := by
-        simp only [clockTape, tempTape, incrementCoreTape]
-        apply installCore_over_installCore
-        simp [clockRegisters, tempRegisters, layoutEnd_increment]
+        simpa [clockRegisters, tempRegisters, clockTape, tempTape] using
+          installCore_incrementCoreTape_eq registers growth .clock .temp T
       rw [htapeThree] at hthree
       have htapeTwo : installCore rightRegisters growth tempTape =
           rightTape := by
-        simp only [tempTape, rightTape, incrementCoreTape]
-        apply installCore_over_installCore
-        simp [tempRegisters, rightRegisters, layoutEnd_increment]
+        simpa [tempRegisters, rightRegisters, tempTape, rightTape] using
+          installCore_incrementCoreTape_eq registers growth .temp .right T
       rw [htapeTwo] at htwo
       have hhandoffThree :
           boundaryOffset clockRegisters ((3 : Fin 4).castSucc) =
@@ -925,21 +922,18 @@ theorem machine_reaches_incrementSchedule_or_halts_of_envelope
           Registers.increment, Registers.set, Registers.get] <;> omega
       have htapeThree : installCore tempRegisters growth clockTape =
           tempTape := by
-        simp only [clockTape, tempTape, incrementCoreTape]
-        apply installCore_over_installCore
-        simp [clockRegisters, tempRegisters, layoutEnd_increment]
+        simpa [clockRegisters, tempRegisters, clockTape, tempTape] using
+          installCore_incrementCoreTape_eq registers growth .clock .temp T
       rw [htapeThree] at hthree
       have htapeTwo : installCore rightRegisters growth tempTape =
           rightTape := by
-        simp only [tempTape, rightTape, incrementCoreTape]
-        apply installCore_over_installCore
-        simp [tempRegisters, rightRegisters, layoutEnd_increment]
+        simpa [tempRegisters, rightRegisters, tempTape, rightTape] using
+          installCore_incrementCoreTape_eq registers growth .temp .right T
       rw [htapeTwo] at htwo
       have htapeOne : installCore leftRegisters growth rightTape =
           leftTape := by
-        simp only [rightTape, leftTape, incrementCoreTape]
-        apply installCore_over_installCore
-        simp [rightRegisters, leftRegisters, layoutEnd_increment]
+        simpa [rightRegisters, leftRegisters, rightTape, leftTape] using
+          installCore_incrementCoreTape_eq registers growth .right .left T
       rw [htapeOne] at hone
       have hhandoffThree :
           boundaryOffset clockRegisters ((3 : Fin 4).castSucc) =
