@@ -285,7 +285,7 @@ theorem validation_reconstructs_roundtrip_of_immortal
           MarkerValidation.sweep →
         raw ∈ rawCommands := by
     intro raw hraw
-    apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    apply CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule
     cases instruction <;>
       simp_all [commandsForRule, validationCommands,
@@ -296,7 +296,7 @@ theorem validation_reconstructs_roundtrip_of_immortal
           validationDirectBase MarkerValidation.sweep →
         rule ∈ rawDirectRules := by
     intro rule hrule'
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     cases instruction <;>
       simp_all [directRulesForRule, validationRules,

@@ -47,7 +47,7 @@ theorem validationFirst_mem
     (instruction : CounterMachine.Instruction)
     (hrule : (source, instruction) ∈ GlobalSourceProgram.program) :
     validationFirst growth source ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   cases instruction <;>
     simp [validationFirst, commandsForRule, validationCommands,
@@ -71,7 +71,7 @@ theorem reaches_validationFirst
     ⟨growth, .logical growth source, .boundary 4,
       searchRef growth source validationSearchBase, .left⟩
   have hentry : entry ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     cases instruction <;>
       simp [entry, directRulesForRule, validationRules,

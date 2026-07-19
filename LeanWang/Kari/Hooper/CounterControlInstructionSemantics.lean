@@ -1649,22 +1649,6 @@ theorem routeFromZero_executesAt {spec : Spec numTags}
       (layoutEnd spec.registers) :=
   (routeFromZero_executesWithin h register).toExecutesAt
 
-/-! ## Inclusion of one source rule in the linked controller -/
-
-theorem command_mem_rawCommands_of_rule
-    (growth : Turing.Dir) {rule : CounterMachine.Rule}
-    (hrule : rule ∈ GlobalSourceProgram.program) {raw : RawCommand}
-    (hraw : raw ∈ commandsForRule growth rule) :
-    raw ∈ rawCommands :=
-  (mem_rawCommands_iff raw).2 ⟨growth, rule, hrule, hraw⟩
-
-theorem directRule_mem_rawDirectRules_of_rule
-    (growth : Turing.Dir) {rule : CounterMachine.Rule}
-    (hrule : rule ∈ GlobalSourceProgram.program) {raw : RawDirectRule}
-    (hraw : raw ∈ directRulesForRule growth rule) :
-    raw ∈ rawDirectRules :=
-  (mem_rawDirectRules_iff raw).2 ⟨growth, rule, hrule, hraw⟩
-
 /-! ## Validation prefix -/
 
 private abbrev validationCommand_mem :=

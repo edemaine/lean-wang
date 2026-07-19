@@ -308,7 +308,7 @@ theorem incrementDirectHandoff
     ⟨growth, directRef growth source bodyDirectBase, .blank,
       incrementAfterShiftRef growth source register next, .right⟩
   have hraw : raw ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change raw ∈ validationRules growth source ++
       incrementRules growth source next register
@@ -382,7 +382,7 @@ theorem incrementRecoverySearchHandoff
       .boundary (MarkerSchedule.decrementStartBoundary register),
       searchRef growth source secondarySearchBase, first.direction⟩
   have hraw : raw ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change raw ∈ validationRules growth source ++
       incrementRules growth source next register
@@ -453,7 +453,7 @@ theorem decrementPositiveDirectHandoff
     ⟨growth, directRef growth source finishDirectSlot, .blank,
       .logical growth ifPositive, .left⟩
   have hraw : raw ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change raw ∈ validationRules growth source ++
       decrementRules growth source register ifZero ifPositive

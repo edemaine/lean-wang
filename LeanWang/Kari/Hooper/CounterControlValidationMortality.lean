@@ -281,7 +281,7 @@ theorem outward_validation_reconstructs_of_immortal
           CounterControlValidationConverse.outwardSweep →
         raw ∈ rawCommands := by
     intro raw hraw
-    apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    apply CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule
     cases instruction <;>
       simp_all [commandsForRule, validationCommands,
@@ -293,7 +293,7 @@ theorem outward_validation_reconstructs_of_immortal
           CounterControlValidationConverse.outwardSweep →
         rule ∈ rawDirectRules := by
     intro rule hraw
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     cases instruction <;>
       simp_all [directRulesForRule, validationRules,
@@ -345,13 +345,13 @@ theorem reaches_outward_validation_of_immortal
       raw ∈ validationCommands growth source instruction →
         raw ∈ rawCommands := by
     intro raw hraw
-    apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    apply CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule
     cases instruction <;> simp [commandsForRule, hraw]
   have hrules : ∀ rule, rule ∈ validationRules growth source →
       rule ∈ rawDirectRules := by
     intro rule hraw
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     cases instruction <;> simp [directRulesForRule, hraw]
   have hraw0 := hcommands

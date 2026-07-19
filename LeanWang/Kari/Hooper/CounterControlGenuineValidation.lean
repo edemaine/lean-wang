@@ -74,7 +74,7 @@ theorem progressedValidation
           MarkerValidation.sweep →
         command ∈ rawCommands := by
     intro command hmem
-    apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    apply CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule
     cases instruction <;>
       simp [commandsForRule, validationCommands, hmem]
@@ -83,7 +83,7 @@ theorem progressedValidation
           validationDirectBase MarkerValidation.sweep →
         rule ∈ rawDirectRules := by
     intro rule hmem
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     cases instruction <;>
       simp [directRulesForRule, validationRules, hmem]

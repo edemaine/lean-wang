@@ -827,7 +827,7 @@ theorem incrementRecoveryRouteEnd
           (bodyDirectBase + 2) (.logical growth next) (first :: rest) →
         command ∈ rawCommands := by
     intro command hcommand
-    apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    apply CounterControlPlan.command_mem_rawCommands_of_rule
       growth handoff.direct.rule_mem
     have hfull : command ∈ routeCommandsAux growth source
         secondarySearchBase (bodyDirectBase + 2) (.logical growth next)
@@ -840,7 +840,7 @@ theorem incrementRecoveryRouteEnd
           (bodyDirectBase + 2) (first :: rest) →
         rule ∈ rawDirectRules := by
     intro rule hrule
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth handoff.direct.rule_mem
     have hfull : rule ∈ routeContinuationRules growth source
         secondarySearchBase (bodyDirectBase + 2)

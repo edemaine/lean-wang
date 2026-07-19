@@ -131,7 +131,7 @@ theorem incrementRecovery_logical_of_rule
           (AnchoredCounterGeometry.routeFromIncrement register) →
         command ∈ rawCommands := by
     intro command hmem
-    exact CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    exact CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule (by simp [commandsForRule, incrementCommands, hmem])
   have hcontinuations : ∀ rule,
       rule ∈ routeContinuationRules growth source secondarySearchBase
@@ -139,7 +139,7 @@ theorem incrementRecovery_logical_of_rule
           (AnchoredCounterGeometry.routeFromIncrement register) →
         rule ∈ rawDirectRules := by
     intro rule hmem
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     simp [directRulesForRule, incrementRules, hmem]
   rcases progressedRoute base c hmortal current himmortal growth source
@@ -178,7 +178,7 @@ theorem zeroRecovery_logical_of_rule
           (AnchoredCounterGeometry.routeFromZero register) →
         command ∈ rawCommands := by
     intro command hmem
-    exact CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    exact CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule (by simp [commandsForRule, decrementCommands, hmem])
   have hcontinuations : ∀ rule,
       rule ∈ routeContinuationRules growth source zeroSearchBase
@@ -186,7 +186,7 @@ theorem zeroRecovery_logical_of_rule
           (AnchoredCounterGeometry.routeFromZero register) →
         rule ∈ rawDirectRules := by
     intro rule hmem
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     simp [directRulesForRule, decrementRules, hmem]
   rcases progressedRoute base c hmortal current himmortal growth source

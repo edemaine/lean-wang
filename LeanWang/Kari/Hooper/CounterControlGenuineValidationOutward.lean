@@ -65,7 +65,7 @@ theorem clockIncrementRaw_mem
     (hrule : (source, .increment .clock next) ∈
       GlobalSourceProgram.program) :
     clockIncrementRaw growth source ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, incrementCommands,
     clockIncrementRaw_mem_increment growth source]
@@ -326,7 +326,7 @@ theorem reaches_logical_of_clockIncrementSuccess
     ⟨growth, directRef growth source bodyDirectBase, .blank,
       .logical growth next, .right⟩
   have hmem : rule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change rule ∈ validationRules growth source ++
       incrementRules growth source next .clock
@@ -368,7 +368,7 @@ theorem reaches_cleanup_of_clockIncrementCollision
     ⟨growth, directRef growth source testDirectSlot, .nonblank,
       searchRef growth source cleanupSearchBase, .left⟩
   have hmem : rule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change rule ∈ validationRules growth source ++
       incrementRules growth source next .clock

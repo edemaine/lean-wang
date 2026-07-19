@@ -429,6 +429,44 @@ theorem mem_rawDirectRules_iff (raw : RawDirectRule) :
     | right => exact Or.inl ⟨rule, hrule, hraw⟩
     | left => exact Or.inr ⟨rule, hrule, hraw⟩
 
+/-- Include one source rule's command family in the linked controller. -/
+theorem command_mem_rawCommands_of_rule
+    (growth : Turing.Dir) {rule : CounterMachine.Rule}
+    (hrule : rule ∈ GlobalSourceProgram.program) {raw : RawCommand}
+    (hraw : raw ∈ commandsForRule growth rule) :
+    raw ∈ rawCommands :=
+  (mem_rawCommands_iff raw).2 ⟨growth, rule, hrule, hraw⟩
+
+/-- Include one source rule's direct family in the linked controller. -/
+theorem directRule_mem_rawDirectRules_of_rule
+    (growth : Turing.Dir) {rule : CounterMachine.Rule}
+    (hrule : rule ∈ GlobalSourceProgram.program) {raw : RawDirectRule}
+    (hraw : raw ∈ directRulesForRule growth rule) :
+    raw ∈ rawDirectRules :=
+  (mem_rawDirectRules_iff raw).2 ⟨growth, rule, hrule, hraw⟩
+
+/-- Every validation command for a linked source rule is globally linked. -/
+theorem validationCommand_mem_rawCommands
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction)
+    (hrule : (source, instruction) ∈ GlobalSourceProgram.program)
+    {raw : RawCommand}
+    (hraw : raw ∈ validationCommands growth source instruction) :
+    raw ∈ rawCommands :=
+  command_mem_rawCommands_of_rule growth hrule
+    (validationCommand_mem_commandsForRule growth source instruction hraw)
+
+/-- Every validation direct rule for a linked source rule is globally linked. -/
+theorem validationRule_mem_rawDirectRules
+    (growth : Turing.Dir) (source : Nat)
+    (instruction : CounterMachine.Instruction)
+    (hrule : (source, instruction) ∈ GlobalSourceProgram.program)
+    {raw : RawDirectRule}
+    (hraw : raw ∈ validationRules growth source) :
+    raw ∈ rawDirectRules :=
+  directRule_mem_rawDirectRules_of_rule growth hrule
+    (validationRule_mem_directRulesForRule growth source instruction hraw)
+
 /-- There is exactly one return symbol for every enumerated bounded search. -/
 abbrev numTags : Nat := rawCommands.length
 

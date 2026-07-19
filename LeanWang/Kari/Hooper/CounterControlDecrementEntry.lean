@@ -185,7 +185,7 @@ theorem testHandoff
       .boundary (MarkerSchedule.decrementStartBoundary register),
       directRef growth source branchDirectSlot, .left⟩
   have hraw : raw ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change raw ∈ validationRules growth source ++
       decrementRules growth source register ifZero ifPositive
@@ -228,7 +228,7 @@ theorem testHandoff_of_rule
           (AnchoredCounterGeometry.routeToDecrementStart register) →
         command ∈ rawCommands := by
     intro command hmem
-    exact CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    exact CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule (by simp [commandsForRule, decrementCommands, hmem])
   have hcontinuations : ∀ rule,
       rule ∈ routeContinuationRules growth source bodySearchBase
@@ -236,7 +236,7 @@ theorem testHandoff_of_rule
           (AnchoredCounterGeometry.routeToDecrementStart register) →
         rule ∈ rawDirectRules := by
     intro rule hmem
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     simp [directRulesForRule, decrementRules, hmem]
   rcases progressedRoute base c hmortal current himmortal growth source
@@ -330,7 +330,7 @@ theorem branchRead_of_reaches
     ⟨growth, directRef growth source branchDirectSlot, .blank,
       searchRef growth source secondarySearchBase, .right⟩
   have hpositiveRule : positiveRule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hprogram
     change positiveRule ∈ validationRules growth source ++
       decrementRules growth source register ifZero ifPositive
@@ -439,7 +439,7 @@ theorem branchStep_of_read
       ⟨growth, directRef growth source branchDirectSlot, .blank,
         searchRef growth source secondarySearchBase, .right⟩
     have hraw : raw ∈ rawDirectRules := by
-      apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
         growth hprogram
       change raw ∈ validationRules growth source ++
         decrementRules growth source register ifZero ifPositive
@@ -458,7 +458,7 @@ theorem branchStep_of_read
         .boundary (AnchoredCounterGeometry.registerGap register).castSucc,
         searchRef growth source zeroSearchBase, .right⟩
     have hraw : raw ∈ rawDirectRules := by
-      apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
         growth hprogram
       change raw ∈ validationRules growth source ++
         decrementRules growth source register ifZero ifPositive

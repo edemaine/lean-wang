@@ -69,7 +69,7 @@ private theorem outwardFour_nonemptyDecrement_handoff
   let raw : RawCommand := .boundaryNavigation
     ⟨growth, source, bodySearchBase⟩ 3 .left success .preserve
   have hrawCommands : raw ∈ rawCommands := by
-    apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    apply CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule
     simp [commandsForRule, decrementCommands, raw, hcommand]
   have hread : current.foundTape.read = boundarySymbol 4 :=
@@ -228,7 +228,7 @@ theorem outwardFour_nonclockDecrement_handoff
         exact Or.inl rfl
       · simp [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
       · apply
-          CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+          CounterControlPlan.directRule_mem_rawDirectRules_of_rule
             growth hrule
         simp [directRulesForRule, decrementRules,
           AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules]
@@ -243,7 +243,7 @@ theorem outwardFour_nonclockDecrement_handoff
         exact Or.inl rfl
       · simp [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
       · apply
-          CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+          CounterControlPlan.directRule_mem_rawDirectRules_of_rule
             growth hrule
         simp [directRulesForRule, decrementRules,
           AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules]
@@ -258,7 +258,7 @@ theorem outwardFour_nonclockDecrement_handoff
         exact Or.inl rfl
       · simp [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
       · apply
-          CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+          CounterControlPlan.directRule_mem_rawDirectRules_of_rule
             growth hrule
         simp [directRulesForRule, decrementRules,
           AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules]

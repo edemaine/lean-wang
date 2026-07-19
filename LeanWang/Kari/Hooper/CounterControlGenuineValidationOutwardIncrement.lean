@@ -83,7 +83,7 @@ theorem firstIncrementRaw_mem
     (hrule : (source, .increment register next) ∈
       GlobalSourceProgram.program) :
     firstIncrementRaw growth source register ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, incrementCommands,
     firstIncrementRaw_mem_increment growth source register]
@@ -130,7 +130,7 @@ theorem reaches_cleanup_of_firstIncrementCollision
     ⟨growth, directRef growth source testDirectSlot, .nonblank,
       searchRef growth source cleanupSearchBase, .left⟩
   have hmem : rule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change rule ∈ validationRules growth source ++
       incrementRules growth source next register

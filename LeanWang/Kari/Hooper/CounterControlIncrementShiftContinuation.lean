@@ -99,7 +99,7 @@ private theorem foundMonotoneGuardedEntryOutcome_of_firstCollision
     simpa [collisionTape, hraw, ShiftDestinationOccupied] using hoccupied
   have hentryRule : cleanupEntryRule growth source ∈ rawDirectRules := by
     apply
-      CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+      CounterControlPlan.directRule_mem_rawDirectRules_of_rule
         growth hrule
     simp [directRulesForRule, incrementRules, cleanupEntryRule]
   have hentryLocal := CounterControlDirectSemantics.reaches_directRule

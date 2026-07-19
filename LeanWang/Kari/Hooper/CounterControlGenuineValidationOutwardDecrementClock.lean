@@ -162,7 +162,7 @@ theorem outwardFour_clockDecrement_handoff
     ⟨growth, directRef growth source testDirectSlot, .boundary 4,
       directRef growth source branchDirectSlot, .left⟩
   have htestRule : testRule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change testRule ∈ validationRules growth source ++
       decrementRules growth source .clock ifZero ifPositive

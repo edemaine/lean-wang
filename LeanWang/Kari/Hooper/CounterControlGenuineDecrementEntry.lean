@@ -227,7 +227,7 @@ theorem firstDecrementShiftRaw_mem_rawCommands
     (hrule : (source, .decrement register ifZero ifPositive) ∈
       GlobalSourceProgram.program) :
     firstDecrementShiftRaw growth source register ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, decrementCommands,
     firstDecrementShiftRaw_mem growth source register]
@@ -238,7 +238,7 @@ theorem firstZeroRecoveryRaw_mem_rawCommands
     (hrule : (source, .decrement register ifZero ifPositive) ∈
       GlobalSourceProgram.program) :
     firstZeroRecoveryRaw growth source register ifZero ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, decrementCommands,
     firstZeroRecoveryRaw_mem growth source register ifZero]

@@ -83,7 +83,7 @@ theorem zeroRecoveryCenteredEnd_of_immortal
           (AnchoredCounterGeometry.routeFromZero register) →
         command ∈ rawCommands := by
     intro command hmem
-    exact CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    exact CounterControlPlan.command_mem_rawCommands_of_rule
       growth entry.route.rule_mem
         (by simp [commandsForRule, decrementCommands, hmem])
   have hcontinuations : ∀ rule,
@@ -92,7 +92,7 @@ theorem zeroRecoveryCenteredEnd_of_immortal
           (AnchoredCounterGeometry.routeFromZero register) →
         rule ∈ rawDirectRules := by
     intro rule hmem
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth entry.route.rule_mem
     simp [directRulesForRule, decrementRules, hmem]
   rcases CounterControlGenuineRouteEmbedding.progressedRoute base c hmortal

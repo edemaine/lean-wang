@@ -150,7 +150,7 @@ private theorem positiveFirstRaw_mem_rawCommands
     (hrule : (source, .decrement register ifZero ifPositive) ∈
       GlobalSourceProgram.program) :
     positiveFirstRaw growth source register ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, decrementCommands,
     positiveFirstRaw_mem_decrementShiftCommands]
@@ -161,7 +161,7 @@ private theorem zeroFirstRaw_mem_rawCommands
     (hrule : (source, .decrement register ifZero ifPositive) ∈
       GlobalSourceProgram.program) :
     zeroFirstRaw growth source register ifZero ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, decrementCommands,
     zeroFirstRaw_mem_routeCommandsAux]

@@ -120,7 +120,7 @@ theorem command_mem_rawCommands_of_increment
     (hrule : (source, .increment register next) ∈
       GlobalSourceProgram.program) (stage : Stage) :
     command growth source stage ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, incrementCommands,
     command_mem_cleanupCommands growth source stage]

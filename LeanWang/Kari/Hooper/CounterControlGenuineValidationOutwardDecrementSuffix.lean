@@ -189,7 +189,7 @@ private theorem routeEntryRule_mem
     RawDirectRule.mk growth
       (directRef growth source bodyDirectBase) (.boundary 4)
       (searchRef growth source bodySearchBase) .left ∈ rawDirectRules := by
-  apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+  apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
     growth hrule
   cases register with
   | left =>
@@ -218,7 +218,7 @@ private theorem routeCommand_mem
       (bodyDirectBase + 1) (directRef growth source testDirectSlot)
       (AnchoredCounterGeometry.routeToDecrementStart register)) :
     raw ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+  apply CounterControlPlan.command_mem_rawCommands_of_rule
     growth hrule
   simp [commandsForRule, decrementCommands, hraw]
 
@@ -234,7 +234,7 @@ private theorem routeContinuation_mem
       (bodyDirectBase + 1)
       (AnchoredCounterGeometry.routeToDecrementStart register)) :
     rule ∈ rawDirectRules := by
-  apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+  apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
     growth hrule
   simp [directRulesForRule, decrementRules, hmem]
 
@@ -547,7 +547,7 @@ theorem bodyBranchOutcome_of_immortal
       .boundary (MarkerSchedule.decrementStartBoundary register),
       directRef growth source branchDirectSlot, .left⟩
   have htestRule : testRule ∈ rawDirectRules := by
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     change testRule ∈ validationRules growth source ++
       decrementRules growth source register ifZero ifPositive
@@ -583,7 +583,7 @@ theorem bodyBranchOutcome_of_immortal
         searchRef growth source secondarySearchBase, .right⟩
     have hbranchRule : branchRule ∈ rawDirectRules := by
       apply
-        CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+        CounterControlPlan.directRule_mem_rawDirectRules_of_rule
           growth hrule
       change branchRule ∈ validationRules growth source ++
         decrementRules growth source register ifZero ifPositive
@@ -609,7 +609,7 @@ theorem bodyBranchOutcome_of_immortal
         searchRef growth source zeroSearchBase, .right⟩
     have hbranchRule : branchRule ∈ rawDirectRules := by
       apply
-        CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+        CounterControlPlan.directRule_mem_rawDirectRules_of_rule
           growth hrule
       change branchRule ∈ validationRules growth source ++
         decrementRules growth source register ifZero ifPositive
@@ -956,14 +956,14 @@ theorem ZeroSearchEntry.centeredEnd_of_immortal
           (AnchoredCounterGeometry.routeFromZero register) →
         command ∈ rawCommands := by
     intro command hmem
-    exact CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+    exact CounterControlPlan.command_mem_rawCommands_of_rule
       growth hrule (by simp [commandsForRule, decrementCommands, hmem])
   have hcontinuations : ∀ rule,
       rule ∈ routeContinuationRules growth source zeroSearchBase
           zeroDirectBase (AnchoredCounterGeometry.routeFromZero register) →
         rule ∈ rawDirectRules := by
     intro rule hmem
-    apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
+    apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
       growth hrule
     simp [directRulesForRule, decrementRules, hmem]
   rcases CounterControlGenuineRouteEmbedding.progressedRoute base c hmortal

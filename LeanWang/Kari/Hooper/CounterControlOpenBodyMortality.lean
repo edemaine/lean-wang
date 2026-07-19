@@ -51,7 +51,7 @@ theorem haltsFrom_body_of_coreOpen
           raw ∈ incrementShiftCommands growth source register →
             raw ∈ rawCommands := by
         intro raw hraw
-        apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+        apply CounterControlPlan.command_mem_rawCommands_of_rule
           growth hrule
         simp [commandsForRule, incrementCommands, hraw]
       have hschedule := machine_reaches_incrementSchedule_or_halts_of_open
@@ -126,7 +126,7 @@ theorem haltsFrom_body_of_coreOpen
             raw ∈ decrementShiftCommands growth source register →
               raw ∈ rawCommands := by
           intro raw hraw
-          apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+          apply CounterControlPlan.command_mem_rawCommands_of_rule
             growth hrule
           simp [commandsForRule, decrementCommands, hraw]
         have hschedule := machine_reaches_decrementSchedule_or_halts_of_open

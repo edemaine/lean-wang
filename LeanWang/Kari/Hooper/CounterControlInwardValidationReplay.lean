@@ -39,29 +39,11 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-private theorem validationCommand_mem
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction)
-    (hrule : (source, instruction) ∈ GlobalSourceProgram.program)
-    {raw : RawCommand}
-    (hraw : raw ∈ validationCommands growth source instruction) :
-    raw ∈ rawCommands := by
-  apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
-    growth hrule
-  cases instruction <;> simp [commandsForRule, hraw]
+private abbrev validationCommand_mem :=
+  CounterControlPlan.validationCommand_mem_rawCommands
 
-private theorem validationRule_mem
-    (growth : Turing.Dir) (source : Nat)
-    (instruction : CounterMachine.Instruction)
-    (hrule : (source, instruction) ∈ GlobalSourceProgram.program)
-    {rule : RawDirectRule}
-    (hruleValidation : rule ∈ validationRules growth source) :
-    rule ∈ rawDirectRules := by
-  apply CounterControlInstructionSemantics.directRule_mem_rawDirectRules_of_rule
-    growth hrule
-  cases instruction <;>
-    simp only [directRulesForRule, List.mem_append] <;>
-    exact Or.inl hruleValidation
+private abbrev validationRule_mem :=
+  CounterControlPlan.validationRule_mem_rawDirectRules
 
 /-- Take the direct one-cell continuation after a validation command whose
 target has already been found. -/

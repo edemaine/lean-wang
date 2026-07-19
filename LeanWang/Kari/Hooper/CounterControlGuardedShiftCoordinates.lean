@@ -263,7 +263,7 @@ theorem incrementShift_suffix_of_immortal
               (bodySearchBase + position.before.length + 1) false
               (expected :: remaining) → command ∈ rawCommands := by
         intro command htail
-        apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+        apply CounterControlPlan.command_mem_rawCommands_of_rule
           growth hrule
         have hfull : command ∈
             incrementShiftCommands growth source register := by
@@ -342,7 +342,7 @@ theorem decrementShift_suffix_of_immortal
               (secondarySearchBase + position.before.length + 1)
               (expected :: remaining) → command ∈ rawCommands := by
         intro command htail
-        apply CounterControlInstructionSemantics.command_mem_rawCommands_of_rule
+        apply CounterControlPlan.command_mem_rawCommands_of_rule
           growth hrule
         have hfull : command ∈
             decrementShiftCommands growth source register := by
