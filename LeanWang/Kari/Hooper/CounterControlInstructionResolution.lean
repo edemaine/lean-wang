@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlSearchResolution
+import LeanWang.Kari.Hooper.CounterControlInstructionOutcome
 import LeanWang.Kari.Hooper.CounterControlStepGeometry
 import LeanWang.Kari.Hooper.CounterControlTraceSimulation
 

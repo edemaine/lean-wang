@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlCoreFrame
-import LeanWang.Kari.Hooper.CounterControlInstructionSemantics
+import LeanWang.Kari.Hooper.CounterControlCoreRoutes
 
 /-!
 # Reconstructing a counter core from validation
@@ -22,8 +22,7 @@ namespace CounterControlValidationConverse
 
 open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape
-open CounterControlCoreFrame CounterControlInstructionSemantics
-  CounterControlCoreRoutes
+open CounterControlCoreFrame CounterControlCoreRoutes
 
 noncomputable section
 

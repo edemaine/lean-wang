@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlLongSearchMortality
-import LeanWang.Kari.Hooper.CounterControlInstructionSemantics
 import LeanWang.Kari.Hooper.CounterControlTerminalSemantics
 import LeanWang.Kari.Hooper.CounterControlCoreFrame
 
