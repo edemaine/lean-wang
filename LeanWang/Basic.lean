@@ -122,11 +122,29 @@ def productBase (tile : WangTile) : WangTile where
   e := tile.e.unpair.1
   w := tile.w.unpair.1
 
+/-- Recover the payload layer of a product-encoded Wang tile. -/
+def productPayload (tile : WangTile) : WangTile where
+  n := tile.n.unpair.2
+  s := tile.s.unpair.2
+  e := tile.e.unpair.2
+  w := tile.w.unpair.2
+
 @[simp] theorem productBase_product (base payload : WangTile) :
     productBase (product base payload) = base := by
   cases base
   cases payload
   simp [productBase, product]
+
+@[simp] theorem productPayload_product (base payload : WangTile) :
+    productPayload (product base payload) = payload := by
+  cases base
+  cases payload
+  simp [productPayload, product]
+
+@[simp] theorem product_projections (tile : WangTile) :
+    product (productBase tile) (productPayload tile) = tile := by
+  cases tile
+  simp [product, productBase, productPayload]
 
 theorem toTuple_primrec : Primrec WangTile.toTuple := by
   simpa [WangTile.equivTuple] using
@@ -157,6 +175,16 @@ theorem productBase_primrec : Primrec productBase := by
         (Primrec.pair
           (Primrec.fst.comp (Primrec.unpair.comp e_primrec))
           (Primrec.fst.comp (Primrec.unpair.comp w_primrec)))))
+
+theorem productPayload_primrec : Primrec productPayload := by
+  exact ofTuple_primrec.comp
+    (Primrec.pair
+      (Primrec.snd.comp (Primrec.unpair.comp n_primrec))
+      (Primrec.pair
+        (Primrec.snd.comp (Primrec.unpair.comp s_primrec))
+        (Primrec.pair
+          (Primrec.snd.comp (Primrec.unpair.comp e_primrec))
+          (Primrec.snd.comp (Primrec.unpair.comp w_primrec)))))
 
 theorem product_primrec : Primrec (fun p : WangTile × WangTile => product p.1 p.2) := by
   let f : WangTile × WangTile → Nat × Nat × Nat × Nat := fun p =>
@@ -213,6 +241,22 @@ theorem VMatches_product_iff (baseLower payloadLower baseUpper payloadUpper : Wa
   unfold VMatches product
   rw [Nat.pair_eq_pair]
 
+theorem HMatches.productBase {left right : WangTile} (h : HMatches left right) :
+    HMatches left.productBase right.productBase := by
+  exact congrArg (fun color => color.unpair.1) h
+
+theorem HMatches.productPayload {left right : WangTile} (h : HMatches left right) :
+    HMatches left.productPayload right.productPayload := by
+  exact congrArg (fun color => color.unpair.2) h
+
+theorem VMatches.productBase {lower upper : WangTile} (h : VMatches lower upper) :
+    VMatches lower.productBase upper.productBase := by
+  exact congrArg (fun color => color.unpair.1) h
+
+theorem VMatches.productPayload {lower upper : WangTile} (h : VMatches lower upper) :
+    VMatches lower.productPayload upper.productPayload := by
+  exact congrArg (fun color => color.unpair.2) h
+
 end WangTile
 
 /-- The finite tileset obtained by layering every base tile with every payload tile. -/
@@ -249,6 +293,18 @@ theorem product_mem_productTileSet {base payload : TileSet}
     WangTile.product b p ∈ productTileSet base payload := by
   rw [mem_productTileSet_iff]
   exact ⟨b, hb, p, hp, rfl⟩
+
+theorem productBase_mem_of_mem_productTileSet {base payload : TileSet}
+    {tile : WangTile} (htile : tile ∈ productTileSet base payload) :
+    tile.productBase ∈ base := by
+  rcases mem_productTileSet_iff.1 htile with ⟨b, hb, p, _hp, rfl⟩
+  simpa using hb
+
+theorem productPayload_mem_of_mem_productTileSet {base payload : TileSet}
+    {tile : WangTile} (htile : tile ∈ productTileSet base payload) :
+    tile.productPayload ∈ payload := by
+  rcases mem_productTileSet_iff.1 htile with ⟨b, _hb, p, hp, rfl⟩
+  simpa using hp
 
 theorem product_eq_iff {base payload base' payload' : WangTile} :
     WangTile.product base payload = WangTile.product base' payload' ↔
@@ -298,80 +354,28 @@ theorem tilesPlane_congr {T U : TileSet}
 theorem tilesPlane_left_of_tilesPlane_productTileSet {base payload : TileSet}
     (h : TilesPlane (productTileSet base payload)) :
     TilesPlane base := by
-  classical
   rcases h with ⟨x, hx⟩
-  have hdecode : ∀ p : Int × Int,
-      ∃ b : TileIn base, ∃ q : TileIn payload,
-        WangTile.product b.1 q.1 = (x p).1 := by
-    intro p
-    rcases mem_productTileSet_iff.1 (x p).2 with ⟨b, hb, q, hq, htile⟩
-    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
-  let baseAt : Int × Int → TileIn base := fun p => Classical.choose (hdecode p)
-  let payloadAt : Int × Int → TileIn payload := fun p =>
-    Classical.choose (Classical.choose_spec (hdecode p))
-  have hproduct : ∀ p : Int × Int,
-      WangTile.product (baseAt p).1 (payloadAt p).1 = (x p).1 := by
-    intro p
-    exact Classical.choose_spec (Classical.choose_spec (hdecode p))
+  let baseAt : Int × Int → TileIn base := fun p =>
+    ⟨(x p).1.productBase, productBase_mem_of_mem_productTileSet (x p).2⟩
   refine ⟨baseAt, ?_⟩
   constructor
   · intro p
-    have hmatch : WangTile.HMatches
-        (WangTile.product (baseAt p).1 (payloadAt p).1)
-        (WangTile.product (baseAt (p.1 + 1, p.2)).1
-          (payloadAt (p.1 + 1, p.2)).1) := by
-      simpa [hproduct p, hproduct (p.1 + 1, p.2)] using hx.1 p
-    exact (WangTile.HMatches_product_iff
-      (baseAt p).1 (payloadAt p).1
-      (baseAt (p.1 + 1, p.2)).1 (payloadAt (p.1 + 1, p.2)).1).1 hmatch |>.1
+    exact (hx.1 p).productBase
   · intro p
-    have hmatch : WangTile.VMatches
-        (WangTile.product (baseAt p).1 (payloadAt p).1)
-        (WangTile.product (baseAt (p.1, p.2 + 1)).1
-          (payloadAt (p.1, p.2 + 1)).1) := by
-      simpa [hproduct p, hproduct (p.1, p.2 + 1)] using hx.2 p
-    exact (WangTile.VMatches_product_iff
-      (baseAt p).1 (payloadAt p).1
-      (baseAt (p.1, p.2 + 1)).1 (payloadAt (p.1, p.2 + 1)).1).1 hmatch |>.1
+    exact (hx.2 p).productBase
 
 theorem tilesPlane_right_of_tilesPlane_productTileSet {base payload : TileSet}
     (h : TilesPlane (productTileSet base payload)) :
     TilesPlane payload := by
-  classical
   rcases h with ⟨x, hx⟩
-  have hdecode : ∀ p : Int × Int,
-      ∃ b : TileIn base, ∃ q : TileIn payload,
-        WangTile.product b.1 q.1 = (x p).1 := by
-    intro p
-    rcases mem_productTileSet_iff.1 (x p).2 with ⟨b, hb, q, hq, htile⟩
-    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
-  let baseAt : Int × Int → TileIn base := fun p => Classical.choose (hdecode p)
   let payloadAt : Int × Int → TileIn payload := fun p =>
-    Classical.choose (Classical.choose_spec (hdecode p))
-  have hproduct : ∀ p : Int × Int,
-      WangTile.product (baseAt p).1 (payloadAt p).1 = (x p).1 := by
-    intro p
-    exact Classical.choose_spec (Classical.choose_spec (hdecode p))
+    ⟨(x p).1.productPayload, productPayload_mem_of_mem_productTileSet (x p).2⟩
   refine ⟨payloadAt, ?_⟩
   constructor
   · intro p
-    have hmatch : WangTile.HMatches
-        (WangTile.product (baseAt p).1 (payloadAt p).1)
-        (WangTile.product (baseAt (p.1 + 1, p.2)).1
-          (payloadAt (p.1 + 1, p.2)).1) := by
-      simpa [hproduct p, hproduct (p.1 + 1, p.2)] using hx.1 p
-    exact (WangTile.HMatches_product_iff
-      (baseAt p).1 (payloadAt p).1
-      (baseAt (p.1 + 1, p.2)).1 (payloadAt (p.1 + 1, p.2)).1).1 hmatch |>.2
+    exact (hx.1 p).productPayload
   · intro p
-    have hmatch : WangTile.VMatches
-        (WangTile.product (baseAt p).1 (payloadAt p).1)
-        (WangTile.product (baseAt (p.1, p.2 + 1)).1
-          (payloadAt (p.1, p.2 + 1)).1) := by
-      simpa [hproduct p, hproduct (p.1, p.2 + 1)] using hx.2 p
-    exact (WangTile.VMatches_product_iff
-      (baseAt p).1 (payloadAt p).1
-      (baseAt (p.1, p.2 + 1)).1 (payloadAt (p.1, p.2 + 1)).1).1 hmatch |>.2
+    exact (hx.2 p).productPayload
 
 theorem tilesPlane_productTileSet_of_tilesPlane {base payload : TileSet}
     (hbase : TilesPlane base) (hpayload : TilesPlane payload) :
@@ -585,89 +589,43 @@ theorem validRectangle_product_of_validRectangle {base payload : TileSet}
     rw [WangTile.VMatches_product_iff]
     exact ⟨hbase.2.2 i j hj, hpayload.2.2 i j hj⟩
 
+theorem validRectangle_productBase {base payload : TileSet}
+    {w h : Nat} {rect : Rectangle w h}
+    (hrect : ValidRectangle (productTileSet base payload) rect) :
+    ValidRectangle base (fun i j => (rect i j).productBase) := by
+  constructor
+  · intro i j
+    exact productBase_mem_of_mem_productTileSet (hrect.1 i j)
+  constructor
+  · intro i j hi
+    exact (hrect.2.1 i j hi).productBase
+  · intro i j hj
+    exact (hrect.2.2 i j hj).productBase
+
 theorem validRectangle_left_of_validRectangle_productTileSet {base payload : TileSet}
     {w h : Nat} {rect : Rectangle w h}
     (hrect : ValidRectangle (productTileSet base payload) rect) :
-    ∃ baseRect : Rectangle w h, ValidRectangle base baseRect := by
-  classical
-  have hdecode : ∀ i : Fin w, ∀ j : Fin h,
-      ∃ b : TileIn base, ∃ q : TileIn payload,
-        WangTile.product b.1 q.1 = rect i j := by
-    intro i j
-    rcases mem_productTileSet_iff.1 (hrect.1 i j) with ⟨b, hb, q, hq, htile⟩
-    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
-  let baseAt : Fin w → Fin h → TileIn base := fun i j => Classical.choose (hdecode i j)
-  let payloadAt : Fin w → Fin h → TileIn payload := fun i j =>
-    Classical.choose (Classical.choose_spec (hdecode i j))
-  have hproduct : ∀ i : Fin w, ∀ j : Fin h,
-      WangTile.product (baseAt i j).1 (payloadAt i j).1 = rect i j := by
-    intro i j
-    exact Classical.choose_spec (Classical.choose_spec (hdecode i j))
-  refine ⟨fun i j => (baseAt i j).1, ?_⟩
+    ∃ baseRect : Rectangle w h, ValidRectangle base baseRect :=
+  ⟨fun i j => (rect i j).productBase, validRectangle_productBase hrect⟩
+
+theorem validRectangle_productPayload {base payload : TileSet}
+    {w h : Nat} {rect : Rectangle w h}
+    (hrect : ValidRectangle (productTileSet base payload) rect) :
+    ValidRectangle payload (fun i j => (rect i j).productPayload) := by
   constructor
   · intro i j
-    exact (baseAt i j).2
+    exact productPayload_mem_of_mem_productTileSet (hrect.1 i j)
   constructor
   · intro i j hi
-    have hmatch : WangTile.HMatches
-        (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-        (WangTile.product (baseAt ⟨i.val + 1, hi⟩ j).1
-          (payloadAt ⟨i.val + 1, hi⟩ j).1) := by
-      simpa [hproduct i j, hproduct ⟨i.val + 1, hi⟩ j] using hrect.2.1 i j hi
-    exact (WangTile.HMatches_product_iff
-      (baseAt i j).1 (payloadAt i j).1
-      (baseAt ⟨i.val + 1, hi⟩ j).1 (payloadAt ⟨i.val + 1, hi⟩ j).1).1 hmatch |>.1
+    exact (hrect.2.1 i j hi).productPayload
   · intro i j hj
-    have hmatch : WangTile.VMatches
-        (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-        (WangTile.product (baseAt i ⟨j.val + 1, hj⟩).1
-          (payloadAt i ⟨j.val + 1, hj⟩).1) := by
-      simpa [hproduct i j, hproduct i ⟨j.val + 1, hj⟩] using hrect.2.2 i j hj
-    exact (WangTile.VMatches_product_iff
-      (baseAt i j).1 (payloadAt i j).1
-      (baseAt i ⟨j.val + 1, hj⟩).1 (payloadAt i ⟨j.val + 1, hj⟩).1).1 hmatch |>.1
+    exact (hrect.2.2 i j hj).productPayload
 
 theorem validRectangle_right_of_validRectangle_productTileSet {base payload : TileSet}
     {w h : Nat} {rect : Rectangle w h}
     (hrect : ValidRectangle (productTileSet base payload) rect) :
-    ∃ payloadRect : Rectangle w h, ValidRectangle payload payloadRect := by
-  classical
-  have hdecode : ∀ i : Fin w, ∀ j : Fin h,
-      ∃ b : TileIn base, ∃ q : TileIn payload,
-        WangTile.product b.1 q.1 = rect i j := by
-    intro i j
-    rcases mem_productTileSet_iff.1 (hrect.1 i j) with ⟨b, hb, q, hq, htile⟩
-    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
-  let baseAt : Fin w → Fin h → TileIn base := fun i j => Classical.choose (hdecode i j)
-  let payloadAt : Fin w → Fin h → TileIn payload := fun i j =>
-    Classical.choose (Classical.choose_spec (hdecode i j))
-  have hproduct : ∀ i : Fin w, ∀ j : Fin h,
-      WangTile.product (baseAt i j).1 (payloadAt i j).1 = rect i j := by
-    intro i j
-    exact Classical.choose_spec (Classical.choose_spec (hdecode i j))
-  refine ⟨fun i j => (payloadAt i j).1, ?_⟩
-  constructor
-  · intro i j
-    exact (payloadAt i j).2
-  constructor
-  · intro i j hi
-    have hmatch : WangTile.HMatches
-        (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-        (WangTile.product (baseAt ⟨i.val + 1, hi⟩ j).1
-          (payloadAt ⟨i.val + 1, hi⟩ j).1) := by
-      simpa [hproduct i j, hproduct ⟨i.val + 1, hi⟩ j] using hrect.2.1 i j hi
-    exact (WangTile.HMatches_product_iff
-      (baseAt i j).1 (payloadAt i j).1
-      (baseAt ⟨i.val + 1, hi⟩ j).1 (payloadAt ⟨i.val + 1, hi⟩ j).1).1 hmatch |>.2
-  · intro i j hj
-    have hmatch : WangTile.VMatches
-        (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-        (WangTile.product (baseAt i ⟨j.val + 1, hj⟩).1
-          (payloadAt i ⟨j.val + 1, hj⟩).1) := by
-      simpa [hproduct i j, hproduct i ⟨j.val + 1, hj⟩] using hrect.2.2 i j hj
-    exact (WangTile.VMatches_product_iff
-      (baseAt i j).1 (payloadAt i j).1
-      (baseAt i ⟨j.val + 1, hj⟩).1 (payloadAt i ⟨j.val + 1, hj⟩).1).1 hmatch |>.2
+    ∃ payloadRect : Rectangle w h, ValidRectangle payload payloadRect :=
+  ⟨fun i j => (rect i j).productPayload, validRectangle_productPayload hrect⟩
 
 /-- A tileset tiles a finite `w × h` rectangle. -/
 def TileableRectangle (T : TileSet) (w h : Nat) : Prop :=
@@ -761,100 +719,20 @@ theorem tileableFixedCornerSquare_left_of_tileableFixedCornerSquare_productTileS
     TileableFixedCornerSquare (productTileSet base payload)
         (WangTile.product baseSeed payloadSeed) n →
       TileableFixedCornerSquare base baseSeed n := by
-  classical
   rintro ⟨hn, rect, hrect, hseed⟩
-  have hdecode : ∀ i : Fin n, ∀ j : Fin n,
-      ∃ b : TileIn base, ∃ q : TileIn payload,
-        WangTile.product b.1 q.1 = rect i j := by
-    intro i j
-    rcases mem_productTileSet_iff.1 (hrect.1 i j) with ⟨b, hb, q, hq, htile⟩
-    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
-  let baseAt : Fin n → Fin n → TileIn base := fun i j => Classical.choose (hdecode i j)
-  let payloadAt : Fin n → Fin n → TileIn payload := fun i j =>
-    Classical.choose (Classical.choose_spec (hdecode i j))
-  have hproduct : ∀ i : Fin n, ∀ j : Fin n,
-      WangTile.product (baseAt i j).1 (payloadAt i j).1 = rect i j := by
-    intro i j
-    exact Classical.choose_spec (Classical.choose_spec (hdecode i j))
-  refine ⟨hn, fun i j => (baseAt i j).1, ?_, ?_⟩
-  · constructor
-    · intro i j
-      exact (baseAt i j).2
-    constructor
-    · intro i j hi
-      have hmatch : WangTile.HMatches
-          (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-          (WangTile.product (baseAt ⟨i.val + 1, hi⟩ j).1
-            (payloadAt ⟨i.val + 1, hi⟩ j).1) := by
-        simpa [hproduct i j, hproduct ⟨i.val + 1, hi⟩ j] using hrect.2.1 i j hi
-      exact (WangTile.HMatches_product_iff
-        (baseAt i j).1 (payloadAt i j).1
-        (baseAt ⟨i.val + 1, hi⟩ j).1 (payloadAt ⟨i.val + 1, hi⟩ j).1).1 hmatch |>.1
-    · intro i j hj
-      have hmatch : WangTile.VMatches
-          (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-          (WangTile.product (baseAt i ⟨j.val + 1, hj⟩).1
-            (payloadAt i ⟨j.val + 1, hj⟩).1) := by
-        simpa [hproduct i j, hproduct i ⟨j.val + 1, hj⟩] using hrect.2.2 i j hj
-      exact (WangTile.VMatches_product_iff
-        (baseAt i j).1 (payloadAt i j).1
-        (baseAt i ⟨j.val + 1, hj⟩).1 (payloadAt i ⟨j.val + 1, hj⟩).1).1 hmatch |>.1
-  · have hcorner :
-        WangTile.product (baseAt ⟨0, hn⟩ ⟨0, hn⟩).1
-            (payloadAt ⟨0, hn⟩ ⟨0, hn⟩).1 =
-          WangTile.product baseSeed payloadSeed := by
-      simpa [hproduct ⟨0, hn⟩ ⟨0, hn⟩] using hseed
-    exact (product_eq_iff.1 hcorner).1
+  refine ⟨hn, fun i j => (rect i j).productBase,
+    validRectangle_productBase hrect, ?_⟩
+  simpa using congrArg WangTile.productBase hseed
 
 theorem tileableFixedCornerSquare_right_of_tileableFixedCornerSquare_productTileSet
     {base payload : TileSet} {baseSeed payloadSeed : WangTile} {n : Nat} :
     TileableFixedCornerSquare (productTileSet base payload)
         (WangTile.product baseSeed payloadSeed) n →
       TileableFixedCornerSquare payload payloadSeed n := by
-  classical
   rintro ⟨hn, rect, hrect, hseed⟩
-  have hdecode : ∀ i : Fin n, ∀ j : Fin n,
-      ∃ b : TileIn base, ∃ q : TileIn payload,
-        WangTile.product b.1 q.1 = rect i j := by
-    intro i j
-    rcases mem_productTileSet_iff.1 (hrect.1 i j) with ⟨b, hb, q, hq, htile⟩
-    exact ⟨⟨b, hb⟩, ⟨q, hq⟩, htile⟩
-  let baseAt : Fin n → Fin n → TileIn base := fun i j => Classical.choose (hdecode i j)
-  let payloadAt : Fin n → Fin n → TileIn payload := fun i j =>
-    Classical.choose (Classical.choose_spec (hdecode i j))
-  have hproduct : ∀ i : Fin n, ∀ j : Fin n,
-      WangTile.product (baseAt i j).1 (payloadAt i j).1 = rect i j := by
-    intro i j
-    exact Classical.choose_spec (Classical.choose_spec (hdecode i j))
-  refine ⟨hn, fun i j => (payloadAt i j).1, ?_, ?_⟩
-  · constructor
-    · intro i j
-      exact (payloadAt i j).2
-    constructor
-    · intro i j hi
-      have hmatch : WangTile.HMatches
-          (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-          (WangTile.product (baseAt ⟨i.val + 1, hi⟩ j).1
-            (payloadAt ⟨i.val + 1, hi⟩ j).1) := by
-        simpa [hproduct i j, hproduct ⟨i.val + 1, hi⟩ j] using hrect.2.1 i j hi
-      exact (WangTile.HMatches_product_iff
-        (baseAt i j).1 (payloadAt i j).1
-        (baseAt ⟨i.val + 1, hi⟩ j).1 (payloadAt ⟨i.val + 1, hi⟩ j).1).1 hmatch |>.2
-    · intro i j hj
-      have hmatch : WangTile.VMatches
-          (WangTile.product (baseAt i j).1 (payloadAt i j).1)
-          (WangTile.product (baseAt i ⟨j.val + 1, hj⟩).1
-            (payloadAt i ⟨j.val + 1, hj⟩).1) := by
-        simpa [hproduct i j, hproduct i ⟨j.val + 1, hj⟩] using hrect.2.2 i j hj
-      exact (WangTile.VMatches_product_iff
-        (baseAt i j).1 (payloadAt i j).1
-        (baseAt i ⟨j.val + 1, hj⟩).1 (payloadAt i ⟨j.val + 1, hj⟩).1).1 hmatch |>.2
-  · have hcorner :
-        WangTile.product (baseAt ⟨0, hn⟩ ⟨0, hn⟩).1
-            (payloadAt ⟨0, hn⟩ ⟨0, hn⟩).1 =
-          WangTile.product baseSeed payloadSeed := by
-      simpa [hproduct ⟨0, hn⟩ ⟨0, hn⟩] using hseed
-    exact (product_eq_iff.1 hcorner).2
+  refine ⟨hn, fun i j => (rect i j).productPayload,
+    validRectangle_productPayload hrect, ?_⟩
+  simpa using congrArg WangTile.productPayload hseed
 
 /-- If a plane tiling exists, every finite square is tileable by restriction. -/
 theorem tileableSquare_of_tilesPlane {T : TileSet} :

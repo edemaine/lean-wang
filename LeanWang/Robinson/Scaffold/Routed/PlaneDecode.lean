@@ -19,40 +19,32 @@ namespace RoutedPlaneDecode
 
 variable {S : RoutedScaffold} {T : TileSet} {seed : WangTile}
 
-theorem exists_base_payload
-    (wang : TileIn (combineWithRoutedScaffold S T seed)) :
-    ∃ base : TileIn S.tiles, ∃ payload : WangTile,
-      payload ∈ routedPayloads S T seed base.1 ∧
-        WangTile.product base.1 payload = wang.1 := by
-  rcases mem_combineWithRoutedScaffold_iff.1 wang.2 with
-    ⟨base, hbase, payload, hpayload, hproduct⟩
-  exact ⟨⟨base, hbase⟩, payload, hpayload, hproduct⟩
-
-@[irreducible] noncomputable def baseAt
+def baseAt
     (x : Int × Int → TileIn (combineWithRoutedScaffold S T seed))
     (p : Int × Int) : TileIn S.tiles :=
-  Classical.choose (exists_base_payload (x p))
+  ⟨(x p).1.productBase, by
+    rcases mem_combineWithRoutedScaffold_iff.1 (x p).2 with
+      ⟨base, hbase, payload, _hpayload, hproduct⟩
+    simpa [← hproduct] using hbase⟩
 
-@[irreducible] noncomputable def payloadAt
+def payloadAt
     (x : Int × Int → TileIn (combineWithRoutedScaffold S T seed))
     (p : Int × Int) : WangTile :=
-  Classical.choose (Classical.choose_spec (exists_base_payload (x p)))
+  (x p).1.productPayload
 
 theorem payloadAt_allowed
     (x : Int × Int → TileIn (combineWithRoutedScaffold S T seed))
     (p : Int × Int) :
     payloadAt x p ∈ routedPayloads S T seed (baseAt x p).1 := by
-  unfold baseAt payloadAt
-  exact (Classical.choose_spec
-    (Classical.choose_spec (exists_base_payload (x p)))).1
+  rcases mem_combineWithRoutedScaffold_iff.1 (x p).2 with
+    ⟨base, _hbase, payload, hpayload, hproduct⟩
+  simpa [baseAt, payloadAt, ← hproduct] using hpayload
 
 theorem baseAt_product
     (x : Int × Int → TileIn (combineWithRoutedScaffold S T seed))
     (p : Int × Int) :
     WangTile.product (baseAt x p).1 (payloadAt x p) = (x p).1 := by
-  unfold baseAt payloadAt
-  exact (Classical.choose_spec
-    (Classical.choose_spec (exists_base_payload (x p)))).2
+  exact WangTile.product_projections (x p).1
 
 /-- Both decoded layers of a valid routed product plane. -/
 structure Decoded
@@ -68,7 +60,7 @@ structure Decoded
   payload_vmatch : ∀ p,
     WangTile.VMatches (payload p) (payload (p.1, p.2 + 1))
 
-noncomputable def decode
+def decode
     {x : Int × Int → TileIn (combineWithRoutedScaffold S T seed)}
     (hx : ValidPlaneTiling (combineWithRoutedScaffold S T seed) x) :
     Decoded x where
@@ -79,43 +71,15 @@ noncomputable def decode
   base_valid := by
     constructor
     · intro p
-      have hproduct : WangTile.HMatches
-          (WangTile.product (baseAt x p).1 (payloadAt x p))
-          (WangTile.product
-            (baseAt x (p.1 + 1, p.2)).1
-            (payloadAt x (p.1 + 1, p.2))) := by
-        rw [baseAt_product, baseAt_product]
-        exact hx.1 p
-      exact (WangTile.HMatches_product_iff _ _ _ _).1 hproduct |>.1
+      exact (hx.1 p).productBase
     · intro p
-      have hproduct : WangTile.VMatches
-          (WangTile.product (baseAt x p).1 (payloadAt x p))
-          (WangTile.product
-            (baseAt x (p.1, p.2 + 1)).1
-            (payloadAt x (p.1, p.2 + 1))) := by
-        rw [baseAt_product, baseAt_product]
-        exact hx.2 p
-      exact (WangTile.VMatches_product_iff _ _ _ _).1 hproduct |>.1
+      exact (hx.2 p).productBase
   payload_hmatch := by
     intro p
-    have hproduct : WangTile.HMatches
-        (WangTile.product (baseAt x p).1 (payloadAt x p))
-        (WangTile.product
-          (baseAt x (p.1 + 1, p.2)).1
-          (payloadAt x (p.1 + 1, p.2))) := by
-      rw [baseAt_product, baseAt_product]
-      exact hx.1 p
-    exact (WangTile.HMatches_product_iff _ _ _ _).1 hproduct |>.2
+    exact (hx.1 p).productPayload
   payload_vmatch := by
     intro p
-    have hproduct : WangTile.VMatches
-        (WangTile.product (baseAt x p).1 (payloadAt x p))
-        (WangTile.product
-          (baseAt x (p.1, p.2 + 1)).1
-          (payloadAt x (p.1, p.2 + 1))) := by
-      rw [baseAt_product, baseAt_product]
-      exact hx.2 p
-    exact (WangTile.VMatches_product_iff _ _ _ _).1 hproduct |>.2
+    exact (hx.2 p).productPayload
 
 namespace Decoded
 
