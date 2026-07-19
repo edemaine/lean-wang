@@ -320,6 +320,15 @@ theorem mem_tiles_iff (M : Machine) (input : List Nat) (tile : WangTile) :
         toWangTile 0 0 normalRowTag normalRowTag history = tile := by
   simp [tiles, initialTiles, normalTiles, List.mem_map]
 
+/-- Every legal tile presents the normal-row tag on its north edge. -/
+theorem northRowTag_eq_normal_of_mem
+    {M : Machine} {input : List Nat} {tile : WangTile}
+    (member : tile ∈ tiles M input) :
+    tile.n.unpair.1 = normalRowTag := by
+  rcases (mem_tiles_iff M input tile).1 member with
+    ⟨position, _hposition, rfl⟩ | rfl | ⟨history, _hhistory, rfl⟩ <;>
+    simp [toWangTile, taggedTripleCellColor]
+
 set_option linter.flexible false in
 theorem next_initialTile_of_hMatches_mem
     (M : Machine) (input : List Nat) (position : Nat) {right : WangTile}
@@ -375,33 +384,18 @@ theorem normal_of_vMatches
     (hmatches : WangTile.VMatches lower upper) :
     ∃ history, history ∈ machineHistoryTiles M ∧
       toWangTile 0 0 normalRowTag normalRowTag history = upper := by
+  have upperRowTag : upper.s.unpair.1 = normalRowTag := by
+    rw [← hmatches]
+    exact northRowTag_eq_normal_of_mem lowerMem
   rcases (mem_tiles_iff M input upper).1 upperMem with
     ⟨upperPosition, _hupperPosition, hupper⟩ | hupper |
       ⟨upperHistory, hupperHistory, hupper⟩
-  · rcases (mem_tiles_iff M input lower).1 lowerMem with
-      ⟨lowerPosition, _hlowerPosition, hlower⟩ | hlower |
-        ⟨lowerHistory, _hlowerHistory, hlower⟩
-    · rw [← hlower, ← hupper] at hmatches
-      exact False.elim (initialRowTag_ne_normalRowTag
-        ((vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hmatches).1.symm)
-    · rw [hlower, ← hupper] at hmatches
-      exact False.elim (initialRowTag_ne_normalRowTag
-        ((vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hmatches).1.symm)
-    · rw [← hlower, ← hupper] at hmatches
-      exact False.elim (initialRowTag_ne_normalRowTag
-        ((vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hmatches).1.symm)
-  · rcases (mem_tiles_iff M input lower).1 lowerMem with
-      ⟨lowerPosition, _hlowerPosition, hlower⟩ | hlower |
-        ⟨lowerHistory, _hlowerHistory, hlower⟩
-    · rw [← hlower, hupper] at hmatches
-      exact False.elim (initialRowTag_ne_normalRowTag
-        ((vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hmatches).1.symm)
-    · rw [hlower, hupper] at hmatches
-      exact False.elim (initialRowTag_ne_normalRowTag
-        ((vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hmatches).1.symm)
-    · rw [← hlower, hupper] at hmatches
-      exact False.elim (initialRowTag_ne_normalRowTag
-        ((vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hmatches).1.symm)
+  · have tagEq : initialRowTag = normalRowTag := by
+      simpa [← hupper, toWangTile, taggedTripleCellColor] using upperRowTag
+    exact (initialRowTag_ne_normalRowTag tagEq).elim
+  · have tagEq : initialRowTag = normalRowTag := by
+      simpa [hupper, toWangTile, taggedTripleCellColor] using upperRowTag
+    exact (initialRowTag_ne_normalRowTag tagEq).elim
   · exact ⟨upperHistory, hupperHistory, hupper⟩
 
 theorem positive_row_decode
