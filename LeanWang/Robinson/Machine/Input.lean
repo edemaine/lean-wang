@@ -35,6 +35,18 @@ def run (M : Machine) (input : List Nat) (steps : Nat) : ID :=
 def Halts (M : Machine) (input : List Nat) : Prop :=
   ∃ steps, (run M input steps).state = M.halt
 
+/-- A halting computation has a first halting time and is nonhalting before
+it. -/
+theorem exists_first_halting_time {M : Machine} {input : List Nat}
+    (halts : Halts M input) :
+    ∃ steps, (run M input steps).state = M.halt ∧
+      ∀ previous, previous < steps →
+        (run M input previous).state ≠ M.halt := by
+  let steps := Nat.find halts
+  refine ⟨steps, Nat.find_spec halts, ?_⟩
+  intro previous before hhalt
+  exact (Nat.not_lt_of_ge (Nat.find_min' halts hhalt)) before
+
 /-- Iterate a machine until its next step enters the absorbing halt state. -/
 def transition (M : Machine) (id : ID) : Option ID :=
   let next := M.nextID id
@@ -133,8 +145,10 @@ theorem transition_eval_dom_iff_halts (M : Machine) (input : List Nat) :
     refine ⟨steps + 1, ?_⟩
     rw [run_succ]
     exact (transition_eq_none_iff M _).1 hnone
-  · rintro ⟨steps, hhalt⟩
-    induction steps with
+  · intro halts
+    rcases exists_first_halting_time halts with
+      ⟨steps, hhalt, before⟩
+    cases steps with
     | zero =>
         have hinitial : (initialID M input).state = M.halt := by
           simpa using hhalt
@@ -144,14 +158,12 @@ theorem transition_eval_dom_iff_halts (M : Machine) (input : List Nat) :
         · apply (transition_eq_none_iff M _).2
           rw [Machine.nextID_of_halt M _ hinitial]
           exact hinitial
-    | succ steps ih =>
-        by_cases hprevious : (run M input steps).state = M.halt
-        · exact ih hprevious
-        · apply Part.dom_iff_mem.2
-          refine ⟨run M input steps, StateTransition.mem_eval.2 ⟨?_, ?_⟩⟩
-          · exact transition_reaches_run_of_ne_halt hprevious
-          · apply (transition_eq_none_iff M _).2
-            simpa [run_succ] using hhalt
+    | succ steps =>
+        apply Part.dom_iff_mem.2
+        refine ⟨run M input steps, StateTransition.mem_eval.2 ⟨?_, ?_⟩⟩
+        · exact transition_reaches_run_of_ne_halt (before steps (by omega))
+        · apply (transition_eq_none_iff M _).2
+          simpa [run_succ] using hhalt
 
 end MachineInput
 end LeanWang

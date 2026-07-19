@@ -645,43 +645,28 @@ theorem false_of_next_halt_from_decoded_row
   rw [hnoneRun] at hlocal
   cases hlocal
 
-theorem not_tilesQuarterWithSeed_of_halts_at
-    {M : Machine} {input : List Nat} (step : Nat)
-    (hhalt : (run M input step).state = M.halt) :
+theorem not_tilesQuarterWithSeed_of_halts
+    {M : Machine} {input : List Nat} (halts : Halts M input) :
     ¬ TilesQuarterWithSeed (tiles M input) (seed M input) := by
-  induction step with
+  rcases exists_first_halting_time halts with ⟨step, hhalt, before⟩
+  rintro ⟨plane, valid, seeded⟩
+  cases step with
   | zero =>
-      rintro ⟨plane, valid, seeded⟩
       apply false_of_run_one_halt valid seeded
       have hinitial : (initialID M input).state = M.halt := by
         simpa [run_zero] using hhalt
       rw [show 1 = 0 + 1 by omega, run_succ, run_zero,
         Machine.nextID_of_halt M _ hinitial]
       exact hinitial
-  | succ step ih =>
-      by_cases hprevious : (run M input step).state = M.halt
-      · exact ih hprevious
-      · cases step with
-        | zero =>
-            rintro ⟨plane, valid, seeded⟩
-            exact false_of_run_one_halt valid seeded (by simpa using hhalt)
-        | succ time =>
-            rintro ⟨plane, valid, seeded⟩
-            have hprefix : ∀ k, 1 ≤ k → k ≤ time + 1 →
-                (run M input k).state ≠ M.halt := by
-              intro k _hk1 hk hkhalt
-              apply hprevious
-              exact run_state_eq_halt_of_le hk hkhalt
-            have hrow := decoded_row_of_nonhalting_prefix
-              valid seeded time hprefix
-            exact false_of_next_halt_from_decoded_row valid hrow hprevious
-              (by simpa using hhalt)
-
-theorem not_tilesQuarterWithSeed_of_halts
-    {M : Machine} {input : List Nat} (halts : Halts M input) :
-    ¬ TilesQuarterWithSeed (tiles M input) (seed M input) := by
-  rcases halts with ⟨step, hhalt⟩
-  exact not_tilesQuarterWithSeed_of_halts_at step hhalt
+  | succ step =>
+      cases step with
+      | zero =>
+          exact false_of_run_one_halt valid seeded (by simpa using hhalt)
+      | succ time =>
+          have hrow := decoded_row_of_nonhalting_prefix
+            valid seeded time (fun k _positive bounded => before k (by omega))
+          exact false_of_next_halt_from_decoded_row valid hrow
+            (before (time + 1) (by omega)) (by simpa using hhalt)
 
 theorem tilesQuarterWithSeed_iff_not_halts
     {M : Machine} {input : List Nat} (supported : Supported M input) :
