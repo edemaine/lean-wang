@@ -3,10 +3,13 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
-import LeanWang.Kari.Hooper.CounterControlRouteSemantics
+import LeanWang.Kari.Hooper.CounterControlDirectSemantics
+import LeanWang.Kari.Hooper.CounterControlNavigationSemantics
+import LeanWang.Kari.Hooper.OrientedMarkerTape
 import LeanWang.Kari.Hooper.CounterControlScheduleSemantics
 import LeanWang.Kari.Hooper.CounterControlCleanupSemantics
 import LeanWang.Kari.Hooper.CounterControlSearchSystem
+import LeanWang.Kari.Hooper.CounterControlSearchExecution
 import LeanWang.Kari.Hooper.CounterControlFrameBacking
 import LeanWang.Kari.Hooper.CounterControlStepGeometry
 import LeanWang.Kari.Hooper.CounterControlCoreFrame
@@ -16,10 +19,9 @@ import LeanWang.Kari.Hooper.CounterControlCoreFrame
 
 This module composes validation, register-update, recovery, and collision
 cleanup into instruction-sized executions of the compiled counter controller.
-The route layer below works directly on a represented tagged frame.  Unlike
-`CounterControlRouteSemantics.route_reaches_or_nests`, it does not require the
-entire ambient tape to be the embedding of an untagged marker tape; this is
-essential when the return tag and suspended outer target are already present.
+The route layer below works directly on a represented tagged frame, so the
+return tag and suspended outer target may already be present on the ambient
+tape.
 -/
 
 namespace LeanWang
@@ -60,33 +62,8 @@ theorem rawSearch_reaches_found
           (searchState base c raw.address),
         outer.moveN
           (compileRawCommand base c raw hraw).searchDirection distance⟩ := by
-  have hsolve := hshort distance hdistance
-    (rawTag raw hraw) outer
-  have hgap' : SearchGap
-      (CounterControlSearchSystem.searchSystem base c).isBlank
-      ((CounterControlSearchSystem.searchSystem base c).isMark
-        (rawTag raw hraw)) outer
-      ((CounterControlSearchSystem.searchSystem base c).direction
-        (rawTag raw hraw)) distance := by
-    simpa [CounterControlSearchSystem.searchSystem,
-      CounterControlSearchSystem.command, compileRawCommand] using hgap
-  have hrun := hsolve hgap'
-  change FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-    ⟨CounterControlSearchSystem.commandOffset base c (rawTag raw hraw),
-      outer⟩
-    ⟨foundState (CanonicalInitializer.radius c)
-        (CounterControlSearchSystem.commandOffset base c (rawTag raw hraw)),
-      outer.moveN
-        (CounterControlSearchSystem.command base c
-          (rawTag raw hraw)).searchDirection distance⟩ at hrun
-  have hoffset : CounterControlSearchSystem.commandOffset base c
-      (rawTag raw hraw) = searchState base c raw.address := by
-    unfold CounterControlSearchSystem.commandOffset
-    rw [rawCommands_get_rawTag]
-  have hcommand : CounterControlSearchSystem.command base c
-      (rawTag raw hraw) = compileRawCommand base c raw hraw := rfl
-  rw [hoffset, hcommand] at hrun
-  exact hrun
+  exact CounterControlSearchExecution.reaches_found_of_solves base c raw hraw
+    outer distance (hshort distance hdistance) hgap
 
 /-- Solved-search form of an erasing boundary command, with its exact
 optional-departure endpoint. -/
@@ -1371,134 +1348,6 @@ theorem rightLeg_executesAt {spec : Spec numTags}
       CounterLayout.boundaryPos_succ]
     omega
 
-/-- The complete validation sweep is executable without changing the
-ambient tagged tape. -/
-theorem validation_executesAt {spec : Spec numTags}
-    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T) :
-    RouteExecutesAt spec.growth T MarkerValidation.sweep
-      (layoutEnd spec.registers) (layoutEnd spec.registers) := by
-  change RouteExecutesAt spec.growth T _
-    (boundaryOffset spec.registers 4) (boundaryOffset spec.registers 4)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 3) _ (leftLeg_executesAt h 3)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 2) _ (leftLeg_executesAt h 2)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 1) _ (leftLeg_executesAt h 1)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 0) _ (leftLeg_executesAt h 0)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 1) _ (rightLeg_executesAt h 0)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 2) _ (rightLeg_executesAt h 1)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 3) _ (rightLeg_executesAt h 2)
-  apply RouteExecutesAt.cons _ _ _
-    (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-  exact RouteExecutesAt.nil _
-
-theorem routeToDecrementStart_executesAt {spec : Spec numTags}
-    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T)
-    (register : Register) :
-    RouteExecutesAt spec.growth T
-      (AnchoredCounterGeometry.routeToDecrementStart register)
-      (layoutEnd spec.registers)
-      (boundaryOffset spec.registers
-        (MarkerSchedule.decrementStartBoundary register)) := by
-  change RouteExecutesAt spec.growth T _
-    (boundaryOffset spec.registers 4) _
-  cases register with
-  | left =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (leftLeg_executesAt h 3)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 2) _ (leftLeg_executesAt h 2)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 1) _ (leftLeg_executesAt h 1)
-      exact RouteExecutesAt.nil _
-  | right =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (leftLeg_executesAt h 3)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 2) _ (leftLeg_executesAt h 2)
-      exact RouteExecutesAt.nil _
-  | temp =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (leftLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-  | clock => exact RouteExecutesAt.nil _
-
-theorem routeFromIncrement_executesAt {spec : Spec numTags}
-    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T)
-    (register : Register) :
-    RouteExecutesAt spec.growth T
-      (AnchoredCounterGeometry.routeFromIncrement register)
-      (boundaryOffset spec.registers
-        (MarkerSchedule.decrementStartBoundary register))
-      (layoutEnd spec.registers) := by
-  change RouteExecutesAt spec.growth T _ _
-    (boundaryOffset spec.registers 4)
-  cases register with
-  | left =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 2) _ (rightLeg_executesAt h 1)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (rightLeg_executesAt h 2)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-  | right =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (rightLeg_executesAt h 2)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-  | temp =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-  | clock => exact RouteExecutesAt.nil _
-
-theorem routeFromZero_executesAt {spec : Spec numTags}
-    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T)
-    (register : Register) :
-    RouteExecutesAt spec.growth T
-      (AnchoredCounterGeometry.routeFromZero register)
-      (boundaryOffset spec.registers
-        (AnchoredCounterGeometry.registerGap register).castSucc)
-      (layoutEnd spec.registers) := by
-  change RouteExecutesAt spec.growth T _ _
-    (boundaryOffset spec.registers 4)
-  cases register with
-  | left =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 1) _ (rightLeg_executesAt h 0)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 2) _ (rightLeg_executesAt h 1)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (rightLeg_executesAt h 2)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-  | right =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 2) _ (rightLeg_executesAt h 1)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (rightLeg_executesAt h 2)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-  | temp =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 3) _ (rightLeg_executesAt h 2)
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-  | clock =>
-      apply RouteExecutesAt.cons _ _ _
-        (boundaryOffset spec.registers 4) _ (rightLeg_executesAt h 3)
-      exact RouteExecutesAt.nil _
-
 theorem boundaryOffset_lt_outerDistance {spec : Spec numTags}
     {T : FullTM0.Tape (Symbol numTags)} (_h : Represents spec T)
     (label : Fin 5) :
@@ -1677,6 +1526,47 @@ theorem routeFromZero_executesWithin {spec : Spec numTags}
         (boundaryOffset spec.registers 4) _
         (boundaryOffset_lt_outerDistance h 3) (rightLeg_executesAt h 3)
       exact RouteExecutesWithin.nil _ (boundaryOffset_lt_outerDistance h 4)
+
+/-! The unbounded canonical-route statements are projections of the stronger
+bounded geometry above. -/
+
+/-- The complete validation sweep is executable without changing the
+ambient tagged tape. -/
+theorem validation_executesAt {spec : Spec numTags}
+    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T) :
+    RouteExecutesAt spec.growth T MarkerValidation.sweep
+      (layoutEnd spec.registers) (layoutEnd spec.registers) :=
+  (validation_executesWithin h).toExecutesAt
+
+theorem routeToDecrementStart_executesAt {spec : Spec numTags}
+    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T)
+    (register : Register) :
+    RouteExecutesAt spec.growth T
+      (AnchoredCounterGeometry.routeToDecrementStart register)
+      (layoutEnd spec.registers)
+      (boundaryOffset spec.registers
+        (MarkerSchedule.decrementStartBoundary register)) :=
+  (routeToDecrementStart_executesWithin h register).toExecutesAt
+
+theorem routeFromIncrement_executesAt {spec : Spec numTags}
+    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T)
+    (register : Register) :
+    RouteExecutesAt spec.growth T
+      (AnchoredCounterGeometry.routeFromIncrement register)
+      (boundaryOffset spec.registers
+        (MarkerSchedule.decrementStartBoundary register))
+      (layoutEnd spec.registers) :=
+  (routeFromIncrement_executesWithin h register).toExecutesAt
+
+theorem routeFromZero_executesAt {spec : Spec numTags}
+    {T : FullTM0.Tape (Symbol numTags)} (h : Represents spec T)
+    (register : Register) :
+    RouteExecutesAt spec.growth T
+      (AnchoredCounterGeometry.routeFromZero register)
+      (boundaryOffset spec.registers
+        (AnchoredCounterGeometry.registerGap register).castSucc)
+      (layoutEnd spec.registers) :=
+  (routeFromZero_executesWithin h register).toExecutesAt
 
 /-! ## Inclusion of one source rule in the linked controller -/
 

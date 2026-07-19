@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlInstructionSemantics
+import LeanWang.Kari.Hooper.CounterControlSearchExecution
 
 /-!
 # Resolving compiled counter-controller searches
@@ -62,38 +63,8 @@ theorem rawSearch_reaches_found_or_halts
             (compileRawCommand base c raw hraw).searchDirection distance⟩ ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨searchState base c raw.address, outer⟩ := by
-  have hresolve := hshort distance hdistance
-    (rawTag raw hraw) outer
-  have hgap' : SearchGap
-      (CounterControlSearchSystem.searchSystem base c).isBlank
-      ((CounterControlSearchSystem.searchSystem base c).isMark
-        (rawTag raw hraw)) outer
-      ((CounterControlSearchSystem.searchSystem base c).direction
-        (rawTag raw hraw)) distance := by
-    simpa [CounterControlSearchSystem.searchSystem,
-      CounterControlSearchSystem.command, compileRawCommand] using hgap
-  have hrun := hresolve hgap'
-  change
-    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨CounterControlSearchSystem.commandOffset base c (rawTag raw hraw),
-          outer⟩
-        ⟨foundState (CanonicalInitializer.radius c)
-            (CounterControlSearchSystem.commandOffset base c
-              (rawTag raw hraw)),
-          outer.moveN
-            (CounterControlSearchSystem.command base c
-              (rawTag raw hraw)).searchDirection distance⟩ ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-        ⟨CounterControlSearchSystem.commandOffset base c (rawTag raw hraw),
-          outer⟩) at hrun
-  have hoffset : CounterControlSearchSystem.commandOffset base c
-      (rawTag raw hraw) = searchState base c raw.address := by
-    unfold CounterControlSearchSystem.commandOffset
-    rw [rawCommands_get_rawTag]
-  have hcommand : CounterControlSearchSystem.command base c
-      (rawTag raw hraw) = compileRawCommand base c raw hraw := rfl
-  rw [hoffset, hcommand] at hrun
-  exact hrun
+  exact CounterControlSearchExecution.reaches_found_or_halts_of_resolves
+    base c raw hraw outer distance (hshort distance hdistance) hgap
 
 /-- Resolving-search form of a preserving boundary command.  The continuation
 is executed only in the successful branch; an already halting search is

@@ -55,7 +55,6 @@ import LeanWang.Kari.Hooper.CounterControlNestingBridge
 import LeanWang.Kari.Hooper.CounterControlNavigationSemantics
 import LeanWang.Kari.Hooper.CounterControlShiftSemantics
 import LeanWang.Kari.Hooper.CounterControlScheduleSemantics
-import LeanWang.Kari.Hooper.CounterControlRouteSemantics
 import LeanWang.Kari.Hooper.CounterControlCleanupSemantics
 import LeanWang.Kari.Hooper.CounterControlFrameBacking
 import LeanWang.Kari.Hooper.CounterControlOpenFrame
