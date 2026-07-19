@@ -28,7 +28,7 @@ namespace CounterControlSearchResolution
 open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape FramedCounterGeometry
 open CounterControlPlan CounterControlCommandAt CounterControlBridge
-open CounterControlInstructionSemantics
+open CounterControlInstructionSemantics CounterControlCoreRoutes
 
 noncomputable section
 

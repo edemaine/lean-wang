@@ -25,6 +25,7 @@ open BoundedMarkerProgram FramedMarkerTape FramedCounterGeometry
 open CounterControlPlan CounterControlCommandAt CounterControlBridge
 open CounterControlScheduleSemantics CounterControlFrameBacking
 open CounterControlInstructionSemantics CounterControlSearchResolution
+  CounterControlCoreRoutes
 
 noncomputable section
 

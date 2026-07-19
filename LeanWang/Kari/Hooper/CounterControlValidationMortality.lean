@@ -23,6 +23,7 @@ namespace CounterControlValidationMortality
 open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape
 open CounterControlPlan CounterControlInstructionSemantics
+  CounterControlCoreRoutes
 open CounterControlBridge
 
 noncomputable section

@@ -23,6 +23,7 @@ namespace CounterControlValidationConverse
 open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape
 open CounterControlCoreFrame CounterControlInstructionSemantics
+  CounterControlCoreRoutes
 
 noncomputable section
 
