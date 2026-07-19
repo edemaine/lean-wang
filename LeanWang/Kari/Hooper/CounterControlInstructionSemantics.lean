@@ -1903,6 +1903,66 @@ theorem machine_reaches_validation_solved
 
 /-! ## Solved increment schedule -/
 
+/-- Reinstalling any incremented register layout absorbs a previous
+increment installation.  All incremented layouts have the same endpoint,
+so the later canonical installation covers everything written by the
+earlier one. -/
+theorem install_incrementTape_eq
+    (spec : Spec numTags) (T : FullTM0.Tape (Symbol numTags))
+    (earlier later : Register) :
+    install (spec.registers.increment later) spec.growth spec.returnTag
+        (incrementTape spec earlier T) =
+      incrementTape spec later T := by
+  change install (spec.registers.increment later) spec.growth spec.returnTag
+      (install (spec.registers.increment earlier) spec.growth
+        spec.returnTag T) =
+    install (spec.registers.increment later) spec.growth spec.returnTag T
+  apply install_over_install
+  simp only [layoutEnd_increment]
+  omega
+
+/- The increment schedule visits boundaries 4, 3, 2, and 1 in order.
+These equations isolate its fixed geometry from the execution proof. -/
+private theorem incrementSchedule_clock_start (registers : Registers) :
+    layoutEnd registers =
+      lastGapOffset (registers.increment .clock) 3 := by
+  simp [lastGapOffset, CounterLayout.boundaryPos, layoutEnd,
+    RegisterLayout.clockBoundary_eq, RegisterLayout.values,
+    Registers.increment, Registers.set, Registers.get]
+  omega
+
+private theorem incrementSchedule_clock_temp (registers : Registers) :
+    boundaryOffset (registers.increment .clock) ((3 : Fin 4).castSucc) =
+      lastGapOffset (registers.increment .temp) 2 := by
+  simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
+    RegisterLayout.values, Registers.increment, Registers.set, Registers.get]
+  omega
+
+private theorem incrementSchedule_temp_right (registers : Registers) :
+    boundaryOffset (registers.increment .temp) ((2 : Fin 4).castSucc) =
+      lastGapOffset (registers.increment .right) 1 := by
+  simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
+    RegisterLayout.values, Registers.increment, Registers.set, Registers.get]
+  omega
+
+private theorem incrementSchedule_finish_temp (registers : Registers) :
+    boundaryOffset (registers.increment .clock) ((3 : Fin 4).castSucc) =
+      boundaryOffset registers 3 := by
+  simp [boundaryOffset, CounterLayout.boundaryPos, RegisterLayout.values,
+    Registers.increment, Registers.set, Registers.get]
+
+private theorem incrementSchedule_finish_right (registers : Registers) :
+    boundaryOffset (registers.increment .temp) ((2 : Fin 4).castSucc) =
+      boundaryOffset registers 2 := by
+  simp [boundaryOffset, CounterLayout.boundaryPos, RegisterLayout.values,
+    Registers.increment, Registers.set, Registers.get]
+
+private theorem incrementSchedule_finish_left (registers : Registers) :
+    boundaryOffset (registers.increment .right) ((1 : Fin 4).castSucc) =
+      boundaryOffset registers 1 := by
+  simp [boundaryOffset, CounterLayout.boundaryPos, RegisterLayout.values,
+    Registers.increment, Registers.set, Registers.get]
+
 /-- The two primitive increment shifts needed by the register-independent
 schedule.  The successful and halting-aware developments instantiate the
 same runner with different shorter-search hypotheses and failure predicates.
@@ -2047,30 +2107,14 @@ theorem machine_reaches_incrementSchedule_with
         (by simpa [clockSpec, incrementSpec, updateSpec] using
           MarkerSchedule.moveTempBoundary_after_clock spec.registers)
         hrawThree
-      have hhead : layoutEnd spec.registers =
-          lastGapOffset (spec.registers.increment .clock) 3 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          layoutEnd, RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
       have htape : install (spec.registers.increment .temp) spec.growth
           spec.returnTag clockTape = incrementTape spec .temp T := by
-        change install (spec.registers.increment .temp) spec.growth
-            spec.returnTag
-            (install (spec.registers.increment .clock) spec.growth
-              spec.returnTag T) =
-          install (spec.registers.increment .temp) spec.growth
-            spec.returnTag T
-        apply install_over_install
-        simp only [layoutEnd_increment]
-        omega
+        simpa [clockTape] using
+          install_incrementTape_eq spec T .clock .temp
       simp only [clockSpec, incrementSpec, updateSpec] at hthree
       rw [htape] at hthree
-      have hfinish : boundaryOffset (spec.registers.increment .clock)
-          ((3 : Fin 4).castSucc) = boundaryOffset spec.registers 3 := by
-        simp [boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      rw [← hhead, hfinish] at hthree
+      rw [← incrementSchedule_clock_start spec.registers,
+        incrementSchedule_finish_temp spec.registers] at hthree
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
       exact FullTM0.CompletesOr.trans runner.pullback hfour hthree
   | right =>
@@ -2141,54 +2185,21 @@ theorem machine_reaches_incrementSchedule_with
         (by simpa [tempSpec, incrementSpec, updateSpec] using
           MarkerSchedule.moveRightBoundary_after_temp spec.registers)
         hrawTwo
-      have hheadFour : layoutEnd spec.registers =
-          lastGapOffset (spec.registers.increment .clock) 3 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          layoutEnd, RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have hheadThree : boundaryOffset (spec.registers.increment .clock) 3 =
-          lastGapOffset (spec.registers.increment .temp) 2 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
       have htapeThree : install (spec.registers.increment .temp) spec.growth
           spec.returnTag clockTape = tempTape := by
-        change install (spec.registers.increment .temp) spec.growth
-            spec.returnTag
-            (install (spec.registers.increment .clock) spec.growth
-              spec.returnTag T) =
-          install (spec.registers.increment .temp) spec.growth
-            spec.returnTag T
-        apply install_over_install
-        simp only [layoutEnd_increment]
-        omega
+        simpa [clockTape, tempTape] using
+          install_incrementTape_eq spec T .clock .temp
       simp only [clockSpec, incrementSpec, updateSpec] at hthree
       rw [htapeThree] at hthree
       have htapeTwo : install (spec.registers.increment .right) spec.growth
           spec.returnTag tempTape = incrementTape spec .right T := by
-        change install (spec.registers.increment .right) spec.growth
-            spec.returnTag
-            (install (spec.registers.increment .temp) spec.growth
-              spec.returnTag T) =
-          install (spec.registers.increment .right) spec.growth
-            spec.returnTag T
-        apply install_over_install
-        simp only [layoutEnd_increment]
-        omega
+        simpa [tempTape] using
+          install_incrementTape_eq spec T .temp .right
       simp only [tempSpec, incrementSpec, updateSpec] at htwo
       rw [htapeTwo] at htwo
-      have hhandoffThree :
-          boundaryOffset (spec.registers.increment .clock)
-              ((3 : Fin 4).castSucc) =
-            lastGapOffset (spec.registers.increment .temp) 2 := by
-        simpa using hheadThree
-      have hfinish : boundaryOffset (spec.registers.increment .temp)
-          ((2 : Fin 4).castSucc) = boundaryOffset spec.registers 2 := by
-        simp [boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      rw [← hheadFour, hhandoffThree] at hthree
-      rw [hfinish] at htwo
+      rw [← incrementSchedule_clock_start spec.registers,
+        incrementSchedule_clock_temp spec.registers] at hthree
+      rw [incrementSchedule_finish_right spec.registers] at htwo
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree
       exact FullTM0.CompletesOr.trans runner.pullback hfour
         (FullTM0.CompletesOr.trans runner.pullback hthree htwo)
@@ -2288,78 +2299,28 @@ theorem machine_reaches_incrementSchedule_with
         (by simpa [rightSpec, incrementSpec, updateSpec] using
           MarkerSchedule.moveLeftBoundary_after_right spec.registers)
         hrawOne
-      have hheadFour : layoutEnd spec.registers =
-          lastGapOffset (spec.registers.increment .clock) 3 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          layoutEnd, RegisterLayout.clockBoundary_eq, RegisterLayout.values,
-          Registers.increment, Registers.set, Registers.get] <;> omega
-      have hheadThree : boundaryOffset (spec.registers.increment .clock) 3 =
-          lastGapOffset (spec.registers.increment .temp) 2 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      have hheadTwo : boundaryOffset (spec.registers.increment .temp) 2 =
-          lastGapOffset (spec.registers.increment .right) 1 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
       have htapeThree : install (spec.registers.increment .temp) spec.growth
           spec.returnTag clockTape = tempTape := by
-        change install (spec.registers.increment .temp) spec.growth
-            spec.returnTag
-            (install (spec.registers.increment .clock) spec.growth
-              spec.returnTag T) =
-          install (spec.registers.increment .temp) spec.growth
-            spec.returnTag T
-        apply install_over_install
-        simp only [layoutEnd_increment]
-        omega
+        simpa [clockTape, tempTape] using
+          install_incrementTape_eq spec T .clock .temp
       simp only [clockSpec, incrementSpec, updateSpec] at hthree
       rw [htapeThree] at hthree
       have htapeTwo : install (spec.registers.increment .right) spec.growth
           spec.returnTag tempTape = rightTape := by
-        change install (spec.registers.increment .right) spec.growth
-            spec.returnTag
-            (install (spec.registers.increment .temp) spec.growth
-              spec.returnTag T) =
-          install (spec.registers.increment .right) spec.growth
-            spec.returnTag T
-        apply install_over_install
-        simp only [layoutEnd_increment]
-        omega
+        simpa [tempTape, rightTape] using
+          install_incrementTape_eq spec T .temp .right
       simp only [tempSpec, incrementSpec, updateSpec] at htwo
       rw [htapeTwo] at htwo
       have htapeOne : install (spec.registers.increment .left) spec.growth
           spec.returnTag rightTape = incrementTape spec .left T := by
-        change install (spec.registers.increment .left) spec.growth
-            spec.returnTag
-            (install (spec.registers.increment .right) spec.growth
-              spec.returnTag T) =
-          install (spec.registers.increment .left) spec.growth
-            spec.returnTag T
-        apply install_over_install
-        simp only [layoutEnd_increment]
-        omega
+        simpa [rightTape] using
+          install_incrementTape_eq spec T .right .left
       simp only [rightSpec, incrementSpec, updateSpec] at hone
       rw [htapeOne] at hone
-      have hhandoffThree :
-          boundaryOffset (spec.registers.increment .clock)
-              ((3 : Fin 4).castSucc) =
-            lastGapOffset (spec.registers.increment .temp) 2 := by
-        simpa using hheadThree
-      have hhandoffTwo :
-          boundaryOffset (spec.registers.increment .temp)
-              ((2 : Fin 4).castSucc) =
-            lastGapOffset (spec.registers.increment .right) 1 := by
-        simpa using hheadTwo
-      have hfinish : boundaryOffset (spec.registers.increment .right)
-          ((1 : Fin 4).castSucc) = boundaryOffset spec.registers 1 := by
-        simp [boundaryOffset, CounterLayout.boundaryPos,
-          RegisterLayout.values, Registers.increment, Registers.set,
-          Registers.get] <;> omega
-      rw [← hheadFour, hhandoffThree] at hthree
-      rw [hhandoffTwo] at htwo
-      rw [hfinish] at hone
+      rw [← incrementSchedule_clock_start spec.registers,
+        incrementSchedule_clock_temp spec.registers] at hthree
+      rw [incrementSchedule_temp_right spec.registers] at htwo
+      rw [incrementSchedule_finish_left spec.registers] at hone
       simp only [searchRef, CounterControlPlan.resolve] at hfour hthree htwo
       exact FullTM0.CompletesOr.trans runner.pullback hfour
         (FullTM0.CompletesOr.trans runner.pullback hthree
