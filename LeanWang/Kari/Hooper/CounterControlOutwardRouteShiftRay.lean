@@ -3,7 +3,8 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
-import LeanWang.Kari.Hooper.CounterControlGenuineValidationOutwardIncrement
+import LeanWang.Kari.Hooper.CounterControlGuardedShiftEmbedding
+import LeanWang.Kari.Hooper.CounterControlOutwardRoute
 
 /-!
 # Inward rays behind an outward route followed by marker shifts
@@ -27,7 +28,7 @@ open BoundedMarkerProgram FramedMarkerTape
 open CounterControlPlan CounterControlBridge
 open CounterControlRouteSuffixMortality
 open CounterControlGuardedShiftEmbedding
-open CounterControlGenuineValidationOutwardIncrement
+open CounterControlOutwardRoute
 open CounterControlResumedShiftCoordinates
 
 noncomputable section

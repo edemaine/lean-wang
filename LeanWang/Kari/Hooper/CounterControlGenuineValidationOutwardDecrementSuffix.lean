@@ -1095,17 +1095,14 @@ theorem PositiveCenteredEnd.distance_lt_layoutEnd_of_boundary_lt_start
     current.distance < layoutEnd endpoint.endpoint.core.registers := by
   let s := MarkerSchedule.decrementStartBoundary register
   rcases
-      CounterControlGenuineValidationOutwardIncrement.ToFour.splitAt
+      CounterControlOutwardRoute.ToFour.splitAt
         suffix.remaining_toFour s (Nat.le_of_lt hstrict) with
     ⟨early, late, hremaining, hearly, hlate⟩
   have hall : RouteTailGaps growth (early ++ late) current.foundTape
       suffix.progress.suffix.finish := by
     rw [← hremaining]
     exact suffix.tailGaps
-  rcases
-      CounterControlGenuineValidationOutwardIncrement.routeTailGaps_split
-        growth early late current.foundTape suffix.progress.suffix.finish
-        hall with
+  rcases hall.split with
     ⟨middle, hEarly, hLate⟩
   have hmiddleRead : middle.read = boundarySymbol s :=
     hearly.finish_read suffix.current_read hEarly

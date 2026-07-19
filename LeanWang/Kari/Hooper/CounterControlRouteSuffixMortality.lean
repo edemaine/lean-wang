@@ -191,6 +191,56 @@ theorem RouteTailGaps.uncons
               exact ⟨distance, gap,
                 .cons following tail _ finish remaining⟩
 
+/-- Split a nonempty route trace after a nonempty list prefix. -/
+theorem routeGaps_split
+    (growth : Turing.Dir) (leg : MarkerValidation.Leg)
+    (rest late : List MarkerValidation.Leg)
+    (outer finish : FullTM0.Tape (Symbol numTags))
+    (trace : RouteGaps growth ((leg :: rest) ++ late) outer finish) :
+    ∃ middle,
+      RouteGaps growth (leg :: rest) outer middle ∧
+      RouteTailGaps growth late middle finish := by
+  induction rest generalizing leg outer with
+  | nil =>
+      cases late with
+      | nil =>
+          exact ⟨finish, by simpa using trace, .nil finish⟩
+      | cons next late =>
+          cases trace with
+          | cons _ _ _ outer distance gap finish tail =>
+              let middle := outer.moveN (orient growth leg.direction) distance
+              exact ⟨middle, .last leg outer distance gap,
+                .cons next late middle finish tail⟩
+  | cons next rest ih =>
+      cases trace with
+      | cons _ _ _ outer distance gap finish tail =>
+          rcases ih next
+              ((outer.moveN (orient growth leg.direction) distance).move
+                (orient growth next.direction)) tail with
+            ⟨middle, earlyTrace, lateTrace⟩
+          exact ⟨middle,
+            .cons leg next rest outer distance gap middle earlyTrace,
+            lateTrace⟩
+
+/-- Split a route-tail trace according to a list decomposition. -/
+theorem RouteTailGaps.split
+    {growth : Turing.Dir}
+    {early late : List MarkerValidation.Leg}
+    {start finish : FullTM0.Tape (Symbol numTags)}
+    (trace : RouteTailGaps growth (early ++ late) start finish) :
+    ∃ middle,
+      RouteTailGaps growth early start middle ∧
+      RouteTailGaps growth late middle finish := by
+  cases early with
+  | nil => exact ⟨start, .nil start, by simpa using trace⟩
+  | cons leg rest =>
+      cases trace with
+      | cons _ _ start finish routeTrace =>
+          rcases routeGaps_split growth leg rest late
+              (start.move (orient growth leg.direction)) finish routeTrace with
+            ⟨middle, earlyTrace, lateTrace⟩
+          exact ⟨middle, .cons leg rest start middle earlyTrace, lateTrace⟩
+
 /-- Success reference selected by one route position. -/
 def routeSuffixSuccess (growth : Turing.Dir) (source directSlot : Nat)
     (after : ControlRef) : List MarkerValidation.Leg → ControlRef
