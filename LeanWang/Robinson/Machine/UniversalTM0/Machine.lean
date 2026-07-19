@@ -11,9 +11,8 @@ import LeanWang.Robinson.Machine.UniversalTM0.Folded
 
 The two-sided TM0 tape is folded at the origin: one one-sided cell stores
 source positions `-(i + 1)` and `i`.  The active half and the TM0 label live in
-finite control.  A source move takes one target step.  A source write takes two
-target steps: write while moving left, then return to the original cell.  The
-origin bit stored in the first target cell handles the one-sided boundary.
+finite control. Source moves and writes each take one target step. The origin
+bit stored in the first target cell handles the one-sided boundary.
 
 This lets the reduction reuse `MachineInputTiles` instead of maintaining a
 second, bespoke Wang-tableau correctness proof.
@@ -77,8 +76,6 @@ local instance : Encodable TapeSymbol :=
 /-- Finite control for the folded simulation. -/
 inductive State where
   | run (side : Side) (label : SupportedLabel)
-  | returnBoundary (side : Side) (label : SupportedLabel)
-  | returnRight (side : Side) (label : SupportedLabel)
   | halt
 deriving DecidableEq
 
@@ -92,13 +89,12 @@ theorem mem_supportedLabels (q : SupportedLabel) : q ∈ supportedLabels := by
 
 def stateValues : List State :=
   [.halt] ++ UniversalTM0Folded.sides.flatMap fun side =>
-    supportedLabels.flatMap fun q =>
-      [.run side q, .returnBoundary side q, .returnRight side q]
+    supportedLabels.map fun q => .run side q
 
 theorem mem_stateValues (state : State) : state ∈ stateValues := by
   cases state with
   | halt => simp [stateValues]
-  | run side q | returnBoundary side q | returnRight side q =>
+  | run side q =>
       simp [stateValues, UniversalTM0Folded.mem_sides, mem_supportedLabels]
 
 local instance : Encodable State :=
@@ -136,17 +132,12 @@ def physicalMove (side : Side) (atOrigin : Bool) (dir : Turing.Dir) : Move :=
 /-- One step of the finite-control folded simulator. -/
 def typedStep : State → TapeSymbol → TapeSymbol × State × Move
   | .halt, cell => (cell, .halt, .left)
-  | .returnBoundary side q, cell => (cell, .run side q, .left)
-  | .returnRight side q, cell => (cell, .run side q, .right)
   | .run side q, cell =>
       match tm0 q.1 (cell.active side) with
       | none => (cell, .halt, .left)
       | some (q', .write symbol) =>
           let next := supportedLabel q'
-          if cell.atOrigin then
-            (cell.write side symbol, .returnBoundary side next, .left)
-          else
-            (cell.write side symbol, .returnRight side next, .left)
+          (cell.write side symbol, .run side next, .stay)
       | some (q', .move dir) =>
           let next := supportedLabel q'
           (cell, .run (UniversalTM0Folded.nextSide side cell.atOrigin dir) next,
@@ -352,18 +343,6 @@ theorem toID_state_ne_halt (config : UniversalTM0Folded.Config)
     (toID config supported).state ≠ machine.halt := by
   exact stateCode_run_ne_halt _ _
 
-theorem stateCode_returnBoundary_ne_halt (side : Side) (q : SupportedLabel) :
-    stateCode (.returnBoundary side q) ≠ stateCode .halt := by
-  intro h
-  have := Encodable.encode_injective h
-  cases this
-
-theorem stateCode_returnRight_ne_halt (side : Side) (q : SupportedLabel) :
-    stateCode (.returnRight side q) ≠ stateCode .halt := by
-  intro h
-  have := Encodable.encode_injective h
-  cases this
-
 theorem typedStep_run_move (side : Side) (q : SupportedLabel)
     (cell : TapeSymbol) (q' : Label) (dir : Turing.Dir)
     (hstep : tm0 q.1 (cell.active side) = some (q', .move dir)) :
@@ -422,29 +401,16 @@ theorem typedStep_run_write (side : Side) (q : SupportedLabel)
     (cell : TapeSymbol) (q' : Label) (symbol : Symbol)
     (hstep : tm0 q.1 (cell.active side) = some (q', .write symbol)) :
     typedStep (.run side q) cell =
-      if cell.atOrigin then
-        (cell.write side symbol,
-          .returnBoundary side (supportedLabel q'), .left)
-      else
-        (cell.write side symbol,
-          .returnRight side (supportedLabel q'), .left) := by
+      (cell.write side symbol, .run side (supportedLabel q'), .stay) := by
   simp [typedStep, hstep]
 
-/-- The intermediate target configuration used to simulate a TM0 write. -/
-def writeReturnID (config : UniversalTM0Folded.Config)
-    (q' : Label) (symbol : Symbol) : ID where
-  tape := fun position =>
-    symbolCode (foldedSymbol (config.afterWrite q' symbol) position)
-  head := config.head.pred
-  state := stateCode (if config.head = 0 then
-    .returnBoundary config.side (supportedLabel q')
-  else .returnRight config.side (supportedLabel q'))
-
-theorem nextID_toID_write_first (config : UniversalTM0Folded.Config)
+theorem nextID_toID_write (config : UniversalTM0Folded.Config)
     (supported : ConfigSupported config) (q' : Label) (symbol : Symbol)
     (hstep : tm0 config.source.q config.source.Tape.head =
-      some (q', .write symbol)) :
-    machine.nextID (toID config supported) = writeReturnID config q' symbol := by
+      some (q', .write symbol))
+    (nextSupported : ConfigSupported (config.afterWrite q' symbol)) :
+    machine.nextID (toID config supported) =
+      toID (config.afterWrite q' symbol) nextSupported := by
   rw [Machine.nextID_of_ne_halt (toID_state_ne_halt config supported)]
   have hstep' : tm0 config.source.q
       ((foldedSymbol config config.head).active config.side) =
@@ -454,76 +420,20 @@ theorem nextID_toID_write_first (config : UniversalTM0Folded.Config)
   have htyped := typedStep_run_write config.side
     ⟨config.source.q, supported⟩ (foldedSymbol config config.head)
     q' symbol hstep'
-  apply ID.ext
-  · funext position
-    simp only [toID, machine_step_code, htyped]
-    rw [show (writeReturnID config q' symbol).tape position =
-      symbolCode (foldedSymbol (config.afterWrite q' symbol) position) by rfl]
-    rw [foldedSymbol_afterWrite]
-    by_cases hhead : config.head = 0
-    · by_cases hposition : position = config.head
-      · simp [foldedSymbol, hhead, hposition]
-      · have hposition0 : position ≠ 0 := by
-          simpa [hhead] using hposition
-        simp [foldedSymbol, hhead, hposition0]
-    · by_cases hposition : position = config.head <;>
-        simp [foldedSymbol, hhead, hposition]
-  · simp only [toID, machine_step_code, htyped]
-    by_cases hhead : config.head = 0 <;>
-      simp [writeReturnID, foldedSymbol, hhead, Move.apply]
-  · simp only [toID, machine_step_code, htyped]
-    by_cases hhead : config.head = 0 <;>
-      simp [writeReturnID, foldedSymbol, hhead]
-
-theorem writeReturnID_state_ne_halt (config : UniversalTM0Folded.Config)
-    (q' : Label) (symbol : Symbol) :
-    (writeReturnID config q' symbol).state ≠ machine.halt := by
-  by_cases hhead : config.head = 0
-  · simpa [writeReturnID, hhead] using
-      stateCode_returnBoundary_ne_halt config.side (supportedLabel q')
-  · simpa [writeReturnID, hhead] using
-      stateCode_returnRight_ne_halt config.side (supportedLabel q')
-
-theorem nextID_writeReturnID (config : UniversalTM0Folded.Config)
-    (supported : ConfigSupported config) (q' : Label) (symbol : Symbol)
-    (hstep : tm0 config.source.q config.source.Tape.head =
-      some (q', .write symbol))
-    (nextSupported : ConfigSupported (config.afterWrite q' symbol)) :
-    machine.nextID (writeReturnID config q' symbol) =
-      toID (config.afterWrite q' symbol) nextSupported := by
-  rw [Machine.nextID_of_ne_halt
-    (writeReturnID_state_ne_halt config q' symbol)]
   have hsupported : supportedLabel q' = ⟨q', nextSupported⟩ := by
     apply Subtype.ext
     exact supportedLabel_val_of_mem
       (tm0_supports.2 (by rw [hstep]; rfl) supported)
   apply ID.ext
   · funext position
-    by_cases hhead : config.head = 0
-    all_goals
-      simp [writeReturnID, toID, machine_step_code, typedStep, hhead]
-      intro hposition
-      subst position
-      rfl
-  · by_cases hhead : config.head = 0
-    · simp [writeReturnID, toID, machine_step_code, typedStep, hhead,
-        Move.apply, UniversalTM0Folded.Config.afterWrite]
-    · simp [writeReturnID, toID, machine_step_code, typedStep, hhead,
-        Move.apply, UniversalTM0Folded.Config.afterWrite]
-      omega
-  · by_cases hhead : config.head = 0 <;>
-      simp [writeReturnID, toID, machine_step_code, typedStep, hhead, hsupported,
-        UniversalTM0Folded.Config.afterWrite]
-
-theorem nextID_nextID_toID_write (config : UniversalTM0Folded.Config)
-    (supported : ConfigSupported config) (q' : Label) (symbol : Symbol)
-    (hstep : tm0 config.source.q config.source.Tape.head =
-      some (q', .write symbol))
-    (nextSupported : ConfigSupported (config.afterWrite q' symbol)) :
-    machine.nextID (machine.nextID (toID config supported)) =
-      toID (config.afterWrite q' symbol) nextSupported := by
-  rw [nextID_toID_write_first config supported q' symbol hstep]
-  exact nextID_writeReturnID config supported q' symbol hstep nextSupported
+    simp only [toID, machine_step_code, htyped]
+    rw [foldedSymbol_afterWrite]
+    by_cases hposition : position = config.head <;>
+      simp [hposition]
+  · simp [toID, machine_step_code, htyped, Move.apply,
+      UniversalTM0Folded.Config.afterWrite]
+  · simp [toID, machine_step_code, htyped, hsupported,
+      UniversalTM0Folded.Config.afterWrite]
 
 theorem typedStep_run_none (side : Side) (q : SupportedLabel)
     (cell : TapeSymbol) (hstep : tm0 q.1 (cell.active side) = none) :
@@ -582,22 +492,14 @@ theorem configStep_respects_transition :
           simp only [UniversalTM0Folded.Config.step, hstep]
           refine ⟨toID (config.afterWrite q' symbol) nextSupported,
             ⟨nextSupported, rfl⟩, ?_⟩
-          apply Relation.TransGen.tail
-            (b := writeReturnID config q' symbol)
-          · apply Relation.TransGen.single
-            have hnext := nextID_toID_write_first
-              config supported q' symbol hstep
-            have hne := writeReturnID_state_ne_halt config q' symbol
-            unfold MachineInput.transition
-            rw [hnext, if_neg hne]
-            rfl
-          · have hnext := nextID_writeReturnID
-              config supported q' symbol hstep nextSupported
-            have hne := toID_state_ne_halt
-              (config.afterWrite q' symbol) nextSupported
-            unfold MachineInput.transition
-            rw [hnext, if_neg hne]
-            rfl
+          apply Relation.TransGen.single
+          have hnext := nextID_toID_write
+            config supported q' symbol hstep nextSupported
+          have hne := toID_state_ne_halt
+            (config.afterWrite q' symbol) nextSupported
+          unfold MachineInput.transition
+          rw [hnext, if_neg hne]
+          rfl
 
 /-- Forget the folding coordinates and retain the underlying TM0 configuration. -/
 def Projects (config : UniversalTM0Folded.Config)

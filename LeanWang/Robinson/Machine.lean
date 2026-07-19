@@ -16,6 +16,7 @@ namespace LeanWang
 inductive Move where
   | left
   | right
+  | stay
 deriving DecidableEq, Repr
 
 namespace Move
@@ -24,29 +25,34 @@ namespace Move
 def apply : Move → Nat → Nat
   | left, i => i.pred
   | right, i => i + 1
+  | stay, i => i
 
-def toBool : Move → Bool
-  | left => false
-  | right => true
+def toCode : Move → Option Bool
+  | left => none
+  | right => some false
+  | stay => some true
 
-def ofBool : Bool → Move
-  | false => left
-  | true => right
+def ofCode : Option Bool → Move
+  | none => left
+  | some false => right
+  | some true => stay
 
-def equivBool : Move ≃ Bool where
-  toFun := toBool
-  invFun := ofBool
+def equivCode : Move ≃ Option Bool where
+  toFun := toCode
+  invFun := ofCode
   left_inv := by
     intro m
     cases m <;> rfl
   right_inv := by
-    intro b
-    cases b <;> rfl
+    intro code
+    cases code with
+    | none => rfl
+    | some b => cases b <;> rfl
 
 end Move
 
 instance instPrimcodableMove : Primcodable Move :=
-  Primcodable.ofEquiv Bool Move.equivBool
+  Primcodable.ofEquiv (Option Bool) Move.equivCode
 
 /--
 A deterministic one-tape machine over natural-number symbols and states.
