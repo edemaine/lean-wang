@@ -238,6 +238,10 @@ theorem horizontal_blocked_of_left
       simpa only [hnone] using valid.horizontalAllowed x row))
   exact hflow.symm ▸ houter
 
+private theorem not_both_of_either_not {p q : Prop} :
+    (¬p ∨ ¬q) → ¬(p ∧ q) := by
+  aesop
+
 theorem Geometry.crossingObstruction
     {indexGrid : Nat -> Nat -> Index}
     {shadeGrid : Nat -> Nat -> RedShades.State}
@@ -250,19 +254,23 @@ theorem Geometry.crossingObstruction
   · intro column row hwest heast hsouth hnorth hfreeRow hnotFreeColumn
     rcases geometry.verticalBoundary hwest heast hsouth hnorth
       hfreeRow hnotFreeColumn with hat | hupper | hlower
-    · exact vertical_blocked_at_boundary valid hat
+    · exact not_both_of_either_not (vertical_blocked_at_boundary valid hat)
     · rcases hupper with ⟨boundary, hrb, _, hselected, hbetween⟩
-      exact Or.inr (vertical_blocked_of_upper valid hrb hselected hbetween)
+      exact not_both_of_either_not
+        (Or.inr (vertical_blocked_of_upper valid hrb hselected hbetween))
     · rcases hlower with ⟨boundary, _, hbr, hselected, hbetween⟩
-      exact Or.inl (vertical_blocked_of_lower valid hbr hselected hbetween)
+      exact not_both_of_either_not
+        (Or.inl (vertical_blocked_of_lower valid hbr hselected hbetween))
   · intro column row hwest heast hsouth hnorth hfreeColumn hnotFreeRow
     rcases geometry.horizontalBoundary hwest heast hsouth hnorth
       hfreeColumn hnotFreeRow with hat | hright | hleft
-    · exact horizontal_blocked_at_boundary valid hat
+    · exact not_both_of_either_not (horizontal_blocked_at_boundary valid hat)
     · rcases hright with ⟨boundary, hcb, _, hselected, hbetween⟩
-      exact Or.inr (horizontal_blocked_of_right valid hcb hselected hbetween)
+      exact not_both_of_either_not
+        (Or.inr (horizontal_blocked_of_right valid hcb hselected hbetween))
     · rcases hleft with ⟨boundary, _, hbc, hselected, hbetween⟩
-      exact Or.inl (horizontal_blocked_of_left valid hbc hselected hbetween)
+      exact not_both_of_either_not
+        (Or.inl (horizontal_blocked_of_left valid hbc hselected hbetween))
 
 end ShadedObstructionGeometry
 end Closed104

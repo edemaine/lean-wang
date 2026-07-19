@@ -37,63 +37,42 @@ structure CrossingObstruction
     quarterSouth south < row -> row < quarterNorth north ->
     IsFreeRow indexGrid shadeGrid west east row ->
     ¬IsFreeColumn indexGrid shadeGrid south north column ->
-      ¬(signalGrid column row).south = .none ∨
-        ¬(signalGrid column row).north = .none
+      ¬((signalGrid column row).south = .none ∧
+        (signalGrid column row).north = .none)
   horizontalBlocked : forall {column row : Nat},
     quarterWest west < column -> column < quarterEast east ->
     quarterSouth south < row -> row < quarterNorth north ->
     IsFreeColumn indexGrid shadeGrid south north column ->
     ¬IsFreeRow indexGrid shadeGrid west east row ->
-      ¬(signalGrid column row).west = .none ∨
-        ¬(signalGrid column row).east = .none
+      ¬((signalGrid column row).west = .none ∧
+        (signalGrid column row).east = .none)
 
 variable {T : TileSet} {seed : WangTile}
   {x : Int × Int -> TileIn
     (combineWithRoutedScaffold ShadedSignals.routedScaffold T seed)}
 
-theorem routeRole_horizontal_at
+theorem routeRole_channel_iff
     (decoded : ShadedRoutedPlaneDecode.Decoded x)
-    (parentOrigin : Int × Int) (column row : Nat)
-    (hclear :
-      (ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).west = .none ∧
-      (ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).east = .none)
-    (hblocked :
-      ¬(ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).south = .none ∨
-      ¬(ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).north = .none) :
-    ShadedSignals.routeRole
-      (decoded.base (point decoded parentOrigin column row)).1 = .horizontal := by
+    (parentOrigin : Int × Int) (column row : Nat) :
+    let signal := ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row
+    let role := ShadedSignals.routeRole
+      (decoded.base (point decoded parentOrigin column row)).1
+    (role = .horizontal ↔
+        signal.west = .none ∧ signal.east = .none ∧
+          ¬(signal.south = .none ∧ signal.north = .none)) ∧
+      (role = .vertical ↔
+        ¬(signal.west = .none ∧ signal.east = .none) ∧
+          signal.south = .none ∧ signal.north = .none) := by
   let site := ShadedSignals.decode
     (decoded.base (point decoded parentOrigin column row))
   rw [← ShadedSignals.decode_tile
     (decoded.base (point decoded parentOrigin column row))]
-  apply (ShadedSignals.routeRole_tile_eq_horizontal_iff site).2
   have hstate : ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row =
       site.2 := by
     rfl
-  rw [hstate] at hclear hblocked
-  exact ⟨hclear.1, hclear.2, by aesop⟩
-
-theorem routeRole_vertical_at
-    (decoded : ShadedRoutedPlaneDecode.Decoded x)
-    (parentOrigin : Int × Int) (column row : Nat)
-    (hblocked :
-      ¬(ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).west = .none ∨
-      ¬(ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).east = .none)
-    (hclear :
-      (ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).south = .none ∧
-      (ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row).north = .none) :
-    ShadedSignals.routeRole
-      (decoded.base (point decoded parentOrigin column row)).1 = .vertical := by
-  let site := ShadedSignals.decode
-    (decoded.base (point decoded parentOrigin column row))
-  rw [← ShadedSignals.decode_tile
-    (decoded.base (point decoded parentOrigin column row))]
-  apply (ShadedSignals.routeRole_tile_eq_vertical_iff site).2
-  have hstate : ShadedPlaneSignalGrid.signalGrid decoded parentOrigin column row =
-      site.2 := by
-    rfl
-  rw [hstate] at hclear hblocked
-  exact ⟨by aesop, hclear⟩
+  rw [hstate]
+  exact ⟨ShadedSignals.routeRole_tile_eq_horizontal_iff site,
+    ShadedSignals.routeRole_tile_eq_vertical_iff site⟩
 
 theorem horizontal_payload_across
     (tiles : Nat -> WangTile) (start count : Nat)
@@ -173,8 +152,8 @@ theorem payload_hmatch_of_consecutive
       (lt_trans (grid.column_west i) hleft)
       (hright.trans (grid.column_east ⟨i.val + 1, hi⟩))
       (grid.row_south j) (grid.row_north j) (grid.freeRow j) hnotFree
-    have hrole := routeRole_horizontal_at decoded parentOrigin column (grid.rowAt j)
-      hrowClear hblocked
+    have hrole := (routeRole_channel_iff decoded parentOrigin
+      column (grid.rowAt j)).1.2 ⟨hrowClear.1, hrowClear.2, hblocked⟩
     exact (decoded.horizontal_payload_wire
       (point decoded parentOrigin column (grid.rowAt j)) hrole).2
 
@@ -239,8 +218,8 @@ theorem payload_vmatch_of_consecutive
       (lt_trans (grid.row_south j) hlower)
       (hupper.trans (grid.row_north ⟨j.val + 1, hj⟩))
       (grid.freeColumn i) hnotFree
-    have hrole := routeRole_vertical_at decoded parentOrigin (grid.columnAt i) row
-      hblocked hcolumnClear
+    have hrole := (routeRole_channel_iff decoded parentOrigin
+      (grid.columnAt i) row).2.2 ⟨hblocked, hcolumnClear⟩
     exact (decoded.vertical_payload_wire
       (point decoded parentOrigin (grid.columnAt i) row) hrole).2
 
