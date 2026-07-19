@@ -423,49 +423,27 @@ private theorem AxisClass.nonnegative_of_step {left right : AxisClass}
   cases left <;> cases right <;>
     simp_all [Step, before, after]
 
-/-- A finite axis-class line starting at the origin never becomes negative. -/
-private theorem axisLine_nonnegative {n : Nat} (positive : 0 < n)
-    (line : Fin n → AxisClass)
-    (origin : line ⟨0, positive⟩ = .origin)
+/-- An invariant at the start of a finite line propagates through every
+successor. -/
+private theorem axisLine_forall {α : Type} {P : α → Prop} {n : Nat}
+    (positive : 0 < n) (line : Fin n → α)
+    (origin : P (line ⟨0, positive⟩))
     (step : ∀ (k : Nat) (hk : k + 1 < n),
-      AxisClass.Step (line ⟨k, by omega⟩) (line ⟨k + 1, hk⟩)) :
-    ∀ index, line index ≠ .negative := by
+      P (line ⟨k, by omega⟩) → P (line ⟨k + 1, hk⟩)) :
+    ∀ index, P (line index) := by
   intro index
-  have claim : ∀ k : Nat, ∀ hk : k < n,
-      line ⟨k, hk⟩ ≠ .negative := by
+  have claim : ∀ k : Nat, ∀ hk : k < n, P (line ⟨k, hk⟩) := by
     intro k
     induction k with
     | zero =>
         intro hk
         have indexEq : (⟨0, hk⟩ : Fin n) = ⟨0, positive⟩ := Fin.ext rfl
-        rw [indexEq, origin]
-        simp
+        rw [indexEq]
+        exact origin
     | succ k inductionHypothesis =>
         intro hk
         have previousBound : k < n := by omega
-        exact AxisClass.nonnegative_of_step (step k hk)
-          (inductionHypothesis previousBound)
-  exact claim index.val index.isLt
-
-/-- Adjacent equality makes a finite line constant from its zeroth entry. -/
-private theorem axisLine_eq_zero {α : Type} {n : Nat} (positive : 0 < n)
-    (line : Fin n → α)
-    (adjacent : ∀ (k : Nat) (hk : k + 1 < n),
-      line ⟨k, by omega⟩ = line ⟨k + 1, hk⟩) :
-    ∀ index, line index = line ⟨0, positive⟩ := by
-  intro index
-  have claim : ∀ k : Nat, ∀ hk : k < n,
-      line ⟨k, hk⟩ = line ⟨0, positive⟩ := by
-    intro k
-    induction k with
-    | zero =>
-        intro hk
-        congr 1
-    | succ k inductionHypothesis =>
-        intro hk
-        have previousBound : k < n := by omega
-        exact (adjacent k hk).symm.trans
-          (inductionHypothesis previousBound)
+        exact step k hk (inductionHypothesis previousBound)
   exact claim index.val index.isLt
 
 /-- A position-class grid is nonnegative when its primary axis steps from the
@@ -479,11 +457,20 @@ private theorem axisGrid_nonnegative {n : Nat} (positive : 0 < n)
     (acrossEq : ∀ (along : Fin n) (k : Nat) (hk : k + 1 < n),
       grid along ⟨k, by omega⟩ = grid along ⟨k + 1, hk⟩) :
     ∀ along across, grid along across ≠ .negative := by
-  intro along across
-  rw [axisLine_eq_zero positive (line := grid along) (acrossEq along) across]
-  exact axisLine_nonnegative positive
-    (line := fun along => grid along ⟨0, positive⟩)
-    origin alongStep along
+  have alongNonnegative : ∀ along,
+      grid along ⟨0, positive⟩ ≠ .negative := by
+    refine axisLine_forall (P := fun axisClass => axisClass ≠ .negative) positive
+      (line := fun along => grid along ⟨0, positive⟩) ?_ ?_
+    · rw [origin]
+      simp
+    · intro k hk hnonnegative
+      exact AxisClass.nonnegative_of_step (alongStep k hk) hnonnegative
+  intro along
+  refine axisLine_forall (P := fun axisClass => axisClass ≠ .negative) positive
+    (line := grid along) (alongNonnegative along) ?_
+  intro k hk hnonnegative
+  rw [← acrossEq along k hk]
+  exact hnonnegative
 
 /-- Every square rooted at the pointed tile decodes to a square rooted at the
 source seed. -/
