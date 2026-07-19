@@ -87,6 +87,15 @@ def quarterEast (east : Nat) : Nat := 2 * east
 def quarterSouth (south : Nat) : Nat := 2 * south + 1
 def quarterNorth (north : Nat) : Nat := 2 * north
 
+theorem componentAt_double_add (grid : Nat → Nat → Index)
+    (x y dx dy : Nat) (hdx : dx < 2) (hdy : dy < 2) :
+    componentAt grid (2 * x + dx) (2 * y + dy) =
+      indexThick (grid x y) := by
+  unfold componentAt
+  have hx : (2 * x + dx) / 2 = x := by omega
+  have hy : (2 * y + dy) / 2 = y := by omega
+  rw [hx, hy, ← indexThick_eq]
+
 @[simp] theorem quadrantAt_quarterSouth_yBit (x south : Nat) :
     (quadrantAt x (quarterSouth south)).yBit = true := by
   cases hbit : (x % 2 == 1) <;>
@@ -116,16 +125,10 @@ theorem CycleOn.southwest_corner
       RedShades.cornerNorth
         (componentAt grid (quarterWest west) (quarterSouth south))
         (quadrantAt (quarterWest west) (quarterSouth south)) = true := by
-  have hcomponent :
-      componentAt grid (quarterWest west) (quarterSouth south) = .b := by
-    rw [componentAt]
-    simp only [quarterWest, quarterSouth]
-    have hdivX : (2 * west + 1) / 2 = west := by omega
-    have hdivY : (2 * south + 1) / 2 = south := by omega
-    rw [hdivX, hdivY, ← indexThick_eq]
-    exact cycle.southwest
-  rw [hcomponent]
-  simp [quadrantAt, quarterWest, quarterSouth, Quadrant.ofBits,
+  rw [quarterWest, quarterSouth,
+    componentAt_double_add grid west south 1 1 (by omega) (by omega),
+    cycle.southwest]
+  simp [quadrantAt, Quadrant.ofBits,
     RedShades.cornerEast, RedShades.cornerNorth]
 
 theorem CycleOn.southeast_corner
@@ -137,16 +140,11 @@ theorem CycleOn.southeast_corner
       RedShades.cornerNorth
         (componentAt grid (quarterEast east) (quarterSouth south))
         (quadrantAt (quarterEast east) (quarterSouth south)) = true := by
-  have hcomponent :
-      componentAt grid (quarterEast east) (quarterSouth south) = .c := by
-    rw [componentAt]
-    simp only [quarterEast, quarterSouth]
-    have hdivX : (2 * east) / 2 = east := by omega
-    have hdivY : (2 * south + 1) / 2 = south := by omega
-    rw [hdivX, hdivY, ← indexThick_eq]
-    exact cycle.southeast
-  rw [hcomponent]
-  simp [quadrantAt, quarterEast, quarterSouth, Quadrant.ofBits,
+  rw [quarterEast, quarterSouth,
+    show 2 * east = 2 * east + 0 by omega,
+    componentAt_double_add grid east south 0 1 (by omega) (by omega),
+    cycle.southeast]
+  simp [quadrantAt, Quadrant.ofBits,
     RedShades.cornerWest, RedShades.cornerNorth]
 
 theorem CycleOn.northeast_corner
@@ -158,16 +156,12 @@ theorem CycleOn.northeast_corner
       RedShades.cornerSouth
         (componentAt grid (quarterEast east) (quarterNorth north))
         (quadrantAt (quarterEast east) (quarterNorth north)) = true := by
-  have hcomponent :
-      componentAt grid (quarterEast east) (quarterNorth north) = .d := by
-    rw [componentAt]
-    simp only [quarterEast, quarterNorth]
-    have hdivX : (2 * east) / 2 = east := by omega
-    have hdivY : (2 * north) / 2 = north := by omega
-    rw [hdivX, hdivY, ← indexThick_eq]
-    exact cycle.northeast
-  rw [hcomponent]
-  simp [quadrantAt, quarterEast, quarterNorth, Quadrant.ofBits,
+  rw [quarterEast, quarterNorth,
+    show 2 * east = 2 * east + 0 by omega,
+    show 2 * north = 2 * north + 0 by omega,
+    componentAt_double_add grid east north 0 0 (by omega) (by omega),
+    cycle.northeast]
+  simp [quadrantAt, Quadrant.ofBits,
     RedShades.cornerWest, RedShades.cornerSouth]
 
 theorem CycleOn.northwest_corner
@@ -179,16 +173,11 @@ theorem CycleOn.northwest_corner
       RedShades.cornerSouth
         (componentAt grid (quarterWest west) (quarterNorth north))
         (quadrantAt (quarterWest west) (quarterNorth north)) = true := by
-  have hcomponent :
-      componentAt grid (quarterWest west) (quarterNorth north) = .a := by
-    rw [componentAt]
-    simp only [quarterWest, quarterNorth]
-    have hdivX : (2 * west + 1) / 2 = west := by omega
-    have hdivY : (2 * north) / 2 = north := by omega
-    rw [hdivX, hdivY, ← indexThick_eq]
-    exact cycle.northwest
-  rw [hcomponent]
-  simp [quadrantAt, quarterWest, quarterNorth, Quadrant.ofBits,
+  rw [quarterWest, quarterNorth,
+    show 2 * north = 2 * north + 0 by omega,
+    componentAt_double_add grid west north 1 0 (by omega) (by omega),
+    cycle.northwest]
+  simp [quadrantAt, Quadrant.ofBits,
     RedShades.cornerEast, RedShades.cornerSouth]
 
 set_option maxHeartbeats 500000 in

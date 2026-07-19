@@ -106,6 +106,66 @@ structure CycleOn (grid : Nat → Nat → Index)
   eastLane : ∀ y, south < y → y < north →
     containsLine (indexThick (grid east y)) .r2 = true
 
+private theorem refinedHorizontalLane
+    {grid : Nat → Nat → Index} {west east row : Nat}
+    (line : Figure16.ThickLine)
+    (parentLane : ∀ x, west < x → x < east →
+      containsLine (indexThick (grid x row)) line = true)
+    (children : ∀ {parent : Index},
+      containsLine (indexThick parent) line = true →
+        containsLine (indexThick (southwestChild parent)) line = true ∧
+        containsLine (indexThick (southeastChild parent)) line = true)
+    (boundary : containsLine
+      (indexThick (southeastChild (grid west row))) line = true) :
+    ∀ x, 2 * west < x → x < 2 * east →
+      containsLine (indexThick (refineIndexGrid grid x (2 * row))) line = true := by
+  intro x hxWest hxEast
+  let parentX := x / 2
+  have hmod : x % 2 = 0 ∨ x % 2 = 1 := by
+    have hlt := Nat.mod_lt x (by decide : 0 < 2)
+    omega
+  have hdecomp := Nat.mod_add_div x 2
+  rcases hmod with heven | hodd
+  · have hx : x = 2 * parentX := by dsimp [parentX]; omega
+    rw [hx, refineIndexGrid_even_even]
+    exact (children (parentLane parentX (by omega) (by omega))).1
+  · have hx : x = 2 * parentX + 1 := by dsimp [parentX]; omega
+    by_cases atBoundary : parentX = west
+    · rw [hx, refineIndexGrid_odd_even, atBoundary]
+      exact boundary
+    · rw [hx, refineIndexGrid_odd_even]
+      exact (children (parentLane parentX (by omega) (by omega))).2
+
+private theorem refinedVerticalLane
+    {grid : Nat → Nat → Index} {south north column : Nat}
+    (line : Figure16.ThickLine)
+    (parentLane : ∀ y, south < y → y < north →
+      containsLine (indexThick (grid column y)) line = true)
+    (children : ∀ {parent : Index},
+      containsLine (indexThick parent) line = true →
+        containsLine (indexThick (southwestChild parent)) line = true ∧
+        containsLine (indexThick (northwestChild parent)) line = true)
+    (boundary : containsLine
+      (indexThick (northwestChild (grid column south))) line = true) :
+    ∀ y, 2 * south < y → y < 2 * north →
+      containsLine (indexThick (refineIndexGrid grid (2 * column) y)) line = true := by
+  intro y hySouth hyNorth
+  let parentY := y / 2
+  have hmod : y % 2 = 0 ∨ y % 2 = 1 := by
+    have hlt := Nat.mod_lt y (by decide : 0 < 2)
+    omega
+  have hdecomp := Nat.mod_add_div y 2
+  rcases hmod with heven | hodd
+  · have hy : y = 2 * parentY := by dsimp [parentY]; omega
+    rw [hy, refineIndexGrid_even_even]
+    exact (children (parentLane parentY (by omega) (by omega))).1
+  · have hy : y = 2 * parentY + 1 := by dsimp [parentY]; omega
+    by_cases atBoundary : parentY = south
+    · rw [hy, refineIndexGrid_even_odd, atBoundary]
+      exact boundary
+    · rw [hy, refineIndexGrid_even_odd]
+      exact (children (parentLane parentY (by omega) (by omega))).2
+
 /-- Substitution doubles an oriented red cycle and preserves all four lanes. -/
 theorem CycleOn.refine {grid : Nat → Nat → Index}
     {west east south north : Nat}
@@ -113,82 +173,14 @@ theorem CycleOn.refine {grid : Nat → Nat → Index}
     CycleOn (refineIndexGrid grid)
       (2 * west) (2 * east) (2 * south) (2 * north) where
   toRedCycleOn := cycle.toRedCycleOn.refine
-  southLane := by
-    intro x hxWest hxEast
-    let parentX := x / 2
-    have hmod : x % 2 = 0 ∨ x % 2 = 1 := by
-      have hlt := Nat.mod_lt x (by decide : 0 < 2)
-      omega
-    have hdecomp := Nat.mod_add_div x 2
-    rcases hmod with heven | hodd
-    · have hx : x = 2 * parentX := by dsimp [parentX]; omega
-      have hline := cycle.southLane parentX (by omega) (by omega)
-      rw [hx, refineIndexGrid_even_even]
-      exact (r1_children hline).1
-    · have hx : x = 2 * parentX + 1 := by dsimp [parentX]; omega
-      by_cases hwest : parentX = west
-      · rw [hx, refineIndexGrid_odd_even, hwest]
-        exact southeastChild_r1_of_b cycle.southwest
-      · have hline := cycle.southLane parentX (by omega) (by omega)
-        rw [hx, refineIndexGrid_odd_even]
-        exact (r1_children hline).2
-  northLane := by
-    intro x hxWest hxEast
-    let parentX := x / 2
-    have hmod : x % 2 = 0 ∨ x % 2 = 1 := by
-      have hlt := Nat.mod_lt x (by decide : 0 < 2)
-      omega
-    have hdecomp := Nat.mod_add_div x 2
-    rcases hmod with heven | hodd
-    · have hx : x = 2 * parentX := by dsimp [parentX]; omega
-      have hline := cycle.northLane parentX (by omega) (by omega)
-      rw [hx, refineIndexGrid_even_even]
-      exact (r3_children hline).1
-    · have hx : x = 2 * parentX + 1 := by dsimp [parentX]; omega
-      by_cases hwest : parentX = west
-      · rw [hx, refineIndexGrid_odd_even, hwest]
-        exact southeastChild_r3_of_a cycle.northwest
-      · have hline := cycle.northLane parentX (by omega) (by omega)
-        rw [hx, refineIndexGrid_odd_even]
-        exact (r3_children hline).2
-  westLane := by
-    intro y hySouth hyNorth
-    let parentY := y / 2
-    have hmod : y % 2 = 0 ∨ y % 2 = 1 := by
-      have hlt := Nat.mod_lt y (by decide : 0 < 2)
-      omega
-    have hdecomp := Nat.mod_add_div y 2
-    rcases hmod with heven | hodd
-    · have hy : y = 2 * parentY := by dsimp [parentY]; omega
-      have hline := cycle.westLane parentY (by omega) (by omega)
-      rw [hy, refineIndexGrid_even_even]
-      exact (r0_children hline).1
-    · have hy : y = 2 * parentY + 1 := by dsimp [parentY]; omega
-      by_cases hsouth : parentY = south
-      · rw [hy, refineIndexGrid_even_odd, hsouth]
-        exact northwestChild_r0_of_b cycle.southwest
-      · have hline := cycle.westLane parentY (by omega) (by omega)
-        rw [hy, refineIndexGrid_even_odd]
-        exact (r0_children hline).2
-  eastLane := by
-    intro y hySouth hyNorth
-    let parentY := y / 2
-    have hmod : y % 2 = 0 ∨ y % 2 = 1 := by
-      have hlt := Nat.mod_lt y (by decide : 0 < 2)
-      omega
-    have hdecomp := Nat.mod_add_div y 2
-    rcases hmod with heven | hodd
-    · have hy : y = 2 * parentY := by dsimp [parentY]; omega
-      have hline := cycle.eastLane parentY (by omega) (by omega)
-      rw [hy, refineIndexGrid_even_even]
-      exact (r2_children hline).1
-    · have hy : y = 2 * parentY + 1 := by dsimp [parentY]; omega
-      by_cases hsouth : parentY = south
-      · rw [hy, refineIndexGrid_even_odd, hsouth]
-        exact northwestChild_r2_of_c cycle.southeast
-      · have hline := cycle.eastLane parentY (by omega) (by omega)
-        rw [hy, refineIndexGrid_even_odd]
-        exact (r2_children hline).2
+  southLane := refinedHorizontalLane .r1 cycle.southLane r1_children
+    (southeastChild_r1_of_b cycle.southwest)
+  northLane := refinedHorizontalLane .r3 cycle.northLane r3_children
+    (southeastChild_r3_of_a cycle.northwest)
+  westLane := refinedVerticalLane .r0 cycle.westLane r0_children
+    (northwestChild_r0_of_b cycle.southwest)
+  eastLane := refinedVerticalLane .r2 cycle.eastLane r2_children
+    (northwestChild_r2_of_c cycle.southeast)
 
 /-- Exact oriented form of the universal depth-two board certificate. -/
 theorem depthTwo_supertile_has_orientedCycleOn (parent : Index) :
