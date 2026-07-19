@@ -153,93 +153,22 @@ theorem moveRight_corePrefix
   let U := writeLogical growth
     (writeLogical growth T source blankSymbol)
     (source + 1) (boundarySymbol label)
-  have hsourcePositive : 0 < source := by
-    simp [source, boundaryOffset]
-  have hU (position : Int) :
-      logicalTape growth U position =
-        if position = source + 1 then boundarySymbol label
-        else if position = source then blankSymbol
-        else logicalTape growth T position := by
-    simpa only [U, logicalTape_writeLogical_apply, Nat.cast_add, Nat.cast_one]
-  have hrep : CorePrefixRepresents next growth limit U := by
-    constructor
-    · constructor
-      intro position hposition
-      change logicalTape growth U (position + 1) = coreSymbol next position
-      rw [hU, coreSymbol_of_moveAt_right current next label hmove]
-      have hsourcePosition :
-          (position : Int) + 1 = (source : Nat) ↔
-            position = CounterLayout.boundaryPos
-              (RegisterLayout.values current) label := by
-        simp only [source, boundaryOffset]
-        constructor <;> intro heq <;> exact_mod_cast (by omega : _)
-      have htargetPosition :
-          (position : Int) + 1 = (source : Int) + 1 ↔
-            position = CounterLayout.boundaryPos
-              (RegisterLayout.values current) label + 1 := by
-        simp only [source, boundaryOffset]
-        constructor <;> intro heq <;> exact_mod_cast (by omega : _)
-      simp only [htargetPosition, hsourcePosition]
-      by_cases htargetMarker : position = CounterLayout.boundaryPos
-          (RegisterLayout.values current) label + 1
-      · simp [htargetMarker]
-      by_cases hsourceMarker : position = CounterLayout.boundaryPos
-          (RegisterLayout.values current) label
-      · simp [hsourceMarker, htargetMarker]
-      · simp only [htargetMarker, hsourceMarker, ↓reduceIte]
-        apply h.core position
-        by_contra hold
-        have hpast : RegisterLayout.clockBoundary current < position :=
-          Nat.lt_of_not_ge hold
-        have hstrictEnds : layoutEnd current < layoutEnd next := by
-          simp only [layoutEnd] at hposition hpast ⊢
-          omega
-        have hnextEnd : layoutEnd next = layoutEnd current + 1 := by omega
-        have hpositionEnd : position + 1 = layoutEnd next := by
-          simp only [layoutEnd] at hposition hpast hnextEnd ⊢
-          omega
-        have hsourceEnd := hextend hstrictEnds
-        apply htargetMarker
-        simp only [source, boundaryOffset] at hsourceEnd
-        omega
-    · exact hnextCore
-    · intro position hpast hpositionLimit
-      change logicalTape growth U position = blankSymbol
-      rw [hU]
-      have hneTarget : (position : Int) ≠ (source : Int) + 1 := by
-        intro heq
-        have heqNat : position = source + 1 := by exact_mod_cast heq
-        omega
-      have hneSource : (position : Int) ≠ (source : Nat) := by
-        intro heq
-        have heqNat : position = source := by exact_mod_cast heq
-        omega
-      simp only [hneTarget, hneSource, ↓reduceIte]
-      exact h.runway position (hlower.trans_lt hpast) hpositionLimit
-  have houtside : ∀ position : Int,
-      ¬(1 ≤ position ∧ position ≤ layoutEnd next) →
-        logicalTape growth T position = logicalTape growth U position := by
-    intro position houtside
-    rw [hU]
-    have hsourceNe : position ≠ (source : Int) := by
-      intro heq
-      apply houtside
-      rw [heq]
-      constructor
-      · exact_mod_cast hsourcePositive
-      · exact_mod_cast hsource.trans hlower
-    have htargetNe : position ≠ (source : Int) + 1 := by
-      intro heq
-      apply houtside
-      rw [heq]
-      constructor
-      · omega
-      · exact_mod_cast htarget
-    simp [hsourceNe, htargetNe]
-  have hinstall := installCore_congr_of_outside next growth T U houtside
-  have hself : installCore next growth U = U :=
-    installCore_eq_self_of_coreRepresents hrep.toCoreRepresents
-  exact ⟨hself.symm.trans hinstall.symm, hrep⟩
+  rcases moveRight_core h.toCoreRepresents label hlower hupper hsource
+      htarget hextend hmove with ⟨hinstall, hcore⟩
+  refine ⟨hinstall, hcore, hnextCore, ?_⟩
+  intro position hpast hpositionLimit
+  change logicalTape growth U position = blankSymbol
+  simp only [U, logicalTape_writeLogical_apply, Nat.cast_add, Nat.cast_one]
+  have hneTarget : (position : Int) ≠ (source : Int) + 1 := by
+    intro heq
+    have heqNat : position = source + 1 := by exact_mod_cast heq
+    omega
+  have hneSource : (position : Int) ≠ (source : Nat) := by
+    intro heq
+    have heqNat : position = source := by exact_mod_cast heq
+    omega
+  simp only [hneTarget, hneSource, ↓reduceIte]
+  exact h.runway position (hlower.trans_lt hpast) hpositionLimit
 
 /-- Moving a represented boundary left and clearing its old cell produces the
 exact core-only installation over that cleared backing tape.  This also
@@ -270,109 +199,37 @@ theorem moveLeft_corePrefix
   let destination := source - 1
   let cleared := writeLogical growth T source blankSymbol
   let U := writeLogical growth cleared destination (boundarySymbol label)
-  have hdestinationPositive : 0 < destination := by
-    simp only [destination]
-    omega
-  have hmarkerPositive : 0 < CounterLayout.boundaryPos
-      (RegisterLayout.values current) label := by
-    simp only [source, boundaryOffset] at hsourcePositive
-    omega
-  have hU (position : Int) :
-      logicalTape growth U position =
-        if position = destination then boundarySymbol label
-        else if position = source then blankSymbol
-        else logicalTape growth T position := by
-    simpa only [U, cleared, logicalTape_writeLogical_apply]
-  have hrep : CorePrefixRepresents next growth limit U := by
-    constructor
-    · constructor
-      intro position hposition
-      change logicalTape growth U (position + 1) = coreSymbol next position
-      rw [hU, coreSymbol_of_moveAt_left current next label
-        hmarkerPositive hmove]
-      have hsourcePosition :
-          (position : Int) + 1 = (source : Int) ↔
-            position = CounterLayout.boundaryPos
-              (RegisterLayout.values current) label := by
-        simp only [source, boundaryOffset]
-        constructor <;> intro heq <;> exact_mod_cast (by omega : _)
-      have hdestinationPosition :
-          (position : Int) + 1 = (destination : Int) ↔
-            position + 1 = CounterLayout.boundaryPos
-              (RegisterLayout.values current) label := by
-        simp only [destination, source, boundaryOffset]
-        constructor
-        · intro heq
-          have hcast : (position : Int) + 1 =
-              CounterLayout.boundaryPos
-                (RegisterLayout.values current) label := by
-            push_cast at heq
-            omega
-          exact_mod_cast hcast
-        · intro heq
-          have hcast : (position : Int) + 1 =
-              CounterLayout.boundaryPos
-                (RegisterLayout.values current) label := by
-            exact_mod_cast heq
-          push_cast
-          omega
-      simp only [hdestinationPosition, hsourcePosition]
-      by_cases hdestinationMarker : position + 1 =
-          CounterLayout.boundaryPos (RegisterLayout.values current) label
-      · simp [hdestinationMarker]
-      by_cases hsourceMarker : position =
-          CounterLayout.boundaryPos (RegisterLayout.values current) label
-      · simp [hsourceMarker, hdestinationMarker]
-      · simp only [hdestinationMarker, hsourceMarker, ↓reduceIte]
-        apply h.core position
-        simp only [layoutEnd] at hlower hposition
-        omega
-    · exact hnextCore
-    · intro position hpast hpositionLimit
-      change logicalTape growth U position = blankSymbol
-      rw [hU]
-      by_cases hsourcePosition : position = source
-      · have hsourceInt : (position : Int) = (source : Int) := by
-          exact_mod_cast hsourcePosition
-        have hdestinationInt : (position : Int) ≠ (destination : Int) := by
-          intro heq
-          have : source = destination := by
-            exact_mod_cast hsourceInt.symm.trans heq
-          omega
-        rw [if_neg hdestinationInt, if_pos hsourceInt]
-      · have hdestinationNe : (position : Int) ≠ (destination : Int) := by
-          intro heq
-          have heqNat : position = destination := by exact_mod_cast heq
-          omega
-        have hsourceNe : (position : Int) ≠ (source : Int) := by
-          exact_mod_cast hsourcePosition
-        simp only [hdestinationNe, hsourceNe, ↓reduceIte]
-        apply h.runway position
-        · by_contra hold
-          have hpositionLe : position ≤ layoutEnd current :=
-            Nat.le_of_not_gt hold
-          have hstrict : layoutEnd next < layoutEnd current := by omega
-          have hsourceEnd := hshrink hstrict
-          apply hsourcePosition
-          omega
-        · exact hpositionLimit
-  have houtside : ∀ position : Int,
-      ¬(1 ≤ position ∧ position ≤ layoutEnd next) →
-        logicalTape growth cleared position = logicalTape growth U position := by
-    intro position houtside
-    simp only [U, logicalTape_writeLogical_apply]
-    have hdestinationNe : position ≠ (destination : Int) := by
+  rcases moveLeft_core h.toCoreRepresents label hlower hsourcePositive
+      hdestination hmove with ⟨hinstall, hcore⟩
+  refine ⟨hinstall, hcore, hnextCore, ?_⟩
+  intro position hpast hpositionLimit
+  change logicalTape growth U position = blankSymbol
+  simp only [U, cleared, logicalTape_writeLogical_apply]
+  by_cases hsourcePosition : position = source
+  · have hsourceInt : (position : Int) = (source : Int) := by
+      exact_mod_cast hsourcePosition
+    have hdestinationInt : (position : Int) ≠ (destination : Int) := by
       intro heq
-      apply houtside
-      rw [heq]
-      constructor
-      · exact_mod_cast hdestinationPositive
-      · exact_mod_cast hdestination
-    simp [hdestinationNe]
-  have hinstall := installCore_congr_of_outside next growth cleared U houtside
-  have hself : installCore next growth U = U :=
-    installCore_eq_self_of_coreRepresents hrep.toCoreRepresents
-  exact ⟨hself.symm.trans hinstall.symm, hrep⟩
+      have : source = destination := by
+        exact_mod_cast hsourceInt.symm.trans heq
+      omega
+    rw [if_neg hdestinationInt, if_pos hsourceInt]
+  · have hdestinationNe : (position : Int) ≠ (destination : Int) := by
+      intro heq
+      have heqNat : position = destination := by exact_mod_cast heq
+      omega
+    have hsourceNe : (position : Int) ≠ (source : Int) := by
+      exact_mod_cast hsourcePosition
+    simp only [hdestinationNe, hsourceNe, ↓reduceIte]
+    apply h.runway position
+    · by_contra hold
+      have hpositionLe : position ≤ layoutEnd current :=
+        Nat.le_of_not_gt hold
+      have hstrict : layoutEnd next < layoutEnd current := by omega
+      have hsourceEnd := hshrink hstrict
+      apply hsourcePosition
+      omega
+    · exact hpositionLimit
 
 /-! ## Target-free outward shifts -/
 
