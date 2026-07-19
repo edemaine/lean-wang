@@ -45,6 +45,17 @@ inductive OnCycle (west east south north : Nat) : Port → Prop where
       (hsouth : quarterSouth south < qy) (hnorth : qy < quarterNorth north) :
       OnCycle west east south north ⟨quarterEast east, qy, .north⟩
 
+/-- A path of specified crossing parity between two oriented cycles. -/
+def CycleBridge
+    (grid : Nat → Nat → Index)
+    (firstWest firstEast firstSouth firstNorth : Nat)
+    (secondWest secondEast secondSouth secondNorth : Nat)
+    (parity : Bool) : Prop :=
+  ∃ firstPort secondPort,
+    OnCycle firstWest firstEast firstSouth firstNorth firstPort ∧
+      OnCycle secondWest secondEast secondSouth secondNorth secondPort ∧
+      Path grid firstPort secondPort parity
+
 theorem OnCycle.value_eq
     {grid : Nat → Nat → Index}
     {stateGrid : Nat → Nat → RedShades.State}

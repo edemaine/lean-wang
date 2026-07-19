@@ -25,14 +25,12 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoard
   TranslatedRedShadeCrossings TranslatedRedShadeCrossingPaths
 
 /-- An explicit even path from one oriented cycle to another. -/
-def EvenCycleBridge
+abbrev EvenCycleBridge
     (grid : Nat → Nat → Index)
     (firstWest firstEast firstSouth firstNorth : Nat)
     (secondWest secondEast secondSouth secondNorth : Nat) : Prop :=
-  ∃ firstPort secondPort,
-    OnCycle firstWest firstEast firstSouth firstNorth firstPort ∧
-      OnCycle secondWest secondEast secondSouth secondNorth secondPort ∧
-      Path grid firstPort secondPort false
+  CycleBridge grid firstWest firstEast firstSouth firstNorth
+    secondWest secondEast secondSouth secondNorth false
 
 /-- Every oriented cycle has an identity even bridge. -/
 theorem EvenCycleBridge.refl

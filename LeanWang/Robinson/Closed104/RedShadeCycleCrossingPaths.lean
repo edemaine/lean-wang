@@ -24,14 +24,12 @@ namespace RedShadeCycleCrossingPaths
 open OrientedRedCycles RedShadeCycles RedShadeGraph RedShadeGraphBoards
 
 /-- An explicit odd path from one oriented cycle to another. -/
-def OddCycleBridge
+abbrev OddCycleBridge
     (grid : Nat → Nat → Index)
     (firstWest firstEast firstSouth firstNorth : Nat)
     (secondWest secondEast secondSouth secondNorth : Nat) : Prop :=
-  ∃ firstPort secondPort,
-    OnCycle firstWest firstEast firstSouth firstNorth firstPort ∧
-      OnCycle secondWest secondEast secondSouth secondNorth secondPort ∧
-      Path grid firstPort secondPort true
+  CycleBridge grid firstWest firstEast firstSouth firstNorth
+    secondWest secondEast secondSouth secondNorth true
 
 /-- The north side of the small cycle crosses the west side of the large one. -/
 theorem north_crosses_west

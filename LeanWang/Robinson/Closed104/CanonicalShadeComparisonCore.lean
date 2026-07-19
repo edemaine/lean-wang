@@ -111,13 +111,14 @@ theorem sourceOnCell (blockX blockY : Nat) :
       (by simp [quarterWest]; omega)
       (by simp [quarterEast]; omega))
 
-/-- An even cycle bridge transports a uniform shade unchanged. -/
-theorem value_eq_of_evenCycleBridge
+/-- A bridge of either parity transports a uniform shade to every port on its
+target cycle. -/
+theorem related_of_cycleBridge
     {grid : Nat → Nat → Index}
     {states : Nat → Nat → RedShades.State}
     {firstWest firstEast firstSouth firstNorth : Nat}
     {secondWest secondEast secondSouth secondNorth : Nat}
-    {shade : RedShades.Shade} {target : Port}
+    {shade : RedShades.Shade} {target : Port} {parity : Bool}
     (valid : ValidShadeGrid grid states)
     (firstCycle : CycleOn grid
       firstWest firstEast firstSouth firstNorth)
@@ -125,50 +126,17 @@ theorem value_eq_of_evenCycleBridge
       firstWest firstEast firstSouth firstNorth shade)
     (secondCycle : CycleOn grid
       secondWest secondEast secondSouth secondNorth)
-    (bridge : EvenCycleBridge grid
+    (bridge : CycleBridge grid
       firstWest firstEast firstSouth firstNorth
-      secondWest secondEast secondSouth secondNorth)
+      secondWest secondEast secondSouth secondNorth parity)
     (targetOn : OnCycle
       secondWest secondEast secondSouth secondNorth target) :
-    value states target = some shade := by
+    Related parity (some shade) (value states target) := by
   rcases bridge with ⟨firstPort, secondPort, firstOn, secondOn, path⟩
   have firstValue := firstOn.value_eq firstCycle firstShaded valid
-  have bridgeEq : value states firstPort = value states secondPort :=
-    path.sound valid
-  have secondValue : value states secondPort = some shade :=
-    bridgeEq.symm.trans firstValue
-  have around := onCycle_connected secondCycle secondOn targetOn
-  have aroundEq : value states secondPort = value states target :=
-    around.sound valid
-  exact aroundEq.symm.trans secondValue
-
-/-- An odd cycle bridge transports a uniform shade to its opposite. -/
-theorem value_eq_of_oddCycleBridge
-    {grid : Nat → Nat → Index}
-    {states : Nat → Nat → RedShades.State}
-    {firstWest firstEast firstSouth firstNorth : Nat}
-    {secondWest secondEast secondSouth secondNorth : Nat}
-    {shade : RedShades.Shade} {target : Port}
-    (valid : ValidShadeGrid grid states)
-    (firstCycle : CycleOn grid
-      firstWest firstEast firstSouth firstNorth)
-    (firstShaded : CycleShade states
-      firstWest firstEast firstSouth firstNorth shade)
-    (secondCycle : CycleOn grid
-      secondWest secondEast secondSouth secondNorth)
-    (bridge : RedShadeCycleCrossingPaths.OddCycleBridge grid
-      firstWest firstEast firstSouth firstNorth
-      secondWest secondEast secondSouth secondNorth)
-    (targetOn : OnCycle
-      secondWest secondEast secondSouth secondNorth target) :
-    value states target = some shade.opposite := by
-  rcases bridge with ⟨firstPort, secondPort, firstOn, secondOn, path⟩
-  have firstValue := firstOn.value_eq firstCycle firstShaded valid
-  have secondValue := end_eq_opposite_of_odd_path valid path firstValue
-  have around := onCycle_connected secondCycle secondOn targetOn
-  have aroundEq : value states secondPort = value states target :=
-    around.sound valid
-  exact aroundEq.symm.trans secondValue
+  have targetValue : value states secondPort = value states target :=
+    (onCycle_connected secondCycle secondOn targetOn).sound valid
+  simpa only [firstValue, targetValue] using path.sound valid
 
 /-- Common two-level coarsening induction for the even and odd canonical
 shade phases.  A phase supplies its base comparison, local canonical blocks,

@@ -179,8 +179,8 @@ private theorem cycleSourceAgreement (depth : Nat)
   have actualSource :
       value states (translatePort cycleSource (8 * blockX) (8 * blockY)) =
         some .light :=
-    value_eq_of_evenCycleBridge valid (rootCycle (depth + 1) coarse)
-      shaded cellCycle bridge (sourceOnCell blockX blockY)
+    (related_of_cycleBridge valid (rootCycle (depth + 1) coarse)
+      shaded cellCycle bridge (sourceOnCell blockX blockY)).symm
   have canonicalSource := cycleSource_light
     (supertileNodeGrid (depth + 1) root blockX blockY)
   exact actualSource.trans canonicalSource.symm

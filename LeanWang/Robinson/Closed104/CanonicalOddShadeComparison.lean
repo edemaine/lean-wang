@@ -237,10 +237,12 @@ private theorem cycleSourceAgreement (depth : Nat)
   have actualSource :
       value states (translatePort cycleSource (8 * blockX) (8 * blockY)) =
         some .dark := by
-    have result := value_eq_of_oddCycleBridge valid
+    rcases related_of_cycleBridge valid
       (rootCycle (depth + 1) coarse) shaded cellCycle bridge'
-      (sourceOnCell blockX blockY)
-    simpa [RedShades.Shade.opposite] using result
+      (sourceOnCell blockX blockY) with ⟨pathShade, shadeEq, targetEq⟩
+    have : pathShade = .light := Option.some.inj shadeEq.symm
+    subst pathShade
+    simpa [RedShades.Shade.opposite] using targetEq
   have canonicalSource := CanonicalOddShadeGeometry.cycleSource_dark
     (supertileNodeGrid (depth + 2) seedNode blockX blockY)
   exact actualSource.trans canonicalSource.symm
