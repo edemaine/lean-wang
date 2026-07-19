@@ -54,24 +54,6 @@ def symbol : MachineCell → Nat
   | plain a => a
   | head _ a => a
 
-def isHead : MachineCell → Bool
-  | boundary => false
-  | plain _ => false
-  | head _ _ => true
-
-def isBoundary : MachineCell → Bool
-  | boundary => true
-  | plain _ => false
-  | head _ _ => false
-
-def plain? : MachineCell → Option Nat
-  | plain a => some a
-  | _ => none
-
-def head? : MachineCell → Option (Nat × Nat)
-  | head q a => some (q, a)
-  | _ => none
-
 /-- A machine cell is supported by a machine's finite symbol and state sets. -/
 def Mem (M : Machine) : MachineCell → Prop
   | boundary => True
@@ -115,72 +97,6 @@ theorem head_primrec : Primrec (fun p : Nat × Nat => MachineCell.head p.1 p.2) 
 
 theorem code_primrec : Primrec MachineCell.code :=
   Primrec.encode
-
-theorem isBoundary_primrec : Primrec MachineCell.isBoundary := by
-  exact (Primrec.eq.decide.comp Primrec.id (Primrec.const MachineCell.boundary)).of_eq
-    fun c => by cases c <;> rfl
-
-theorem plain?_primrec : Primrec MachineCell.plain? := by
-  have hrest :
-      Primrec₂ (fun (_ : MachineCell) (r : Nat ⊕ Nat × Nat) =>
-        match r with
-        | Sum.inl a => some a
-        | Sum.inr _ => none) := by
-    apply Primrec₂.mk
-    refine (Primrec.sumCasesOn
-      (α := MachineCell × (Nat ⊕ Nat × Nat)) (β := Nat) (γ := Nat × Nat)
-      (σ := Option Nat)
-      (f := fun p : MachineCell × (Nat ⊕ Nat × Nat) => p.2)
-      (g := fun _ a => some a)
-      (h := fun _ _ => none)
-      Primrec.snd ?_ ?_).of_eq ?_
-    · exact (Primrec.option_some.comp Primrec.snd).to₂
-    · exact (Primrec.const none).to₂
-    · intro p
-      cases p.2 <;> rfl
-  refine (Primrec.sumCasesOn
-    (α := MachineCell) (β := Unit) (γ := Nat ⊕ Nat × Nat) (σ := Option Nat)
-    (f := MachineCell.toSum)
-    (g := fun _ _ => none)
-    (h := fun _ r =>
-      match r with
-      | Sum.inl a => some a
-      | Sum.inr _ => none)
-    toSum_primrec ?_ hrest).of_eq ?_
-  · exact (Primrec.const none).to₂
-  · intro c
-    cases c <;> rfl
-
-theorem head?_primrec : Primrec MachineCell.head? := by
-  have hrest :
-      Primrec₂ (fun (_ : MachineCell) (r : Nat ⊕ Nat × Nat) =>
-        match r with
-        | Sum.inl _ => none
-        | Sum.inr p => some p) := by
-    apply Primrec₂.mk
-    refine (Primrec.sumCasesOn
-      (α := MachineCell × (Nat ⊕ Nat × Nat)) (β := Nat) (γ := Nat × Nat)
-      (σ := Option (Nat × Nat))
-      (f := fun p : MachineCell × (Nat ⊕ Nat × Nat) => p.2)
-      (g := fun _ _ => none)
-      (h := fun _ p => some p)
-      Primrec.snd ?_ ?_).of_eq ?_
-    · exact (Primrec.const none).to₂
-    · exact (Primrec.option_some.comp Primrec.snd).to₂
-    · intro p
-      cases p.2 <;> rfl
-  refine (Primrec.sumCasesOn
-    (α := MachineCell) (β := Unit) (γ := Nat ⊕ Nat × Nat) (σ := Option (Nat × Nat))
-    (f := MachineCell.toSum)
-    (g := fun _ _ => none)
-    (h := fun _ r =>
-      match r with
-      | Sum.inl _ => none
-      | Sum.inr p => some p)
-    toSum_primrec ?_ hrest).of_eq ?_
-  · exact (Primrec.const none).to₂
-  · intro c
-    cases c <;> rfl
 
 end MachineCell
 
@@ -759,25 +675,6 @@ theorem vMatches_toTaggedWangTile_iff_cells
         lower.nextRight = upper.prevRight := by
   unfold WangTile.VMatches toTaggedWangTile
   rw [taggedTripleCellColor_eq_iff]
-
-theorem toTaggedWangTile_injective
-    {rowTag nextRowTag rowTag' nextRowTag' : Nat}
-    {t u : MachineHistoryTile}
-    (h : t.toTaggedWangTile rowTag nextRowTag =
-      u.toTaggedWangTile rowTag' nextRowTag') :
-    rowTag = rowTag' ∧ nextRowTag = nextRowTag' ∧ t = u := by
-  have hs : taggedTripleCellColor rowTag t.prevLeft t.prevCenter t.prevRight =
-      taggedTripleCellColor rowTag' u.prevLeft u.prevCenter u.prevRight := by
-    simpa [toTaggedWangTile] using congrArg WangTile.s h
-  have hn : taggedTripleCellColor nextRowTag t.nextLeft t.nextCenter t.nextRight =
-      taggedTripleCellColor nextRowTag' u.nextLeft u.nextCenter u.nextRight := by
-    simpa [toTaggedWangTile] using congrArg WangTile.n h
-  rw [taggedTripleCellColor_eq_iff] at hs hn
-  rcases hs with ⟨hrow, hprevLeft, hprevCenter, hprevRight⟩
-  rcases hn with ⟨hnextRow, hnextLeft, hnextCenter, hnextRight⟩
-  cases t
-  cases u
-  simp_all
 
 end MachineHistoryTile
 

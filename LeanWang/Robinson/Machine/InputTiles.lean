@@ -91,29 +91,6 @@ theorem vMatches_toWangTile_iff
         lower.nextRight = upper.prevRight := by
   simp [WangTile.VMatches, toWangTile, taggedTripleCellColor_eq_iff]
 
-theorem toWangTile_injective
-    {westTag eastTag rowTag nextRowTag westTag' eastTag' rowTag' nextRowTag' : Nat}
-    {tile tile' : MachineHistoryTile}
-    (heq : toWangTile westTag eastTag rowTag nextRowTag tile =
-      toWangTile westTag' eastTag' rowTag' nextRowTag' tile') :
-    westTag = westTag' ∧ eastTag = eastTag' ∧ rowTag = rowTag' ∧
-      nextRowTag = nextRowTag' ∧ tile = tile' := by
-  have hs := congrArg WangTile.s heq
-  have hn := congrArg WangTile.n heq
-  have hw := congrArg WangTile.w heq
-  have he := congrArg WangTile.e heq
-  simp only [toWangTile, taggedTripleCellColor_eq_iff] at hs hn
-  simp only [toWangTile, horizontalColor, Nat.pair_eq_pair,
-    taggedOverlapCellColor_eq_iff] at hw he
-  rcases hs with ⟨hrow, hprevLeft, hprevCenter, hprevRight⟩
-  rcases hn with ⟨hnextRow, hnextLeft, hnextCenter, hnextRight⟩
-  rcases hw with ⟨hwest, _hrow', _, _, _, _⟩
-  rcases he with ⟨heast, _hrow'', _, _, _, _⟩
-  refine ⟨hwest, heast, hrow, hnextRow, ?_⟩
-  cases tile
-  cases tile'
-  simp_all
-
 /-- Past this position, the time-zero local history is a constant blank tail. -/
 def tailPosition (input : List Nat) : Nat :=
   input.length + 3
