@@ -5,6 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.RedShades
 import LeanWang.Robinson.Closed104.SignalFreeCellLocal
+import LeanWang.Robinson.Closed104.SignalCorridors
 
 /-!
 Path-level propagation for the light/dark red-wire layer.
@@ -29,65 +30,52 @@ structure ValidShadeGrid (indexGrid : Nat → Nat → Index)
   hmatch : ∀ x y, (stateGrid x y).east = (stateGrid (x + 1) y).west
   vmatch : ∀ x y, (stateGrid x y).north = (stateGrid x (y + 1)).south
 
+private theorem ValidShadeGrid.allowedFor
+    {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
+    (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat) :
+    RedShades.allowedFor (componentAt indexGrid x y) (quadrantAt x y)
+      (stateGrid x y) = true := by
+  simpa [RedShades.locallyAllowed, componentAt] using valid.allowed x y
+
 theorem ValidShadeGrid.horizontal_eq
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
     (hpath : RedShades.hasHorizontal
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).west = (stateGrid x y).east := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hpath
-  exact RedShades.horizontal_eq_of_allowedFor hallowed hpath
+    (stateGrid x y).west = (stateGrid x y).east :=
+  RedShades.horizontal_eq_of_allowedFor (valid.allowedFor x y) hpath
 
 theorem ValidShadeGrid.vertical_eq
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
     (hpath : RedShades.hasVertical
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).south = (stateGrid x y).north := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hpath
-  exact RedShades.vertical_eq_of_allowedFor hallowed hpath
+    (stateGrid x y).south = (stateGrid x y).north :=
+  RedShades.vertical_eq_of_allowedFor (valid.allowedFor x y) hpath
 
 theorem ValidShadeGrid.east_present
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
     (hpath : RedShades.hasEast
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).east.isSome = true := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hpath
-  exact RedShades.east_present_of_allowedFor hallowed hpath
+    (stateGrid x y).east.isSome = true :=
+  RedShades.east_present_of_allowedFor (valid.allowedFor x y) hpath
 
 theorem ValidShadeGrid.west_present
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
     (hpath : RedShades.hasWest
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).west.isSome = true := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hpath
-  exact RedShades.west_present_of_allowedFor hallowed hpath
+    (stateGrid x y).west.isSome = true :=
+  RedShades.west_present_of_allowedFor (valid.allowedFor x y) hpath
 
 theorem ValidShadeGrid.south_present
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
     (valid : ValidShadeGrid indexGrid stateGrid) (x y : Nat)
     (hpath : RedShades.hasSouth
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).south.isSome = true := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hpath
-  exact RedShades.south_present_of_allowedFor hallowed hpath
+    (stateGrid x y).south.isSome = true :=
+  RedShades.south_present_of_allowedFor (valid.allowedFor x y) hpath
 
 theorem ValidShadeGrid.west_north_corner_eq
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
@@ -96,12 +84,9 @@ theorem ValidShadeGrid.west_north_corner_eq
       (componentAt indexGrid x y) (quadrantAt x y) = true)
     (hnorth : RedShades.cornerNorth
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).west = (stateGrid x y).north := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hwest hnorth
-  exact RedShades.west_north_corner_eq_of_allowedFor hallowed hwest hnorth
+    (stateGrid x y).west = (stateGrid x y).north :=
+  RedShades.west_north_corner_eq_of_allowedFor
+    (valid.allowedFor x y) hwest hnorth
 
 theorem ValidShadeGrid.west_south_corner_eq
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
@@ -110,12 +95,9 @@ theorem ValidShadeGrid.west_south_corner_eq
       (componentAt indexGrid x y) (quadrantAt x y) = true)
     (hsouth : RedShades.cornerSouth
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).west = (stateGrid x y).south := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hwest hsouth
-  exact RedShades.west_south_corner_eq_of_allowedFor hallowed hwest hsouth
+    (stateGrid x y).west = (stateGrid x y).south :=
+  RedShades.west_south_corner_eq_of_allowedFor
+    (valid.allowedFor x y) hwest hsouth
 
 theorem ValidShadeGrid.east_north_corner_eq
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
@@ -124,12 +106,9 @@ theorem ValidShadeGrid.east_north_corner_eq
       (componentAt indexGrid x y) (quadrantAt x y) = true)
     (hnorth : RedShades.cornerNorth
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).east = (stateGrid x y).north := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at heast hnorth
-  exact RedShades.east_north_corner_eq_of_allowedFor hallowed heast hnorth
+    (stateGrid x y).east = (stateGrid x y).north :=
+  RedShades.east_north_corner_eq_of_allowedFor
+    (valid.allowedFor x y) heast hnorth
 
 theorem ValidShadeGrid.crossing_opposite
     {indexGrid : Nat → Nat → Index} {stateGrid : Nat → Nat → RedShades.State}
@@ -138,13 +117,9 @@ theorem ValidShadeGrid.crossing_opposite
       (componentAt indexGrid x y) (quadrantAt x y) = true)
     (hvertical : RedShades.hasVertical
       (componentAt indexGrid x y) (quadrantAt x y) = true) :
-    (stateGrid x y).west ≠ (stateGrid x y).south := by
-  have hallowed := valid.allowed x y
-  unfold RedShades.locallyAllowed at hallowed
-  dsimp only at hallowed
-  unfold componentAt at hhorizontal hvertical
-  exact RedShades.crossing_opposite_of_allowedFor
-    hallowed hhorizontal hvertical
+    (stateGrid x y).west ≠ (stateGrid x y).south :=
+  RedShades.crossing_opposite_of_allowedFor
+    (valid.allowedFor x y) hhorizontal hvertical
 
 /-- Equality of horizontal shade across a sequence of path quarters. -/
 theorem horizontal_shade_across
@@ -153,18 +128,9 @@ theorem horizontal_shade_across
       (state (start + i)).east = (state (start + i + 1)).west)
     (htransmit : ∀ i, i < count →
       (state (start + i + 1)).west = (state (start + i + 1)).east) :
-    (state start).east = (state (start + count + 1)).west := by
-  induction count with
-  | zero => simpa using hmatch 0 (by omega)
-  | succ count ih =>
-      have hprefix := ih
-        (fun i hi => hmatch i (by omega))
-        (fun i hi => htransmit i (by omega))
-      calc
-        (state start).east = (state (start + count + 1)).west := hprefix
-        _ = (state (start + count + 1)).east := htransmit count (by omega)
-        _ = (state (start + (count + 1) + 1)).west := by
-          simpa [Nat.add_assoc] using hmatch (count + 1) (by omega)
+    (state start).east = (state (start + count + 1)).west :=
+  Signals.value_across state RedShades.State.east RedShades.State.west
+    start count hmatch htransmit
 
 /-- Equality of vertical shade across a sequence of path quarters. -/
 theorem vertical_shade_across
@@ -173,18 +139,9 @@ theorem vertical_shade_across
       (state (start + i)).north = (state (start + i + 1)).south)
     (htransmit : ∀ i, i < count →
       (state (start + i + 1)).south = (state (start + i + 1)).north) :
-    (state start).north = (state (start + count + 1)).south := by
-  induction count with
-  | zero => simpa using hmatch 0 (by omega)
-  | succ count ih =>
-      have hprefix := ih
-        (fun i hi => hmatch i (by omega))
-        (fun i hi => htransmit i (by omega))
-      calc
-        (state start).north = (state (start + count + 1)).south := hprefix
-        _ = (state (start + count + 1)).north := htransmit count (by omega)
-        _ = (state (start + (count + 1) + 1)).south := by
-          simpa [Nat.add_assoc] using hmatch (count + 1) (by omega)
+    (state start).north = (state (start + count + 1)).south :=
+  Signals.value_across state RedShades.State.north RedShades.State.south
+    start count hmatch htransmit
 
 end RedShadePaths
 end Closed104
