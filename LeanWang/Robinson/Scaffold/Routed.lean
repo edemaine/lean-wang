@@ -332,7 +332,21 @@ private theorem core_mem_completePayloads
     patch.core p ∈ completePayloads T :=
   mem_completePayloads_of_mem_routedPayloads (patch.core_mem p)
 
-set_option linter.unusedSimpArgs false in
+private theorem colorFromNeighbor_mem
+    {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
+    (patch : RoutedCoreBoxLayerPatch S T seed r)
+    (neighbor : Option (Box r)) (edge : WangTile → Nat)
+    (edge_mem : ∀ q, edge (patch.core q) ∈ payloadPalette T) :
+    PayloadCompletion.colorFromNeighbor
+      patch.constrained patch.core neighbor edge ∈ payloadPalette T := by
+  cases neighbor with
+  | none => exact zero_mem_payloadPalette T
+  | some q =>
+      by_cases hcore : patch.constrained q = true
+      · simpa [PayloadCompletion.colorFromNeighbor, hcore] using edge_mem q
+      · simp [PayloadCompletion.colorFromNeighbor, hcore,
+          zero_mem_payloadPalette]
+
 private theorem inactivePayloadAround_mem
     {S : RoutedScaffold} {T : TileSet} {seed : WangTile} {r : Nat}
     (patch : RoutedCoreBoxLayerPatch S T seed r) (p : Box r) :
@@ -340,54 +354,22 @@ private theorem inactivePayloadAround_mem
       patch.constrained patch.core p ∈
       completePayloads T := by
   apply mk_mem_completePayloads
-  · split
-    · rename_i hp
-      by_cases hcore : patch.constrained
-          ⟨(p.1.1, p.1.2 + 1), hp⟩ = true
-      · simp only [PayloadCompletion.inactiveAround,
-          dif_pos hp, hcore, if_true]
-        exact (edge_mem_payloadPalette_of_mem_completePayloads
-          (patch.core_mem_completePayloads _)).2.1
-      · simp [PayloadCompletion.inactiveAround,
-          hp, hcore, zero_mem_payloadPalette]
-    · simp [PayloadCompletion.inactiveAround,
-        zero_mem_payloadPalette]
-  · split
-    · rename_i hp
-      by_cases hcore : patch.constrained
-          ⟨(p.1.1, p.1.2 - 1), hp⟩ = true
-      · simp only [PayloadCompletion.inactiveAround,
-          dif_pos hp, hcore, if_true]
-        exact (edge_mem_payloadPalette_of_mem_completePayloads
-          (patch.core_mem_completePayloads _)).1
-      · simp [PayloadCompletion.inactiveAround,
-          hp, hcore, zero_mem_payloadPalette]
-    · simp [PayloadCompletion.inactiveAround,
-        zero_mem_payloadPalette]
-  · split
-    · rename_i hp
-      by_cases hcore : patch.constrained
-          ⟨(p.1.1 + 1, p.1.2), hp⟩ = true
-      · simp only [PayloadCompletion.inactiveAround,
-          dif_pos hp, hcore, if_true]
-        exact (edge_mem_payloadPalette_of_mem_completePayloads
-          (patch.core_mem_completePayloads _)).2.2.2
-      · simp [PayloadCompletion.inactiveAround,
-          hp, hcore, zero_mem_payloadPalette]
-    · simp [PayloadCompletion.inactiveAround,
-        zero_mem_payloadPalette]
-  · split
-    · rename_i hp
-      by_cases hcore : patch.constrained
-          ⟨(p.1.1 - 1, p.1.2), hp⟩ = true
-      · simp only [PayloadCompletion.inactiveAround,
-          dif_pos hp, hcore, if_true]
-        exact (edge_mem_payloadPalette_of_mem_completePayloads
-          (patch.core_mem_completePayloads _)).2.2.1
-      · simp [PayloadCompletion.inactiveAround,
-          hp, hcore, zero_mem_payloadPalette]
-    · simp [PayloadCompletion.inactiveAround,
-        zero_mem_payloadPalette]
+  · apply colorFromNeighbor_mem patch
+    intro q
+    exact (edge_mem_payloadPalette_of_mem_completePayloads
+      (patch.core_mem_completePayloads q)).2.1
+  · apply colorFromNeighbor_mem patch
+    intro q
+    exact (edge_mem_payloadPalette_of_mem_completePayloads
+      (patch.core_mem_completePayloads q)).1
+  · apply colorFromNeighbor_mem patch
+    intro q
+    exact (edge_mem_payloadPalette_of_mem_completePayloads
+      (patch.core_mem_completePayloads q)).2.2.2
+  · apply colorFromNeighbor_mem patch
+    intro q
+    exact (edge_mem_payloadPalette_of_mem_completePayloads
+      (patch.core_mem_completePayloads q)).2.2.1
 
 /-- Fill all inactive cells around a locally compatible routed core. -/
 def toRoutedCombinedBoxLayerPatch

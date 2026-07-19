@@ -151,29 +151,30 @@ theorem completePayloads_primrec : Primrec completePayloads :=
 
 namespace PayloadCompletion
 
+/-- Read one edge color from a constrained neighbor, using zero when the
+neighbor is absent or unconstrained. -/
+def colorFromNeighbor {r : Nat} (isActive : Box r → Bool)
+    (activePayload : Box r → WangTile) (neighbor : Option (Box r))
+    (edge : WangTile → Nat) : Nat :=
+  match neighbor with
+  | none => 0
+  | some q => if isActive q = true then edge (activePayload q) else 0
+
 /-- Fill one unconstrained cell with the colors of its constrained neighbors. -/
 def inactiveAround {r : Nat} (isActive : Box r → Bool)
     (activePayload : Box r → WangTile) (p : Box r) : WangTile where
-  n :=
-    if hp : InBox r (p.1.1, p.1.2 + 1) then
-      let q : Box r := ⟨(p.1.1, p.1.2 + 1), hp⟩
-      if isActive q = true then (activePayload q).s else 0
-    else 0
-  s :=
-    if hp : InBox r (p.1.1, p.1.2 - 1) then
-      let q : Box r := ⟨(p.1.1, p.1.2 - 1), hp⟩
-      if isActive q = true then (activePayload q).n else 0
-    else 0
-  e :=
-    if hp : InBox r (p.1.1 + 1, p.1.2) then
-      let q : Box r := ⟨(p.1.1 + 1, p.1.2), hp⟩
-      if isActive q = true then (activePayload q).w else 0
-    else 0
-  w :=
-    if hp : InBox r (p.1.1 - 1, p.1.2) then
-      let q : Box r := ⟨(p.1.1 - 1, p.1.2), hp⟩
-      if isActive q = true then (activePayload q).e else 0
-    else 0
+  n := colorFromNeighbor isActive activePayload
+    (if hp : InBox r (p.1.1, p.1.2 + 1) then
+      some ⟨(p.1.1, p.1.2 + 1), hp⟩ else none) WangTile.s
+  s := colorFromNeighbor isActive activePayload
+    (if hp : InBox r (p.1.1, p.1.2 - 1) then
+      some ⟨(p.1.1, p.1.2 - 1), hp⟩ else none) WangTile.n
+  e := colorFromNeighbor isActive activePayload
+    (if hp : InBox r (p.1.1 + 1, p.1.2) then
+      some ⟨(p.1.1 + 1, p.1.2), hp⟩ else none) WangTile.w
+  w := colorFromNeighbor isActive activePayload
+    (if hp : InBox r (p.1.1 - 1, p.1.2) then
+      some ⟨(p.1.1 - 1, p.1.2), hp⟩ else none) WangTile.e
 
 /-- Keep constrained payloads and complete every other cell locally. -/
 def complete {r : Nat} (isActive : Box r → Bool)
@@ -199,12 +200,12 @@ theorem complete_hmatch {r : Nat}
   · by_cases hqActive : isActive q = true
     · simpa [complete, q, hpActive, hqActive] using
         hactive p hp hpActive hqActive
-    · simp [WangTile.HMatches, complete, inactiveAround,
+    · simp [WangTile.HMatches, complete, inactiveAround, colorFromNeighbor,
         q, hpActive, hqActive, p.2]
   · by_cases hqActive : isActive q = true
-    · simp [WangTile.HMatches, complete, inactiveAround,
+    · simp [WangTile.HMatches, complete, inactiveAround, colorFromNeighbor,
         q, hpActive, hqActive, hp]
-    · simp [WangTile.HMatches, complete, inactiveAround,
+    · simp [WangTile.HMatches, complete, inactiveAround, colorFromNeighbor,
         q, hpActive, hqActive, hp, p.2]
 
 theorem complete_vmatch {r : Nat}
@@ -225,12 +226,12 @@ theorem complete_vmatch {r : Nat}
   · by_cases hqActive : isActive q = true
     · simpa [complete, q, hpActive, hqActive] using
         hactive p hp hpActive hqActive
-    · simp [WangTile.VMatches, complete, inactiveAround,
+    · simp [WangTile.VMatches, complete, inactiveAround, colorFromNeighbor,
         q, hpActive, hqActive, p.2]
   · by_cases hqActive : isActive q = true
-    · simp [WangTile.VMatches, complete, inactiveAround,
+    · simp [WangTile.VMatches, complete, inactiveAround, colorFromNeighbor,
         q, hpActive, hqActive, hp]
-    · simp [WangTile.VMatches, complete, inactiveAround,
+    · simp [WangTile.VMatches, complete, inactiveAround, colorFromNeighbor,
         q, hpActive, hqActive, hp, p.2]
 
 end PayloadCompletion
