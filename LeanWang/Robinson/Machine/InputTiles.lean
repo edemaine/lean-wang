@@ -439,6 +439,18 @@ theorem positive_row_decode
     (plane (position, time)).2 (plane (position, time + 1)).2
     (valid.2 (position, time))
 
+/-- A positive-row plane cell decodes as the corresponding local machine
+history neighborhood. -/
+def DecodedHistoryCell (M : Machine) (input : List Nat)
+    (plane : Nat × Nat → TileIn (tiles M input))
+    (time position : Nat) : Prop :=
+  ∃ tile, tile ∈ machineHistoryTiles M ∧
+    toWangTile 0 0 normalRowTag normalRowTag tile =
+        (plane (position, time)).1 ∧
+      tile.prevLeft = (historyTile M input time position).prevLeft ∧
+      tile.prevCenter = (historyTile M input time position).prevCenter ∧
+      tile.prevRight = (historyTile M input time position).prevRight
+
 theorem row_one_prev_cells
     {M : Machine} {input : List Nat}
     {plane : Nat × Nat → TileIn (tiles M input)}
@@ -470,12 +482,7 @@ theorem row_one_prev_run_cells
     {plane : Nat × Nat → TileIn (tiles M input)}
     (valid : ValidQuarterTiling (tiles M input) plane)
     (seeded : (plane (0, 0)).1 = seed M input) (position : Nat) :
-    ∃ upper, upper ∈ machineHistoryTiles M ∧
-      toWangTile 0 0 normalRowTag normalRowTag upper =
-          (plane (position, 1)).1 ∧
-        upper.prevLeft = (historyTile M input 1 position).prevLeft ∧
-        upper.prevCenter = (historyTile M input 1 position).prevCenter ∧
-        upper.prevRight = (historyTile M input 1 position).prevRight := by
+    DecodedHistoryCell M input plane 1 position := by
   rcases row_one_prev_cells valid seeded position with
     ⟨upper, hupperMem, hupperTile, hleft, hcenter, hright⟩
   exact ⟨upper, hupperMem, hupperTile,
@@ -546,22 +553,11 @@ theorem next_row_prev_run_cells
     {plane : Nat × Nat → TileIn (tiles M input)}
     (valid : ValidQuarterTiling (tiles M input) plane)
     {time : Nat}
-    (hrow : ∀ position,
-      ∃ tile, tile ∈ machineHistoryTiles M ∧
-        toWangTile 0 0 normalRowTag normalRowTag tile =
-            (plane (position, time + 1)).1 ∧
-          tile.prevLeft = (historyTile M input (time + 1) position).prevLeft ∧
-          tile.prevCenter = (historyTile M input (time + 1) position).prevCenter ∧
-          tile.prevRight = (historyTile M input (time + 1) position).prevRight)
+    (hrow : ∀ position, DecodedHistoryCell M input plane (time + 1) position)
     (hstate : (run M input (time + 1)).state ≠ M.halt)
     (hnext : (run M input (time + 1 + 1)).state ≠ M.halt)
     (position : Nat) :
-    ∃ tile, tile ∈ machineHistoryTiles M ∧
-      toWangTile 0 0 normalRowTag normalRowTag tile =
-          (plane (position, time + 1 + 1)).1 ∧
-        tile.prevLeft = (historyTile M input (time + 1 + 1) position).prevLeft ∧
-        tile.prevCenter = (historyTile M input (time + 1 + 1) position).prevCenter ∧
-        tile.prevRight = (historyTile M input (time + 1 + 1) position).prevRight := by
+    DecodedHistoryCell M input plane (time + 1 + 1) position := by
   rcases hrow position with
     ⟨lower, hlowerMem, hlowerTile, hlowerLeft, hlowerCenter, hlowerRight⟩
   rcases positive_row_prev_cells_of_lower valid
@@ -631,13 +627,7 @@ theorem positive_row_prev_run_cells_of_nonhalting_prefix
     (seeded : (plane (0, 0)).1 = seed M input) (time : Nat)
     (hprefix : ∀ step, 1 ≤ step → step ≤ time + 1 →
       (run M input step).state ≠ M.halt) :
-    ∀ position,
-      ∃ tile, tile ∈ machineHistoryTiles M ∧
-        toWangTile 0 0 normalRowTag normalRowTag tile =
-            (plane (position, time + 1)).1 ∧
-          tile.prevLeft = (historyTile M input (time + 1) position).prevLeft ∧
-          tile.prevCenter = (historyTile M input (time + 1) position).prevCenter ∧
-          tile.prevRight = (historyTile M input (time + 1) position).prevRight := by
+    ∀ position, DecodedHistoryCell M input plane (time + 1) position := by
   induction time with
   | zero =>
       intro position
@@ -670,13 +660,7 @@ theorem false_of_next_halt_from_decoded_row
     {M : Machine} {input : List Nat}
     {plane : Nat × Nat → TileIn (tiles M input)}
     {time : Nat}
-    (hrow : ∀ position,
-      ∃ tile, tile ∈ machineHistoryTiles M ∧
-        toWangTile 0 0 normalRowTag normalRowTag tile =
-            (plane (position, time + 1)).1 ∧
-          tile.prevLeft = (historyTile M input (time + 1) position).prevLeft ∧
-          tile.prevCenter = (historyTile M input (time + 1) position).prevCenter ∧
-          tile.prevRight = (historyTile M input (time + 1) position).prevRight)
+    (hrow : ∀ position, DecodedHistoryCell M input plane (time + 1) position)
     (hstate : (run M input (time + 1)).state ≠ M.halt)
     (hnext : (run M input (time + 1 + 1)).state = M.halt) : False := by
   let configuration := run M input (time + 1)
