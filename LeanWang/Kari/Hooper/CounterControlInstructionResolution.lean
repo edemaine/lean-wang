@@ -33,21 +33,6 @@ private instance : Inhabited (Symbol numTags) :=
 
 /-! ## Resolving cleanup navigation -/
 
-private theorem cleanup_boundary_three_eq_lastGap_two_add_one
-    (registers : Registers) :
-    boundaryOffset registers 3 = lastGapOffset registers 2 + 1 := by
-  simp [boundaryOffset, lastGapOffset]
-
-private theorem cleanup_boundary_two_eq_lastGap_one_add_one
-    (registers : Registers) :
-    boundaryOffset registers 2 = lastGapOffset registers 1 + 1 := by
-  simp [boundaryOffset, lastGapOffset]
-
-private theorem cleanup_boundary_one_eq_lastGap_zero_add_one
-    (registers : Registers) :
-    boundaryOffset registers 1 = lastGapOffset registers 0 + 1 := by
-  simp [boundaryOffset, lastGapOffset]
-
 /-- Resolving-search form of an erasing boundary command.  The exact erase
 continuation runs only after the search has found its target. -/
 theorem machine_reaches_boundary_erase_or_halts
@@ -79,6 +64,20 @@ theorem machine_reaches_boundary_erase_or_halts
     (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
     (resolvingSearchRunner base c limit hshort) address expected direction
     success departure hraw outer distance hdistance hgap
+
+/-- Resolving searches instantiate the shared four-command cleanup runner. -/
+def resolvingCleanupRunner
+    (base : Nat) (c : Nat.Partrec.Code) (limit source : Nat)
+    (growth : Turing.Dir) (hshort : ShortResolves base c limit) :
+    CounterControlCleanupSemantics.CleanupRunner base c limit growth source
+      (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)) where
+  pullback := by
+    intro start current hreach hhalts
+    exact FullTM0.HaltsFrom.of_reaches hreach hhalts
+  erase := by
+    intro address expected success _ hraw outer distance hdistance hgap
+    exact machine_reaches_boundary_erase_or_halts base c limit hshort address
+      expected .left success (some .left) hraw outer distance hdistance hgap
 
 /-- Resolving-search form of the cleanup tag command. -/
 theorem machine_reaches_tag_or_halts
@@ -125,247 +124,29 @@ theorem machine_reaches_cleanup_return_or_halts
         ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
           atLogical spec.growth (CounterControlCleanupSemantics.afterFour spec T)
             (layoutEnd spec.registers)⟩ := by
-  let rawThree : RawCommand :=
-    .boundaryNavigation ⟨spec.growth, source, cleanupSearchBase⟩ 3 .left
-      (searchRef spec.growth source (cleanupSearchBase + 1))
-      (.erase (some .left))
-  let rawTwo : RawCommand :=
-    .boundaryNavigation ⟨spec.growth, source, cleanupSearchBase + 1⟩ 2 .left
-      (searchRef spec.growth source (cleanupSearchBase + 2))
-      (.erase (some .left))
-  let rawOne : RawCommand :=
-    .boundaryNavigation ⟨spec.growth, source, cleanupSearchBase + 2⟩ 1 .left
-      (searchRef spec.growth source (cleanupSearchBase + 3))
-      (.erase (some .left))
-  let rawZero : RawCommand :=
-    .boundaryNavigation ⟨spec.growth, source, cleanupSearchBase + 3⟩ 0 .left
-      (.sharedReturn spec.growth)
-      (.erase (some .left))
-  have hrawThree : rawThree ∈ rawCommands := hcommands rawThree (by
-    simp [rawThree, cleanupCommands])
-  have hrawTwo : rawTwo ∈ rawCommands := hcommands rawTwo (by
-    simp [rawTwo, cleanupCommands])
-  have hrawOne : rawOne ∈ rawCommands := hcommands rawOne (by
-    simp [rawOne, cleanupCommands])
-  have hrawZero : rawZero ∈ rawCommands := hcommands rawZero (by
-    simp [rawZero, cleanupCommands])
-  have hdistanceThree : RegisterLayout.values spec.registers 3 + 1 < limit := by
+  have hthree : RegisterLayout.values spec.registers 3 + 1 < limit := by
     rw [← hlimit]
     have hcore := spec.core_before_target
     rw [layoutEnd_eq] at hcore
     simp [RegisterLayout.values]
     omega
-  have hdistanceTwo : RegisterLayout.values spec.registers 2 < limit := by
-    rw [← hlimit]
-    exact registerValue_lt_outerDistance h (2 : Fin 4)
-  have hdistanceOne : RegisterLayout.values spec.registers 1 < limit := by
-    rw [← hlimit]
-    exact registerValue_lt_outerDistance h (1 : Fin 4)
-  have hdistanceZero : RegisterLayout.values spec.registers 0 < limit := by
-    rw [← hlimit]
-    exact registerValue_lt_outerDistance h (0 : Fin 4)
-  have hrunThree := machine_reaches_boundary_erase_or_halts base c limit
-    hshort ⟨spec.growth, source, cleanupSearchBase⟩ 3 .left
-    (searchRef spec.growth source (cleanupSearchBase + 1)) (some .left)
-    hrawThree
-    (atLogical spec.growth (CounterControlCleanupSemantics.afterFour spec T)
-      (boundaryOffset spec.registers 4))
-    (RegisterLayout.values spec.registers 3 + 1) hdistanceThree
-    (CounterControlCleanupSemantics.cleanupGap_three h)
-  have hthree :
-      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterFour spec T)
-              (layoutEnd spec.registers)⟩
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 1⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterThree spec T)
-              (lastGapOffset spec.registers 2)⟩ ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c ⟨spec.growth, source, cleanupSearchBase⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterFour spec T)
-              (layoutEnd spec.registers)⟩ := by
-    rcases hrunThree with hrun | hhalts
-    · left
-      have hstart : boundaryOffset spec.registers 4 =
-          boundaryOffset spec.registers 3 +
-            (RegisterLayout.values spec.registers 3 + 1) := by
-        simp [boundaryOffset, CounterLayout.boundaryPos]
-        omega
-      have hfound :
-          (atLogical spec.growth
-              (CounterControlCleanupSemantics.afterFour spec T)
-              (boundaryOffset spec.registers 4)).moveN
-              (orient spec.growth .left)
-              (RegisterLayout.values spec.registers 3 + 1) =
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterFour spec T)
-              (boundaryOffset spec.registers 3) := by
-        rw [hstart, orient_eq_orientDirection, atLogical_moveN_left]
-      simp only at hrun
-      rw [hfound, orient_eq_orientDirection,
-        cleanup_boundary_three_eq_lastGap_two_add_one,
-        erase_departLeft_atLogical] at hrun
-      rw [← cleanup_boundary_three_eq_lastGap_two_add_one] at hrun
-      simpa [rawThree, searchRef, CounterControlPlan.resolve,
-        CounterControlCleanupSemantics.afterThree,
-        CounterControlCleanupSemantics.clearBoundary] using hrun
-    · exact Or.inr hhalts
-  have hrunTwo := machine_reaches_boundary_erase_or_halts base c limit
-    hshort ⟨spec.growth, source, cleanupSearchBase + 1⟩ 2 .left
-    (searchRef spec.growth source (cleanupSearchBase + 2)) (some .left)
-    hrawTwo
-    (atLogical spec.growth (CounterControlCleanupSemantics.afterThree spec T)
-      (lastGapOffset spec.registers 2))
-    (RegisterLayout.values spec.registers 2) hdistanceTwo
-    (CounterControlCleanupSemantics.cleanupGap_two h)
-  have htwo :
-      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 1⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterThree spec T)
-              (lastGapOffset spec.registers 2)⟩
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 2⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterTwo spec T)
-              (lastGapOffset spec.registers 1)⟩ ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 1⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterThree spec T)
-              (lastGapOffset spec.registers 2)⟩ := by
-    rcases hrunTwo with hrun | hhalts
-    · left
-      have hstart : lastGapOffset spec.registers 2 =
-          boundaryOffset spec.registers 2 +
-            RegisterLayout.values spec.registers 2 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos]
-        omega
-      have hfound :
-          (atLogical spec.growth
-              (CounterControlCleanupSemantics.afterThree spec T)
-              (lastGapOffset spec.registers 2)).moveN
-              (orient spec.growth .left)
-              (RegisterLayout.values spec.registers 2) =
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterThree spec T)
-              (boundaryOffset spec.registers 2) := by
-        rw [hstart, orient_eq_orientDirection, atLogical_moveN_left]
-      simp only at hrun
-      rw [hfound, orient_eq_orientDirection,
-        cleanup_boundary_two_eq_lastGap_one_add_one,
-        erase_departLeft_atLogical] at hrun
-      rw [← cleanup_boundary_two_eq_lastGap_one_add_one] at hrun
-      simpa [rawTwo, searchRef, CounterControlPlan.resolve,
-        CounterControlCleanupSemantics.afterTwo,
-        CounterControlCleanupSemantics.clearBoundary] using hrun
-    · exact Or.inr hhalts
-  have hrunOne := machine_reaches_boundary_erase_or_halts base c limit
-    hshort ⟨spec.growth, source, cleanupSearchBase + 2⟩ 1 .left
-    (searchRef spec.growth source (cleanupSearchBase + 3)) (some .left)
-    hrawOne
-    (atLogical spec.growth (CounterControlCleanupSemantics.afterTwo spec T)
-      (lastGapOffset spec.registers 1))
-    (RegisterLayout.values spec.registers 1) hdistanceOne
-    (CounterControlCleanupSemantics.cleanupGap_one h)
-  have hone :
-      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 2⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterTwo spec T)
-              (lastGapOffset spec.registers 1)⟩
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 3⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterOne spec T)
-              (lastGapOffset spec.registers 0)⟩ ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 2⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterTwo spec T)
-              (lastGapOffset spec.registers 1)⟩ := by
-    rcases hrunOne with hrun | hhalts
-    · left
-      have hstart : lastGapOffset spec.registers 1 =
-          boundaryOffset spec.registers 1 +
-            RegisterLayout.values spec.registers 1 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos]
-        omega
-      have hfound :
-          (atLogical spec.growth
-              (CounterControlCleanupSemantics.afterTwo spec T)
-              (lastGapOffset spec.registers 1)).moveN
-              (orient spec.growth .left)
-              (RegisterLayout.values spec.registers 1) =
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterTwo spec T)
-              (boundaryOffset spec.registers 1) := by
-        rw [hstart, orient_eq_orientDirection, atLogical_moveN_left]
-      simp only at hrun
-      rw [hfound, orient_eq_orientDirection,
-        cleanup_boundary_one_eq_lastGap_zero_add_one,
-        erase_departLeft_atLogical] at hrun
-      rw [← cleanup_boundary_one_eq_lastGap_zero_add_one] at hrun
-      simpa [rawOne, searchRef, CounterControlPlan.resolve,
-        CounterControlCleanupSemantics.afterOne,
-        CounterControlCleanupSemantics.clearBoundary] using hrun
-    · exact Or.inr hhalts
-  have hrunZero := machine_reaches_boundary_erase_or_halts base c limit
-    hshort ⟨spec.growth, source, cleanupSearchBase + 3⟩ 0 .left
-    (.sharedReturn spec.growth) (some .left)
-    hrawZero
-    (atLogical spec.growth (CounterControlCleanupSemantics.afterOne spec T)
-      (lastGapOffset spec.registers 0))
-    (RegisterLayout.values spec.registers 0) hdistanceZero
-    (CounterControlCleanupSemantics.cleanupGap_zero h)
-  have hzero :
-      FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 3⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterOne spec T)
-              (lastGapOffset spec.registers 0)⟩
-          ⟨controllerReturn base c spec.growth,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterZero spec T) 0⟩ ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-          ⟨searchState base c
-              ⟨spec.growth, source, cleanupSearchBase + 3⟩,
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterOne spec T)
-              (lastGapOffset spec.registers 0)⟩ := by
-    rcases hrunZero with hrun | hhalts
-    · left
-      have hstart : lastGapOffset spec.registers 0 =
-          1 + RegisterLayout.values spec.registers 0 := by
-        simp [lastGapOffset, boundaryOffset, CounterLayout.boundaryPos]
-        omega
-      have hfound :
-          (atLogical spec.growth
-              (CounterControlCleanupSemantics.afterOne spec T)
-              (lastGapOffset spec.registers 0)).moveN
-              (orient spec.growth .left)
-              (RegisterLayout.values spec.registers 0) =
-            atLogical spec.growth
-              (CounterControlCleanupSemantics.afterOne spec T) 1 := by
-        rw [hstart, orient_eq_orientDirection, atLogical_moveN_left]
-      simp only at hrun
-      rw [hfound, orient_eq_orientDirection, erase_departLeft_atLogical] at hrun
-      simpa [rawZero, searchRef, CounterControlPlan.resolve,
-        CounterControlCleanupSemantics.afterZero,
-        CounterControlCleanupSemantics.clearBoundary] using hrun
-    · exact Or.inr hhalts
-  exact FullTM0.ResolvesTo.trans hthree
-    (FullTM0.ResolvesTo.trans htwo
-      (FullTM0.ResolvesTo.trans hone hzero))
+  exact CounterControlCleanupSemantics.machine_reaches_cleanup_return_with
+    base c limit source
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    (resolvingCleanupRunner base c limit source spec.growth hshort)
+    hthree
+    (by rw [← hlimit]; exact registerValue_lt_outerDistance h 2)
+    (by rw [← hlimit]; exact registerValue_lt_outerDistance h 1)
+    (by rw [← hlimit]; exact registerValue_lt_outerDistance h 0)
+    (by simpa [orient_eq_orientDirection] using
+      CounterControlCleanupSemantics.cleanupGap_three h)
+    (by simpa [orient_eq_orientDirection] using
+      CounterControlCleanupSemantics.cleanupGap_two h)
+    (by simpa [orient_eq_orientDirection] using
+      CounterControlCleanupSemantics.cleanupGap_one h)
+    (by simpa [orient_eq_orientDirection] using
+      CounterControlCleanupSemantics.cleanupGap_zero h)
+    hcommands
 
 /-- Resolving cleanup through the shared return dispatcher. -/
 theorem machine_reaches_cleanup_resume_or_halts
@@ -395,35 +176,8 @@ theorem machine_reaches_cleanup_resume_or_halts
   have hread :
       (atLogical spec.growth
         (CounterControlCleanupSemantics.afterZero spec T) 0).read =
-        tagSymbol spec.returnTag := by
-    rw [atLogical_read]
-    simp only [CounterControlCleanupSemantics.afterZero,
-      CounterControlCleanupSemantics.afterOne,
-      CounterControlCleanupSemantics.afterTwo,
-      CounterControlCleanupSemantics.afterThree,
-      CounterControlCleanupSemantics.afterFour,
-      CounterControlCleanupSemantics.clearBoundary]
-    rw [writeLogical_of_ne spec.growth _
-      (boundaryOffset spec.registers 0) 0 blankSymbol (by
-        simp only [boundaryOffset]
-        omega)]
-    rw [writeLogical_of_ne spec.growth _
-      (boundaryOffset spec.registers 1) 0 blankSymbol (by
-        simp only [boundaryOffset]
-        omega)]
-    rw [writeLogical_of_ne spec.growth _
-      (boundaryOffset spec.registers 2) 0 blankSymbol (by
-        simp only [boundaryOffset]
-        omega)]
-    rw [writeLogical_of_ne spec.growth _
-      (boundaryOffset spec.registers 3) 0 blankSymbol (by
-        simp only [boundaryOffset]
-        omega)]
-    rw [writeLogical_of_ne spec.growth _
-      (boundaryOffset spec.registers 4) 0 blankSymbol (by
-        simp only [boundaryOffset]
-        omega)]
-    exact h.tag
+        tagSymbol spec.returnTag :=
+    CounterControlCleanupSemantics.afterZero_read_tag h
   have hdispatch :=
     CounterControlCleanupSemantics.machine_sharedReturn_reaches_resume
       base c spec.returnTag
