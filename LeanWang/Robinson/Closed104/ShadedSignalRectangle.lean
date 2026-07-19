@@ -262,6 +262,30 @@ def intervalEdge (interior : Nat → Option Bool) (length position : Nat) :
           | none => simp
           | some previous => cases previous <;> simp
 
+/-- Every edge between an opening border and the following closing border is
+clear when there is no selected border in between. -/
+theorem intervalEdge_eq_none_of_between_borders
+    {interior : Nat → Option Bool} {length opening closing position : Nat}
+    (openingBorder : interior opening = some true)
+    (closingBorder : interior closing = some false)
+    (noBorder : ∀ candidate, opening < candidate → candidate < closing →
+      interior candidate = none)
+    (afterOpening : opening < position)
+    (atMostClosing : position ≤ closing)
+    (closingBeforeEnd : closing < length) :
+    intervalEdge interior length position = .none := by
+  rw [intervalEdge_eq_none_iff]
+  constructor
+  · apply nextInterior_eq_of_no_opposite_before closingBorder
+      (atMostBorder := atMostClosing) (borderBeforeEnd := closingBeforeEnd)
+    intro candidate positionLe beforeClosing
+    rw [noBorder candidate (afterOpening.trans_le positionLe) beforeClosing]
+    simp
+  · rw [previousInterior_eq_of_none_between openingBorder
+      (fun candidate lower upper =>
+        noBorder candidate lower (upper.trans_le atMostClosing)) afterOpening]
+    simp
+
 /-- The nearest-border formula satisfies every one-dimensional local signal
 rule. -/
 def intervalPath (interior : Nat → Option Bool) (length : Nat) :

@@ -538,38 +538,13 @@ theorem intervalEdge_pair_of_horizontalCarrier
       have noBorder := fun candidate (after : frameOpening depth coordinate < candidate)
           (before : candidate < frameClosing depth coordinate) =>
         selectedBorder_none_between_frameBounds owner after before
-      have previous (position : Nat)
-          (after : frameOpening depth coordinate < position)
-          (before : position ≤ frameClosing depth coordinate) :
-          ShadedSignalRectangle.previousInterior
-              (fun x => selectedBorder level x transverse) position = some true :=
-        ShadedSignalRectangle.previousInterior_eq_of_none_between
-          openingBorder (fun candidate lower upper =>
-            noBorder candidate lower (upper.trans_le before)) after
-      have next (position : Nat)
-          (lower : coordinate ≤ position)
-          (before : position ≤ frameClosing depth coordinate) :
-          ShadedSignalRectangle.nextInterior
-              (fun x => selectedBorder level x transverse) position
-                (2 * scale level - position) = some false := by
-        apply ShadedSignalRectangle.nextInterior_eq_of_no_opposite_before
-            (interior := fun x => selectedBorder level x transverse)
-            (position := position)
-            (border := frameClosing depth coordinate)
-            (length := 2 * scale level) closingBorder
-            (atMostBorder := before) (borderBeforeEnd := closingBeforeEnd)
-        intro candidate candidateLower candidateBefore
-        rw [noBorder candidate (by omega) candidateBefore]
-        simp
-      constructor
-      · rw [ShadedSignalRectangle.intervalEdge_eq_none_iff]
-        exact ⟨next coordinate (by omega) (by omega), by
-          rw [previous coordinate openingBefore (by omega)]
-          simp⟩
-      · rw [ShadedSignalRectangle.intervalEdge_eq_none_iff]
-        exact ⟨next (coordinate + 1) (by omega) successorAtMostClosing, by
-          rw [previous (coordinate + 1) (by omega) successorAtMostClosing]
-          simp⟩
+      exact ⟨
+        ShadedSignalRectangle.intervalEdge_eq_none_of_between_borders
+          openingBorder closingBorder noBorder openingBefore
+          (by omega) closingBeforeEnd,
+        ShadedSignalRectangle.intervalEdge_eq_none_of_between_borders
+          openingBorder closingBorder noBorder (by omega)
+          successorAtMostClosing closingBeforeEnd⟩
 
 /-- Conversely, the canonical signal can be clear on both sides of a cell only
 inside the smallest frame owning its row. -/
