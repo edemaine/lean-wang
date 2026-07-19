@@ -439,29 +439,24 @@ theorem positive_row_decode
     (plane (position, time)).2 (plane (position, time + 1)).2
     (valid.2 (position, time))
 
-/-- A positive-row plane cell decodes as the corresponding local machine
-history neighborhood. -/
+/-- A positive-row plane cell decodes with the center value of the corresponding
+machine configuration. At the left edge we additionally remember the boundary;
+horizontal matching recovers the other two cells when they are needed. -/
 def DecodedHistoryCell (M : Machine) (input : List Nat)
     (plane : Nat × Nat → TileIn (tiles M input))
     (time position : Nat) : Prop :=
   ∃ tile, tile ∈ machineHistoryTiles M ∧
     toWangTile 0 0 normalRowTag normalRowTag tile =
         (plane (position, time)).1 ∧
-      tile.prevLeft = (historyTile M input time position).prevLeft ∧
       tile.prevCenter = (historyTile M input time position).prevCenter ∧
-      tile.prevRight = (historyTile M input time position).prevRight
+      (position = 0 → tile.prevLeft = MachineCell.boundary)
 
-theorem row_one_prev_cells
+theorem row_one_decoded
     {M : Machine} {input : List Nat}
     {plane : Nat × Nat → TileIn (tiles M input)}
     (valid : ValidQuarterTiling (tiles M input) plane)
     (seeded : (plane (0, 0)).1 = seed M input) (position : Nat) :
-    ∃ upper, upper ∈ machineHistoryTiles M ∧
-      toWangTile 0 0 normalRowTag normalRowTag upper =
-          (plane (position, 1)).1 ∧
-        upper.prevLeft = (historyTile M input 0 position).nextLeft ∧
-        upper.prevCenter = (historyTile M input 0 position).nextCenter ∧
-        upper.prevRight = (historyTile M input 0 position).nextRight := by
+    DecodedHistoryCell M input plane 1 position := by
   rcases positive_row_decode valid 0 position with
     ⟨upper, hupperMem, hupperTile⟩
   have hbottom := seeded_tiling_row_zero_eq valid seeded position
@@ -472,25 +467,14 @@ theorem row_one_prev_cells
   rw [initialTile_history] at hvertical
   split_ifs at hvertical <;>
     have hcells := (vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hvertical
-  · exact ⟨upper, hupperMem, hupperTile,
-      hcells.2.1.symm, hcells.2.2.1.symm, hcells.2.2.2.symm⟩
-  · exact ⟨upper, hupperMem, hupperTile,
-      hcells.2.1.symm, hcells.2.2.1.symm, hcells.2.2.2.symm⟩
+  all_goals
+    refine ⟨upper, hupperMem, hupperTile, ?_, ?_⟩
+    · simpa [historyTile] using hcells.2.2.1.symm
+    · rintro rfl
+      rw [← hcells.2.1]
+      simp [historyTile, runCellLeft]
 
-theorem row_one_prev_run_cells
-    {M : Machine} {input : List Nat}
-    {plane : Nat × Nat → TileIn (tiles M input)}
-    (valid : ValidQuarterTiling (tiles M input) plane)
-    (seeded : (plane (0, 0)).1 = seed M input) (position : Nat) :
-    DecodedHistoryCell M input plane 1 position := by
-  rcases row_one_prev_cells valid seeded position with
-    ⟨upper, hupperMem, hupperTile, hleft, hcenter, hright⟩
-  exact ⟨upper, hupperMem, hupperTile,
-    by simpa [historyTile] using hleft,
-    by simpa [historyTile] using hcenter,
-    by simpa [historyTile] using hright⟩
-
-theorem positive_row_prev_cells_of_lower
+theorem positive_row_decode_above
     {M : Machine} {input : List Nat}
     {plane : Nat × Nat → TileIn (tiles M input)}
     (valid : ValidQuarterTiling (tiles M input) plane)
@@ -501,8 +485,7 @@ theorem positive_row_prev_cells_of_lower
       toWangTile 0 0 normalRowTag normalRowTag upper =
           (plane (position, time + 1 + 1)).1 ∧
         upper.prevLeft = lower.nextLeft ∧
-        upper.prevCenter = lower.nextCenter ∧
-        upper.prevRight = lower.nextRight := by
+        upper.prevCenter = lower.nextCenter := by
   rcases positive_row_decode valid (time + 1) position with
     ⟨upper, hupperMem, hupperTile⟩
   have hvertical : WangTile.VMatches
@@ -511,7 +494,7 @@ theorem positive_row_prev_cells_of_lower
     simpa [hlower, hupperTile] using valid.2 (position, time + 1)
   have hcells := (vMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hvertical
   exact ⟨upper, hupperMem, hupperTile,
-    hcells.2.1.symm, hcells.2.2.1.symm, hcells.2.2.2.symm⟩
+    hcells.2.1.symm, hcells.2.2.1.symm⟩
 
 theorem positive_row_hMatches_cells
     {M : Machine} {input : List Nat}
@@ -532,6 +515,48 @@ theorem positive_row_hMatches_cells
     simpa [hleft, hright] using valid.1 (position, time + 1)
   exact (hMatches_toWangTile_iff _ _ _ _ _ _ _ _ _ _).1 hhorizontal |>.2.2
 
+/-- Horizontal matching reconstructs the two neighboring configuration cells
+from the centers recorded by a decoded row. -/
+theorem prev_cells_eq_historyTile_of_decoded_row
+    {M : Machine} {input : List Nat}
+    {plane : Nat × Nat → TileIn (tiles M input)}
+    (valid : ValidQuarterTiling (tiles M input) plane)
+    {time : Nat}
+    (hrow : ∀ position, DecodedHistoryCell M input plane (time + 1) position)
+    {position : Nat} {tile : MachineHistoryTile}
+    (htile : toWangTile 0 0 normalRowTag normalRowTag tile =
+      (plane (position, time + 1)).1)
+    (hboundary : position = 0 → tile.prevLeft = MachineCell.boundary) :
+    tile.prevLeft = (historyTile M input (time + 1) position).prevLeft ∧
+      tile.prevRight = (historyTile M input (time + 1) position).prevRight := by
+  constructor
+  · cases position with
+    | zero =>
+        rw [hboundary rfl]
+        simp [historyTile, runCellLeft]
+    | succ predecessor =>
+        rcases hrow predecessor with
+          ⟨left, _hleftMem, hleftTile, hleftCenter, _hleftBoundary⟩
+        have hmatches := positive_row_hMatches_cells valid
+          (time := time) (position := predecessor)
+          (left := left) (right := tile) hleftTile (by
+            simpa [Nat.succ_eq_add_one] using htile)
+        calc
+          tile.prevLeft = left.prevCenter := hmatches.1.symm
+          _ = (historyTile M input (time + 1) predecessor).prevCenter := hleftCenter
+          _ = (historyTile M input (time + 1) (predecessor + 1)).prevLeft := by
+            simp [historyTile, runCellLeft, runCell]
+  · rcases hrow (position + 1) with
+      ⟨right, _hrightMem, hrightTile, hrightCenter, _hrightBoundary⟩
+    have hmatches := positive_row_hMatches_cells valid
+      (time := time) (position := position)
+      (left := tile) (right := right) htile hrightTile
+    calc
+      tile.prevRight = right.prevCenter := hmatches.2.1
+      _ = (historyTile M input (time + 1) (position + 1)).prevCenter := hrightCenter
+      _ = (historyTile M input (time + 1) position).prevRight := by
+        simp [historyTile]
+
 theorem nextCenter_eq_historyTile_nextCenter_of_prev_cells
     {M : Machine} {input : List Nat} {time position : Nat}
     {tile : MachineHistoryTile}
@@ -548,7 +573,7 @@ theorem nextCenter_eq_historyTile_nextCenter_of_prev_cells
   rw [hrun] at hlocal
   exact Option.some.inj hlocal.symm
 
-theorem next_row_prev_run_cells
+theorem next_row_decoded
     {M : Machine} {input : List Nat}
     {plane : Nat × Nat → TileIn (tiles M input)}
     (valid : ValidQuarterTiling (tiles M input) plane)
@@ -559,68 +584,26 @@ theorem next_row_prev_run_cells
     (position : Nat) :
     DecodedHistoryCell M input plane (time + 1 + 1) position := by
   rcases hrow position with
-    ⟨lower, hlowerMem, hlowerTile, hlowerLeft, hlowerCenter, hlowerRight⟩
-  rcases positive_row_prev_cells_of_lower valid
+    ⟨lower, hlowerMem, hlowerTile, hlowerCenter, hlowerBoundary⟩
+  have ⟨hlowerLeft, hlowerRight⟩ :=
+    prev_cells_eq_historyTile_of_decoded_row valid hrow
+      hlowerTile hlowerBoundary
+  rcases positive_row_decode_above valid
       (time := time) (position := position) (lower := lower) hlowerTile.symm with
-    ⟨upper, hupperMem, hupperTile, hupperLeft, hupperCenter, hupperRight⟩
+    ⟨upper, hupperMem, hupperTile, hupperLeft, hupperCenter⟩
   have hlowerNextCenter : lower.nextCenter =
       (historyTile M input (time + 1) position).nextCenter :=
     nextCenter_eq_historyTile_nextCenter_of_prev_cells
       hlowerMem hstate hnext hlowerLeft hlowerCenter hlowerRight
-  have hlowerNextLeft : lower.nextLeft =
-      (historyTile M input (time + 1) position).nextLeft := by
-    cases position with
-    | zero =>
-        have hprevBoundary : lower.prevLeft = MachineCell.boundary := by
-          simpa [historyTile, runCellLeft] using hlowerLeft
-        calc
-          lower.nextLeft = MachineCell.boundary :=
-            nextLeft_boundary_of_mem_machineHistoryTiles hlowerMem hprevBoundary
-          _ = (historyTile M input (time + 1) 0).nextLeft := by
-            exact (historyTile_boundaryOK M input (time + 1) 0 (by
-              simp [historyTile, runCellLeft])).symm
-    | succ predecessor =>
-        rcases hrow predecessor with
-          ⟨left, hleftMem, hleftTile, hleftLeft, hleftCenter, hleftRight⟩
-        have hmatches := positive_row_hMatches_cells valid
-          (time := time) (position := predecessor)
-          (left := left) (right := lower) hleftTile hlowerTile
-        have hleftNextCenter : left.nextCenter =
-            (historyTile M input (time + 1) predecessor).nextCenter :=
-          nextCenter_eq_historyTile_nextCenter_of_prev_cells
-            hleftMem hstate hnext hleftLeft hleftCenter hleftRight
-        calc
-          lower.nextLeft = left.nextCenter := hmatches.2.2.1.symm
-          _ = (historyTile M input (time + 1) predecessor).nextCenter :=
-            hleftNextCenter
-          _ = (historyTile M input (time + 1) (predecessor + 1)).nextLeft := by
-            simp [historyTile, runCellLeft, runCell]
-  have hlowerNextRight : lower.nextRight =
-      (historyTile M input (time + 1) position).nextRight := by
-    rcases hrow (position + 1) with
-      ⟨right, hrightMem, hrightTile, hrightLeft, hrightCenter, hrightRight⟩
-    have hmatches := positive_row_hMatches_cells valid
-      (time := time) (position := position)
-      (left := lower) (right := right) hlowerTile hrightTile
-    have hrightNextCenter : right.nextCenter =
-        (historyTile M input (time + 1) (position + 1)).nextCenter :=
-      nextCenter_eq_historyTile_nextCenter_of_prev_cells
-        hrightMem hstate hnext hrightLeft hrightCenter hrightRight
-    calc
-      lower.nextRight = right.nextCenter := hmatches.2.2.2
-      _ = (historyTile M input (time + 1) (position + 1)).nextCenter :=
-        hrightNextCenter
-      _ = (historyTile M input (time + 1) position).nextRight := by
-        simp [historyTile]
-  exact ⟨upper, hupperMem, hupperTile, by
-      rw [hupperLeft, hlowerNextLeft]
-      simp [historyTile], by
-      rw [hupperCenter, hlowerNextCenter]
-      simp [historyTile], by
-      rw [hupperRight, hlowerNextRight]
-      simp [historyTile]⟩
+  refine ⟨upper, hupperMem, hupperTile, ?_, ?_⟩
+  · rw [hupperCenter, hlowerNextCenter]
+    simp [historyTile]
+  · rintro rfl
+    rw [hupperLeft]
+    exact nextLeft_boundary_of_mem_machineHistoryTiles hlowerMem
+      (hlowerBoundary rfl)
 
-theorem positive_row_prev_run_cells_of_nonhalting_prefix
+theorem decoded_row_of_nonhalting_prefix
     {M : Machine} {input : List Nat}
     {plane : Nat × Nat → TileIn (tiles M input)}
     (valid : ValidQuarterTiling (tiles M input) plane)
@@ -631,9 +614,9 @@ theorem positive_row_prev_run_cells_of_nonhalting_prefix
   induction time with
   | zero =>
       intro position
-      exact row_one_prev_run_cells valid seeded position
+      exact row_one_decoded valid seeded position
   | succ time ih =>
-      exact next_row_prev_run_cells valid
+      exact next_row_decoded valid
         (time := time)
         (ih fun step hstep hbound => hprefix step hstep (by omega))
         (hprefix (time + 1) (by omega) (by omega))
@@ -646,8 +629,8 @@ theorem false_of_run_one_halt
     (seeded : (plane (0, 0)).1 = seed M input)
     (hhalt : (run M input 1).state = M.halt) : False := by
   let position := (run M input 1).head
-  rcases row_one_prev_run_cells valid seeded position with
-    ⟨tile, tileMem, _htile, _hleft, hcenter, _hright⟩
+  rcases row_one_decoded valid seeded position with
+    ⟨tile, tileMem, _htile, hcenter, _hboundary⟩
   apply prevCenter_not_halt_of_mem_machineHistoryTiles
     (a := (run M input 1).tape (run M input 1).head) tileMem
   rw [hcenter]
@@ -660,6 +643,7 @@ theorem false_of_next_halt_from_decoded_row
     {M : Machine} {input : List Nat}
     {plane : Nat × Nat → TileIn (tiles M input)}
     {time : Nat}
+    (valid : ValidQuarterTiling (tiles M input) plane)
     (hrow : ∀ position, DecodedHistoryCell M input plane (time + 1) position)
     (hstate : (run M input (time + 1)).state ≠ M.halt)
     (hnext : (run M input (time + 1 + 1)).state = M.halt) : False := by
@@ -668,7 +652,9 @@ theorem false_of_next_halt_from_decoded_row
     (M.step configuration.state (configuration.tape configuration.head)).2.2.apply
       configuration.head
   rcases hrow position with
-    ⟨tile, tileMem, _htile, hleft, hcenter, hright⟩
+    ⟨tile, tileMem, htile, hcenter, hboundary⟩
+  have ⟨hleft, hright⟩ :=
+    prev_cells_eq_historyTile_of_decoded_row valid hrow htile hboundary
   have hstate' : configuration.state ≠ M.halt := by
     simpa [configuration] using hstate
   have hnextState :
@@ -715,9 +701,9 @@ theorem not_tilesQuarterWithSeed_of_halts_at
               intro k _hk1 hk hkhalt
               apply hprevious
               exact run_state_eq_halt_of_le hk hkhalt
-            have hrow := positive_row_prev_run_cells_of_nonhalting_prefix
+            have hrow := decoded_row_of_nonhalting_prefix
               valid seeded time hprefix
-            exact false_of_next_halt_from_decoded_row hrow hprevious
+            exact false_of_next_halt_from_decoded_row valid hrow hprevious
               (by simpa using hhalt)
 
 theorem not_tilesQuarterWithSeed_of_halts
