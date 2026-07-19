@@ -734,7 +734,7 @@ structure DecrementScheduleRunner
 /-! ## Generic positive-decrement stage chains -/
 
 /-- Gap index shifted at one stage of a positive-decrement suffix. -/
-private def decrementStageIndex : Register → Fin 4
+def decrementStageIndex : Register → Fin 4
   | .left => 0
   | .right => 1
   | .temp => 2
@@ -742,32 +742,32 @@ private def decrementStageIndex : Register → Fin 4
 
 /-- Intermediate layout: the final tuple with the current suffix register
 still one cell longer. -/
-private def decrementStageRegisters
+def decrementStageRegisters
     (final : Registers) (stage : Register) : Registers :=
   final.increment stage
 
 /-- Consecutive registers in the left-to-right decrement suffix. -/
-private inductive DecrementStageNext : Register → Register → Prop
+inductive DecrementStageNext : Register → Register → Prop
   | left : DecrementStageNext .left .right
   | right : DecrementStageNext .right .temp
   | temp : DecrementStageNext .temp .clock
 
 /-- The suffix of register boundaries shifted by one named decrement. -/
-private def decrementStages : Register → List Register
+def decrementStages : Register → List Register
   | .left => [.left, .right, .temp, .clock]
   | .right => [.right, .temp, .clock]
   | .temp => [.temp, .clock]
   | .clock => [.clock]
 
 /-- A list follows the fixed left-to-right register order and ends at clock. -/
-private inductive DecrementStageChain : Register → List Register → Prop
+inductive DecrementStageChain : Register → List Register → Prop
   | clock : DecrementStageChain .clock [.clock]
   | cons {stage next : Register} {tail : List Register}
       (hnext : DecrementStageNext stage next)
       (hrest : DecrementStageChain next (next :: tail)) :
       DecrementStageChain stage (stage :: next :: tail)
 
-private theorem decrementStages_chain (register : Register) :
+theorem decrementStages_chain (register : Register) :
     DecrementStageChain register (decrementStages register) := by
   cases register with
   | clock => exact .clock
@@ -775,19 +775,19 @@ private theorem decrementStages_chain (register : Register) :
   | right => exact .cons .right (.cons .temp .clock)
   | left => exact .cons .left (.cons .right (.cons .temp .clock))
 
-private theorem decrementStages_labels (register : Register) :
+theorem decrementStages_labels (register : Register) :
     (decrementStages register).map
         (fun stage => (decrementStageIndex stage).succ) =
       MarkerShift.decrementOrder register := by
   cases register <;>
     rfl
 
-private theorem decrementStage_layoutEnd
+theorem decrementStage_layoutEnd
     (final : Registers) (stage : Register) :
     layoutEnd (decrementStageRegisters final stage) = layoutEnd final + 1 := by
   simp [decrementStageRegisters]
 
-private theorem decrementStage_positive (final : Registers) (stage : Register) :
+theorem decrementStage_positive (final : Registers) (stage : Register) :
     0 < RegisterLayout.values (decrementStageRegisters final stage)
       (decrementStageIndex stage) := by
   cases stage <;>
@@ -795,7 +795,7 @@ private theorem decrementStage_positive (final : Registers) (stage : Register) :
       RegisterLayout.values, Registers.increment, Registers.set,
       Registers.get]
 
-private theorem decrementStage_move {final : Registers} {stage next : Register}
+theorem decrementStage_move {final : Registers} {stage next : Register}
     (hnext : DecrementStageNext stage next) :
     MarkerMachine.moveAt .left
         (MarkerTape.canonicalTape (decrementStageRegisters final stage))
@@ -808,7 +808,7 @@ private theorem decrementStage_move {final : Registers} {stage next : Register}
   | right => exact MarkerSchedule.moveRightBoundary_before_temp final
   | temp => exact MarkerSchedule.moveTempBoundary_before_clock final
 
-private theorem decrementStage_head {final : Registers} {stage next : Register}
+theorem decrementStage_head {final : Registers} {stage next : Register}
     (hnext : DecrementStageNext stage next) :
     boundaryOffset (decrementStageRegisters final stage)
         (decrementStageIndex stage).succ =
