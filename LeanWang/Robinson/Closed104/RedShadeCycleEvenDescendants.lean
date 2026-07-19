@@ -34,6 +34,52 @@ private theorem bits_eq (digit : Fin 4) :
   dsimp [highBit, lowBit]
   omega
 
+/-- One coordinate of a descendant cell, split into its next base-four digit
+and the remaining lower-order block. -/
+private structure DescendantCoordinate (depth block cell : Nat) where
+  digit : Fin 4
+  middle : Nat
+  lower : 4 ^ depth * middle ≤ cell
+  upper : cell < 4 ^ depth * (middle + 1)
+  bits :
+    2 * (2 * block + (highBit digit).val) + (lowBit digit).val = middle
+
+private def descendantCoordinate {depth block cell : Nat}
+    (lower : 4 ^ (depth + 1) * block ≤ cell)
+    (upper : cell < 4 ^ (depth + 1) * (block + 1)) :
+    DescendantCoordinate depth block cell := by
+  let scale := 4 ^ depth
+  have scalePositive : 0 < scale := pow_pos (by decide) _
+  have quotientLower : 4 * block ≤ cell / scale := by
+    apply (Nat.le_div_iff_mul_le scalePositive).2
+    rw [pow_succ] at lower
+    calc
+      4 * block * scale = 4 ^ depth * 4 * block := by
+        dsimp [scale]
+        ac_rfl
+      _ ≤ cell := lower
+  have quotientUpper : cell / scale < 4 * (block + 1) := by
+    apply (Nat.div_lt_iff_lt_mul scalePositive).2
+    rw [pow_succ] at upper
+    calc
+      cell < 4 ^ depth * 4 * (block + 1) := upper
+      _ = 4 * (block + 1) * scale := by
+        dsimp [scale]
+        ac_rfl
+  let digit : Fin 4 := ⟨cell / scale - 4 * block, by omega⟩
+  let middle := cell / scale
+  have middleEq : 4 * block + digit.val = middle := by
+    dsimp [digit, middle]
+    omega
+  refine ⟨digit, middle, ?_, ?_, ?_⟩
+  · dsimp [middle, scale]
+    simpa [Nat.mul_comm] using Nat.div_mul_le_self cell (4 ^ depth)
+  · dsimp [middle, scale]
+    simpa [Nat.mul_comm] using
+      Nat.lt_mul_div_succ cell (pow_pos (by decide) depth)
+  · have digitBits := bits_eq digit
+    omega
+
 /-- Every cell in a base-four descendant block is evenly connected to its
 ancestor board after the corresponding even number of refinements. -/
 theorem descendantBridge : ∀ (depth : Nat) (grid : Nat → Nat → Index)
@@ -59,72 +105,16 @@ theorem descendantBridge : ∀ (depth : Nat) (grid : Nat → Nat → Index)
       simpa using EvenCycleBridge.refl cycle (by omega)
   | depth + 1, grid, blockX, blockY, cellX, cellY,
       hcellXLower, hcellXUpper, hcellYLower, hcellYUpper => by
-      let scale := 4 ^ depth
-      have hscale : 0 < scale := pow_pos (by decide) _
-      have hquotXLower : 4 * blockX ≤ cellX / scale := by
-        apply (Nat.le_div_iff_mul_le hscale).2
-        rw [pow_succ] at hcellXLower
-        calc
-          4 * blockX * scale = 4 ^ depth * 4 * blockX := by
-            dsimp [scale]
-            ac_rfl
-          _ ≤ cellX := hcellXLower
-      have hquotXUpper : cellX / scale < 4 * (blockX + 1) := by
-        apply (Nat.div_lt_iff_lt_mul hscale).2
-        rw [pow_succ] at hcellXUpper
-        calc
-          cellX < 4 ^ depth * 4 * (blockX + 1) := hcellXUpper
-          _ = 4 * (blockX + 1) * scale := by
-            dsimp [scale]
-            ac_rfl
-      have hquotYLower : 4 * blockY ≤ cellY / scale := by
-        apply (Nat.le_div_iff_mul_le hscale).2
-        rw [pow_succ] at hcellYLower
-        calc
-          4 * blockY * scale = 4 ^ depth * 4 * blockY := by
-            dsimp [scale]
-            ac_rfl
-          _ ≤ cellY := hcellYLower
-      have hquotYUpper : cellY / scale < 4 * (blockY + 1) := by
-        apply (Nat.div_lt_iff_lt_mul hscale).2
-        rw [pow_succ] at hcellYUpper
-        calc
-          cellY < 4 ^ depth * 4 * (blockY + 1) := hcellYUpper
-          _ = 4 * (blockY + 1) * scale := by
-            dsimp [scale]
-            ac_rfl
-      let digitX : Fin 4 := ⟨cellX / scale - 4 * blockX, by
-        omega⟩
-      let digitY : Fin 4 := ⟨cellY / scale - 4 * blockY, by
-        omega⟩
-      let middleX := 4 * blockX + digitX.val
-      let middleY := 4 * blockY + digitY.val
-      have hmiddleX : middleX = cellX / scale := by
-        dsimp [middleX, digitX]
-        omega
-      have hmiddleY : middleY = cellY / scale := by
-        dsimp [middleY, digitY]
-        omega
-      have hnextXLower : scale * middleX ≤ cellX := by
-        rw [hmiddleX]
-        simpa [Nat.mul_comm] using Nat.div_mul_le_self cellX scale
-      have hnextXUpper : cellX < scale * (middleX + 1) := by
-        rw [hmiddleX]
-        simpa [Nat.mul_comm] using Nat.lt_mul_div_succ cellX hscale
-      have hnextYLower : scale * middleY ≤ cellY := by
-        rw [hmiddleY]
-        simpa [Nat.mul_comm] using Nat.div_mul_le_self cellY scale
-      have hnextYUpper : cellY < scale * (middleY + 1) := by
-        rw [hmiddleY]
-        simpa [Nat.mul_comm] using Nat.lt_mul_div_succ cellY hscale
+      have xCoordinate := descendantCoordinate hcellXLower hcellXUpper
+      have yCoordinate := descendantCoordinate hcellYLower hcellYUpper
       have first := twoCornerBridge grid (level := 2 * (depth + 1)) (by omega)
-        blockX blockY (highBit digitX) (highBit digitY)
-        (lowBit digitX) (lowBit digitY)
+        blockX blockY (highBit xCoordinate.digit) (highBit yCoordinate.digit)
+        (lowBit xCoordinate.digit) (lowBit yCoordinate.digit)
       have second := descendantBridge depth (RedCycles.iterateRefine 2 grid)
-        middleX middleY cellX cellY
-        hnextXLower hnextXUpper hnextYLower hnextYUpper
+        xCoordinate.middle yCoordinate.middle cellX cellY
+        xCoordinate.lower xCoordinate.upper yCoordinate.lower yCoordinate.upper
       have middleCycle := at_scale (RedCycles.iterateRefine 2 grid)
-        (2 * depth) middleX middleY
+        (2 * depth) xCoordinate.middle yCoordinate.middle
       have hgrid :
           RedCycles.iterateRefine (2 * depth + 2)
               (RedCycles.iterateRefine 2 grid) =
@@ -133,29 +123,17 @@ theorem descendantBridge : ∀ (depth : Nat) (grid : Nat → Nat → Index)
         congr 1
       rw [hgrid] at second middleCycle
       have hlevel : 2 * (depth + 1) - 2 = 2 * depth := by omega
-      have hbitsX :
-          2 * (2 * blockX + (highBit digitX).val) + (lowBit digitX).val =
-            middleX := by
-        have hbits := bits_eq digitX
-        dsimp [middleX]
-        omega
-      have hbitsY :
-          2 * (2 * blockY + (highBit digitY).val) + (lowBit digitY).val =
-            middleY := by
-        have hbits := bits_eq digitY
-        dsimp [middleY]
-        omega
       have first' : EvenCycleBridge
           (RedCycles.iterateRefine (2 * (depth + 1) + 2) grid)
           (2 ^ (2 * (depth + 1)) * (4 * blockX + 1))
           (2 ^ (2 * (depth + 1)) * (4 * blockX + 3))
           (2 ^ (2 * (depth + 1)) * (4 * blockY + 1))
           (2 ^ (2 * (depth + 1)) * (4 * blockY + 3))
-          (2 ^ (2 * depth) * (4 * middleX + 1))
-          (2 ^ (2 * depth) * (4 * middleX + 3))
-          (2 ^ (2 * depth) * (4 * middleY + 1))
-          (2 ^ (2 * depth) * (4 * middleY + 3)) := by
-        rw [hlevel, hbitsX, hbitsY] at first
+          (2 ^ (2 * depth) * (4 * xCoordinate.middle + 1))
+          (2 ^ (2 * depth) * (4 * xCoordinate.middle + 3))
+          (2 ^ (2 * depth) * (4 * yCoordinate.middle + 1))
+          (2 ^ (2 * depth) * (4 * yCoordinate.middle + 3)) := by
+        rw [hlevel, xCoordinate.bits, yCoordinate.bits] at first
         exact first
       exact CycleBridge.trans middleCycle first' second
 
