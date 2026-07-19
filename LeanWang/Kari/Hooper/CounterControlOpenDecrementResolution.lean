@@ -1335,7 +1335,8 @@ theorem machine_reaches_decrementToTest_or_halts_of_core
     simp [commandsForRule, decrementCommands, route, hraw]
   have hrules : ∀ raw,
       raw ∈ routeEntryRules growth source
-            (directRef growth source bodyDirectBase) 4 bodySearchBase
+            (bodyEntry growth source
+              (.decrement register ifZero ifPositive)) 4 bodySearchBase
             route ++
           routeContinuationRules growth source bodySearchBase
             (bodyDirectBase + 1) route →
@@ -1352,89 +1353,31 @@ theorem machine_reaches_decrementToTest_or_halts_of_core
           routeContinuationRules growth source bodySearchBase
             (bodyDirectBase + 1)
             (AnchoredCounterGeometry.routeToDecrementStart register) := by
-      simpa [route] using hraw
+      cases register <;>
+        simpa [route, bodyEntry,
+          AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules,
+          routeContinuationRules] using hraw
     rcases List.mem_append.mp hraw' with hentry | hcontinuation
     · simp only [decrementRules, List.mem_append]
       exact Or.inl (Or.inl (Or.inl hentry))
     · simp only [decrementRules, List.mem_append]
       exact Or.inl (Or.inl (Or.inr hcontinuation))
-  cases register with
-  | clock => exact Or.inl Relation.ReflTransGen.refl
-  | temp =>
-      have hrun := route_reaches_or_halts_at_of_ne_nil base c limit
-        (shortResolves_all base c limit) growth source bodySearchBase
-        (bodyDirectBase + 1) (directRef growth source bodyDirectBase)
-        (directRef growth source testDirectSlot) 4
-        (AnchoredCounterGeometry.routeToDecrementStart .temp)
-        (by simp [AnchoredCounterGeometry.routeToDecrementStart]) T
-        (layoutEnd registers) (boundaryOffset registers 3)
-        h.read_boundary_four
-        (routeToDecrementStart_executesWithin_of_core h hlimit .temp)
-        (by intro raw hraw; exact hcommands raw hraw)
-        (by intro raw hraw; exact hrules raw hraw)
-      change (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c
-              (bodyEntry growth source
-                (.decrement .temp ifZero ifPositive)),
-            atLogical growth T (layoutEnd registers)⟩
-          ⟨resolve base c (directRef growth source testDirectSlot),
-            atLogical growth T (boundaryOffset registers 3)⟩ ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c
-              (bodyEntry growth source
-                (.decrement .temp ifZero ifPositive)),
-            atLogical growth T (layoutEnd registers)⟩) at hrun
-      exact hrun
-  | right =>
-      have hrun := route_reaches_or_halts_at_of_ne_nil base c limit
-        (shortResolves_all base c limit) growth source bodySearchBase
-        (bodyDirectBase + 1) (directRef growth source bodyDirectBase)
-        (directRef growth source testDirectSlot) 4
-        (AnchoredCounterGeometry.routeToDecrementStart .right)
-        (by simp [AnchoredCounterGeometry.routeToDecrementStart]) T
-        (layoutEnd registers) (boundaryOffset registers 2)
-        h.read_boundary_four
-        (routeToDecrementStart_executesWithin_of_core h hlimit .right)
-        (by intro raw hraw; exact hcommands raw hraw)
-        (by intro raw hraw; exact hrules raw hraw)
-      change (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c
-              (bodyEntry growth source
-                (.decrement .right ifZero ifPositive)),
-            atLogical growth T (layoutEnd registers)⟩
-          ⟨resolve base c (directRef growth source testDirectSlot),
-            atLogical growth T (boundaryOffset registers 2)⟩ ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c
-              (bodyEntry growth source
-                (.decrement .right ifZero ifPositive)),
-            atLogical growth T (layoutEnd registers)⟩) at hrun
-      exact hrun
-  | left =>
-      have hrun := route_reaches_or_halts_at_of_ne_nil base c limit
-        (shortResolves_all base c limit) growth source bodySearchBase
-        (bodyDirectBase + 1) (directRef growth source bodyDirectBase)
-        (directRef growth source testDirectSlot) 4
-        (AnchoredCounterGeometry.routeToDecrementStart .left)
-        (by simp [AnchoredCounterGeometry.routeToDecrementStart]) T
-        (layoutEnd registers) (boundaryOffset registers 1)
-        h.read_boundary_four
-        (routeToDecrementStart_executesWithin_of_core h hlimit .left)
-        (by intro raw hraw; exact hcommands raw hraw)
-        (by intro raw hraw; exact hrules raw hraw)
-      change (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c
-              (bodyEntry growth source
-                (.decrement .left ifZero ifPositive)),
-            atLogical growth T (layoutEnd registers)⟩
-          ⟨resolve base c (directRef growth source testDirectSlot),
-            atLogical growth T (boundaryOffset registers 1)⟩ ∨
-        FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c
-              (bodyEntry growth source
-                (.decrement .left ifZero ifPositive)),
-            atLogical growth T (layoutEnd registers)⟩) at hrun
-      exact hrun
+  exact route_reaches_or_halts_at_maybe_empty base c limit
+    (shortResolves_all base c limit) growth source bodySearchBase
+    (bodyDirectBase + 1)
+    (bodyEntry growth source (.decrement register ifZero ifPositive))
+    (directRef growth source testDirectSlot) 4 route
+    (by
+      intro hnil
+      cases register <;>
+        simp [route, bodyEntry,
+          AnchoredCounterGeometry.routeToDecrementStart] at hnil ⊢)
+    T (layoutEnd registers)
+    (boundaryOffset registers
+      (MarkerSchedule.decrementStartBoundary register))
+    h.read_boundary_four
+    (routeToDecrementStart_executesWithin_of_core h hlimit register)
+    hcommands hrules
 
 /-- From the predecessor boundary of an empty selected gap, return to the
 zero successor using only core-internal searches, or expose a halt. -/

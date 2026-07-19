@@ -148,6 +148,45 @@ theorem route_reaches_or_halts_at
     growth counterState searchSlot directSlot source after sourceBoundary
     first rest T sourcePosition finishPosition hsource hexec hcommands hrules
 
+/-- Whole-list resolving route runner which also accepts an empty route when
+its source control reference is already the advertised continuation. -/
+theorem route_reaches_or_halts_at_maybe_empty
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (hshort : ShortResolves base c limit) (growth : Turing.Dir)
+    (counterState searchSlot directSlot : Nat)
+    (source after : ControlRef) (sourceBoundary : Fin 5)
+    (legs : List MarkerValidation.Leg)
+    (hnil : legs = [] → source = after)
+    (T : FullTM0.Tape (Symbol numTags)) (sourcePosition finishPosition : Nat)
+    (hsource : (atLogical growth T sourcePosition).read =
+      boundarySymbol sourceBoundary)
+    (hexec : RouteExecutesWithin growth T limit legs
+      sourcePosition finishPosition)
+    (hcommands : ∀ raw,
+      raw ∈ routeCommandsAux growth counterState searchSlot directSlot
+          after legs → raw ∈ rawCommands)
+    (hrules : ∀ rule,
+      rule ∈ routeEntryRules growth counterState source sourceBoundary
+            searchSlot legs ++
+          routeContinuationRules growth counterState searchSlot directSlot
+            legs →
+        rule ∈ rawDirectRules) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+        ⟨resolve base c source, atLogical growth T sourcePosition⟩
+        ⟨resolve base c after, atLogical growth T finishPosition⟩ ∨
+      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
+        ⟨resolve base c source, atLogical growth T sourcePosition⟩ := by
+  cases legs with
+  | nil =>
+      cases hexec
+      left
+      rw [← hnil rfl]
+      exact Relation.ReflTransGen.refl
+  | cons first rest =>
+      exact route_reaches_or_halts_at base c limit hshort growth counterState
+        searchSlot directSlot source after sourceBoundary first rest T
+        sourcePosition finishPosition hsource hexec hcommands hrules
+
 end
 
 end CounterControlSearchResolution

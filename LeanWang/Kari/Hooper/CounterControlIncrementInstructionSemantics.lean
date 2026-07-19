@@ -535,7 +535,9 @@ theorem machine_reaches_incrementRecovery_solved
     simp [commandsForRule, incrementCommands, hraw]
   have hrules : ∀ raw,
       raw ∈ routeEntryRules spec.growth source
-            (directRef spec.growth source (bodyDirectBase + 1))
+            (match AnchoredCounterGeometry.routeFromIncrement register with
+            | [] => .logical spec.growth next
+            | _ :: _ => directRef spec.growth source (bodyDirectBase + 1))
             (MarkerSchedule.decrementStartBoundary register)
             secondarySearchBase
             (AnchoredCounterGeometry.routeFromIncrement register) ++
@@ -548,62 +550,41 @@ theorem machine_reaches_incrementRecovery_solved
     change raw ∈ validationRules spec.growth source ++
       incrementRules spec.growth source next register
     apply List.mem_append_right
-    rcases List.mem_append.mp hraw with hentry | hcontinuation
+    have hraw' : raw ∈
+        routeEntryRules spec.growth source
+            (directRef spec.growth source (bodyDirectBase + 1))
+            (MarkerSchedule.decrementStartBoundary register)
+            secondarySearchBase
+            (AnchoredCounterGeometry.routeFromIncrement register) ++
+          routeContinuationRules spec.growth source secondarySearchBase
+            (bodyDirectBase + 2)
+            (AnchoredCounterGeometry.routeFromIncrement register) := by
+      cases register <;>
+        simpa [AnchoredCounterGeometry.routeFromIncrement, routeEntryRules,
+          routeContinuationRules] using hraw
+    rcases List.mem_append.mp hraw' with hentry | hcontinuation
     · simp only [incrementRules, List.mem_append]
       exact Or.inl (Or.inl (Or.inr hentry))
     · simp only [incrementRules, List.mem_append]
       exact Or.inl (Or.inr hcontinuation)
-  cases register with
-  | clock =>
-      exact Relation.ReflTransGen.refl
-  | temp =>
-      have hrun := route_reaches_solved_at_of_ne_nil base c
-        spec.outerDistance hshort
-        spec.growth source secondarySearchBase (bodyDirectBase + 2)
-        (directRef spec.growth source (bodyDirectBase + 1))
-        (.logical spec.growth next) 3
-        (AnchoredCounterGeometry.routeFromIncrement .temp)
-        (by simp [AnchoredCounterGeometry.routeFromIncrement]) T
-        (boundaryOffset spec.registers 3) (layoutEnd spec.registers)
-        (by rw [atLogical_read]; exact h.boundary 3)
-        (routeFromIncrement_executesWithin h .temp)
-        (by intro raw hraw; exact hcommands raw hraw)
-        (by intro raw hraw; exact hrules raw hraw)
-      simpa [AnchoredCounterGeometry.routeFromIncrement, logicalState,
-        CounterControlPlan.resolve,
-        MarkerSchedule.decrementStartBoundary] using hrun
-  | right =>
-      have hrun := route_reaches_solved_at_of_ne_nil base c
-        spec.outerDistance hshort
-        spec.growth source secondarySearchBase (bodyDirectBase + 2)
-        (directRef spec.growth source (bodyDirectBase + 1))
-        (.logical spec.growth next) 2
-        (AnchoredCounterGeometry.routeFromIncrement .right)
-        (by simp [AnchoredCounterGeometry.routeFromIncrement]) T
-        (boundaryOffset spec.registers 2) (layoutEnd spec.registers)
-        (by rw [atLogical_read]; exact h.boundary 2)
-        (routeFromIncrement_executesWithin h .right)
-        (by intro raw hraw; exact hcommands raw hraw)
-        (by intro raw hraw; exact hrules raw hraw)
-      simpa [AnchoredCounterGeometry.routeFromIncrement, logicalState,
-        CounterControlPlan.resolve,
-        MarkerSchedule.decrementStartBoundary] using hrun
-  | left =>
-      have hrun := route_reaches_solved_at_of_ne_nil base c
-        spec.outerDistance hshort
-        spec.growth source secondarySearchBase (bodyDirectBase + 2)
-        (directRef spec.growth source (bodyDirectBase + 1))
-        (.logical spec.growth next) 1
-        (AnchoredCounterGeometry.routeFromIncrement .left)
-        (by simp [AnchoredCounterGeometry.routeFromIncrement]) T
-        (boundaryOffset spec.registers 1) (layoutEnd spec.registers)
-        (by rw [atLogical_read]; exact h.boundary 1)
-        (routeFromIncrement_executesWithin h .left)
-        (by intro raw hraw; exact hcommands raw hraw)
-        (by intro raw hraw; exact hrules raw hraw)
-      simpa [AnchoredCounterGeometry.routeFromIncrement, logicalState,
-        CounterControlPlan.resolve,
-        MarkerSchedule.decrementStartBoundary] using hrun
+  exact route_reaches_solved_at_maybe_empty base c spec.outerDistance hshort
+    spec.growth source secondarySearchBase (bodyDirectBase + 2)
+    (match AnchoredCounterGeometry.routeFromIncrement register with
+    | [] => .logical spec.growth next
+    | _ :: _ => directRef spec.growth source (bodyDirectBase + 1))
+    (.logical spec.growth next)
+    (MarkerSchedule.decrementStartBoundary register)
+    (AnchoredCounterGeometry.routeFromIncrement register)
+    (by
+      intro hnil
+      cases register <;>
+        simp [AnchoredCounterGeometry.routeFromIncrement] at hnil ⊢)
+    T
+    (boundaryOffset spec.registers
+      (MarkerSchedule.decrementStartBoundary register))
+    (layoutEnd spec.registers)
+    (by rw [atLogical_read]; exact h.boundary _)
+    (routeFromIncrement_executesWithin h register) hcommands hrules
 
 /-- The direct blank rule after the final increment shift moves onto the new
 boundary and selects either the recovery route or (for clock) the logical
