@@ -229,10 +229,6 @@ def carrierRole (level x y : Nat) : RouteRole :=
     cases vertical : isVerticalCarrier level x y <;>
     simp [carrierRole, horizontal, vertical, RouteRole.isVerticalCarrier]
 
-def eraseCorner : RouteRole → RouteRole
-  | .corner => .active
-  | role => role
-
 /-- Coordinates that become logical vertices of their depth's carrier grid. -/
 def isFreeCoordinate (depth coordinate : Nat) : Bool :=
   depthAt depth coordinate == some depth &&

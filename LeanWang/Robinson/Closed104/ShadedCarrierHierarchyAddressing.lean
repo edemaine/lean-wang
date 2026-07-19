@@ -107,14 +107,6 @@ private def roleIsPrimaryCarrier : AddressAxis → RouteRole → Bool
       roleIsPrimaryCarrier axis role := by
   cases axis <;> cases role <;> rfl
 
-@[simp] theorem eraseCorner_isHorizontalCarrier (role : RouteRole) :
-    (eraseCorner role).isHorizontalCarrier = role.isHorizontalCarrier := by
-  cases role <;> rfl
-
-@[simp] theorem eraseCorner_isVerticalCarrier (role : RouteRole) :
-    (eraseCorner role).isVerticalCarrier = role.isVerticalCarrier := by
-  cases role <;> rfl
-
 private theorem primaryCarrier_iff_of_owner
     (axis : AddressAxis) {level along transverse depth : Nat}
     (owner : depthAt (level - 1) transverse = some depth) :

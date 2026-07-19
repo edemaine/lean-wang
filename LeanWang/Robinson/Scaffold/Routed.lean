@@ -91,6 +91,16 @@ def isVerticalCarrier : RouteRole → Bool
   | .vertical | .active | .corner => true
   | .inactive | .horizontal => false
 
+theorem eq_horizontal_iff_carriers {role : RouteRole} :
+    role = .horizontal ↔
+      role.isHorizontalCarrier = true ∧ role.isVerticalCarrier = false := by
+  cases role <;> simp [isHorizontalCarrier, isVerticalCarrier]
+
+theorem eq_vertical_iff_carriers {role : RouteRole} :
+    role = .vertical ↔
+      role.isHorizontalCarrier = false ∧ role.isVerticalCarrier = true := by
+  cases role <;> simp [isHorizontalCarrier, isVerticalCarrier]
+
 @[simp] theorem isConstrained_eq_false_iff {role : RouteRole} :
     role.isConstrained = false ↔ role = .inactive := by
   cases role <;> simp [isConstrained]
@@ -112,6 +122,23 @@ theorem isCorner_primrec : Primrec isCorner :=
   Primrec.dom_finite _
 
 end RouteRole
+
+/-- Forget that an active routed cell is the distinguished source corner. -/
+def eraseCorner : RouteRole → RouteRole
+  | .corner => .active
+  | role => role
+
+@[simp] theorem eraseCorner_isHorizontalCarrier (role : RouteRole) :
+    (eraseCorner role).isHorizontalCarrier = role.isHorizontalCarrier := by
+  cases role <;> rfl
+
+@[simp] theorem eraseCorner_isVerticalCarrier (role : RouteRole) :
+    (eraseCorner role).isVerticalCarrier = role.isVerticalCarrier := by
+  cases role <;> rfl
+
+@[simp] theorem eraseCorner_eq_active_iff (role : RouteRole) :
+    eraseCorner role = .active ↔ role = .active ∨ role = .corner := by
+  cases role <;> simp [eraseCorner]
 
 /-- Scaffold tiles together with a primitive-recursive routing-role decoder. -/
 structure RoutedScaffold where

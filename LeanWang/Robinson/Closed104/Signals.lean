@@ -45,6 +45,9 @@ def code : Flow → Nat
   | .forward => 1
   | .backward => 2
 
+@[simp] theorem code_eq_zero_iff {flow : Flow} : flow.code = 0 ↔ flow = .none := by
+  cases flow <;> simp [code]
+
 theorem code_injective : Function.Injective code := by
   intro first second heq
   cases first <;> cases second <;> simp [code] at heq ⊢

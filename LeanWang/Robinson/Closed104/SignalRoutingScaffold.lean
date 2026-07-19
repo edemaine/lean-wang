@@ -74,23 +74,15 @@ theorem routeRole_eq_active_iff (wang : WangTile) :
   simp only [routeRole, isClear, horizontalClear, verticalClear]
   split_ifs <;> simp_all only [Bool.and_eq_true, beq_iff_eq] <;> aesop
 
-theorem routeRole_eq_horizontal_iff (wang : WangTile) :
-    routeRole wang = .horizontal ↔
-      horizontalClear wang = true ∧ verticalClear wang = false := by
+@[simp] theorem isHorizontalCarrier_routeRole (wang : WangTile) :
+    (routeRole wang).isHorizontalCarrier = horizontalClear wang := by
   simp only [routeRole]
-  split_ifs <;> simp_all
+  split_ifs <;> simp_all [RouteRole.isHorizontalCarrier]
 
-theorem routeRole_eq_vertical_iff (wang : WangTile) :
-    routeRole wang = .vertical ↔
-      horizontalClear wang = false ∧ verticalClear wang = true := by
+@[simp] theorem isVerticalCarrier_routeRole (wang : WangTile) :
+    (routeRole wang).isVerticalCarrier = verticalClear wang := by
   simp only [routeRole]
-  split_ifs <;> simp_all
-
-theorem routeRole_eq_inactive_iff (wang : WangTile) :
-    routeRole wang = .inactive ↔
-      horizontalClear wang = false ∧ verticalClear wang = false := by
-  simp only [routeRole]
-  split_ifs <;> simp_all
+  split_ifs <;> simp_all [RouteRole.isVerticalCarrier]
 
 theorem routeRole_tile_eq_active_iff (site : Site) :
     routeRole (tile site) = .active ↔ site.2 = clearState := by
