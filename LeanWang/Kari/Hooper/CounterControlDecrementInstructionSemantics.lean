@@ -657,13 +657,6 @@ theorem machine_reaches_decrementPositiveHandoff
           (MarkerSchedule.decrementStartBoundary register))⟩ at hrun
   exact hrun
 
-theorem boundaryOffset_le_layoutEnd (registers : Registers)
-    (label : Fin 5) : boundaryOffset registers label ≤ layoutEnd registers := by
-  change CounterLayout.boundaryPos (RegisterLayout.values registers) label + 1 ≤
-    CounterLayout.boundaryPos (RegisterLayout.values registers) 4 + 1
-  apply Nat.add_le_add_right
-  exact CounterLayout.boundaryPos_mono _ (by omega)
-
 /-- Complete positive-decrement suffix schedule, including exact preservation
 of the suspended outer backing. -/
 structure DecrementScheduleRunner
@@ -945,25 +938,27 @@ theorem machine_reaches_decrementSchedule_with
       intro counterState searchSlot success current next hcurrent hnext hraw
       subst current
       let nextRegisters := decrementStageRegisters final next
-      have hends : layoutEnd spec.registers = layoutEnd nextRegisters := by
-        rw [hregisters, decrementStage_layoutEnd,
-          decrementStage_layoutEnd]
+      let geometry := decrementStepGeometry (final := final) hnext
       have hlimit : 0 < spec.outerDistance :=
         Nat.zero_lt_of_lt spec.core_before_target
       have hrun := runner.first spec.outerDistance hshort counterState
         searchSlot success hlimit hback.represents nextRegisters
         (decrementStageIndex register)
-        (by rw [hregisters]; exact decrementStage_positive final register)
-        (hstageCore next) (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd spec.registers _)
-        (by
-          have hb := boundaryOffset_le_layoutEnd spec.registers
-            (decrementStageIndex register).succ
-          rw [← hends]
-          omega)
-        (by intro hlt; omega)
+        (by simpa [hregisters] using geometry.positive)
+        (hstageCore next)
         (by simpa [hregisters, nextRegisters] using
-          decrementStage_move (final := final) hnext)
+          geometry.next_le_current)
+        (by simpa [hregisters, nextRegisters] using
+          geometry.current_le_next_succ)
+        (by simpa [hregisters] using geometry.source_le)
+        (by simpa [hregisters, nextRegisters] using
+          geometry.destination_le)
+        (by
+          intro hlt
+          simpa [hregisters, nextRegisters] using
+            geometry.shrink_source_eq_end (by
+              simpa [hregisters, nextRegisters] using hlt))
+        (by simpa [hregisters, nextRegisters] using geometry.move)
         hraw
       have htapeNext : install nextRegisters spec.growth spec.returnTag
           (writeLogical spec.growth T
@@ -977,8 +972,8 @@ theorem machine_reaches_decrementSchedule_with
           install nextRegisters spec.growth spec.returnTag T
         apply install_clear_inside
         · simp [boundaryOffset]
-        · rw [← hends]
-          exact boundaryOffset_le_layoutEnd spec.registers _
+        · simpa [hregisters, nextRegisters] using
+            geometry.source_le_next
       rw [htapeNext] at hrun
       exact hrun
     followingStep := by
@@ -989,41 +984,35 @@ theorem machine_reaches_decrementSchedule_with
       let currentTape := stageTape current
       have hcurrent : Represents currentSpec currentTape :=
         (hstageBack current).represents
-      have hends : layoutEnd currentRegisters = layoutEnd nextRegisters := by
-        simp [currentRegisters, nextRegisters, decrementStage_layoutEnd]
+      let geometry := decrementStepGeometry (final := final) hnext
       have hcurrentShort : Short currentSpec.outerDistance := by
         simpa [currentSpec, stageSpec, updateSpec] using hshort
       have hrun := runner.following currentSpec.outerDistance hcurrentShort
         counterState searchSlot success hcurrent nextRegisters
         (decrementStageIndex current)
-        (by
-          simpa [currentSpec, stageSpec, updateSpec, currentRegisters] using
-            decrementStage_positive final current)
+        (by simpa [currentSpec, stageSpec, updateSpec,
+          currentRegisters] using geometry.positive)
         (registerValue_lt_outerDistance hcurrent
           (decrementStageIndex current))
         (by
           simpa [currentSpec, stageSpec, updateSpec] using hstageCore next)
-        (by
-          simpa [currentSpec, stageSpec, updateSpec] using hends.ge)
-        (by
-          change layoutEnd currentRegisters ≤ layoutEnd nextRegisters + 1
-          omega)
-        (boundaryOffset_le_layoutEnd currentSpec.registers _)
-        (by
-          change boundaryOffset currentRegisters
-              (decrementStageIndex current).succ - 1 ≤
-            layoutEnd nextRegisters
-          rw [← hends]
-          have hb := boundaryOffset_le_layoutEnd currentRegisters
-            (decrementStageIndex current).succ
-          omega)
+        (by simpa [currentSpec, stageSpec, updateSpec,
+          currentRegisters, nextRegisters] using geometry.next_le_current)
+        (by simpa [currentSpec, stageSpec, updateSpec,
+          currentRegisters, nextRegisters] using geometry.current_le_next_succ)
+        (by simpa [currentSpec, stageSpec, updateSpec,
+          currentRegisters] using geometry.source_le)
+        (by simpa [currentSpec, stageSpec, updateSpec,
+          currentRegisters, nextRegisters] using geometry.destination_le)
         (by
           intro hlt
-          change layoutEnd nextRegisters < layoutEnd currentRegisters at hlt
-          omega)
-        (by
-          simpa [currentSpec, stageSpec, updateSpec, currentRegisters,
-            nextRegisters] using decrementStage_move (final := final) hnext)
+          simpa [currentSpec, stageSpec, updateSpec,
+            currentRegisters, nextRegisters] using
+              geometry.shrink_source_eq_end (by
+                simpa [currentSpec, stageSpec, updateSpec,
+                  currentRegisters, nextRegisters] using hlt))
+        (by simpa [currentSpec, stageSpec, updateSpec,
+          currentRegisters, nextRegisters] using geometry.move)
         hraw
       have htapeNext : install nextRegisters spec.growth spec.returnTag
           (writeLogical spec.growth currentTape
@@ -1038,10 +1027,12 @@ theorem machine_reaches_decrementSchedule_with
         rw [install_clear_inside nextRegisters spec.growth spec.returnTag
           currentTape]
         · exact install_over_install currentRegisters nextRegisters
-            spec.growth spec.returnTag T (by omega)
+            spec.growth spec.returnTag T (by
+              simpa [currentRegisters, nextRegisters] using
+                geometry.current_le_next)
         · simp [boundaryOffset]
-        · rw [← hends]
-          exact boundaryOffset_le_layoutEnd currentRegisters _
+        · simpa [currentRegisters, nextRegisters] using
+            geometry.source_le_next
       simp only [currentSpec, stageSpec, updateSpec] at hrun
       rw [htapeNext] at hrun
       exact hrun

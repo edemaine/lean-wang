@@ -246,6 +246,96 @@ theorem decrementStage_head {final : Registers} {stage next : Register}
       Registers.increment, Registers.set, Registers.get] <;>
     omega
 
+/-- Every boundary lies inside its register layout.  This fact is shared by
+the finite-frame and open-core schedule adapters. -/
+theorem boundaryOffset_le_layoutEnd (registers : Registers)
+    (label : Fin 5) : boundaryOffset registers label ≤ layoutEnd registers := by
+  change CounterLayout.boundaryPos (RegisterLayout.values registers) label + 1 ≤
+    CounterLayout.boundaryPos (RegisterLayout.values registers) 4 + 1
+  apply Nat.add_le_add_right
+  exact CounterLayout.boundaryPos_mono _ (by omega)
+
+/-- Geometry common to one nonfinal positive-decrement stage.  Both machine
+adapters need the same equal-length layouts, positive shifted gap, and
+canonical tape move. -/
+structure DecrementStepGeometry
+    (final : Registers) (current next : Register) : Prop where
+  layoutEnd_eq :
+    layoutEnd (decrementStageRegisters final current) =
+      layoutEnd (decrementStageRegisters final next)
+  positive :
+    0 < RegisterLayout.values (decrementStageRegisters final current)
+      (decrementStageIndex current)
+  move :
+    MarkerMachine.moveAt .left
+        (MarkerTape.canonicalTape (decrementStageRegisters final current))
+        (MarkerTape.boundaryPosition (decrementStageRegisters final current)
+          (decrementStageIndex current).succ)
+        (decrementStageIndex current).succ =
+      MarkerTape.canonicalTape (decrementStageRegisters final next)
+
+theorem decrementStepGeometry {final : Registers} {current next : Register}
+    (hnext : DecrementStageNext current next) :
+    DecrementStepGeometry final current next where
+  layoutEnd_eq := by simp [decrementStage_layoutEnd]
+  positive := decrementStage_positive final current
+  move := decrementStage_move hnext
+
+namespace DecrementStepGeometry
+
+theorem current_le_next {final : Registers} {current next : Register}
+    (geometry : DecrementStepGeometry final current next) :
+    layoutEnd (decrementStageRegisters final current) ≤
+      layoutEnd (decrementStageRegisters final next) :=
+  geometry.layoutEnd_eq.le
+
+theorem next_le_current {final : Registers} {current next : Register}
+    (geometry : DecrementStepGeometry final current next) :
+    layoutEnd (decrementStageRegisters final next) ≤
+      layoutEnd (decrementStageRegisters final current) :=
+  geometry.layoutEnd_eq.ge
+
+theorem current_le_next_succ {final : Registers} {current next : Register}
+    (geometry : DecrementStepGeometry final current next) :
+    layoutEnd (decrementStageRegisters final current) ≤
+      layoutEnd (decrementStageRegisters final next) + 1 :=
+  geometry.layoutEnd_eq.le.trans (Nat.le_succ _)
+
+theorem source_le {final : Registers} {current next : Register}
+    (_geometry : DecrementStepGeometry final current next) :
+    boundaryOffset (decrementStageRegisters final current)
+        (decrementStageIndex current).succ ≤
+      layoutEnd (decrementStageRegisters final current) :=
+  boundaryOffset_le_layoutEnd _ _
+
+theorem source_le_next {final : Registers} {current next : Register}
+    (geometry : DecrementStepGeometry final current next) :
+    boundaryOffset (decrementStageRegisters final current)
+        (decrementStageIndex current).succ ≤
+      layoutEnd (decrementStageRegisters final next) := by
+  rw [← geometry.layoutEnd_eq]
+  exact geometry.source_le
+
+theorem destination_le {final : Registers} {current next : Register}
+    (geometry : DecrementStepGeometry final current next) :
+    boundaryOffset (decrementStageRegisters final current)
+          (decrementStageIndex current).succ - 1 ≤
+      layoutEnd (decrementStageRegisters final next) := by
+  rw [← geometry.layoutEnd_eq]
+  exact (Nat.sub_le _ _).trans geometry.source_le
+
+theorem shrink_source_eq_end {final : Registers} {current next : Register}
+    (geometry : DecrementStepGeometry final current next)
+    (hshrink : layoutEnd (decrementStageRegisters final next) <
+      layoutEnd (decrementStageRegisters final current)) :
+    boundaryOffset (decrementStageRegisters final current)
+        (decrementStageIndex current).succ =
+      layoutEnd (decrementStageRegisters final current) := by
+  rw [geometry.layoutEnd_eq] at hshrink
+  omega
+
+end DecrementStepGeometry
+
 
 end
 

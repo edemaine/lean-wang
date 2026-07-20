@@ -442,7 +442,7 @@ theorem incrementRecovery_foundGuardedParentOutcome
           geometry.travel ≤ layoutEnd centered.core.registers := by
     rw [hcoordinate]
     exact
-      CounterControlInstructionSemantics.boundaryOffset_le_layoutEnd
+      CounterControlScheduleSemantics.boundaryOffset_le_layoutEnd
         centered.core.registers handoff.direct.suffix.position.current
   have hcenter' : handoff.direct.suffix.finish.move
       (NestingMachine.opposite (orient growth .left)) =

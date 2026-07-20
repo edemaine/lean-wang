@@ -473,31 +473,24 @@ theorem machine_reaches_decrementSchedule_or_halts_of_envelope
       intro counterState searchSlot success current next hcurrent hnext hraw
       subst current
       let nextRegisters := decrementStageRegisters final next
-      have hends : layoutEnd registers = layoutEnd nextRegisters := by
-        rw [hregisters, decrementStage_layoutEnd,
-          decrementStage_layoutEnd]
-      have hstagePositive : 0 < RegisterLayout.values registers
-          (decrementStageIndex register) := by
-        rw [hregisters]
-        exact decrementStage_positive final register
-      have hmove : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape registers)
-          (MarkerTape.boundaryPosition registers
-            (decrementStageIndex register).succ)
-          (decrementStageIndex register).succ =
-          MarkerTape.canonicalTape nextRegisters := by
-        simpa [hregisters, nextRegisters] using
-          decrementStage_move (final := final) hnext
+      let geometry := decrementStepGeometry (final := final) hnext
       have hrun := E.first base c counterState searchSlot success
         (E.limit_positive h) h (decrementStageIndex register)
-        hstagePositive (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd registers _)
+        (by simpa [hregisters] using geometry.positive)
+        (by simpa [hregisters, nextRegisters] using
+          geometry.next_le_current)
+        (by simpa [hregisters, nextRegisters] using
+          geometry.current_le_next_succ)
+        (by simpa [hregisters] using geometry.source_le)
+        (by simpa [hregisters, nextRegisters] using
+          geometry.destination_le)
         (by
-          have hb := boundaryOffset_le_layoutEnd registers
-            (decrementStageIndex register).succ
-          rw [← hends]
-          omega)
-        (by intro hlt; omega) hmove hraw
+          intro hlt
+          simpa [hregisters, nextRegisters] using
+            geometry.shrink_source_eq_end (by
+              simpa [hregisters, nextRegisters] using hlt))
+        (by simpa [hregisters, nextRegisters] using geometry.move)
+        hraw
       have htapeNext : installCore nextRegisters growth
           (writeLogical growth T
             (boundaryOffset registers
@@ -505,8 +498,8 @@ theorem machine_reaches_decrementSchedule_or_halts_of_envelope
           installCore nextRegisters growth T := by
         apply installCore_write_inside
         · simp [boundaryOffset]
-        · rw [← hends]
-          exact boundaryOffset_le_layoutEnd registers _
+        · simpa [hregisters, nextRegisters] using
+            geometry.source_le_next
       rw [htapeNext] at hrun
       rcases hrun with hrun | hhalts
       · exact Or.inl hrun.1
@@ -518,40 +511,37 @@ theorem machine_reaches_decrementSchedule_or_halts_of_envelope
       let currentTape := installCore currentRegisters growth T
       have hcurrent : E.Represents currentRegisters currentTape := by
         simpa [currentRegisters, currentTape] using hstageRep current
-      have hends : layoutEnd currentRegisters = layoutEnd nextRegisters := by
-        simp [currentRegisters, nextRegisters, decrementStage_layoutEnd]
-      have hstagePositive : 0 < RegisterLayout.values currentRegisters
-          (decrementStageIndex current) := by
-        simpa [currentRegisters] using decrementStage_positive final current
-      have hmove : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape currentRegisters)
-          (MarkerTape.boundaryPosition currentRegisters
-            (decrementStageIndex current).succ)
-          (decrementStageIndex current).succ =
-          MarkerTape.canonicalTape nextRegisters := by
-        simpa [currentRegisters, nextRegisters] using
-          decrementStage_move (final := final) hnext
+      let geometry := decrementStepGeometry (final := final) hnext
       have hrun := E.following base c counterState searchSlot success hcurrent
-        (decrementStageIndex current) hstagePositive
+        (decrementStageIndex current)
+        (by simpa [currentRegisters] using geometry.positive)
         (E.registerValue_lt hcurrent (decrementStageIndex current))
-        (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd currentRegisters _)
+        (by simpa [currentRegisters, nextRegisters] using
+          geometry.next_le_current)
+        (by simpa [currentRegisters, nextRegisters] using
+          geometry.current_le_next_succ)
+        (by simpa [currentRegisters] using geometry.source_le)
+        (by simpa [currentRegisters, nextRegisters] using
+          geometry.destination_le)
         (by
-          have hb := boundaryOffset_le_layoutEnd currentRegisters
-            (decrementStageIndex current).succ
-          rw [← hends]
-          omega)
-        (by intro hlt; omega) hmove hraw
+          intro hlt
+          simpa [currentRegisters, nextRegisters] using
+            geometry.shrink_source_eq_end (by
+              simpa [currentRegisters, nextRegisters] using hlt))
+        (by simpa [currentRegisters, nextRegisters] using
+          geometry.move)
+        hraw
       have htapeNext : installCore nextRegisters growth
           (writeLogical growth currentTape
             (boundaryOffset currentRegisters
               (decrementStageIndex current).succ) blankSymbol) =
           installCore nextRegisters growth T := by
         apply installCore_after_internal_left
-        · omega
+        · simpa [currentRegisters, nextRegisters] using
+            geometry.current_le_next
         · simp [boundaryOffset]
-        · rw [← hends]
-          exact boundaryOffset_le_layoutEnd currentRegisters _
+        · simpa [currentRegisters, nextRegisters] using
+            geometry.source_le_next
       rw [htapeNext] at hrun
       rcases hrun with hrun | hhalts
       · exact Or.inl hrun.1
