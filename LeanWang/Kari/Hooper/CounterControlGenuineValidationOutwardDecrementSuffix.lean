@@ -201,15 +201,7 @@ private theorem routeEntryRule_mem
   apply CounterControlPlan.directRule_mem_rawDirectRules_of_rule
     growth hrule
   cases register with
-  | left =>
-      simp [directRulesForRule, decrementRules,
-        AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules]
-      exact Or.inr (Or.inl rfl)
-  | right =>
-      simp [directRulesForRule, decrementRules,
-        AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules]
-      exact Or.inr (Or.inl rfl)
-  | temp =>
+  | left | right | temp =>
       simp [directRulesForRule, decrementRules,
         AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules]
       exact Or.inr (Or.inl rfl)
@@ -818,19 +810,7 @@ private theorem PositiveCenteredEnd.position_eq
   rw [hbefore] at hlabels
   simp only [List.nil_append] at hlabels
   cases register with
-  | left =>
-      simp [MarkerShift.decrementOrder] at hlabels
-      exact ⟨hlabels.1.symm, by
-        simpa [MarkerSchedule.decrementStartBoundary,
-          CounterControlGuardedDecrementPositiveEmbedding.shiftAfter] using
-            hlabels.2.symm⟩
-  | right =>
-      simp [MarkerShift.decrementOrder] at hlabels
-      exact ⟨hlabels.1.symm, by
-        simpa [MarkerSchedule.decrementStartBoundary,
-          CounterControlGuardedDecrementPositiveEmbedding.shiftAfter] using
-            hlabels.2.symm⟩
-  | temp =>
+  | left | right | temp =>
       simp [MarkerShift.decrementOrder] at hlabels
       exact ⟨hlabels.1.symm, by
         simpa [MarkerSchedule.decrementStartBoundary,
