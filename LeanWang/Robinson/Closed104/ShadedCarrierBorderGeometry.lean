@@ -51,6 +51,41 @@ theorem frameEndResidue_succ (depth : Nat) :
     frameEndResidue (depth + 1) = 4 * frameEndResidue depth := by
   simp [frameEndResidue, scale, pow_succ, Nat.mul_comm, Nat.mul_left_comm]
 
+private inductive FrameSide where
+  | opening
+  | closing
+
+private def FrameSide.boundaryResidue : FrameSide → Nat → Nat
+  | .opening => frameStartResidue
+  | .closing => frameEndResidue
+
+private def FrameSide.fineResidue : FrameSide → Nat
+  | .opening => 1
+  | .closing => 0
+
+private theorem FrameSide.boundaryResidue_pos
+    (side : FrameSide) (depth : Nat) :
+    0 < side.boundaryResidue depth := by
+  cases side <;> simp [boundaryResidue, frameStartResidue,
+    frameEndResidue, scale, pow_pos]
+
+private theorem FrameSide.boundaryResidue_lt_period
+    (side : FrameSide) (depth : Nat) :
+    side.boundaryResidue depth < period depth := by
+  have positive : 0 < scale depth := pow_pos (by decide) _
+  rw [period_eq_four_mul_scale]
+  cases side <;> simp only [boundaryResidue, frameStartResidue,
+    frameEndResidue] <;> omega
+
+private theorem FrameSide.ceilDivFour_boundaryResidue_succ
+    (side : FrameSide) (depth : Nat) :
+    ceilDivFour (side.boundaryResidue (depth + 1)) =
+      side.boundaryResidue depth := by
+  cases side <;>
+    simp only [boundaryResidue, frameStartResidue, frameEndResidue,
+      scale, pow_succ] <;>
+    unfold ceilDivFour <;> omega
+
 private theorem inFrame_ceilDivFour_periodic (depth : Nat) :
     Function.Periodic (fun coordinate =>
       inFrame depth (ceilDivFour coordinate)) (period (depth + 1)) := by
@@ -110,127 +145,87 @@ theorem inFrame_succ_iff_ceilDivFour (depth coordinate : Nat) :
       simp [inFrame, frameStartResidue]
     rw [fineFalse, coarseFalse]
 
-private theorem openingLiftCondition_periodic (depth : Nat) :
+private theorem boundaryLiftCondition_periodic
+    (side : FrameSide) (depth : Nat) :
     Function.Periodic (fun coordinate =>
-      ceilDivFour coordinate % period depth = frameStartResidue depth ∧
-        coordinate % 4 = 1) (period (depth + 1)) := by
+      ceilDivFour coordinate % period depth = side.boundaryResidue depth ∧
+        coordinate % 4 = side.fineResidue) (period (depth + 1)) := by
   intro coordinate
   rw [period_succ]
   apply propext
   change
     ceilDivFour (coordinate + 4 * period depth) % period depth = _ ∧
-        (coordinate + 4 * period depth) % 4 = 1 ↔ _
+        (coordinate + 4 * period depth) % 4 = side.fineResidue ↔ _
   rw [ceilDivFour_add_four_mul]
   simp
 
-private theorem openingBoundary_periodic (depth : Nat) :
+private theorem boundary_periodic (side : FrameSide) (depth : Nat) :
     Function.Periodic (fun coordinate =>
-      coordinate % period (depth + 1) = frameStartResidue (depth + 1))
+      coordinate % period (depth + 1) = side.boundaryResidue (depth + 1))
       (period (depth + 1)) := by
   intro coordinate
   simp
+
+private theorem boundary_succ_iff
+    (side : FrameSide) (depth coordinate : Nat) :
+    coordinate % period (depth + 1) = side.boundaryResidue (depth + 1) ↔
+      ceilDivFour coordinate % period depth = side.boundaryResidue depth ∧
+        coordinate % 4 = side.fineResidue := by
+  let residue := coordinate % period (depth + 1)
+  have residueLt : residue < period (depth + 1) :=
+    Nat.mod_lt _ (pow_pos (by decide) _)
+  rw [← (boundary_periodic side depth).map_mod_nat coordinate]
+  rw [← (boundaryLiftCondition_periodic side depth).map_mod_nat coordinate]
+  change residue % period (depth + 1) = side.boundaryResidue (depth + 1) ↔
+    ceilDivFour residue % period depth = side.boundaryResidue depth ∧
+      residue % 4 = side.fineResidue
+  rw [Nat.mod_eq_of_lt residueLt]
+  have periodEq := period_succ depth
+  have coarseLe : ceilDivFour residue ≤ period depth := by
+    unfold ceilDivFour
+    rw [periodEq] at residueLt
+    omega
+  by_cases coarseLt : ceilDivFour residue < period depth
+  · rw [Nat.mod_eq_of_lt coarseLt]
+    cases side with
+    | opening =>
+        simp only [FrameSide.boundaryResidue, FrameSide.fineResidue]
+        rw [frameStartResidue_succ]
+        have startPositive : 0 < frameStartResidue depth := by
+          simp [frameStartResidue]
+        unfold ceilDivFour
+        omega
+    | closing =>
+        simp only [FrameSide.boundaryResidue, FrameSide.fineResidue]
+        rw [frameEndResidue_succ]
+        unfold ceilDivFour
+        omega
+  · have coarseEq : ceilDivFour residue = period depth := by omega
+    have boundaryPositive := side.boundaryResidue_pos depth
+    have boundaryLt := side.boundaryResidue_lt_period depth
+    constructor
+    · intro left
+      have ceilEq : ceilDivFour residue = side.boundaryResidue depth := by
+        rw [left]
+        exact side.ceilDivFour_boundaryResidue_succ depth
+      exact ((Nat.ne_of_gt boundaryLt) (coarseEq.symm.trans ceilEq)).elim
+    · rintro ⟨right, _⟩
+      rw [coarseEq, Nat.mod_self] at right
+      exact ((Nat.ne_of_gt boundaryPositive) right.symm).elim
 
 theorem openingBoundary_succ_iff (depth coordinate : Nat) :
     coordinate % period (depth + 1) = frameStartResidue (depth + 1) ↔
       ceilDivFour coordinate % period depth = frameStartResidue depth ∧
         coordinate % 4 = 1 := by
-  let residue := coordinate % period (depth + 1)
-  have residueLt : residue < period (depth + 1) :=
-    Nat.mod_lt _ (pow_pos (by decide) _)
-  rw [← (openingBoundary_periodic depth).map_mod_nat coordinate]
-  rw [← (openingLiftCondition_periodic depth).map_mod_nat coordinate]
-  change residue % period (depth + 1) = frameStartResidue (depth + 1) ↔
-    ceilDivFour residue % period depth = frameStartResidue depth ∧
-      residue % 4 = 1
-  rw [Nat.mod_eq_of_lt residueLt]
-  have periodEq := period_succ depth
-  have startEq := frameStartResidue_succ depth
-  have coarseLe : ceilDivFour residue ≤ period depth := by
-    unfold ceilDivFour
-    rw [periodEq] at residueLt
-    omega
-  by_cases coarseLt : ceilDivFour residue < period depth
-  · rw [Nat.mod_eq_of_lt coarseLt]
-    rw [startEq]
-    have startPositive : 0 < frameStartResidue depth := by
-      simp [frameStartResidue]
-    unfold ceilDivFour
-    omega
-  · have coarseEq : ceilDivFour residue = period depth := by omega
-    rw [coarseEq, Nat.mod_self, startEq]
-    have startPositive : 0 < frameStartResidue depth := by
-      simp [frameStartResidue]
-    have startLtPeriod : frameStartResidue depth < period depth := by
-      rw [period_eq_four_mul_scale]
-      simp only [frameStartResidue]
-      have scalePositive : 0 < scale depth := pow_pos (by decide) _
-      omega
-    have leftFalse : residue ≠ 4 * frameStartResidue depth - 3 := by
-      intro residueEq
-      rw [residueEq,
-        ceilDivFour_four_mul_sub_three _ startPositive] at coarseEq
-      exact (Nat.ne_of_lt startLtPeriod) coarseEq
-    constructor
-    · intro left
-      exact (leftFalse left).elim
-    · rintro ⟨zeroEq, _⟩
-      omega
-
-private theorem closingLiftCondition_periodic (depth : Nat) :
-    Function.Periodic (fun coordinate =>
-      ceilDivFour coordinate % period depth = frameEndResidue depth ∧
-        coordinate % 4 = 0) (period (depth + 1)) := by
-  intro coordinate
-  rw [period_succ]
-  apply propext
-  change
-    ceilDivFour (coordinate + 4 * period depth) % period depth = _ ∧
-        (coordinate + 4 * period depth) % 4 = 0 ↔ _
-  rw [ceilDivFour_add_four_mul]
-  simp
-
-private theorem closingBoundary_periodic (depth : Nat) :
-    Function.Periodic (fun coordinate =>
-      coordinate % period (depth + 1) = frameEndResidue (depth + 1))
-      (period (depth + 1)) := by
-  intro coordinate
-  simp
+  simpa [FrameSide.boundaryResidue, FrameSide.fineResidue] using
+    boundary_succ_iff .opening depth coordinate
 
 theorem closingBoundary_succ_iff (depth coordinate : Nat) :
     coordinate % period (depth + 1) = frameEndResidue (depth + 1) ↔
       ceilDivFour coordinate % period depth = frameEndResidue depth ∧
         coordinate % 4 = 0 := by
-  let residue := coordinate % period (depth + 1)
-  have residueLt : residue < period (depth + 1) :=
-    Nat.mod_lt _ (pow_pos (by decide) _)
-  rw [← (closingBoundary_periodic depth).map_mod_nat coordinate]
-  rw [← (closingLiftCondition_periodic depth).map_mod_nat coordinate]
-  change residue % period (depth + 1) = frameEndResidue (depth + 1) ↔
-    ceilDivFour residue % period depth = frameEndResidue depth ∧
-      residue % 4 = 0
-  rw [Nat.mod_eq_of_lt residueLt]
-  have periodEq := period_succ depth
-  have endEq := frameEndResidue_succ depth
-  have coarseLe : ceilDivFour residue ≤ period depth := by
-    unfold ceilDivFour
-    rw [periodEq] at residueLt
-    omega
-  by_cases coarseLt : ceilDivFour residue < period depth
-  · rw [Nat.mod_eq_of_lt coarseLt]
-    rw [endEq]
-    have endPositive : 0 < frameEndResidue depth := by
-      simp [frameEndResidue, scale, pow_pos]
-    unfold ceilDivFour
-    omega
-  · have coarseEq : ceilDivFour residue = period depth := by omega
-    rw [coarseEq, Nat.mod_self, endEq]
-    have endPositive : 0 < frameEndResidue depth := by
-      simp [frameEndResidue, scale, pow_pos]
-    have scalePositive : 0 < scale depth := pow_pos (by decide) _
-    have periodScale := period_eq_four_mul_scale depth
-    unfold ceilDivFour at coarseEq
-    rw [periodEq] at residueLt
-    omega
+  simpa [FrameSide.boundaryResidue, FrameSide.fineResidue] using
+    boundary_succ_iff .closing depth coordinate
 
 theorem frameBorder_succ (depth coordinate transverse : Nat) :
     liftBorder coordinate
@@ -266,10 +261,10 @@ theorem period_dvd_scale_of_lt {small large : Nat} (h : small < large) :
   rw [period, scale]
   exact Nat.pow_dvd_pow 4 (by omega)
 
-theorem largeOpening_mod_small {small large coordinate : Nat}
-    (h : small < large)
-    (opening : coordinate % period large = frameStartResidue large) :
-    coordinate % period small = 1 := by
+private theorem largeBoundary_mod_small (side : FrameSide)
+    {small large coordinate : Nat} (h : small < large)
+    (boundary : coordinate % period large = side.boundaryResidue large) :
+    coordinate % period small = side.fineResidue := by
   have periodDvd : period small ∣ period large := by
     rw [period, period]
     exact Nat.pow_dvd_pow 4 (by omega)
@@ -278,33 +273,35 @@ theorem largeOpening_mod_small {small large coordinate : Nat}
     coordinate % period small =
         (coordinate % period large) % period small :=
       (Nat.mod_mod_of_dvd coordinate periodDvd).symm
-    _ = frameStartResidue large % period small := by rw [opening]
-    _ = 1 := by
-      rw [frameStartResidue, Nat.add_mod,
-        Nat.mod_eq_zero_of_dvd scaleDvd]
-      have oneLt : 1 < period small := by
-        rw [period_eq_four_mul_scale]
-        have := scale_pos small
-        omega
-      simp [Nat.mod_eq_of_lt oneLt]
+    _ = side.boundaryResidue large % period small := by rw [boundary]
+    _ = side.fineResidue := by
+      cases side with
+      | opening =>
+          rw [FrameSide.boundaryResidue, FrameSide.fineResidue,
+            frameStartResidue, Nat.add_mod,
+            Nat.mod_eq_zero_of_dvd scaleDvd]
+          have oneLt : 1 < period small := by
+            rw [period_eq_four_mul_scale]
+            have := scale_pos small
+            omega
+          simp [Nat.mod_eq_of_lt oneLt]
+      | closing =>
+          rw [FrameSide.boundaryResidue, FrameSide.fineResidue,
+            frameEndResidue, Nat.mul_mod,
+            Nat.mod_eq_zero_of_dvd scaleDvd]
+          simp
+
+theorem largeOpening_mod_small {small large coordinate : Nat}
+    (h : small < large)
+    (opening : coordinate % period large = frameStartResidue large) :
+    coordinate % period small = 1 := by
+  exact largeBoundary_mod_small .opening h opening
 
 theorem largeClosing_mod_small {small large coordinate : Nat}
     (h : small < large)
     (closing : coordinate % period large = frameEndResidue large) :
     coordinate % period small = 0 := by
-  have periodDvd : period small ∣ period large := by
-    rw [period, period]
-    exact Nat.pow_dvd_pow 4 (by omega)
-  have scaleDvd : period small ∣ scale large := period_dvd_scale_of_lt h
-  calc
-    coordinate % period small =
-        (coordinate % period large) % period small :=
-      (Nat.mod_mod_of_dvd coordinate periodDvd).symm
-    _ = frameEndResidue large % period small := by rw [closing]
-    _ = 0 := by
-      rw [frameEndResidue, Nat.mul_mod,
-        Nat.mod_eq_zero_of_dvd scaleDvd]
-      simp
+  exact largeBoundary_mod_small .closing h closing
 
 theorem outerBorder_lift (coordinate transverse : Nat) :
     liftBorder coordinate
