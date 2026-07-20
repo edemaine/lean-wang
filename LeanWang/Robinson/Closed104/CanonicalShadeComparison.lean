@@ -185,6 +185,65 @@ private theorem cycleSourceAgreement (depth : Nat)
     (supertileNodeGrid (depth + 1) root blockX blockY)
   exact actualSource.trans canonicalSource.symm
 
+private noncomputable def refinementComparison
+    (coarse : Nat → Nat → Index) (root : Node)
+    (coarseRoot : coarse 0 0 = 0) (rootParent : root.data.parent = 0) :
+    RefinementComparison where
+  scale := scale
+  actualGrid := fun depth => actualGrid depth coarse
+  canonicalGrid := fun depth => indexGrid root (depth + 1)
+  canonicalStates := fun depth => shadeGrid root (depth + 1)
+  localStates := localStates root
+  extent := fun depth => 2 * 4 ^ (depth + 1)
+  scaleSucc := by
+    intro depth
+    simp [scale, pow_succ, Nat.mul_comm]
+  gridSucc := by
+    intro depth
+    dsimp [actualGrid]
+    rw [PlaneRedBoards.iterateRefine_add]
+    congr 1
+    omega
+  rootCycle := fun depth => rootCycle depth coarse
+  base := by
+    intro baseStates baseValid baseShaded baseTarget baseWest baseEast
+      baseSouth baseNorth basePresent
+    exact baseAgreement coarse root coarseRoot rootParent baseStates
+      baseValid baseShaded baseTarget baseWest baseEast baseSouth baseNorth
+      basePresent
+  localValid := by
+    intro depth blockX blockY blockXLower blockXUpper blockYLower blockYUpper
+    exact localValid depth coarse root (coarseRoot.trans rootParent.symm)
+      blockX blockY blockXLower blockXUpper blockYLower blockYUpper
+  canonicalBlock := by
+    intro depth blockX blockY port portX portY
+    exact value_succ_block (depth + 1) root blockX blockY port portX portY
+  canonicalSparse := by
+    intro depth port
+    exact value_succ_sparse (depth + 1) root port
+  cycleSourceAgreement := by
+    intro depth states blockX blockY valid shaded
+      blockXLower blockXUpper blockYLower blockYUpper cellCycle
+    exact cycleSourceAgreement depth coarse root states blockX blockY
+      valid shaded blockXLower blockXUpper blockYLower blockYUpper cellCycle
+  canonicalValid := fun depth => validRectangle (depth + 1) root
+  extentLarge := by
+    intro depth
+    simp only [scale, pow_succ]
+    omega
+  componentEq := by
+    intro depth x y xEast yNorth
+    have xBound : x < 2 * 4 ^ (depth + 1) := by
+      simp only [scale, pow_succ] at xEast ⊢
+      omega
+    have yBound : y < 2 * 4 ^ (depth + 1) := by
+      simp only [scale, pow_succ] at yNorth ⊢
+      omega
+    simpa only [indexGrid, actualGrid,
+      show 2 * (depth + 1) = 2 * depth + 2 by omega] using
+      componentAt_supertile_eq_coarse (depth + 1) root coarse
+        (coarseRoot.trans rootParent.symm) x y xBound yBound
+
 /-- Every live port in the central square has the same shade in an arbitrary
 valid light-root assignment and in the selected canonical assignment. -/
 theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
@@ -201,76 +260,10 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
     (targetNorth : target.y < 6 * scale depth)
     (targetPresent : portPresent (actualGrid depth coarse) target = true) :
     value states target = value (shadeGrid root (depth + 1)) target := by
-  apply present_value_eq_of_refinement {
-    scale := scale
-    actualGrid := fun phaseDepth => actualGrid phaseDepth coarse
-    canonicalStates := fun phaseDepth => shadeGrid root (phaseDepth + 1)
-    localStates := localStates root
-    scaleSucc := by
-      intro phaseDepth
-      simp [scale, pow_succ, Nat.mul_comm]
-    gridSucc := by
-      intro phaseDepth
-      dsimp [actualGrid]
-      rw [PlaneRedBoards.iterateRefine_add]
-      congr 1
-      omega
-    rootCycle := fun phaseDepth => rootCycle phaseDepth coarse
-    base := by
-      intro baseStates baseValid baseShaded baseTarget baseWest baseEast
-        baseSouth baseNorth basePresent
-      exact baseAgreement coarse root coarseRoot rootParent baseStates
-        baseValid baseShaded baseTarget baseWest baseEast baseSouth baseNorth
-        basePresent
-    localValid := by
-      intro phaseDepth blockX blockY blockXLower blockXUpper
-        blockYLower blockYUpper
-      exact localValid phaseDepth coarse root
-        (coarseRoot.trans rootParent.symm) blockX blockY
-        blockXLower blockXUpper blockYLower blockYUpper
-    canonicalBlock := by
-      intro phaseDepth blockX blockY port portX portY
-      exact value_succ_block (phaseDepth + 1) root blockX blockY
-        port portX portY
-    canonicalSparse := by
-      intro phaseDepth port
-      exact value_succ_sparse (phaseDepth + 1) root port
-    cycleSourceAgreement := by
-      intro phaseDepth phaseStates blockX blockY phaseValid phaseShaded
-        blockXLower blockXUpper blockYLower blockYUpper cellCycle
-      exact cycleSourceAgreement phaseDepth coarse root phaseStates
-        blockX blockY phaseValid phaseShaded blockXLower blockXUpper
-        blockYLower blockYUpper cellCycle
-  }
-  · exact valid
-  · exact shaded
-  · exact targetWest
-  · exact targetEast
-  · exact targetSouth
-  · exact targetNorth
-  · exact targetPresent
-
-private theorem index_canonical_eq (depth : Nat)
-    (coarse : Nat → Nat → Index) (root : Node)
-    (rootEq : coarse 0 0 = root.data.parent) (x y : Nat)
-    (xEast : x < 8 * scale depth) (yNorth : y < 8 * scale depth) :
-    indexGrid root (depth + 1) (x / 2) (y / 2) =
-      actualGrid depth coarse (x / 2) (y / 2) := by
-  have xBound : x / 2 < 4 ^ (depth + 1) := by
-    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    rw [pow_succ]
-    simp only [scale] at xEast
-    omega
-  have yBound : y / 2 < 4 ^ (depth + 1) := by
-    apply (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).2
-    rw [pow_succ]
-    simp only [scale] at yNorth
-    omega
-  change supertileIndexGrid (depth + 1) root (x / 2) (y / 2) =
-    iterateRefine (2 * depth + 2) coarse (x / 2) (y / 2)
-  rw [← show 2 * (depth + 1) = 2 * depth + 2 by omega]
-  exact supertileIndexGrid_eq_coarse (depth + 1) root coarse rootEq
-    xBound yBound
+  exact present_value_eq_of_refinement
+    (refinementComparison coarse root coarseRoot rootParent)
+    depth states valid shaded target targetWest targetEast targetSouth
+      targetNorth targetPresent
 
 /-- The even phase packages live-port agreement and common geometry. -/
 theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
@@ -282,24 +275,9 @@ theorem comparison (depth : Nat) (coarse : Nat → Nat → Index)
       (scale depth) (3 * scale depth) .light) :
     PhaseComparison (actualGrid depth coarse) (indexGrid root (depth + 1))
       states (shadeGrid root (depth + 1)) (scale depth)
-      (2 * 4 ^ (depth + 1)) := by
-  refine {
-    actualValid := valid
-    canonicalValid := validRectangle (depth + 1) root
-    extent_large := ?_
-    component_eq := ?_
-    present_value_eq := ?_
-  }
-  · rw [pow_succ]
-    simp only [scale]
-    omega
-  · intro x y xEast yNorth
-    simp only [componentAt]
-    rw [index_canonical_eq depth coarse root
-      (coarseRoot.trans rootParent.symm) x y xEast yNorth]
-  · intro port portWest portEast portSouth portNorth portPresent
-    exact present_value_eq depth coarse states root coarseRoot rootParent
-      valid shaded port portWest portEast portSouth portNorth portPresent
+      (2 * 4 ^ (depth + 1)) :=
+  (refinementComparison coarse root coarseRoot rootParent).phaseComparison
+    depth states valid shaded
 
 /-- Every coordinate in the canonical family is a free row and column in the
 arbitrary light-root shade assignment. -/

@@ -139,12 +139,29 @@ theorem related_of_cycleBridge
     (onCycle_connected secondCycle secondOn targetOn).sound valid
   simpa only [firstValue, targetValue] using path.sound valid
 
-/-- Data and laws shared by the even and odd canonical shade refinements. -/
+/-- A canonical supertile and the corresponding refined coarse grid have the
+same component geometry throughout the supertile's finite extent. -/
+theorem componentAt_supertile_eq_coarse
+    (level : Nat) (root : Node) (coarse : Nat → Nat → Index)
+    (rootEq : coarse 0 0 = root.data.parent) (x y : Nat)
+    (xBound : x < 2 * 4 ^ level) (yBound : y < 2 * 4 ^ level) :
+    componentAt (supertileIndexGrid level root) x y =
+      componentAt (iterateRefine (2 * level) coarse) x y := by
+  have halfXBound : x / 2 < 4 ^ level := by omega
+  have halfYBound : y / 2 < 4 ^ level := by omega
+  simp only [componentAt]
+  rw [supertileIndexGrid_eq_coarse level root coarse rootEq
+    halfXBound halfYBound]
+
+/-- A complete canonical shade phase: recursive shade comparison together
+with the finite canonical geometry used to transfer free lines. -/
 structure RefinementComparison where
   scale : Nat → Nat
   actualGrid : Nat → Nat → Nat → Index
+  canonicalGrid : Nat → Nat → Nat → Index
   canonicalStates : Nat → Nat → Nat → RedShades.State
   localStates : Nat → Nat → Nat → Nat → Nat → RedShades.State
+  extent : Nat → Nat
   scaleSucc : ∀ depth, scale (depth + 1) = 4 * scale depth
   gridSucc : ∀ depth,
     iterateRefine 2 (actualGrid depth) = actualGrid (depth + 1)
@@ -184,6 +201,14 @@ structure RefinementComparison where
         (4 * blockY + 1) (4 * blockY + 3) →
       value states (translatePort cycleSource (8 * blockX) (8 * blockY)) =
         value (localStates depth blockX blockY) cycleSource
+  canonicalValid : ∀ depth,
+    ValidShadeRectangle (canonicalGrid depth) (canonicalStates depth)
+      (extent depth) (extent depth)
+  extentLarge : ∀ depth, 8 * scale depth ≤ extent depth
+  componentEq : ∀ depth x y,
+    x < 8 * scale depth → y < 8 * scale depth →
+      componentAt (canonicalGrid depth) x y =
+        componentAt (actualGrid depth) x y
 
 /-- Common two-level coarsening induction for the even and odd canonical
 shade phases. -/
@@ -200,9 +225,10 @@ theorem present_value_eq_of_refinement (comparison : RefinementComparison) :
         target.y < 6 * comparison.scale depth →
         portPresent (comparison.actualGrid depth) target = true →
         value states target = value (comparison.canonicalStates depth) target := by
-  rcases comparison with ⟨scale, actualGrid, canonicalStates, localStates,
-    scaleSucc, gridSucc, rootCycle, base, localValid, canonicalBlock,
-    canonicalSparse, cycleSourceAgreement⟩
+  rcases comparison with ⟨scale, actualGrid, canonicalGrid, canonicalStates,
+    localStates, extent, scaleSucc, gridSucc, rootCycle, base, localValid,
+    canonicalBlock, canonicalSparse, cycleSourceAgreement, canonicalValid,
+    extentLarge, componentEq⟩
   dsimp only at *
   intro depth states valid shaded target targetWest targetEast
     targetSouth targetNorth targetPresent
@@ -369,6 +395,26 @@ structure PhaseComparison
     2 * scale ≤ port.y → port.y < 6 * scale →
     portPresent actualGrid port = true →
     value actualStates port = value canonicalStates port
+
+/-- Instantiate the complete finite phase comparison supplied by a canonical
+refinement specification. -/
+def RefinementComparison.phaseComparison
+    (comparison : RefinementComparison) (depth : Nat)
+    (states : Nat → Nat → RedShades.State)
+    (valid : ValidShadeGrid (comparison.actualGrid depth) states)
+    (shaded : CycleShade states
+      (comparison.scale depth) (3 * comparison.scale depth)
+      (comparison.scale depth) (3 * comparison.scale depth) .light) :
+    PhaseComparison (comparison.actualGrid depth)
+      (comparison.canonicalGrid depth) states
+      (comparison.canonicalStates depth) (comparison.scale depth)
+      (comparison.extent depth) where
+  actualValid := valid
+  canonicalValid := comparison.canonicalValid depth
+  extent_large := comparison.extentLarge depth
+  component_eq := comparison.componentEq depth
+  present_value_eq := present_value_eq_of_refinement comparison depth states
+    valid shaded
 
 namespace PhaseComparison
 
