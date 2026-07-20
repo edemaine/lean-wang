@@ -36,46 +36,36 @@ structure OrderedPrefix (s : Finset Nat) (size : Nat) where
 
 noncomputable def OrderedPrefix.ofCardLE (s : Finset Nat) (size : Nat)
     (hsize : size ≤ s.card) : OrderedPrefix s size where
-  coord := fun i =>
-    (s.sort (· ≤ ·)).get ⟨i.val, by simpa using lt_of_lt_of_le i.isLt hsize⟩
-  mem_coord := by
-    intro i
-    rw [← Finset.mem_sort (· ≤ ·)]
-    exact List.get_mem _ _
-  strictMono := by
-    intro i j hij
-    exact (Finset.sortedLT_sort s).pairwise.rel_get_of_lt hij
+  coord := s.orderEmbOfCardLe hsize
+  mem_coord := s.orderEmbOfCardLe_mem hsize
+  strictMono := (s.orderEmbOfCardLe hsize).strictMono
   first_min := by
     intro hpositive k hk
-    have hkl : k ∈ s.sort (· ≤ ·) := (Finset.mem_sort (· ≤ ·)).2 hk
-    rcases List.mem_iff_get.1 hkl with ⟨j, hj⟩
-    have hle := (Finset.pairwise_sort s (· ≤ ·)).rel_get_of_le
-      (show (⟨0, by simpa using lt_of_lt_of_le hpositive hsize⟩ :
-        Fin (s.sort (· ≤ ·)).length) ≤ j by
-          change 0 ≤ j.val
-          exact Nat.zero_le _)
-    simpa only [hj] using hle
+    let fullIndex := (s.orderIsoOfFin rfl).symm ⟨k, hk⟩
+    have hle : (Fin.castLE hsize ⟨0, hpositive⟩) ≤ fullIndex := by
+      change 0 ≤ fullIndex.val
+      omega
+    have mapped := (s.orderEmbOfFin rfl).monotone hle
+    have mappedValue : s.orderEmbOfFin rfl fullIndex = k := by
+      exact congrArg Subtype.val
+        ((s.orderIsoOfFin rfl).apply_symm_apply ⟨k, hk⟩)
+    exact mapped.trans_eq mappedValue
   no_mem_between := by
     intro i hi k hik hki hk
-    have hkl : k ∈ s.sort (· ≤ ·) := (Finset.mem_sort (· ≤ ·)).2 hk
-    rcases List.mem_iff_get.1 hkl with ⟨j, hj⟩
-    let left : Fin (s.sort (· ≤ ·)).length :=
-      ⟨i.val, by simpa using lt_of_lt_of_le i.isLt hsize⟩
-    let right : Fin (s.sort (· ≤ ·)).length :=
-      ⟨i.val + 1, by simpa using lt_of_lt_of_le hi hsize⟩
-    by_cases hji : j ≤ left
-    · have hle := (Finset.pairwise_sort s (· ≤ ·)).rel_get_of_le hji
-      change (s.sort (· ≤ ·)).get left < k at hik
-      rw [hj] at hle
-      omega
-    · have hright : right ≤ j := by
-        change i.val + 1 ≤ j.val
-        change ¬j.val ≤ i.val at hji
-        omega
-      have hle := (Finset.pairwise_sort s (· ≤ ·)).rel_get_of_le hright
-      change k < (s.sort (· ≤ ·)).get right at hki
-      rw [hj] at hle
-      omega
+    let fullIndex := (s.orderIsoOfFin rfl).symm ⟨k, hk⟩
+    have mapped : s.orderEmbOfFin rfl fullIndex = k := by
+      exact congrArg Subtype.val ((s.orderIsoOfFin rfl).apply_symm_apply ⟨k, hk⟩)
+    by_cases before : fullIndex.val ≤ i.val
+    · have hle := (s.orderEmbOfFin rfl).monotone
+        (show fullIndex ≤ Fin.castLE hsize i by exact before)
+      rw [mapped] at hle
+      exact (Nat.not_lt_of_ge hle) hik
+    · have hle := (s.orderEmbOfFin rfl).monotone
+        (show Fin.castLE hsize ⟨i.val + 1, hi⟩ ≤ fullIndex by
+          change i.val + 1 ≤ fullIndex.val
+          omega)
+      rw [mapped] at hle
+      exact (Nat.not_lt_of_ge hle) hki
 
 theorem OrderedPrefix.at_zero_eq
     {s : Finset Nat} {size marker : Nat} (hsize : 0 < size)
@@ -103,35 +93,28 @@ structure ConsecutiveMarkedFreeGrid
       quadrantAt (columnAt ⟨0, positive⟩) (rowAt ⟨0, positive⟩)) ∈
       ShadedSignals.markerQuarters
 
-private theorem columnAt_zero_le
-    {indexGrid : Nat -> Nat -> Index} {shadeGrid : Nat -> Nat -> RedShades.State}
-    {west east south north size : Nat}
-    (grid : FreeGrid indexGrid shadeGrid west east south north size)
-    (positive : 0 < size) (i : Fin size) :
-    grid.columnAt ⟨0, positive⟩ ≤ grid.columnAt i := by
+private theorem coordinate_zero_le {size : Nat} {coordinate : Fin size → Nat}
+    (strictMono : StrictMono coordinate) (positive : 0 < size) (i : Fin size) :
+    coordinate ⟨0, positive⟩ ≤ coordinate i := by
   by_cases hi : i = ⟨0, positive⟩
   · rw [hi]
   · have hval : i.val ≠ 0 := by
       intro hzero
       exact hi (Fin.ext hzero)
-    exact (grid.column_strictMono (show (⟨0, positive⟩ : Fin size) < i by
+    exact (strictMono (show (⟨0, positive⟩ : Fin size) < i by
       change 0 < i.val
       omega)).le
 
-private theorem rowAt_zero_le
-    {indexGrid : Nat -> Nat -> Index} {shadeGrid : Nat -> Nat -> RedShades.State}
-    {west east south north size : Nat}
-    (grid : FreeGrid indexGrid shadeGrid west east south north size)
-    (positive : 0 < size) (i : Fin size) :
-    grid.rowAt ⟨0, positive⟩ ≤ grid.rowAt i := by
-  by_cases hi : i = ⟨0, positive⟩
-  · rw [hi]
-  · have hval : i.val ≠ 0 := by
-      intro hzero
-      exact hi (Fin.ext hzero)
-    exact (grid.row_strictMono (show (⟨0, positive⟩ : Fin size) < i by
-      change 0 < i.val
-      omega)).le
+private theorem card_le_of_strictMono_mem {s : Finset Nat} {size : Nat}
+    {coordinate : Fin size → Nat} (member : ∀ i, coordinate i ∈ s)
+    (strictMono : StrictMono coordinate) : size ≤ s.card := by
+  let embed : Fin size → {value // value ∈ s} :=
+    fun i => ⟨coordinate i, member i⟩
+  have injective : Function.Injective embed := by
+    intro i j equal
+    exact strictMono.injective (congrArg Subtype.val equal)
+  simpa only [Fintype.card_fin, Fintype.card_coe] using
+    Fintype.card_le_of_injective embed injective
 
 noncomputable def ConsecutiveMarkedFreeGrid.ofMarked
     {indexGrid : Nat -> Nat -> Index} {shadeGrid : Nat -> Nat -> RedShades.State}
@@ -149,40 +132,20 @@ noncomputable def ConsecutiveMarkedFreeGrid.ofMarked
     simp only [columns, Finset.mem_filter, mem_freeColumns_iff]
     exact ⟨⟨marked.grid.column_west i, marked.grid.column_east i,
       marked.grid.freeColumn i⟩,
-      columnAt_zero_le marked.grid marked.positive i⟩
+      coordinate_zero_le (coordinate := marked.grid.columnAt)
+        (fun _ _ h => marked.grid.column_strictMono h) marked.positive i⟩
   have row_mem (i : Fin size) : marked.grid.rowAt i ∈ rows := by
     simp only [rows, Finset.mem_filter, mem_freeRows_iff]
     exact ⟨⟨marked.grid.row_south i, marked.grid.row_north i,
       marked.grid.freeRow i⟩,
-      rowAt_zero_le marked.grid marked.positive i⟩
-  have hcolumns : size ≤ columns.card := by
-    let embed : Fin size -> {column // column ∈ columns} :=
-      fun i => ⟨marked.grid.columnAt i, column_mem i⟩
-    have hinjective : Function.Injective embed := by
-      intro i j heq
-      apply Fin.ext
-      by_contra hij
-      rcases lt_or_gt_of_ne hij with hij | hji
-      · exact (Nat.ne_of_lt (marked.grid.column_strictMono hij))
-          (congrArg Subtype.val heq)
-      · exact (Nat.ne_of_lt (marked.grid.column_strictMono hji))
-          (congrArg Subtype.val heq).symm
-    simpa only [Fintype.card_fin, Fintype.card_coe] using
-      Fintype.card_le_of_injective embed hinjective
-  have hrows : size ≤ rows.card := by
-    let embed : Fin size -> {row // row ∈ rows} :=
-      fun i => ⟨marked.grid.rowAt i, row_mem i⟩
-    have hinjective : Function.Injective embed := by
-      intro i j heq
-      apply Fin.ext
-      by_contra hij
-      rcases lt_or_gt_of_ne hij with hij | hji
-      · exact (Nat.ne_of_lt (marked.grid.row_strictMono hij))
-          (congrArg Subtype.val heq)
-      · exact (Nat.ne_of_lt (marked.grid.row_strictMono hji))
-          (congrArg Subtype.val heq).symm
-    simpa only [Fintype.card_fin, Fintype.card_coe] using
-      Fintype.card_le_of_injective embed hinjective
+      coordinate_zero_le (coordinate := marked.grid.rowAt)
+        (fun _ _ h => marked.grid.row_strictMono h) marked.positive i⟩
+  have hcolumns : size ≤ columns.card :=
+    card_le_of_strictMono_mem column_mem
+      (fun _ _ h => marked.grid.column_strictMono h)
+  have hrows : size ≤ rows.card :=
+    card_le_of_strictMono_mem row_mem
+      (fun _ _ h => marked.grid.row_strictMono h)
   let selectedColumns := OrderedPrefix.ofCardLE columns size hcolumns
   let selectedRows := OrderedPrefix.ofCardLE rows size hrows
   have hmarkerColumn : markerColumn ∈ columns := column_mem zero
