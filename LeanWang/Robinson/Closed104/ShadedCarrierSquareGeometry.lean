@@ -76,54 +76,6 @@ theorem isVerticalCarrier_tileRectangle_iff
     ShadedSignals.isVerticalCarrier_routeRole_tile_iff]
   rfl
 
-/-- Horizontal carriers contain no selected vertical border at their cell. -/
-theorem rowInterior_eq_none_of_horizontalCarrier
-    (level : Nat) (root : Node) (i j : Fin (side level))
-    (carrier : (ShadedSignals.routedScaffold.role
-      (tileRectangle level root i j)).isHorizontalCarrier = true) :
-    rowInterior level root i j = none := by
-  have clear := (isHorizontalCarrier_tileRectangle_iff level root i j).1 carrier
-  exact ShadedSignalRectangle.interior_eq_none_of_adjacent_clear
-    (fun x => rowInterior level root x j) i.isLt clear.1 clear.2
-
-/-- Vertical carriers contain no selected horizontal border at their cell. -/
-theorem columnInterior_eq_none_of_verticalCarrier
-    (level : Nat) (root : Node) (i j : Fin (side level))
-    (carrier : (ShadedSignals.routedScaffold.role
-      (tileRectangle level root i j)).isVerticalCarrier = true) :
-    columnInterior level root i j = none := by
-  have clear := (isVerticalCarrier_tileRectangle_iff level root i j).1 carrier
-  exact ShadedSignalRectangle.interior_eq_none_of_adjacent_clear
-    (fun y => columnInterior level root i y) j.isLt clear.1 clear.2
-
-/-- The physical row interval coordinate advances across every horizontal
-carrier cell. -/
-theorem rowIntervalCoordinate_succ_of_horizontalCarrier
-    (level : Nat) (root : Node) (i j : Fin (side level))
-    (carrier : (ShadedSignals.routedScaffold.role
-      (tileRectangle level root i j)).isHorizontalCarrier = true) :
-    ShadedSignalRectangle.intervalCoordinate
-        (fun x => rowInterior level root x j) (i.val + 1) =
-      ShadedSignalRectangle.intervalCoordinate
-        (fun x => rowInterior level root x j) i + 1 := by
-  have clear := (isHorizontalCarrier_tileRectangle_iff level root i j).1 carrier
-  exact ShadedSignalRectangle.intervalCoordinate_succ_of_adjacent_clear
-    (fun x => rowInterior level root x j) i.isLt clear.1 clear.2
-
-/-- The physical column interval coordinate advances across every vertical
-carrier cell. -/
-theorem columnIntervalCoordinate_succ_of_verticalCarrier
-    (level : Nat) (root : Node) (i j : Fin (side level))
-    (carrier : (ShadedSignals.routedScaffold.role
-      (tileRectangle level root i j)).isVerticalCarrier = true) :
-    ShadedSignalRectangle.intervalCoordinate
-        (fun y => columnInterior level root i y) (j.val + 1) =
-      ShadedSignalRectangle.intervalCoordinate
-        (fun y => columnInterior level root i y) j + 1 := by
-  have clear := (isVerticalCarrier_tileRectangle_iff level root i j).1 carrier
-  exact ShadedSignalRectangle.intervalCoordinate_succ_of_adjacent_clear
-    (fun y => columnInterior level root i y) j.isLt clear.1 clear.2
-
 end ShadedCarrierSquareGeometry
 end Closed104
 end Figure13Layers

@@ -57,25 +57,6 @@ instance instFintype : Fintype RouteRole :=
 instance instPrimcodable : Primcodable RouteRole :=
   Primcodable.ofEquiv (Option (Bool × Bool)) equivCode
 
-theorem toCode_primrec : Primrec toCode :=
-  Primrec.dom_finite _
-
-def isHorizontal : RouteRole → Bool
-  | .horizontal => true
-  | _ => false
-
-def isVertical : RouteRole → Bool
-  | .vertical => true
-  | _ => false
-
-def isActive : RouteRole → Bool
-  | .active | .corner => true
-  | _ => false
-
-def isCorner : RouteRole → Bool
-  | .corner => true
-  | _ => false
-
 /-- Whether a routed payload cell has a prescribed channel or source role. -/
 def isConstrained : RouteRole → Bool
   | .inactive => false
@@ -109,18 +90,6 @@ theorem eq_vertical_iff_carriers {role : RouteRole} :
     role.isConstrained = true ↔ role ≠ .inactive := by
   cases role <;> simp [isConstrained]
 
-theorem isHorizontal_primrec : Primrec isHorizontal :=
-  Primrec.dom_finite _
-
-theorem isVertical_primrec : Primrec isVertical :=
-  Primrec.dom_finite _
-
-theorem isActive_primrec : Primrec isActive :=
-  Primrec.dom_finite _
-
-theorem isCorner_primrec : Primrec isCorner :=
-  Primrec.dom_finite _
-
 end RouteRole
 
 /-- Forget that an active routed cell is the distinguished source corner. -/
@@ -153,16 +122,6 @@ def horizontalPayloadWires (T : TileSet) : TileSet :=
 /-- Complete-palette tiles that transmit their vertical color unchanged. -/
 def verticalPayloadWires (T : TileSet) : TileSet :=
   (completePayloads T).filter fun tile => tile.s = tile.n
-
-theorem mem_horizontalPayloadWires_iff {T : TileSet} {tile : WangTile} :
-    tile ∈ horizontalPayloadWires T ↔
-      tile ∈ completePayloads T ∧ tile.w = tile.e := by
-  simp [horizontalPayloadWires]
-
-theorem mem_verticalPayloadWires_iff {T : TileSet} {tile : WangTile} :
-    tile ∈ verticalPayloadWires T ↔
-      tile ∈ completePayloads T ∧ tile.s = tile.n := by
-  simp [verticalPayloadWires]
 
 /-- Membership in the complete payload palette exposes all four edge colors. -/
 theorem edge_mem_payloadPalette_of_mem_completePayloads

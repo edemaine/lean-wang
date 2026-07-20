@@ -73,10 +73,6 @@ def code : MachineCell → Nat := Encodable.encode
 theorem code_injective : Function.Injective code :=
   Encodable.encode_injective
 
-theorem toSum_primrec : Primrec MachineCell.toSum := by
-  simpa [MachineCell.equivSum] using
-    (Primrec.of_equiv (e := MachineCell.equivSum) : Primrec MachineCell.equivSum)
-
 theorem ofSum_primrec : Primrec MachineCell.ofSum := by
   simpa [MachineCell.equivSum] using
     (Primrec.of_equiv_symm (e := MachineCell.equivSum) : Primrec MachineCell.equivSum.symm)
@@ -684,15 +680,5 @@ theorem prevCenter_not_halt_of_mem_machineHistoryTiles {M : Machine}
   have hmem := prevCenter_mem_of_mem_machineHistoryTiles ht
   rw [hcell] at hmem
   exact hmem.2.1 rfl
-
-theorem nextCenter_not_halt_of_mem_machineHistoryTiles {M : Machine}
-    {t : MachineHistoryTile} {a : Nat}
-    (ht : t ∈ machineHistoryTiles M) :
-    t.nextCenter ≠ MachineCell.head M.halt a := by
-  intro hcell
-  have hmem := nextCenter_mem_of_mem_machineHistoryTiles ht
-  rw [hcell] at hmem
-  exact hmem.2.1 rfl
-
 
 end LeanWang

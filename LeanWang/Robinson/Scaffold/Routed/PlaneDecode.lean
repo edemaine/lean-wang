@@ -85,13 +85,6 @@ namespace Decoded
 
 variable {x : Int × Int → TileIn (combineWithRoutedScaffold S T seed)}
 
-theorem inactive_complete (decoded : Decoded x) (p : Int × Int)
-    (hrole : S.role (decoded.base p).1 = .inactive) :
-    decoded.payload p ∈ completePayloads T := by
-  have hallowed := decoded.payload_allowed p
-  rw [mem_routedPayloads_iff] at hallowed
-  simpa only [hrole] using hallowed
-
 theorem horizontal_wire (decoded : Decoded x) (p : Int × Int)
     (hrole : S.role (decoded.base p).1 = .horizontal) :
     decoded.payload p ∈ completePayloads T ∧

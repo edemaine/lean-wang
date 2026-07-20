@@ -84,23 +84,9 @@ theorem childIndex_matches (parent : Index) (quadrant : Quadrant) :
   rw [← mem_childCandidates_iff]
   simp [childCandidates_eq_singleton]
 
-theorem eq_childIndex_of_matches
-    {parent child : Index} {quadrant : Quadrant}
-    (hmatches : componentTripleChildMatchesBool
-      (components parent) quadrant (components child) = true) :
-    child = childIndex parent quadrant := by
-  have hmem : child ∈ childCandidates parent quadrant :=
-    mem_childCandidates_iff.2 hmatches
-  simpa [childCandidates_eq_singleton] using hmem
-
 /-- The `2 x 2` corrected child-index block of one parent tile. -/
 def childBlock (parent : Index) : Fin 2 → Fin 2 → Index :=
   fun i j => childIndex parent (quadrantOfOffset i j)
-
-theorem childBlock_matches (parent : Index) (i j : Fin 2) :
-    componentTripleChildMatchesBool (components parent) (quadrantOfOffset i j)
-      (components (childBlock parent i j)) = true :=
-  childIndex_matches parent (quadrantOfOffset i j)
 
 end Closed104
 end Figure13Layers

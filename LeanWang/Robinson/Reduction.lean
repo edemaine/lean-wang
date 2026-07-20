@@ -94,38 +94,6 @@ def routedReduction
   tiles_computable := routedDominoReduction_computable S
   correct := routedDominoReduction_correct realizes forces
 
-def routedDominoReductionCode (S : RoutedScaffold) (c : Code) : Nat :=
-  encodeTileSet (routedDominoReduction S c)
-
-theorem routedDominoReductionCode_computable (S : RoutedScaffold) :
-    Computable (routedDominoReductionCode S) := by
-  exact encodeTileSet_computable.comp (routedDominoReduction_computable S)
-
-theorem routedDominoReductionCode_correct
-    {S : RoutedScaffold}
-    (realizes : RealizesRoutedPointedPlanes S)
-    (forces : ForcesRoutedFixedCornerSquares S) (c : Code) :
-    TilesPlane (decodeTileSet (routedDominoReductionCode S c)) ↔
-      ¬ (Nat.Partrec.Code.eval c 0).Dom := by
-  rw [routedDominoReductionCode, decodeTileSet_encodeTileSet]
-  exact routedDominoReduction_correct realizes forces c
-
-/-- Encoded domino undecidability from a channel-aware routed scaffold. -/
-theorem encoded_domino_problem_undecidable_of_routed
-    (S : RoutedScaffold)
-    (realizes : RealizesRoutedPointedPlanes S)
-    (forces : ForcesRoutedFixedCornerSquares S) :
-    DominoProblem.EncodedUndecidable :=
-  (routedReduction S realizes forces).encodedUndecidable
-
-/-- Unencoded domino undecidability from a channel-aware routed scaffold. -/
-theorem domino_problem_undecidable_of_routed
-    (S : RoutedScaffold)
-    (realizes : RealizesRoutedPointedPlanes S)
-    (forces : ForcesRoutedFixedCornerSquares S) :
-    DominoProblem.Undecidable :=
-  (routedReduction S realizes forces).undecidable
-
 end UniversalTM0Reduction
 
 end LeanWang
