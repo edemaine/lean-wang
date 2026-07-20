@@ -607,31 +607,6 @@ theorem toTaggedWangTile_primrec :
     cases t
     rfl
 
-theorem hMatches_toTaggedWangTile_iff_cells
-    (rowTag nextRowTag rowTag' nextRowTag' : Nat)
-    (left right : MachineHistoryTile) :
-    WangTile.HMatches (left.toTaggedWangTile rowTag nextRowTag)
-        (right.toTaggedWangTile rowTag' nextRowTag') ↔
-      rowTag = rowTag' ∧
-        left.prevCenter = right.prevLeft ∧
-        left.prevRight = right.prevCenter ∧
-        left.nextCenter = right.nextLeft ∧
-        left.nextRight = right.nextCenter := by
-  unfold WangTile.HMatches toTaggedWangTile
-  rw [taggedOverlapCellColor_eq_iff]
-
-theorem vMatches_toTaggedWangTile_iff_cells
-    (rowTag nextRowTag rowTag' nextRowTag' : Nat)
-    (lower upper : MachineHistoryTile) :
-    WangTile.VMatches (lower.toTaggedWangTile rowTag nextRowTag)
-        (upper.toTaggedWangTile rowTag' nextRowTag') ↔
-      nextRowTag = rowTag' ∧
-        lower.nextLeft = upper.prevLeft ∧
-        lower.nextCenter = upper.prevCenter ∧
-        lower.nextRight = upper.prevRight := by
-  unfold WangTile.VMatches toTaggedWangTile
-  rw [taggedTripleCellColor_eq_iff]
-
 end MachineHistoryTile
 
 /-- All locally valid history blocks over the finite cell support of `M`. -/

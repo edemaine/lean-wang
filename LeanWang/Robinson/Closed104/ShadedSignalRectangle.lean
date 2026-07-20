@@ -66,28 +66,6 @@ def verticalInteriorCode : Option Signals.VerticalInterior → Option Bool
   · rfl
   · cases interior <;> rfl
 
-theorem horizontalAllowed_ignore_vertical
-    (interior : Option Signals.HorizontalInterior)
-    (west east south north : Signals.Flow) :
-    Signals.horizontalAllowed interior
-        { west := west, east := east, south := south, north := north } =
-      Signals.horizontalAllowed interior
-        { west := west, east := east, south := .none, north := .none } := by
-  rcases interior with _ | interior
-  · rfl
-  · cases interior <;> rfl
-
-theorem verticalAllowed_ignore_horizontal
-    (interior : Option Signals.VerticalInterior)
-    (west east south north : Signals.Flow) :
-    Signals.verticalAllowed interior
-        { west := west, east := east, south := south, north := north } =
-      Signals.verticalAllowed interior
-        { west := .none, east := .none, south := south, north := north } := by
-  rcases interior with _ | interior
-  · rfl
-  · cases interior <;> rfl
-
 theorem horizontalAllowed_only_horizontal
     (interior : Option Signals.HorizontalInterior) (state : Signals.State) :
     Signals.horizontalAllowed interior state =

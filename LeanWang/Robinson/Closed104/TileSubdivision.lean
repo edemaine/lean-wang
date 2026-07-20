@@ -101,10 +101,6 @@ private theorem bitCode_primrec : Primrec (fun b : Bool => bitCode b) :=
 private theorem tileCode_primrec : Primrec (fun t : WangTile => tileCode t) :=
   Primrec.encode
 
-set_option linter.flexible false in
-private theorem tileCode_injective : Function.Injective tileCode :=
-  Encodable.encode_injective
-
 /-- Horizontal macro-edge colors are split by west/east half. -/
 def horizontalEdgeColor (x : Bool) (color : Nat) : Nat :=
   Nat.pair 0 (Nat.pair (bitCode x) color)
