@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlIncrementInstructionSemantics
+import LeanWang.Kari.Hooper.CounterControlDecrementSchedule
 
 /-!
 # Conditional-decrement instruction semantics
@@ -730,160 +731,6 @@ structure DecrementScheduleRunner
                 (boundaryOffset spec.registers i.succ) blankSymbol))
             (boundaryOffset spec.registers i.succ)⟩
 
-/-- Execute one noninitial stage and preserve exact outer backing. -/
-private theorem decrementIntermediateStage_with
-    (base : Nat) (c : Nat.Partrec.Code)
-    (Short : Nat → Prop)
-    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
-    (runner : DecrementScheduleRunner base c Short Failure)
-    (source searchSlot : Nat) (success : ControlRef)
-    (final : Registers) {stage next : Register}
-    (hstage : DecrementStageNext stage next)
-    {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
-    (hback : BackedBy spec T outer)
-    (hregisters : spec.registers = decrementStageRegisters final stage)
-    (hshort : Short spec.outerDistance)
-    (hraw : RawCommand.markerShift
-      ⟨spec.growth, source, searchSlot⟩ (decrementStageIndex stage).succ
-      .right .left success (some .right) none ∈ rawCommands) :
-    let nextRegisters := decrementStageRegisters final next
-    let nextCore : layoutEnd nextRegisters < spec.outerDistance := by
-      rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
-        ← hregisters]
-      exact spec.core_before_target
-    let U := install nextRegisters spec.growth spec.returnTag
-      (writeLogical spec.growth T
-        (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-        blankSymbol)
-    let nextSpec := updateSpec spec nextRegisters nextCore
-    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
-        ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
-          atLogical spec.growth T
-            (firstGapOffset spec.registers (decrementStageIndex stage))⟩
-        ⟨resolve base c success,
-          atLogical spec.growth U
-            (boundaryOffset spec.registers
-              (decrementStageIndex stage).succ)⟩ ∧
-      BackedBy nextSpec U outer := by
-  dsimp only
-  have h := hback.represents
-  let nextRegisters := decrementStageRegisters final next
-  have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
-    rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
-      ← hregisters]
-    exact spec.core_before_target
-  have hlayout : layoutEnd nextRegisters = layoutEnd spec.registers := by
-    rw [hregisters, decrementStage_layoutEnd,
-      decrementStage_layoutEnd]
-  have hrun := runner.following spec.outerDistance hshort source searchSlot
-    success h nextRegisters (decrementStageIndex stage)
-    (by rw [hregisters]; exact decrementStage_positive final stage)
-    (registerValue_lt_outerDistance h (decrementStageIndex stage))
-    hnextCore (by omega) (by omega)
-    (boundaryOffset_le_layoutEnd spec.registers _)
-    (by
-      have hbound := boundaryOffset_le_layoutEnd spec.registers
-        (decrementStageIndex stage).succ
-      omega)
-    (by intro hlt; omega)
-    (by simpa [hregisters, nextRegisters] using
-      decrementStage_move (final := final) hstage)
-    hraw
-  let U := install nextRegisters spec.growth spec.returnTag
-    (writeLogical spec.growth T
-      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-      blankSymbol)
-  let nextSpec := updateSpec spec nextRegisters hnextCore
-  have hnextBack : BackedBy nextSpec U outer := by
-    exact install_clear_inside_backedBy hback nextRegisters hnextCore
-      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-      (by simp [boundaryOffset])
-      (by
-        have hbound := boundaryOffset_le_layoutEnd spec.registers
-          (decrementStageIndex stage).succ
-        rw [hlayout]
-        exact hbound)
-      (by omega)
-  exact ⟨hrun, hnextBack⟩
-
-/-- Execute the zero-distance first stage and preserve exact outer backing. -/
-private theorem decrementFirstIntermediateStage_with
-    (base : Nat) (c : Nat.Partrec.Code)
-    (Short : Nat → Prop)
-    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
-    (runner : DecrementScheduleRunner base c Short Failure)
-    (source searchSlot : Nat) (success : ControlRef)
-    (final : Registers) {stage next : Register}
-    (hstage : DecrementStageNext stage next)
-    {spec : Spec numTags} {T outer : FullTM0.Tape (Symbol numTags)}
-    (hback : BackedBy spec T outer)
-    (hregisters : spec.registers = decrementStageRegisters final stage)
-    (hshort : Short spec.outerDistance)
-    (hraw : RawCommand.markerShift
-      ⟨spec.growth, source, searchSlot⟩ (decrementStageIndex stage).succ
-      .right .left success (some .right) none ∈ rawCommands) :
-    let nextRegisters := decrementStageRegisters final next
-    let nextCore : layoutEnd nextRegisters < spec.outerDistance := by
-      rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
-        ← hregisters]
-      exact spec.core_before_target
-    let U := install nextRegisters spec.growth spec.returnTag
-      (writeLogical spec.growth T
-        (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-        blankSymbol)
-    let nextSpec := updateSpec spec nextRegisters nextCore
-    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
-        ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
-          atLogical spec.growth T
-            (boundaryOffset spec.registers
-              (decrementStageIndex stage).succ)⟩
-        ⟨resolve base c success,
-          atLogical spec.growth U
-            (boundaryOffset spec.registers
-              (decrementStageIndex stage).succ)⟩ ∧
-      BackedBy nextSpec U outer := by
-  dsimp only
-  have h := hback.represents
-  let nextRegisters := decrementStageRegisters final next
-  have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
-    rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
-      ← hregisters]
-    exact spec.core_before_target
-  have hlayout : layoutEnd nextRegisters = layoutEnd spec.registers := by
-    rw [hregisters, decrementStage_layoutEnd,
-      decrementStage_layoutEnd]
-  have hlimit : 0 < spec.outerDistance :=
-    Nat.zero_lt_of_lt spec.core_before_target
-  have hrun := runner.first spec.outerDistance hshort source searchSlot
-    success hlimit h nextRegisters (decrementStageIndex stage)
-    (by rw [hregisters]; exact decrementStage_positive final stage)
-    hnextCore (by omega) (by omega)
-    (boundaryOffset_le_layoutEnd spec.registers _)
-    (by
-      have hbound := boundaryOffset_le_layoutEnd spec.registers
-        (decrementStageIndex stage).succ
-      omega)
-    (by intro hlt; omega)
-    (by simpa [hregisters, nextRegisters] using
-      decrementStage_move (final := final) hstage)
-    hraw
-  let U := install nextRegisters spec.growth spec.returnTag
-    (writeLogical spec.growth T
-      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-      blankSymbol)
-  let nextSpec := updateSpec spec nextRegisters hnextCore
-  have hnextBack : BackedBy nextSpec U outer := by
-    exact install_clear_inside_backedBy hback nextRegisters hnextCore
-      (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-      (by simp [boundaryOffset])
-      (by
-        have hbound := boundaryOffset_le_layoutEnd spec.registers
-          (decrementStageIndex stage).succ
-        rw [hlayout]
-        exact hbound)
-      (by omega)
-  exact ⟨hrun, hnextBack⟩
-
 /-- Finish a noninitial stage chain by shifting boundary `4`. -/
 private theorem decrementFinalFollowing_with
     (base : Nat) (c : Nat.Partrec.Code)
@@ -1022,203 +869,6 @@ private theorem decrementFinalFirst_with
       boundaryOffset_four] using hrun
   simpa [hcurrentEnd, hfinalTape] using hrun'
 
-/-- Fold all noninitial stages of a decrement suffix. -/
-private theorem decrementFollowingChain_with
-    (base : Nat) (c : Nat.Partrec.Code)
-    (Short : Nat → Prop)
-    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
-    (runner : DecrementScheduleRunner base c Short Failure)
-    (source searchSlot : Nat) (final : Registers)
-    {stage : Register} {stages : List Register}
-    (hchain : DecrementStageChain stage stages)
-    {spec : Spec numTags} {T outer desiredTape :
-      FullTM0.Tape (Symbol numTags)}
-    (hback : BackedBy spec T outer)
-    (hregisters : spec.registers = decrementStageRegisters final stage)
-    (hshort : Short spec.outerDistance)
-    (hfinalCore : layoutEnd final < spec.outerDistance)
-    (hdesired : BackedBy (updateSpec spec final hfinalCore)
-      desiredTape outer)
-    (hcommands : ∀ raw,
-      raw ∈ decrementShiftCommandsAux spec.growth source searchSlot
-        (stages.map
-          (fun current => (decrementStageIndex current).succ)) →
-      raw ∈ rawCommands) :
-    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
-      ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
-        atLogical spec.growth T
-          (firstGapOffset spec.registers (decrementStageIndex stage))⟩
-      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
-        atLogical spec.growth desiredTape (layoutEnd final + 1)⟩ := by
-  induction hchain generalizing spec T searchSlot with
-  | clock =>
-      apply decrementFinalFollowing_with base c Short Failure runner source
-        searchSlot final hback hregisters hshort hfinalCore hdesired
-      apply hcommands
-      simp [decrementShiftCommandsAux, decrementStageIndex]
-  | @cons stage next tail hstage hrest ih =>
-      let nextRegisters := decrementStageRegisters final next
-      have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
-        rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
-          ← hregisters]
-        exact spec.core_before_target
-      let U := install nextRegisters spec.growth spec.returnTag
-        (writeLogical spec.growth T
-          (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-          blankSymbol)
-      let nextSpec := updateSpec spec nextRegisters hnextCore
-      have hraw : RawCommand.markerShift
-          ⟨spec.growth, source, searchSlot⟩
-          (decrementStageIndex stage).succ .right .left
-          (searchRef spec.growth source (searchSlot + 1))
-          (some .right) none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommandsAux]
-      have hfirst := decrementIntermediateStage_with base c Short Failure
-        runner source searchSlot
-        (searchRef spec.growth source (searchSlot + 1)) final hstage hback
-        hregisters hshort hraw
-      have hfirst' : FullTM0.CompletesOr
-          (CounterControlNestingBridge.machine base c) Failure
-          ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
-            atLogical spec.growth T
-              (firstGapOffset spec.registers
-                (decrementStageIndex stage))⟩
-          ⟨searchState base c ⟨nextSpec.growth, source, searchSlot + 1⟩,
-            atLogical nextSpec.growth U
-              (firstGapOffset nextSpec.registers
-                (decrementStageIndex next))⟩ := by
-        have hhead : boundaryOffset spec.registers
-              (decrementStageIndex stage).succ =
-            firstGapOffset nextRegisters (decrementStageIndex next) := by
-          rw [hregisters]
-          exact decrementStage_head (final := final) hstage
-        simpa [nextSpec, nextRegisters, U, hhead, searchRef,
-          CounterControlPlan.resolve] using hfirst.1
-      have hnextBack : BackedBy nextSpec U outer := by
-        simpa [nextSpec, nextRegisters, U] using hfirst.2
-      have hnextShort : Short nextSpec.outerDistance := by
-        simpa [nextSpec, updateSpec] using hshort
-      have hnextFinalCore : layoutEnd final < nextSpec.outerDistance := by
-        simpa [nextSpec, updateSpec] using hfinalCore
-      have hnextDesired : BackedBy
-          (updateSpec nextSpec final hnextFinalCore) desiredTape outer := by
-        simpa [nextSpec, updateSpec] using hdesired
-      have hnextCommands : ∀ raw,
-          raw ∈ decrementShiftCommandsAux nextSpec.growth source
-            (searchSlot + 1)
-            ((next :: tail).map
-              (fun current => (decrementStageIndex current).succ)) →
-          raw ∈ rawCommands := by
-        intro raw hraw'
-        apply hcommands raw
-        simpa [nextSpec, updateSpec, decrementShiftCommandsAux] using
-          List.mem_cons_of_mem _ hraw'
-      have hrestRun := ih (searchSlot := searchSlot + 1)
-        (spec := nextSpec) (T := U) hnextBack rfl hnextShort
-        hnextFinalCore hnextDesired hnextCommands
-      exact FullTM0.CompletesOr.trans runner.pullback hfirst' hrestRun
-
-/-- Interpret a complete register suffix, using the first-stage runner once
-and the following-stage runner for its tail. -/
-private theorem decrementChain_with
-    (base : Nat) (c : Nat.Partrec.Code)
-    (Short : Nat → Prop)
-    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
-    (runner : DecrementScheduleRunner base c Short Failure)
-    (source : Nat) (final : Registers)
-    {stage : Register} {stages : List Register}
-    (hchain : DecrementStageChain stage stages)
-    {spec : Spec numTags} {T outer desiredTape :
-      FullTM0.Tape (Symbol numTags)}
-    (hback : BackedBy spec T outer)
-    (hregisters : spec.registers = decrementStageRegisters final stage)
-    (hshort : Short spec.outerDistance)
-    (hfinalCore : layoutEnd final < spec.outerDistance)
-    (hdesired : BackedBy (updateSpec spec final hfinalCore)
-      desiredTape outer)
-    (hcommands : ∀ raw,
-      raw ∈ decrementShiftCommandsAux spec.growth source secondarySearchBase
-        (stages.map
-          (fun current => (decrementStageIndex current).succ)) →
-      raw ∈ rawCommands) :
-    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
-      ⟨searchState base c ⟨spec.growth, source, secondarySearchBase⟩,
-        atLogical spec.growth T
-          (boundaryOffset spec.registers (decrementStageIndex stage).succ)⟩
-      ⟨resolve base c (directRef spec.growth source finishDirectSlot),
-        atLogical spec.growth desiredTape (layoutEnd final + 1)⟩ := by
-  cases hchain with
-  | clock =>
-      apply decrementFinalFirst_with base c Short Failure runner source
-        secondarySearchBase final hback hregisters hshort hfinalCore hdesired
-      apply hcommands
-      simp [decrementShiftCommandsAux, decrementStageIndex]
-  | @cons stage next tail hstage hrest =>
-      let nextRegisters := decrementStageRegisters final next
-      have hnextCore : layoutEnd nextRegisters < spec.outerDistance := by
-        rw [decrementStage_layoutEnd, ← decrementStage_layoutEnd final stage,
-          ← hregisters]
-        exact spec.core_before_target
-      let U := install nextRegisters spec.growth spec.returnTag
-        (writeLogical spec.growth T
-          (boundaryOffset spec.registers (decrementStageIndex stage).succ)
-          blankSymbol)
-      let nextSpec := updateSpec spec nextRegisters hnextCore
-      have hraw : RawCommand.markerShift
-          ⟨spec.growth, source, secondarySearchBase⟩
-          (decrementStageIndex stage).succ .right .left
-          (searchRef spec.growth source (secondarySearchBase + 1))
-          (some .right) none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommandsAux]
-      have hfirst := decrementFirstIntermediateStage_with base c Short Failure
-        runner source secondarySearchBase
-        (searchRef spec.growth source (secondarySearchBase + 1)) final hstage
-        hback hregisters hshort hraw
-      have hfirst' : FullTM0.CompletesOr
-          (CounterControlNestingBridge.machine base c) Failure
-          ⟨searchState base c
-              ⟨spec.growth, source, secondarySearchBase⟩,
-            atLogical spec.growth T
-              (boundaryOffset spec.registers
-                (decrementStageIndex stage).succ)⟩
-          ⟨searchState base c
-              ⟨nextSpec.growth, source, secondarySearchBase + 1⟩,
-            atLogical nextSpec.growth U
-              (firstGapOffset nextSpec.registers
-                (decrementStageIndex next))⟩ := by
-        have hhead : boundaryOffset spec.registers
-              (decrementStageIndex stage).succ =
-            firstGapOffset nextRegisters (decrementStageIndex next) := by
-          rw [hregisters]
-          exact decrementStage_head (final := final) hstage
-        simpa [nextSpec, nextRegisters, U, hhead, searchRef,
-          CounterControlPlan.resolve] using hfirst.1
-      have hnextBack : BackedBy nextSpec U outer := by
-        simpa [nextSpec, nextRegisters, U] using hfirst.2
-      have hnextShort : Short nextSpec.outerDistance := by
-        simpa [nextSpec, updateSpec] using hshort
-      have hnextFinalCore : layoutEnd final < nextSpec.outerDistance := by
-        simpa [nextSpec, updateSpec] using hfinalCore
-      have hnextDesired : BackedBy
-          (updateSpec nextSpec final hnextFinalCore) desiredTape outer := by
-        simpa [nextSpec, updateSpec] using hdesired
-      have hnextCommands : ∀ raw,
-          raw ∈ decrementShiftCommandsAux nextSpec.growth source
-            (secondarySearchBase + 1)
-            ((next :: tail).map
-              (fun current => (decrementStageIndex current).succ)) →
-          raw ∈ rawCommands := by
-        intro raw hraw'
-        apply hcommands raw
-        simpa [nextSpec, updateSpec, decrementShiftCommandsAux] using
-          List.mem_cons_of_mem _ hraw'
-      have hrestRun := decrementFollowingChain_with base c Short Failure
-        runner source (secondarySearchBase + 1) final hrest hnextBack rfl
-        hnextShort hnextFinalCore hnextDesired hnextCommands
-      exact FullTM0.CompletesOr.trans runner.pullback hfirst' hrestRun
-
 /-- Register-independent positive-decrement scheduling, parameterized by the
 outcome of each constituent bounded search. -/
 theorem machine_reaches_decrementSchedule_with
@@ -1259,28 +909,171 @@ theorem machine_reaches_decrementSchedule_with
   have hfinalCore : layoutEnd final < spec.outerDistance :=
     (layoutEnd_decrement_lt spec.registers register hpositive).trans
       spec.core_before_target
+  have hend : layoutEnd final + 1 = layoutEnd spec.registers :=
+    layoutEnd_decrement_add_one spec.registers register hpositive
   have hdesired := decrementTape_backedBy hback register hpositive
   have hdesired' : BackedBy (updateSpec spec final hfinalCore)
       (decrementTape spec register T) outer := by
     simpa [decrementSpec, final] using hdesired
-  have hcommandList :
-      (decrementStages register).map
-          (fun current => (decrementStageIndex current).succ) =
-        MarkerShift.decrementOrder register :=
-    decrementStages_labels register
-  have hrun := decrementChain_with base c Short Failure runner source final
-    (decrementStages_chain register) hback hregisters hshort hfinalCore
-    hdesired' (by
-      intro raw hraw
-      apply hcommands raw
-      simpa [decrementShiftCommands, hcommandList] using hraw)
-  have hend : layoutEnd final + 1 = layoutEnd spec.registers :=
-    layoutEnd_decrement_add_one spec.registers register hpositive
-  have hstart : (decrementStageIndex register).succ =
-      MarkerSchedule.decrementStartBoundary register := by
-    cases register <;> rfl
-  apply FullTM0.CompletesOr.and_right ?_ hdesired
-  simpa [final, hend, hstart] using hrun
+  have hstageCore (stage : Register) :
+      layoutEnd (decrementStageRegisters final stage) <
+        spec.outerDistance := by
+    rw [decrementStage_layoutEnd, hend]
+    exact spec.core_before_target
+  let stageSpec (stage : Register) :=
+    updateSpec spec (decrementStageRegisters final stage) (hstageCore stage)
+  let stageTape (stage : Register) :=
+    install (decrementStageRegisters final stage) spec.growth
+      spec.returnTag T
+  have hstageBack (stage : Register) :
+      BackedBy (stageSpec stage) (stageTape stage) outer := by
+    constructor
+    · change install (decrementStageRegisters final stage) spec.growth
+          spec.returnTag T =
+        install (decrementStageRegisters final stage) spec.growth
+          spec.returnTag outer
+      rw [hback.installed]
+      apply install_over_install
+      rw [decrementStage_layoutEnd, hend]
+    · simpa [stageSpec, updateSpec] using hback.searchGap
+  let suffixRunner : DecrementSuffixRunner base c Failure spec.growth
+      spec.registers final register T (decrementTape spec register T) := {
+    stageTape := stageTape
+    aligned := hregisters
+    pullback := runner.pullback
+    firstStep := by
+      intro counterState searchSlot success current next hcurrent hnext hraw
+      subst current
+      let nextRegisters := decrementStageRegisters final next
+      have hends : layoutEnd spec.registers = layoutEnd nextRegisters := by
+        rw [hregisters, decrementStage_layoutEnd,
+          decrementStage_layoutEnd]
+      have hlimit : 0 < spec.outerDistance :=
+        Nat.zero_lt_of_lt spec.core_before_target
+      have hrun := runner.first spec.outerDistance hshort counterState
+        searchSlot success hlimit hback.represents nextRegisters
+        (decrementStageIndex register)
+        (by rw [hregisters]; exact decrementStage_positive final register)
+        (hstageCore next) (by omega) (by omega)
+        (boundaryOffset_le_layoutEnd spec.registers _)
+        (by
+          have hb := boundaryOffset_le_layoutEnd spec.registers
+            (decrementStageIndex register).succ
+          rw [← hends]
+          omega)
+        (by intro hlt; omega)
+        (by simpa [hregisters, nextRegisters] using
+          decrementStage_move (final := final) hnext)
+        hraw
+      have htapeNext : install nextRegisters spec.growth spec.returnTag
+          (writeLogical spec.growth T
+            (boundaryOffset spec.registers
+              (decrementStageIndex register).succ) blankSymbol) =
+          stageTape next := by
+        change install nextRegisters spec.growth spec.returnTag
+            (writeLogical spec.growth T
+              (boundaryOffset spec.registers
+                (decrementStageIndex register).succ) blankSymbol) =
+          install nextRegisters spec.growth spec.returnTag T
+        apply install_clear_inside
+        · simp [boundaryOffset]
+        · rw [← hends]
+          exact boundaryOffset_le_layoutEnd spec.registers _
+      rw [htapeNext] at hrun
+      exact hrun
+    followingStep := by
+      intro counterState searchSlot success current next hnext hraw
+      let currentRegisters := decrementStageRegisters final current
+      let nextRegisters := decrementStageRegisters final next
+      let currentSpec := stageSpec current
+      let currentTape := stageTape current
+      have hcurrent : Represents currentSpec currentTape :=
+        (hstageBack current).represents
+      have hends : layoutEnd currentRegisters = layoutEnd nextRegisters := by
+        simp [currentRegisters, nextRegisters, decrementStage_layoutEnd]
+      have hcurrentShort : Short currentSpec.outerDistance := by
+        simpa [currentSpec, stageSpec, updateSpec] using hshort
+      have hrun := runner.following currentSpec.outerDistance hcurrentShort
+        counterState searchSlot success hcurrent nextRegisters
+        (decrementStageIndex current)
+        (by
+          simpa [currentSpec, stageSpec, updateSpec, currentRegisters] using
+            decrementStage_positive final current)
+        (registerValue_lt_outerDistance hcurrent
+          (decrementStageIndex current))
+        (by
+          simpa [currentSpec, stageSpec, updateSpec] using hstageCore next)
+        (by
+          simpa [currentSpec, stageSpec, updateSpec] using hends.ge)
+        (by
+          change layoutEnd currentRegisters ≤ layoutEnd nextRegisters + 1
+          omega)
+        (boundaryOffset_le_layoutEnd currentSpec.registers _)
+        (by
+          change boundaryOffset currentRegisters
+              (decrementStageIndex current).succ - 1 ≤
+            layoutEnd nextRegisters
+          rw [← hends]
+          have hb := boundaryOffset_le_layoutEnd currentRegisters
+            (decrementStageIndex current).succ
+          omega)
+        (by
+          intro hlt
+          change layoutEnd nextRegisters < layoutEnd currentRegisters at hlt
+          omega)
+        (by
+          simpa [currentSpec, stageSpec, updateSpec, currentRegisters,
+            nextRegisters] using decrementStage_move (final := final) hnext)
+        hraw
+      have htapeNext : install nextRegisters spec.growth spec.returnTag
+          (writeLogical spec.growth currentTape
+            (boundaryOffset currentRegisters
+              (decrementStageIndex current).succ) blankSymbol) =
+          stageTape next := by
+        change install nextRegisters spec.growth spec.returnTag
+            (writeLogical spec.growth currentTape
+              (boundaryOffset currentRegisters
+                (decrementStageIndex current).succ) blankSymbol) =
+          install nextRegisters spec.growth spec.returnTag T
+        rw [install_clear_inside nextRegisters spec.growth spec.returnTag
+          currentTape]
+        · exact install_over_install currentRegisters nextRegisters
+            spec.growth spec.returnTag T (by omega)
+        · simp [boundaryOffset]
+        · rw [← hends]
+          exact boundaryOffset_le_layoutEnd currentRegisters _
+      simp only [currentSpec, stageSpec, updateSpec] at hrun
+      rw [htapeNext] at hrun
+      exact hrun
+    firstFinish := by
+      intro counterState searchSlot hstart hraw
+      subst register
+      have hrun := decrementFinalFirst_with base c Short Failure runner
+        counterState searchSlot final hback hregisters hshort hfinalCore
+        hdesired' hraw
+      simpa [hend] using hrun
+    followingFinish := by
+      intro counterState searchSlot hraw
+      let currentSpec := stageSpec .clock
+      let currentTape := stageTape .clock
+      have hcurrentBack : BackedBy currentSpec currentTape outer :=
+        hstageBack .clock
+      have hcurrentShort : Short currentSpec.outerDistance := by
+        simpa [currentSpec, stageSpec, updateSpec] using hshort
+      have hcurrentFinalCore : layoutEnd final <
+          currentSpec.outerDistance := by
+        simpa [currentSpec, stageSpec, updateSpec] using hfinalCore
+      have hcurrentDesired : BackedBy
+          (updateSpec currentSpec final hcurrentFinalCore)
+          (decrementTape spec register T) outer := by
+        simpa [currentSpec, stageSpec, updateSpec] using hdesired'
+      have hrun := decrementFinalFollowing_with base c Short Failure runner
+        counterState searchSlot final hcurrentBack rfl hcurrentShort
+        hcurrentFinalCore hcurrentDesired hraw
+      simpa [currentSpec, currentTape, stageSpec, stageTape, hend] using hrun }
+  have hrun := machine_reaches_decrementSuffix_with base c Failure
+    suffixRunner source hcommands
+  exact FullTM0.CompletesOr.and_right hrun hdesired
 /-- Complete positive-decrement suffix schedule, including exact preservation
 of the suspended outer backing. -/
 theorem machine_reaches_decrementSchedule_solved

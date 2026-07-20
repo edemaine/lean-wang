@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlOpenIncrementResolution
+import LeanWang.Kari.Hooper.CounterControlDecrementSchedule
 
 /-!
 # Resolving decrements on a target-free open counter core
@@ -415,325 +416,6 @@ structure DecrementEnvelope (growth : Turing.Dir) (limit : Nat) where
       Represents (registers.decrement register)
         (decrementCoreTape registers growth register T)
 
-/-- Fold the noninitial tail of a positive-decrement suffix.  The tape at
-each intermediate stage is a single core installation over the original
-tape; equal-length installations collapse by `installCore_after_internal_left`.
--/
-private theorem decrementEnvelopeFollowingChain
-    (base : Nat) (c : Nat.Partrec.Code) (source searchSlot : Nat)
-    {growth : Turing.Dir} {limit : Nat}
-    (E : DecrementEnvelope growth limit)
-    (origin final : Registers) (original : FullTM0.Tape (Symbol numTags))
-    (desired : FullTM0.Tape (Symbol numTags))
-    {stage : Register} {stages : List Register}
-    (hchain : DecrementStageChain stage stages)
-    {current : Registers} {T : FullTM0.Tape (Symbol numTags)}
-    (hcurrent : current = decrementStageRegisters final stage)
-    (htape : T = installCore current growth original)
-    (h : E.Represents current T)
-    (hend : layoutEnd final + 1 = layoutEnd origin)
-    (hdesired : installCore final growth
-        (writeLogical growth original (layoutEnd origin) blankSymbol) =
-      desired)
-    (hcommands : ∀ raw,
-      raw ∈ decrementShiftCommandsAux growth source searchSlot
-        (stages.map
-          (fun current => (decrementStageIndex current).succ)) →
-      raw ∈ rawCommands) :
-    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, source, searchSlot⟩,
-          atLogical growth T
-            (firstGapOffset current (decrementStageIndex stage))⟩
-        ⟨resolve base c (directRef growth source finishDirectSlot),
-          atLogical growth desired
-            (layoutEnd origin)⟩ ∧
-      E.Represents final
-        desired) ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, source, searchSlot⟩,
-          atLogical growth T
-            (firstGapOffset current (decrementStageIndex stage))⟩ := by
-  induction hchain generalizing current T searchSlot with
-  | clock =>
-      have hpositive : 0 < RegisterLayout.values current (3 : Fin 4) := by
-        rw [hcurrent]
-        exact decrementStage_positive final .clock
-      have hcurrentEnd : layoutEnd current = layoutEnd origin := by
-        rw [hcurrent, decrementStage_layoutEnd, hend]
-      have hmove : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape current)
-          (MarkerTape.boundaryPosition current 4) 4 =
-          MarkerTape.canonicalTape final := by
-        rw [hcurrent]
-        exact MarkerSchedule.moveClockBoundary_after_increment final
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, searchSlot⟩ 4 .right .left
-          (directRef growth source finishDirectSlot) (some .right) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommandsAux, decrementStageIndex]
-      have hrun := E.following base c source searchSlot
-        (directRef growth source finishDirectSlot) h (3 : Fin 4)
-        hpositive (E.registerValue_lt h (3 : Fin 4))
-        (by rw [hcurrentEnd, ← hend]; omega)
-        (by rw [hcurrentEnd, ← hend])
-        (boundaryOffset_le_layoutEnd current 4)
-        (by
-          change layoutEnd current - 1 ≤ layoutEnd final
-          rw [hcurrentEnd, ← hend]
-          omega)
-        (by intro _; exact boundaryOffset_four current)
-        hmove hraw
-      have hfinalTape : installCore final growth
-          (writeLogical growth T (boundaryOffset current 4) blankSymbol) =
-          desired := by
-        rw [htape]
-        change installCore final growth
-          (writeLogical growth (installCore current growth original)
-            (layoutEnd current) blankSymbol) = desired
-        rw [installCore_clear_old_overlay current final growth original]
-        · rw [hcurrentEnd]
-          exact hdesired
-        · rw [hcurrentEnd]
-          exact hend
-      have hfinish : boundaryOffset current (3 : Fin 4).succ =
-          layoutEnd origin := by
-        change layoutEnd current = layoutEnd origin
-        exact hcurrentEnd
-      have hfinalTape' : installCore final growth
-          (writeLogical growth T (layoutEnd current) blankSymbol) =
-          desired := by
-        simpa [boundaryOffset_four] using hfinalTape
-      have hfinalTapeOrigin : installCore final growth
-          (writeLogical growth T (layoutEnd origin) blankSymbol) =
-          desired := by
-        rw [← hcurrentEnd]
-        exact hfinalTape'
-      rw [hfinish, hfinalTapeOrigin] at hrun
-      simpa [decrementStageIndex] using hrun
-  | @cons stage next tail hstage hrest ih =>
-      let nextRegisters := decrementStageRegisters final next
-      let nextTape := installCore nextRegisters growth original
-      have hends : layoutEnd current = layoutEnd nextRegisters := by
-        rw [hcurrent, decrementStage_layoutEnd,
-          decrementStage_layoutEnd]
-      have hpositive : 0 < RegisterLayout.values current
-          (decrementStageIndex stage) := by
-        rw [hcurrent]
-        exact decrementStage_positive final stage
-      have hmove : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape current)
-          (MarkerTape.boundaryPosition current
-            (decrementStageIndex stage).succ)
-          (decrementStageIndex stage).succ =
-          MarkerTape.canonicalTape nextRegisters := by
-        simpa [hcurrent, nextRegisters] using
-          decrementStage_move (final := final) hstage
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, searchSlot⟩
-          (decrementStageIndex stage).succ .right .left
-          (searchRef growth source (searchSlot + 1))
-          (some .right) none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommandsAux]
-      have hfirst := E.following base c source searchSlot
-        (searchRef growth source (searchSlot + 1)) h
-        (decrementStageIndex stage) hpositive
-        (E.registerValue_lt h (decrementStageIndex stage))
-        (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd current _)
-        (by
-          have hb := boundaryOffset_le_layoutEnd current
-            (decrementStageIndex stage).succ
-          rw [← hends]
-          omega)
-        (by intro hlt; omega) hmove hraw
-      have htapeNext : installCore nextRegisters growth
-          (writeLogical growth T
-            (boundaryOffset current (decrementStageIndex stage).succ)
-            blankSymbol) = nextTape := by
-        rw [htape]
-        apply installCore_after_internal_left current nextRegisters growth
-          original
-        · omega
-        · simp [boundaryOffset]
-        · rw [← hends]
-          exact boundaryOffset_le_layoutEnd current _
-      rcases hfirst with hsuccess | hhalts
-      · have hnext : E.Represents nextRegisters nextTape := by
-          simpa [nextTape, htapeNext] using hsuccess.2
-        have hhead : boundaryOffset current
-              (decrementStageIndex stage).succ =
-            firstGapOffset nextRegisters (decrementStageIndex next) := by
-          rw [hcurrent]
-          exact decrementStage_head (final := final) hstage
-        have hfirst' : FullTM0.Reaches
-            (CounterControlNestingBridge.machine base c)
-            ⟨searchState base c ⟨growth, source, searchSlot⟩,
-              atLogical growth T
-                (firstGapOffset current (decrementStageIndex stage))⟩
-            ⟨searchState base c ⟨growth, source, searchSlot + 1⟩,
-              atLogical growth nextTape
-                (firstGapOffset nextRegisters
-                  (decrementStageIndex next))⟩ := by
-          rw [htapeNext] at hsuccess
-          simpa [searchRef, CounterControlPlan.resolve, hhead] using hsuccess.1
-        have hnextCommands : ∀ raw,
-          raw ∈ decrementShiftCommandsAux growth source (searchSlot + 1)
-            ((next :: tail).map
-              (fun current => (decrementStageIndex current).succ)) →
-            raw ∈ rawCommands := by
-          intro raw hraw'
-          apply hcommands raw
-          simpa [decrementShiftCommandsAux] using
-            List.mem_cons_of_mem _ hraw'
-        rcases ih (searchSlot := searchSlot + 1)
-            (current := nextRegisters) (T := nextTape) rfl rfl hnext
-            hnextCommands with hrest | hrest
-        · exact Or.inl ⟨hfirst'.trans hrest.1, hrest.2⟩
-        · exact Or.inr (FullTM0.HaltsFrom.of_reaches hfirst' hrest)
-      · exact Or.inr hhalts
-
-/-- Interpret a complete suffix using the zero-distance runner for its first
-stage and the common following-stage fold for the remainder. -/
-private theorem decrementEnvelopeChain
-    (base : Nat) (c : Nat.Partrec.Code) (source : Nat)
-    {growth : Turing.Dir} {limit : Nat}
-    (E : DecrementEnvelope growth limit)
-    (origin final : Registers) (original : FullTM0.Tape (Symbol numTags))
-    (desired : FullTM0.Tape (Symbol numTags))
-    {stage : Register} {stages : List Register}
-    (hchain : DecrementStageChain stage stages)
-    (hregisters : origin = decrementStageRegisters final stage)
-    (h : E.Represents origin original)
-    (hend : layoutEnd final + 1 = layoutEnd origin)
-    (hdesired : installCore final growth
-        (writeLogical growth original (layoutEnd origin) blankSymbol) =
-      desired)
-    (hcommands : ∀ raw,
-      raw ∈ decrementShiftCommandsAux growth source secondarySearchBase
-        (stages.map
-          (fun current => (decrementStageIndex current).succ)) →
-      raw ∈ rawCommands) :
-    (FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
-          atLogical growth original
-            (boundaryOffset origin (decrementStageIndex stage).succ)⟩
-        ⟨resolve base c (directRef growth source finishDirectSlot),
-          atLogical growth desired
-            (layoutEnd origin)⟩ ∧
-      E.Represents final
-        desired) ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
-          atLogical growth original
-            (boundaryOffset origin (decrementStageIndex stage).succ)⟩ := by
-  cases hchain with
-  | clock =>
-      have hpositive : 0 < RegisterLayout.values origin (3 : Fin 4) := by
-        rw [hregisters]
-        exact decrementStage_positive final .clock
-      have hmove : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape origin)
-          (MarkerTape.boundaryPosition origin 4) 4 =
-          MarkerTape.canonicalTape final := by
-        rw [hregisters]
-        exact MarkerSchedule.moveClockBoundary_after_increment final
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, secondarySearchBase⟩ 4 .right .left
-          (directRef growth source finishDirectSlot) (some .right) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommandsAux, decrementStageIndex]
-      have hrun := E.first base c source secondarySearchBase
-        (directRef growth source finishDirectSlot) (E.limit_positive h) h
-        (3 : Fin 4) hpositive (by omega) (by omega)
-        (boundaryOffset_le_layoutEnd origin 4)
-        (by change layoutEnd origin - 1 ≤ layoutEnd final; omega)
-        (by intro _; exact boundaryOffset_four origin) hmove hraw
-      simpa [decrementStageIndex, boundaryOffset_four, hend, hdesired] using hrun
-  | @cons stage next tail hstage hrest =>
-      let nextRegisters := decrementStageRegisters final next
-      let nextTape := installCore nextRegisters growth original
-      have hends : layoutEnd origin = layoutEnd nextRegisters := by
-        rw [hregisters, decrementStage_layoutEnd,
-          decrementStage_layoutEnd]
-      have hpositive : 0 < RegisterLayout.values origin
-          (decrementStageIndex stage) := by
-        rw [hregisters]
-        exact decrementStage_positive final stage
-      have hmove : MarkerMachine.moveAt .left
-          (MarkerTape.canonicalTape origin)
-          (MarkerTape.boundaryPosition origin
-            (decrementStageIndex stage).succ)
-          (decrementStageIndex stage).succ =
-          MarkerTape.canonicalTape nextRegisters := by
-        simpa [hregisters, nextRegisters] using
-          decrementStage_move (final := final) hstage
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, secondarySearchBase⟩
-          (decrementStageIndex stage).succ .right .left
-          (searchRef growth source (secondarySearchBase + 1))
-          (some .right) none ∈ rawCommands := by
-        apply hcommands
-        simp [decrementShiftCommandsAux]
-      have hfirst := E.first base c source secondarySearchBase
-        (searchRef growth source (secondarySearchBase + 1))
-        (E.limit_positive h) h (decrementStageIndex stage) hpositive
-        (by omega) (by omega) (boundaryOffset_le_layoutEnd origin _)
-        (by
-          have hb := boundaryOffset_le_layoutEnd origin
-            (decrementStageIndex stage).succ
-          rw [← hends]
-          omega)
-        (by intro hlt; omega) hmove hraw
-      have htapeNext : installCore nextRegisters growth
-          (writeLogical growth original
-            (boundaryOffset origin (decrementStageIndex stage).succ)
-            blankSymbol) = nextTape := by
-        apply installCore_write_inside
-        · simp [boundaryOffset]
-        · rw [← hends]
-          exact boundaryOffset_le_layoutEnd origin _
-      rcases hfirst with hsuccess | hhalts
-      · have hnext : E.Represents nextRegisters nextTape := by
-          simpa [nextTape, htapeNext] using hsuccess.2
-        have hhead : boundaryOffset origin
-              (decrementStageIndex stage).succ =
-            firstGapOffset nextRegisters (decrementStageIndex next) := by
-          rw [hregisters]
-          exact decrementStage_head (final := final) hstage
-        have hfirst' : FullTM0.Reaches
-            (CounterControlNestingBridge.machine base c)
-            ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
-              atLogical growth original
-                (boundaryOffset origin
-                  (decrementStageIndex stage).succ)⟩
-            ⟨searchState base c
-                ⟨growth, source, secondarySearchBase + 1⟩,
-              atLogical growth nextTape
-                (firstGapOffset nextRegisters
-                  (decrementStageIndex next))⟩ := by
-          rw [htapeNext] at hsuccess
-          simpa [searchRef, CounterControlPlan.resolve, hhead] using hsuccess.1
-        have hnextCommands : ∀ raw,
-          raw ∈ decrementShiftCommandsAux growth source
-            (secondarySearchBase + 1)
-            ((next :: tail).map
-              (fun current => (decrementStageIndex current).succ)) →
-            raw ∈ rawCommands := by
-          intro raw hraw'
-          apply hcommands raw
-          simpa [decrementShiftCommandsAux] using
-            List.mem_cons_of_mem _ hraw'
-        rcases decrementEnvelopeFollowingChain base c source
-            (secondarySearchBase + 1) E origin final original desired hrest rfl rfl
-            hnext hend hdesired hnextCommands with hrestRun | hrestRun
-        · exact Or.inl ⟨hfirst'.trans hrestRun.1, hrestRun.2⟩
-        · exact Or.inr
-            (FullTM0.HaltsFrom.of_reaches hfirst' hrestRun)
-      · exact Or.inr hhalts
-
 /-- A positive-decrement schedule depends only on the common envelope
 operations, not on whether its blank runway is finite or infinite. -/
 theorem machine_reaches_decrementSchedule_or_halts_of_envelope
@@ -774,23 +456,191 @@ theorem machine_reaches_decrementSchedule_or_halts_of_envelope
       (writeLogical growth T (layoutEnd registers) blankSymbol) =
       decrementCoreTape registers growth register T := by
     rfl
-  have hcommandList :
-      (decrementStages register).map
-          (fun current => (decrementStageIndex current).succ) =
-        MarkerShift.decrementOrder register :=
-    decrementStages_labels register
-  have hrun := decrementEnvelopeChain base c source E registers final T
-    (decrementCoreTape registers growth register T)
-    (decrementStages_chain register) hregisters h hend hdesired (by
-      intro raw hraw
-      apply hcommands raw
-      simpa [decrementShiftCommands, hcommandList] using hraw)
-  have hstart : (decrementStageIndex register).succ =
-      MarkerSchedule.decrementStartBoundary register := by
-    cases register <;> rfl
+  have hstageRep (stage : Register) :
+      E.Represents (decrementStageRegisters final stage)
+        (installCore (decrementStageRegisters final stage) growth T) := by
+    apply E.install_equal_length h
+    rw [decrementStage_layoutEnd, hend]
+  let suffixRunner : DecrementSuffixRunner base c
+      (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+      growth registers final register T
+      (decrementCoreTape registers growth register T) := {
+    stageTape := fun stage =>
+      installCore (decrementStageRegisters final stage) growth T
+    aligned := hregisters
+    pullback := FullTM0.HaltsFrom.of_reaches
+    firstStep := by
+      intro counterState searchSlot success current next hcurrent hnext hraw
+      subst current
+      let nextRegisters := decrementStageRegisters final next
+      have hends : layoutEnd registers = layoutEnd nextRegisters := by
+        rw [hregisters, decrementStage_layoutEnd,
+          decrementStage_layoutEnd]
+      have hstagePositive : 0 < RegisterLayout.values registers
+          (decrementStageIndex register) := by
+        rw [hregisters]
+        exact decrementStage_positive final register
+      have hmove : MarkerMachine.moveAt .left
+          (MarkerTape.canonicalTape registers)
+          (MarkerTape.boundaryPosition registers
+            (decrementStageIndex register).succ)
+          (decrementStageIndex register).succ =
+          MarkerTape.canonicalTape nextRegisters := by
+        simpa [hregisters, nextRegisters] using
+          decrementStage_move (final := final) hnext
+      have hrun := E.first base c counterState searchSlot success
+        (E.limit_positive h) h (decrementStageIndex register)
+        hstagePositive (by omega) (by omega)
+        (boundaryOffset_le_layoutEnd registers _)
+        (by
+          have hb := boundaryOffset_le_layoutEnd registers
+            (decrementStageIndex register).succ
+          rw [← hends]
+          omega)
+        (by intro hlt; omega) hmove hraw
+      have htapeNext : installCore nextRegisters growth
+          (writeLogical growth T
+            (boundaryOffset registers
+              (decrementStageIndex register).succ) blankSymbol) =
+          installCore nextRegisters growth T := by
+        apply installCore_write_inside
+        · simp [boundaryOffset]
+        · rw [← hends]
+          exact boundaryOffset_le_layoutEnd registers _
+      rw [htapeNext] at hrun
+      rcases hrun with hrun | hhalts
+      · exact Or.inl hrun.1
+      · exact Or.inr hhalts
+    followingStep := by
+      intro counterState searchSlot success current next hnext hraw
+      let currentRegisters := decrementStageRegisters final current
+      let nextRegisters := decrementStageRegisters final next
+      let currentTape := installCore currentRegisters growth T
+      have hcurrent : E.Represents currentRegisters currentTape := by
+        simpa [currentRegisters, currentTape] using hstageRep current
+      have hends : layoutEnd currentRegisters = layoutEnd nextRegisters := by
+        simp [currentRegisters, nextRegisters, decrementStage_layoutEnd]
+      have hstagePositive : 0 < RegisterLayout.values currentRegisters
+          (decrementStageIndex current) := by
+        simpa [currentRegisters] using decrementStage_positive final current
+      have hmove : MarkerMachine.moveAt .left
+          (MarkerTape.canonicalTape currentRegisters)
+          (MarkerTape.boundaryPosition currentRegisters
+            (decrementStageIndex current).succ)
+          (decrementStageIndex current).succ =
+          MarkerTape.canonicalTape nextRegisters := by
+        simpa [currentRegisters, nextRegisters] using
+          decrementStage_move (final := final) hnext
+      have hrun := E.following base c counterState searchSlot success hcurrent
+        (decrementStageIndex current) hstagePositive
+        (E.registerValue_lt hcurrent (decrementStageIndex current))
+        (by omega) (by omega)
+        (boundaryOffset_le_layoutEnd currentRegisters _)
+        (by
+          have hb := boundaryOffset_le_layoutEnd currentRegisters
+            (decrementStageIndex current).succ
+          rw [← hends]
+          omega)
+        (by intro hlt; omega) hmove hraw
+      have htapeNext : installCore nextRegisters growth
+          (writeLogical growth currentTape
+            (boundaryOffset currentRegisters
+              (decrementStageIndex current).succ) blankSymbol) =
+          installCore nextRegisters growth T := by
+        apply installCore_after_internal_left
+        · omega
+        · simp [boundaryOffset]
+        · rw [← hends]
+          exact boundaryOffset_le_layoutEnd currentRegisters _
+      rw [htapeNext] at hrun
+      rcases hrun with hrun | hhalts
+      · exact Or.inl hrun.1
+      · exact Or.inr hhalts
+    firstFinish := by
+      intro counterState searchSlot hstart hraw
+      subst register
+      have hclockPositive :
+          0 < RegisterLayout.values registers (3 : Fin 4) := by
+        rw [hregisters]
+        exact decrementStage_positive final .clock
+      have hmove : MarkerMachine.moveAt .left
+          (MarkerTape.canonicalTape registers)
+          (MarkerTape.boundaryPosition registers 4) 4 =
+          MarkerTape.canonicalTape final := by
+        rw [hregisters]
+        exact MarkerSchedule.moveClockBoundary_after_increment final
+      have hrun := E.first base c counterState searchSlot
+        (directRef growth counterState finishDirectSlot)
+        (E.limit_positive h) h (3 : Fin 4) hclockPositive
+        (by omega) (by omega) (boundaryOffset_le_layoutEnd registers 4)
+        (by change layoutEnd registers - 1 ≤ layoutEnd final; omega)
+        (by intro _; exact boundaryOffset_four registers) hmove hraw
+      rcases hrun with hrun | hhalts
+      · left
+        simpa [boundaryOffset_four, hend, hdesired] using hrun.1
+      · exact Or.inr hhalts
+    followingFinish := by
+      intro counterState searchSlot hraw
+      let current := decrementStageRegisters final .clock
+      let currentTape := installCore current growth T
+      have hcurrent : E.Represents current currentTape := by
+        simpa [current, currentTape] using hstageRep .clock
+      have hcurrentEnd : layoutEnd current = layoutEnd registers := by
+        simp [current, decrementStage_layoutEnd, hend]
+      have hclockPositive :
+          0 < RegisterLayout.values current (3 : Fin 4) := by
+        simpa only [current, decrementStageRegisters,
+          decrementStageIndex] using decrementStage_positive final .clock
+      have hmove : MarkerMachine.moveAt .left
+          (MarkerTape.canonicalTape current)
+          (MarkerTape.boundaryPosition current 4) 4 =
+          MarkerTape.canonicalTape final := by
+        simpa only [current, decrementStageRegisters] using
+          MarkerSchedule.moveClockBoundary_after_increment final
+      have hrun := E.following base c counterState searchSlot
+        (directRef growth counterState finishDirectSlot) hcurrent (3 : Fin 4)
+        hclockPositive (E.registerValue_lt hcurrent (3 : Fin 4))
+        (by rw [hcurrentEnd, ← hend]; omega)
+        (by rw [hcurrentEnd, ← hend])
+        (boundaryOffset_le_layoutEnd current 4)
+        (by
+          change layoutEnd current - 1 ≤ layoutEnd final
+          rw [hcurrentEnd, ← hend]
+          omega)
+        (by intro _; exact boundaryOffset_four current) hmove hraw
+      have hfinalTape : installCore final growth
+          (writeLogical growth currentTape
+            (boundaryOffset current 4) blankSymbol) =
+          decrementCoreTape registers growth register T := by
+        change installCore final growth
+          (writeLogical growth (installCore current growth T)
+            (layoutEnd current) blankSymbol) =
+          decrementCoreTape registers growth register T
+        rw [installCore_clear_old_overlay current final growth T]
+        · rw [hcurrentEnd]
+          exact hdesired
+        · rw [hcurrentEnd]
+          exact hend
+      have hfinalTape' : installCore final growth
+          (writeLogical growth currentTape
+            (layoutEnd registers) blankSymbol) =
+          decrementCoreTape registers growth register T := by
+        rw [← hcurrentEnd]
+        simpa [boundaryOffset_four] using hfinalTape
+      have hfinish : boundaryOffset current (3 : Fin 4).succ =
+          layoutEnd registers := by
+        change layoutEnd current = layoutEnd registers
+        exact hcurrentEnd
+      rw [hfinish] at hrun
+      rw [hfinalTape'] at hrun
+      rcases hrun with hrun | hhalts
+      · exact Or.inl hrun.1
+      · exact Or.inr hhalts }
+  have hrun := machine_reaches_decrementSuffix_with base c
+    (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+    suffixRunner source hcommands
   have hfinal := E.decrement register h hpositive
-  simpa [final, hstart] using hrun
-
+  exact hrun.imp (fun hs => ⟨hs, hfinal⟩) id
 /-- An open runway equipped with a finite search bound.  The extra bound is
 proof-only and is preserved because every intermediate decrement layout has
 the same length as the input layout. -/
