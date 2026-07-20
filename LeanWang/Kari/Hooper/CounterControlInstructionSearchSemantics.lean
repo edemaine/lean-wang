@@ -1493,37 +1493,6 @@ theorem route_reaches_solved_at
   · exact hsuccess
   · exact hfailure.elim
 
-/-- Whole-list wrapper for a nonempty solved route. -/
-theorem route_reaches_solved_at_of_ne_nil
-    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
-    (hshort : ShortSearches base c limit) (growth : Turing.Dir)
-    (counterState searchSlot directSlot : Nat)
-    (source after : ControlRef) (sourceBoundary : Fin 5)
-    (legs : List MarkerValidation.Leg) (hne : legs ≠ [])
-    (T : FullTM0.Tape (Symbol numTags)) (sourcePosition finishPosition : Nat)
-    (hsource : (atLogical growth T sourcePosition).read =
-      boundarySymbol sourceBoundary)
-    (hexec : RouteExecutesWithin growth T limit legs
-      sourcePosition finishPosition)
-    (hcommands : ∀ raw,
-      raw ∈ routeCommandsAux growth counterState searchSlot directSlot
-          after legs → raw ∈ rawCommands)
-    (hrules : ∀ rule,
-      rule ∈ routeEntryRules growth counterState source sourceBoundary
-            searchSlot legs ++
-          routeContinuationRules growth counterState searchSlot directSlot
-            legs →
-        rule ∈ rawDirectRules) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c source, atLogical growth T sourcePosition⟩
-      ⟨resolve base c after, atLogical growth T finishPosition⟩ := by
-  cases legs with
-  | nil => exact (hne rfl).elim
-  | cons first rest =>
-      exact route_reaches_solved_at base c limit hshort growth counterState
-        searchSlot directSlot source after sourceBoundary first rest T
-        sourcePosition finishPosition hsource hexec hcommands hrules
-
 /-- Whole-list solved route runner which also accepts an empty route when its
 source control reference is already the advertised continuation. -/
 theorem route_reaches_solved_at_maybe_empty
@@ -1559,6 +1528,35 @@ theorem route_reaches_solved_at_maybe_empty
       exact route_reaches_solved_at base c limit hshort growth counterState
         searchSlot directSlot source after sourceBoundary first rest T
         sourcePosition finishPosition hsource hexec hcommands hrules
+
+/-- Whole-list wrapper for a nonempty solved route. -/
+theorem route_reaches_solved_at_of_ne_nil
+    (base : Nat) (c : Nat.Partrec.Code) (limit : Nat)
+    (hshort : ShortSearches base c limit) (growth : Turing.Dir)
+    (counterState searchSlot directSlot : Nat)
+    (source after : ControlRef) (sourceBoundary : Fin 5)
+    (legs : List MarkerValidation.Leg) (hne : legs ≠ [])
+    (T : FullTM0.Tape (Symbol numTags)) (sourcePosition finishPosition : Nat)
+    (hsource : (atLogical growth T sourcePosition).read =
+      boundarySymbol sourceBoundary)
+    (hexec : RouteExecutesWithin growth T limit legs
+      sourcePosition finishPosition)
+    (hcommands : ∀ raw,
+      raw ∈ routeCommandsAux growth counterState searchSlot directSlot
+          after legs → raw ∈ rawCommands)
+    (hrules : ∀ rule,
+      rule ∈ routeEntryRules growth counterState source sourceBoundary
+            searchSlot legs ++
+          routeContinuationRules growth counterState searchSlot directSlot
+            legs →
+        rule ∈ rawDirectRules) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c source, atLogical growth T sourcePosition⟩
+      ⟨resolve base c after, atLogical growth T finishPosition⟩ := by
+  exact route_reaches_solved_at_maybe_empty base c limit hshort growth
+    counterState searchSlot directSlot source after sourceBoundary legs
+    (fun hnil => (hne hnil).elim) T sourcePosition finishPosition hsource
+    hexec hcommands hrules
 
 /-! ## Canonical routes of a represented frame -/
 

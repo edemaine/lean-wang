@@ -559,9 +559,11 @@ theorem machine_reaches_incrementRecovery_solved
           routeContinuationRules spec.growth source secondarySearchBase
             (bodyDirectBase + 2)
             (AnchoredCounterGeometry.routeFromIncrement register) := by
-      cases register <;>
-        simpa [AnchoredCounterGeometry.routeFromIncrement, routeEntryRules,
-          routeContinuationRules] using hraw
+      generalize hroute : AnchoredCounterGeometry.routeFromIncrement register =
+        route at hraw ⊢
+      cases route with
+      | nil => simp [routeEntryRules, routeContinuationRules] at hraw
+      | cons first rest => exact hraw
     rcases List.mem_append.mp hraw' with hentry | hcontinuation
     · simp only [incrementRules, List.mem_append]
       exact Or.inl (Or.inl (Or.inr hentry))
@@ -577,8 +579,7 @@ theorem machine_reaches_incrementRecovery_solved
     (AnchoredCounterGeometry.routeFromIncrement register)
     (by
       intro hnil
-      cases register <;>
-        simp [AnchoredCounterGeometry.routeFromIncrement] at hnil ⊢)
+      simp [hnil])
     T
     (boundaryOffset spec.registers
       (MarkerSchedule.decrementStartBoundary register))

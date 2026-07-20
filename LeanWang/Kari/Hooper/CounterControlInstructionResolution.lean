@@ -294,12 +294,10 @@ theorem route_reaches_or_halts_at_of_ne_nil
         ⟨resolve base c after, atLogical growth T finishPosition⟩ ∨
       FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
         ⟨resolve base c source, atLogical growth T sourcePosition⟩ := by
-  cases legs with
-  | nil => exact (hne rfl).elim
-  | cons first rest =>
-      exact route_reaches_or_halts_at base c limit hshort growth counterState
-        searchSlot directSlot source after sourceBoundary first rest T
-        sourcePosition finishPosition hsource hexec hcommands hrules
+  exact route_reaches_or_halts_at_maybe_empty base c limit hshort growth
+    counterState searchSlot directSlot source after sourceBoundary legs
+    (fun hnil => (hne hnil).elim) T sourcePosition finishPosition hsource
+    hexec hcommands hrules
 
 /-- The mandatory validation sweep reaches the selected instruction body, or
 one of its shorter searches makes the complete controller halt. -/
@@ -634,9 +632,11 @@ theorem machine_reaches_incrementRecovery_or_halts
           routeContinuationRules spec.growth source secondarySearchBase
             (bodyDirectBase + 2)
             (AnchoredCounterGeometry.routeFromIncrement register) := by
-      cases register <;>
-        simpa [AnchoredCounterGeometry.routeFromIncrement, routeEntryRules,
-          routeContinuationRules] using hraw
+      generalize hroute : AnchoredCounterGeometry.routeFromIncrement register =
+        route at hraw ⊢
+      cases route with
+      | nil => simp [routeEntryRules, routeContinuationRules] at hraw
+      | cons first rest => exact hraw
     rcases List.mem_append.mp hraw' with hentry | hcontinuation
     · simp only [incrementRules, List.mem_append]
       exact Or.inl (Or.inl (Or.inr hentry))
@@ -652,8 +652,7 @@ theorem machine_reaches_incrementRecovery_or_halts
     (AnchoredCounterGeometry.routeFromIncrement register)
     (by
       intro hnil
-      cases register <;>
-        simp [AnchoredCounterGeometry.routeFromIncrement] at hnil ⊢)
+      simp [hnil])
     T
     (boundaryOffset spec.registers
       (MarkerSchedule.decrementStartBoundary register))
@@ -893,10 +892,11 @@ theorem machine_reaches_decrementToTest_or_halts
           routeContinuationRules spec.growth source bodySearchBase
             (bodyDirectBase + 1)
             (AnchoredCounterGeometry.routeToDecrementStart register) := by
-      cases register <;>
-        simpa [route, bodyEntry,
-          AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules,
-          routeContinuationRules] using hraw
+      simp only [bodyEntry] at hraw
+      cases hlegs : AnchoredCounterGeometry.routeToDecrementStart register with
+      | nil =>
+          simp [route, hlegs, routeEntryRules, routeContinuationRules] at hraw
+      | cons first rest => simpa [route, hlegs] using hraw
     rcases List.mem_append.mp hraw' with hentry | hcontinuation
     · simp only [decrementRules, List.mem_append]
       exact Or.inl (Or.inl (Or.inl hentry))
@@ -908,9 +908,7 @@ theorem machine_reaches_decrementToTest_or_halts
     (directRef spec.growth source testDirectSlot) 4 route
     (by
       intro hnil
-      cases register <;>
-        simp [route, bodyEntry,
-          AnchoredCounterGeometry.routeToDecrementStart] at hnil ⊢)
+      simp [route, bodyEntry, hnil])
     T (layoutEnd spec.registers)
     (boundaryOffset spec.registers
       (MarkerSchedule.decrementStartBoundary register))

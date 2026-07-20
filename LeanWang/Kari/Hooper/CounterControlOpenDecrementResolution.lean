@@ -1071,10 +1071,11 @@ theorem machine_reaches_decrementToTest_or_halts_of_core
           routeContinuationRules growth source bodySearchBase
             (bodyDirectBase + 1)
             (AnchoredCounterGeometry.routeToDecrementStart register) := by
-      cases register <;>
-        simpa [route, bodyEntry,
-          AnchoredCounterGeometry.routeToDecrementStart, routeEntryRules,
-          routeContinuationRules] using hraw
+      simp only [bodyEntry] at hraw
+      cases hlegs : AnchoredCounterGeometry.routeToDecrementStart register with
+      | nil =>
+          simp [route, hlegs, routeEntryRules, routeContinuationRules] at hraw
+      | cons first rest => simpa [route, hlegs] using hraw
     rcases List.mem_append.mp hraw' with hentry | hcontinuation
     · simp only [decrementRules, List.mem_append]
       exact Or.inl (Or.inl (Or.inl hentry))
@@ -1087,9 +1088,7 @@ theorem machine_reaches_decrementToTest_or_halts_of_core
     (directRef growth source testDirectSlot) 4 route
     (by
       intro hnil
-      cases register <;>
-        simp [route, bodyEntry,
-          AnchoredCounterGeometry.routeToDecrementStart] at hnil ⊢)
+      simp [route, bodyEntry, hnil])
     T (layoutEnd registers)
     (boundaryOffset registers
       (MarkerSchedule.decrementStartBoundary register))
