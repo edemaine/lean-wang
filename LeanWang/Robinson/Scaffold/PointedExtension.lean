@@ -410,13 +410,6 @@ theorem mem_source_of_mem_regionPayloads
       | origin => simpa [regionPayloads] using member
       | positive => simpa [regionPayloads] using member
 
-/-- The origin region contains only the prescribed source seed. -/
-theorem eq_seed_of_mem_originPayloads
-    {T : TileSet} {seed payload : WangTile}
-    (member : payload ∈ regionPayloads T seed .origin .origin) :
-    payload = seed := by
-  exact (by simpa [regionPayloads] using member : payload ∈ T ∧ payload = seed).2
-
 private theorem AxisClass.nonnegative_of_step {left right : AxisClass}
     (step : Step left right) (nonnegative : left ≠ .negative) :
     right ≠ .negative := by
@@ -765,42 +758,6 @@ theorem exists_pointed_plane_of_tilesQuarterWithSeed
       (quarter (0, 0)).1 = pointedSeed seed
     rw [seeded]
     rfl
-
-theorem tilesPlane_of_tilesQuarterWithSeed
-    {T : TileSet} {seed : WangTile} :
-    TilesQuarterWithSeed T seed → TilesPlane (tiles T seed) := by
-  intro quarter
-  rcases exists_pointed_plane_of_tilesQuarterWithSeed quarter with
-    ⟨plane, valid, _pointed⟩
-  exact ⟨plane, valid⟩
-
-/-- Restrict the explicit pointed plane back to its northeast quadrant. -/
-theorem extension_tilesQuarterWithSeed_of_tilesQuarterWithSeed
-    {T : TileSet} {seed : WangTile} :
-    TilesQuarterWithSeed T seed →
-      TilesQuarterWithSeed (tiles T seed) (pointedSeed seed) := by
-  intro source
-  rcases exists_pointed_plane_of_tilesQuarterWithSeed source with
-    ⟨plane, valid, pointed⟩
-  let quarter : Nat × Nat → TileIn (tiles T seed) := fun point =>
-    plane (point.1, point.2)
-  refine ⟨quarter, ?_, ?_⟩
-  · constructor
-    · intro point
-      simpa [quarter] using valid.1 ((point.1 : Int), (point.2 : Int))
-    · intro point
-      simpa [quarter] using valid.2 ((point.1 : Int), (point.2 : Int))
-  · simpa [quarter] using pointed
-
-/-- A seeded source quarter-plane supplies pointed extension squares of every
-positive size. -/
-theorem extension_fixedCornerSquares_of_tilesQuarterWithSeed
-    {T : TileSet} {seed : WangTile}
-    (source : TilesQuarterWithSeed T seed) :
-    ∀ n : Nat, 0 < n →
-      TileableFixedCornerSquare (tiles T seed) (pointedSeed seed) n :=
-  fixedCornerSquare_of_tilesQuarterWithSeed
-    (extension_tilesQuarterWithSeed_of_tilesQuarterWithSeed source)
 
 end PointedExtension
 end LeanWang

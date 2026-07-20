@@ -474,78 +474,10 @@ theorem tileableBox
 
 end RoutedCombinedBoxLayerPatch
 
-/-- Finite-patch form of the backward routed scaffold construction. -/
-def HasRoutedCombinedBoxLayerPatches (S : RoutedScaffold) : Prop :=
-  ∀ (T : TileSet) (seed : WangTile),
-    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
-      ∀ r : Nat, Nonempty (RoutedCombinedBoxLayerPatch S T seed r)
-
-/-- Core-patch form of the backward routed scaffold construction. -/
-def HasRoutedCoreBoxLayerPatches (S : RoutedScaffold) : Prop :=
-  ∀ (T : TileSet) (seed : WangTile),
-    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
-      ∀ r : Nat, Nonempty (RoutedCoreBoxLayerPatch S T seed r)
-
-/-- Locally compatible constrained cores supply the required full patches. -/
-theorem hasRoutedCombinedBoxLayerPatches_of_coreBoxLayerPatches
-    {S : RoutedScaffold} (cores : HasRoutedCoreBoxLayerPatches S) :
-    HasRoutedCombinedBoxLayerPatches S := by
-  intro T seed squares r
-  rcases cores T seed squares r with ⟨core⟩
-  exact ⟨core.toRoutedCombinedBoxLayerPatch⟩
-
-/-- The abstract property required of a channel-aware routed scaffold. -/
-def IsRoutedScaffold (S : RoutedScaffold) : Prop :=
-  ∀ (T : TileSet) (seed : WangTile),
-    TilesPlane (combineWithRoutedScaffold S T seed) ↔
-      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
-
-/-- Backward half of the routed scaffold equivalence. -/
-def RealizesRoutedFixedCornerSquares (S : RoutedScaffold) : Prop :=
-  ∀ (T : TileSet) (seed : WangTile),
-    (∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n) →
-      TilesPlane (combineWithRoutedScaffold S T seed)
-
 /-- Forward half of the routed scaffold equivalence. -/
 def ForcesRoutedFixedCornerSquares (S : RoutedScaffold) : Prop :=
   ∀ {T : TileSet} {seed : WangTile},
     TilesPlane (combineWithRoutedScaffold S T seed) →
       ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n
-
-/-- Finite routed layer patches realize every family of fixed-corner squares
-by Wang compactness. -/
-theorem realizesRoutedFixedCornerSquares_of_combinedBoxLayerPatches
-    {S : RoutedScaffold}
-    (patches : HasRoutedCombinedBoxLayerPatches S) :
-    RealizesRoutedFixedCornerSquares S := by
-  intro T seed hsquares
-  apply tilesPlane_of_all_tileableBoxes
-  intro r
-  rcases patches T seed hsquares r with ⟨patch⟩
-  exact patch.tileableBox
-
-theorem isRoutedScaffold_of_realizes_of_forces
-    {S : RoutedScaffold}
-    (realizes : RealizesRoutedFixedCornerSquares S)
-    (forces : ForcesRoutedFixedCornerSquares S) :
-    IsRoutedScaffold S := by
-  intro T seed
-  exact ⟨forces, realizes T seed⟩
-
-theorem isRoutedScaffold_of_combinedBoxLayerPatches_of_forces
-    {S : RoutedScaffold}
-    (patches : HasRoutedCombinedBoxLayerPatches S)
-    (forces : ForcesRoutedFixedCornerSquares S) :
-    IsRoutedScaffold S :=
-  isRoutedScaffold_of_realizes_of_forces
-    (realizesRoutedFixedCornerSquares_of_combinedBoxLayerPatches patches)
-    forces
-
-/-- Correctness theorem exposed by any certified routed scaffold. -/
-theorem routedScaffold_reduction_correct {S : RoutedScaffold}
-    (hS : IsRoutedScaffold S) (T : TileSet) (seed : WangTile) :
-    TilesPlane (combineWithRoutedScaffold S T seed) ↔
-      ∀ n : Nat, 0 < n → TileableFixedCornerSquare T seed n :=
-  hS T seed
 
 end LeanWang
