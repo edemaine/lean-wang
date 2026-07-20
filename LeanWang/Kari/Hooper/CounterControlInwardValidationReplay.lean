@@ -180,50 +180,6 @@ theorem reverseBoundaryGap_distance_ge
   rw [hboundary] at hblank
   exact blankSymbol_ne_boundarySymbol replayTarget hblank.symm
 
-private theorem reverseGap_continue
-    (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir)
-    (distance : Nat) :
-    (((((T.move direction).moveN direction distance).move
-        (NestingMachine.opposite direction)).moveN
-      (NestingMachine.opposite direction) distance).move
-        (NestingMachine.opposite direction)) =
-      T.move (NestingMachine.opposite direction) := by
-  funext position
-  cases direction <;>
-    simp [NestingMachine.opposite, FullTM0.Tape.moveN,
-      FullTM0.Tape.offset, FullTM0.Tape.move] <;>
-    congr 1 <;> ring
-
-/-- A preserving search followed later by its reverse has the same distance,
-and the two one-cell departures finish immediately beyond the original
-source boundary. -/
-private theorem reversePair_continue
-    (T : FullTM0.Tape (Symbol numTags)) (direction : Turing.Dir)
-    {distance reverseDistance : Nat} {found source : Fin 5}
-    (hsource : T.read = boundarySymbol source)
-    (hinward : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary found).Matches (T.move direction)
-      direction distance)
-    (houtward : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary source).Matches
-      (((T.move direction).moveN direction distance).move
-        (NestingMachine.opposite direction))
-      (NestingMachine.opposite direction) reverseDistance) :
-    reverseDistance = distance ∧
-      (((((T.move direction).moveN direction distance).move
-          (NestingMachine.opposite direction)).moveN
-        (NestingMachine.opposite direction) reverseDistance).move
-          (NestingMachine.opposite direction)) =
-        T.move (NestingMachine.opposite direction) := by
-  have hbehind : ((T.move direction).move
-      (NestingMachine.opposite direction)).read = boundarySymbol source := by
-    rw [move_move_opposite]
-    exact hsource
-  have hreverse := reverseGap_of_source_boundary hinward hbehind
-  have hdistance := BoundedMarkerProgram.boundaryGap_distance_unique houtward hreverse
-  subst reverseDistance
-  exact ⟨rfl, reverseGap_continue T direction distance⟩
-
 private theorem selectedRaw_right_false
     {base : Nat} {c : Nat.Partrec.Code}
     (current : GuardedSearch base c)
@@ -571,8 +527,7 @@ private theorem replay_of_oneInward
           validationSearchBase, validationDirectBase, directRef, searchRef])
       (by simpa [zeroTape] using houtwardStart) with
     ⟨d1, gap1, hreplay⟩
-  have hpair := reversePair_continue current.foundTape
-    (orient growth .left) hone gap0
+  have hpair := reverseGap_pair_continue hone gap0
     (by simpa only [zeroTape, opposite_orient_left] using gap1)
   have htape :
       ((zeroTape.move (orient growth .right)).moveN
@@ -671,8 +626,7 @@ private theorem replay_of_twoInward
           validationSearchBase, validationDirectBase, directRef, searchRef])
       (by simpa [zeroTape, oneTape] using houtwardStart) with
     ⟨e0, reverse0, hentry5⟩
-  have hpair0 := reversePair_continue oneTape (orient growth .left)
-    hone gap0 (by
+  have hpair0 := reverseGap_pair_continue hone gap0 (by
       simpa only [zeroTape, opposite_orient_left] using reverse0)
   have htape1 :
       ((zeroTape.move (orient growth .right)).moveN
@@ -697,8 +651,7 @@ private theorem replay_of_twoInward
           routeContinuationRules, routeContinuationRulesFrom,
           validationSearchBase, validationDirectBase, directRef, searchRef])
       hentry5' with ⟨e1, reverse1, hreplay⟩
-  have hpair1 := reversePair_continue current.foundTape
-    (orient growth .left) htwo gap1
+  have hpair1 := reverseGap_pair_continue htwo gap1
     (by simpa only [oneTape, opposite_orient_left] using reverse1)
   have htape2 :
       ((oneTape.move (orient growth .right)).moveN
@@ -814,8 +767,7 @@ private theorem replay_of_threeInward
           validationSearchBase, validationDirectBase, directRef, searchRef])
       (by simpa [zeroTape, oneTape, twoTape] using houtwardStart) with
     ⟨e0, reverse0, hentry5⟩
-  have hpair0 := reversePair_continue oneTape (orient growth .left)
-    hone gap0 (by
+  have hpair0 := reverseGap_pair_continue hone gap0 (by
       simpa only [zeroTape, opposite_orient_left] using reverse0)
   have htape1 :
       ((zeroTape.move (orient growth .right)).moveN
@@ -840,8 +792,7 @@ private theorem replay_of_threeInward
           routeContinuationRules, routeContinuationRulesFrom,
           validationSearchBase, validationDirectBase, directRef, searchRef])
       hentry5' with ⟨e1, reverse1, hentry6⟩
-  have hpair1 := reversePair_continue twoTape (orient growth .left)
-    htwo gap1
+  have hpair1 := reverseGap_pair_continue htwo gap1
     (by simpa only [oneTape, opposite_orient_left] using reverse1)
   have htape2 :
       ((oneTape.move (orient growth .right)).moveN
@@ -866,8 +817,7 @@ private theorem replay_of_threeInward
           routeContinuationRules, routeContinuationRulesFrom,
           validationSearchBase, validationDirectBase, directRef, searchRef])
       hentry6' with ⟨e2, reverse2, hreplay⟩
-  have hpair2 := reversePair_continue current.foundTape
-    (orient growth .left) hthree gap2
+  have hpair2 := reverseGap_pair_continue hthree gap2
     (by simpa only [twoTape, opposite_orient_left] using reverse2)
   have htape3 :
       ((twoTape.move (orient growth .right)).moveN

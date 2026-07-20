@@ -103,7 +103,7 @@ theorem incrementShiftPosition_descendingTo
 
 /-- Viewed from the newly shifted boundary, the old gap reverses into the
 blank gap leading to the previously shifted boundary. -/
-private theorem shiftStepTape_reverseGap
+theorem shiftStepTape_reverseGap
     (direction : Turing.Dir)
     (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
     (expected source : Fin 5)

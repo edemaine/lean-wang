@@ -932,49 +932,6 @@ theorem outwardFound_reverse_blank
       FullTM0.Tape.moveN, FullTM0.Tape.offset, index] at hblank ⊢ <;>
     rw [← hblank] <;> congr 1 <;> omega
 
-/-- Reverse the first remaining shifted gap.  This is the one-step geometry
-used inside the generic canonical backward theorem, exposed here because the
-old outward-validation gap is anchored at its source boundary. -/
-private theorem shiftStepTape_reverseGap
-    (direction : Turing.Dir)
-    (outer : FullTM0.Tape (Symbol numTags)) (distance : Nat)
-    (expected source : Fin 5)
-    (gap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary expected).Matches outer direction distance)
-    (positive : 0 < distance)
-    (hsource : (outer.move
-      (NestingMachine.opposite direction)).read = boundarySymbol source) :
-    SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary source).Matches
-      ((shiftStepTape direction outer distance expected).move
-        (NestingMachine.opposite direction) |>.move
-          (NestingMachine.opposite direction))
-      (NestingMachine.opposite direction) (distance - 1) := by
-  constructor
-  · intro k hk
-    have hbetween := CounterControlGuardedShiftEmbedding.shiftStepTape_between
-      direction outer distance (k + 1) expected gap (by omega) (by omega)
-    cases direction <;>
-      simp [NestingMachine.opposite, FullTM0.Tape.read,
-        FullTM0.Tape.move, FullTM0.Tape.moveN,
-        FullTM0.Tape.offset] at hbetween ⊢ <;>
-      rw [← hbetween] <;> congr 1 <;> ring
-  · have hbehind :=
-      CounterControlGuardedShiftEmbedding.shiftStepTape_behind
-        direction outer distance 0 expected positive
-    have hsource' :
-        (((outer.move (NestingMachine.opposite direction)).moveN
-          (NestingMachine.opposite direction) 0).read) =
-            boundarySymbol source := by
-      simpa using hsource
-    rw [hsource'] at hbehind
-    have hdistance : distance - 1 + 1 = distance := by omega
-    cases direction <;>
-      simp [Target.Matches, NestingMachine.opposite,
-        FullTM0.Tape.read, FullTM0.Tape.move,
-        FullTM0.Tape.moveN, FullTM0.Tape.offset] at hbehind ⊢ <;>
-      rw [← hbehind] <;> congr 1 <;> norm_num at hdistance ⊢ <;> omega
-
 /-- The first remaining search of a non-clock increment is farther than the
 old final-validation gap, and canonical recovery places that whole search
 inside the reconstructed layout. -/

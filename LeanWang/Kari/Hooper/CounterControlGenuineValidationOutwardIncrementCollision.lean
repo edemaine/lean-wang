@@ -203,11 +203,8 @@ private theorem outward_then_reverse
     ((((T.move outward).moveN outward distance).move
       (NestingMachine.opposite outward)).moveN
         (NestingMachine.opposite outward) distance) = T := by
-  funext position
-  cases outward <;>
-    simp [NestingMachine.opposite, FullTM0.Tape.move,
-      FullTM0.Tape.moveN, FullTM0.Tape.offset] <;>
-    congr 1 <;> ring
+  exact (reverseGap_finish (T.move outward) outward distance).trans
+    (move_move_opposite T outward)
 
 /-- Once a reversed retained gap has been erased, its actual tape agrees on
 the remaining inward ray with the canonical tape obtained by clearing its
