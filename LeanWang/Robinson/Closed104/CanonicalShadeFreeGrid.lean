@@ -23,35 +23,34 @@ namespace CanonicalShadeFreeGrid
 
 open OrientedRedCycles RedShadePaths RedShadeCycles RedShadeGraph
   CanonicalFreeLineCoordinates CanonicalShadeComparison
+  CanonicalShadeComparisonCore
   ShadedFreeGrid ShadedSubstitution
 
 set_option maxRecDepth 20000
 
-def coordinateAt (depth : Nat) (index : Fin (depth + 1)) : Nat :=
+abbrev coordinateAt (depth : Nat) (index : Fin (depth + 1)) : Nat :=
   CanonicalFreeLineCoordinates.coordinateAt depth
     (Fin.cast (coordinates_length depth).symm index)
-
-theorem coordinateAt_mem (depth : Nat) (index : Fin (depth + 1)) :
-    coordinateAt depth index ∈ coordinates depth :=
-  CanonicalFreeLineCoordinates.coordinateAt_mem depth _
-
-theorem coordinateAt_strictMono (depth : Nat)
-    {first second : Fin (depth + 1)} (hlt : first < second) :
-    coordinateAt depth first < coordinateAt depth second := by
-  apply CanonicalFreeLineCoordinates.coordinateAt_strictMono depth
-  simpa [Fin.cast] using hlt
 
 @[simp] theorem coordinateAt_zero (depth : Nat) :
     coordinateAt depth (0 : Fin (depth + 1)) = 4 * 4 ^ depth + 1 := by
   unfold coordinateAt
   apply CanonicalFreeLineCoordinates.coordinateAt_zero
 
-theorem coordinateAt_bounds (depth : Nat) (index : Fin (depth + 1)) :
-    quarterSouth (scale depth) < coordinateAt depth index ∧
-      coordinateAt depth index < quarterNorth (3 * scale depth) := by
-  simpa [coordinateAt, scale] using
-    (CanonicalFreeLineCoordinates.coordinateAt_bounds depth
-      (Fin.cast (coordinates_length depth).symm index))
+private def orderedCoordinates (depth : Nat) :
+    PhaseComparison.OrderedCoordinates (scale depth) (depth + 1)
+      (coordinates depth) where
+  coord := coordinateAt depth
+  mem_coord := fun index => CanonicalFreeLineCoordinates.coordinateAt_mem depth _
+  strictMono := by
+    intro first second hlt
+    apply CanonicalFreeLineCoordinates.coordinateAt_strictMono depth
+    simpa [Fin.cast] using hlt
+  bounds := by
+    intro index
+    simpa [coordinateAt, scale] using
+      (CanonicalFreeLineCoordinates.coordinateAt_bounds depth
+        (Fin.cast (coordinates_length depth).symm index))
 
 /-- The canonical coordinate family interpreted in an arbitrary valid
 light-root shade assignment. -/
@@ -64,19 +63,9 @@ def freeGrid (depth : Nat) (coarse : Nat → Nat → Index)
       (scale depth) (3 * scale depth) .light) :
     FreeGrid (actualGrid depth coarse) states
       (scale depth) (3 * scale depth)
-      (scale depth) (3 * scale depth) (depth + 1) where
-  columnAt := coordinateAt depth
-  rowAt := coordinateAt depth
-  column_strictMono := coordinateAt_strictMono depth
-  row_strictMono := coordinateAt_strictMono depth
-  column_west := fun index => (coordinateAt_bounds depth index).1
-  column_east := fun index => (coordinateAt_bounds depth index).2
-  row_south := fun index => (coordinateAt_bounds depth index).1
-  row_north := fun index => (coordinateAt_bounds depth index).2
-  freeColumn := fun index => (freeCoordinates depth coarse states root
-    coarseRoot rootParent valid shaded).freeColumn (coordinateAt_mem depth index)
-  freeRow := fun index => (freeCoordinates depth coarse states root
-    coarseRoot rootParent valid shaded).freeRow (coordinateAt_mem depth index)
+      (scale depth) (3 * scale depth) (depth + 1) :=
+  (freeCoordinates depth coarse states root coarseRoot rootParent
+    valid shaded).toFreeGrid (orderedCoordinates depth)
 
 end CanonicalShadeFreeGrid
 end Closed104

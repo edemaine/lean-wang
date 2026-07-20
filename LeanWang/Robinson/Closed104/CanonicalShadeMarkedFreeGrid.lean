@@ -21,21 +21,12 @@ namespace Figure13Layers
 namespace Closed104
 namespace CanonicalShadeMarkedFreeGrid
 
-open RedCycles RedShadePaths RedShadeCycles RedShadeGraphRefinement
-  RefinementTranslation Signals.FreeCellLocal
+open RedCycles RedShadePaths RedShadeCycles Signals.FreeCellLocal
   CanonicalShadeComparison CanonicalShadeFreeGrid ShadedSubstitution
+  CanonicalShadeComparisonCore.PhaseComparison
   SparseFreeLinePlaneMarkedGrid
 
 set_option maxRecDepth 20000
-
-set_option linter.style.nativeDecide false in
-private theorem marker_refines (index : Index)
-    (marker : (index, Quadrant.northeast) ∈
-      ShadedSignals.markerQuarters) :
-    (southwestChild (southwestChild index), Quadrant.northeast) ∈
-      ShadedSignals.markerQuarters := by
-  revert index
-  native_decide
 
 set_option linter.style.nativeDecide false in
 private theorem baseMarker_constant :
@@ -43,49 +34,18 @@ private theorem baseMarker_constant :
       Quadrant.northeast) ∈ ShadedSignals.markerQuarters := by
   native_decide
 
-private theorem baseMarker (coarse : Nat → Nat → Index)
-    (coarseRoot : coarse 0 0 = 0) :
-    (actualGrid 1 coarse 8 8, Quadrant.northeast) ∈
-      ShadedSignals.markerQuarters := by
-  have localized := iterateRefine_shift_eq_constant 4 coarse 0 0 8 8
-    (by norm_num) (by norm_num)
-  have shiftZero : shiftGrid coarse 0 0 = coarse := by
-    funext x y
-    simp [shiftGrid]
-  rw [shiftZero] at localized
-  change (iterateRefine 4 coarse 8 8, Quadrant.northeast) ∈
-    ShadedSignals.markerQuarters
-  rw [localized, coarseRoot]
-  exact baseMarker_constant
-
-private theorem actualGrid_succ (depth : Nat)
-    (coarse : Nat → Nat → Index) :
-    actualGrid (depth + 1) coarse = iterateRefine 2 (actualGrid depth coarse) := by
-  unfold actualGrid
-  rw [PlaneRedBoards.iterateRefine_add]
-  congr 1
-  omega
-
 private theorem markerIndex (extra : Nat)
     (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0) :
     (actualGrid (extra + 1) coarse
         (2 * 4 ^ (extra + 1)) (2 * 4 ^ (extra + 1)),
       Quadrant.northeast) ∈ ShadedSignals.markerQuarters := by
-  induction extra with
-  | zero => simpa using baseMarker coarse coarseRoot
-  | succ extra ih =>
-      rw [show extra + 1 + 1 = (extra + 1) + 1 by omega,
-        actualGrid_succ]
-      change
-        (refineIndexGrid (refineIndexGrid (actualGrid (extra + 1) coarse))
-            (2 * 4 ^ (extra + 2)) (2 * 4 ^ (extra + 2)),
-          Quadrant.northeast) ∈ ShadedSignals.markerQuarters
-      rw [show 2 * 4 ^ (extra + 2) =
-          2 * (2 * (2 * 4 ^ (extra + 1))) by
-        rw [pow_succ]
-        omega]
-      simp only [refineIndexGrid_even_even]
-      exact marker_refines _ ih
+  have base := markerAt_of_root coarse coarseRoot 8 (by decide) baseMarker_constant
+  have propagated := markerAt_iterateRefine coarse 8 extra base
+  have depthEq : 2 * (extra + 1) + 2 = 2 * extra + 4 := by omega
+  have coordinateEq : 2 * 4 ^ (extra + 1) = 8 * 4 ^ extra := by
+    rw [pow_succ]
+    omega
+  simpa only [actualGrid, depthEq, coordinateEq] using propagated
 
 /-- The direct canonical free grid, with its first crossing certified as the
 routed lower-left marker. -/
@@ -103,7 +63,13 @@ def markedFreeGrid (size : Nat) (coarse : Nat → Nat → Index)
     valid shaded
   positive := by omega
   lowerLeftMarker := by
-    dsimp [freeGrid]
+    simp only [freeGrid, FreeCoordinateFamily.toFreeGrid]
+    change
+      (actualGrid (size + 1) coarse
+          (coordinateAt (size + 1) 0 / 2)
+          (coordinateAt (size + 1) 0 / 2),
+        quadrantAt (coordinateAt (size + 1) 0)
+          (coordinateAt (size + 1) 0)) ∈ ShadedSignals.markerQuarters
     rw [coordinateAt_zero]
     have half : (4 * 4 ^ (size + 1) + 1) / 2 =
         2 * 4 ^ (size + 1) := by omega

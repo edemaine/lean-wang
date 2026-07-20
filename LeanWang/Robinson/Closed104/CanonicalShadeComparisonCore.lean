@@ -6,6 +6,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.CanonicalShadeGeometry
 import LeanWang.Robinson.Closed104.OrientedRedBoardTranslations
 import LeanWang.Robinson.Closed104.RedShadeCycleBridgeComposition
+import LeanWang.Robinson.Closed104.ShadedFreeGrid
 
 /-! Phase-independent local lemmas for canonical shade comparison. -/
 
@@ -531,6 +532,35 @@ structure FreeCoordinateFamily
     FreeAxis.row.IsFreeLine indexGrid shadeGrid scale (3 * scale) line
   freeColumn : ∀ {line}, line ∈ coordinates →
     FreeAxis.column.IsFreeLine indexGrid shadeGrid scale (3 * scale) line
+
+/-- An ordered indexing of a finite coordinate family inside one red board. -/
+structure OrderedCoordinates (scale size : Nat) (coordinates : List Nat) where
+  coord : Fin size → Nat
+  mem_coord : ∀ i, coord i ∈ coordinates
+  strictMono : StrictMono coord
+  bounds : ∀ i,
+    quarterSouth scale < coord i ∧ coord i < quarterNorth (3 * scale)
+
+/-- Interpret one ordered coordinate family simultaneously as free rows and
+columns. -/
+def FreeCoordinateFamily.toFreeGrid
+    {indexGrid : Nat → Nat → Index}
+    {shadeGrid : Nat → Nat → RedShades.State}
+    {scale size : Nat} {coordinateList : List Nat}
+    (family : FreeCoordinateFamily indexGrid shadeGrid scale coordinateList)
+    (coordinates : OrderedCoordinates scale size coordinateList) :
+    ShadedFreeGrid.FreeGrid indexGrid shadeGrid
+      scale (3 * scale) scale (3 * scale) size where
+  columnAt := coordinates.coord
+  rowAt := coordinates.coord
+  column_strictMono := fun {_ _} h => coordinates.strictMono h
+  row_strictMono := fun {_ _} h => coordinates.strictMono h
+  column_west := fun i => (coordinates.bounds i).1
+  column_east := fun i => (coordinates.bounds i).2
+  row_south := fun i => (coordinates.bounds i).1
+  row_north := fun i => (coordinates.bounds i).2
+  freeColumn := fun i => family.freeColumn (coordinates.mem_coord i)
+  freeRow := fun i => family.freeRow (coordinates.mem_coord i)
 
 /-- Transfer a canonical family of free rows and columns through one phase
 comparison. -/
