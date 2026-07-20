@@ -262,36 +262,44 @@ theorem present_value_eq (depth : Nat) (coarse : Nat → Nat → Index)
     (targetNorth : target.y < 6 * scale depth)
     (targetPresent : portPresent (actualGrid depth coarse) target = true) :
     value states target = value (shadeGrid (depth + 2)) target := by
-  apply present_value_eq_of_refinement
-    scale (fun phaseDepth => actualGrid phaseDepth coarse)
-    (fun phaseDepth => shadeGrid (phaseDepth + 2))
-    localStates
-  · exact scale_succ
-  · intro phaseDepth
-    dsimp [actualGrid]
-    rw [PlaneRedBoards.iterateRefine_add]
-    congr 1
-    omega
-  · exact fun phaseDepth => rootCycle phaseDepth coarse
-  · intro baseStates baseValid baseShaded baseTarget baseWest baseEast
-      baseSouth baseNorth basePresent
-    simpa [scale] using baseAgreement coarse coarseRoot baseStates
-      baseValid baseShaded baseTarget baseWest baseEast baseSouth baseNorth
-      basePresent
-  · intro phaseDepth blockX blockY blockXLower blockXUpper
-      blockYLower blockYUpper
-    exact localValid phaseDepth coarse coarseRoot blockX blockY
-      blockXLower blockXUpper blockYLower blockYUpper
-  · intro phaseDepth blockX blockY port portX portY
-    exact value_succ_block (phaseDepth + 2) blockX blockY
-      port portX portY
-  · intro phaseDepth port
-    exact value_succ_sparse (phaseDepth + 2) port
-  · intro phaseDepth phaseStates blockX blockY phaseValid phaseShaded
-      blockXLower blockXUpper blockYLower blockYUpper cellCycle
-    exact cycleSourceAgreement phaseDepth coarse phaseStates blockX blockY
-      phaseValid phaseShaded blockXLower blockXUpper blockYLower
-      blockYUpper cellCycle
+  apply present_value_eq_of_refinement {
+    scale := scale
+    actualGrid := fun phaseDepth => actualGrid phaseDepth coarse
+    canonicalStates := fun phaseDepth => shadeGrid (phaseDepth + 2)
+    localStates := localStates
+    scaleSucc := scale_succ
+    gridSucc := by
+      intro phaseDepth
+      dsimp [actualGrid]
+      rw [PlaneRedBoards.iterateRefine_add]
+      congr 1
+      omega
+    rootCycle := fun phaseDepth => rootCycle phaseDepth coarse
+    base := by
+      intro baseStates baseValid baseShaded baseTarget baseWest baseEast
+        baseSouth baseNorth basePresent
+      simpa [scale] using baseAgreement coarse coarseRoot baseStates
+        baseValid baseShaded baseTarget baseWest baseEast baseSouth baseNorth
+        basePresent
+    localValid := by
+      intro phaseDepth blockX blockY blockXLower blockXUpper
+        blockYLower blockYUpper
+      exact localValid phaseDepth coarse coarseRoot blockX blockY
+        blockXLower blockXUpper blockYLower blockYUpper
+    canonicalBlock := by
+      intro phaseDepth blockX blockY port portX portY
+      exact value_succ_block (phaseDepth + 2) blockX blockY
+        port portX portY
+    canonicalSparse := by
+      intro phaseDepth port
+      exact value_succ_sparse (phaseDepth + 2) port
+    cycleSourceAgreement := by
+      intro phaseDepth phaseStates blockX blockY phaseValid phaseShaded
+        blockXLower blockXUpper blockYLower blockYUpper cellCycle
+      exact cycleSourceAgreement phaseDepth coarse phaseStates blockX blockY
+        phaseValid phaseShaded blockXLower blockXUpper blockYLower
+        blockYUpper cellCycle
+  }
   · exact valid
   · exact shaded
   · exact targetWest

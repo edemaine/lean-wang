@@ -139,20 +139,18 @@ theorem related_of_cycleBridge
     (onCycle_connected secondCycle secondOn targetOn).sound valid
   simpa only [firstValue, targetValue] using path.sound valid
 
-/-- Common two-level coarsening induction for the even and odd canonical
-shade phases.  A phase supplies its base comparison, local canonical blocks,
-and the descendant-cycle source agreement. -/
-theorem present_value_eq_of_refinement
-    (scale : Nat → Nat)
-    (actualGrid : Nat → Nat → Nat → Index)
-    (canonicalStates : Nat → Nat → Nat → RedShades.State)
-    (localStates : Nat → Nat → Nat → Nat → Nat → RedShades.State)
-    (scaleSucc : ∀ depth, scale (depth + 1) = 4 * scale depth)
-    (gridSucc : ∀ depth,
-      iterateRefine 2 (actualGrid depth) = actualGrid (depth + 1))
-    (rootCycle : ∀ depth, CycleOn (actualGrid depth)
-      (scale depth) (3 * scale depth) (scale depth) (3 * scale depth))
-    (base : ∀ states,
+/-- Data and laws shared by the even and odd canonical shade refinements. -/
+structure RefinementComparison where
+  scale : Nat → Nat
+  actualGrid : Nat → Nat → Nat → Index
+  canonicalStates : Nat → Nat → Nat → RedShades.State
+  localStates : Nat → Nat → Nat → Nat → Nat → RedShades.State
+  scaleSucc : ∀ depth, scale (depth + 1) = 4 * scale depth
+  gridSucc : ∀ depth,
+    iterateRefine 2 (actualGrid depth) = actualGrid (depth + 1)
+  rootCycle : ∀ depth, CycleOn (actualGrid depth)
+      (scale depth) (3 * scale depth) (scale depth) (3 * scale depth)
+  base : ∀ states,
       ValidShadeGrid (actualGrid 0) states →
       CycleShade states (scale 0) (3 * scale 0)
         (scale 0) (3 * scale 0) .light →
@@ -160,21 +158,21 @@ theorem present_value_eq_of_refinement
         2 * scale 0 ≤ target.x → target.x < 6 * scale 0 →
         2 * scale 0 ≤ target.y → target.y < 6 * scale 0 →
         portPresent (actualGrid 0) target = true →
-        value states target = value (canonicalStates 0) target)
-    (localValid : ∀ depth blockX blockY,
+        value states target = value (canonicalStates 0) target
+  localValid : ∀ depth blockX blockY,
       scale depth ≤ blockX → blockX < 3 * scale depth →
       scale depth ≤ blockY → blockY < 3 * scale depth →
       ValidShadeRectangle (fineGrid (actualGrid depth blockX blockY))
-        (localStates depth blockX blockY) 8 8)
-    (canonicalBlock : ∀ depth blockX blockY port,
+        (localStates depth blockX blockY) 8 8
+  canonicalBlock : ∀ depth blockX blockY port,
       port.x < 8 → port.y < 8 →
       value (canonicalStates (depth + 1))
           (translatePort port (8 * blockX) (8 * blockY)) =
-        value (localStates depth blockX blockY) port)
-    (canonicalSparse : ∀ depth port,
+        value (localStates depth blockX blockY) port
+  canonicalSparse : ∀ depth port,
       value (canonicalStates (depth + 1)) (sparsePort port) =
-        value (canonicalStates depth) port)
-    (cycleSourceAgreement : ∀ depth states blockX blockY,
+        value (canonicalStates depth) port
+  cycleSourceAgreement : ∀ depth states blockX blockY,
       ValidShadeGrid (actualGrid (depth + 1)) states →
       CycleShade states
         (scale (depth + 1)) (3 * scale (depth + 1))
@@ -185,17 +183,27 @@ theorem present_value_eq_of_refinement
         (4 * blockX + 1) (4 * blockX + 3)
         (4 * blockY + 1) (4 * blockY + 3) →
       value states (translatePort cycleSource (8 * blockX) (8 * blockY)) =
-        value (localStates depth blockX blockY) cycleSource) :
+        value (localStates depth blockX blockY) cycleSource
+
+/-- Common two-level coarsening induction for the even and odd canonical
+shade phases. -/
+theorem present_value_eq_of_refinement (comparison : RefinementComparison) :
     ∀ depth states,
-      ValidShadeGrid (actualGrid depth) states →
+      ValidShadeGrid (comparison.actualGrid depth) states →
       CycleShade states
-        (scale depth) (3 * scale depth)
-        (scale depth) (3 * scale depth) .light →
+        (comparison.scale depth) (3 * comparison.scale depth)
+        (comparison.scale depth) (3 * comparison.scale depth) .light →
       ∀ target,
-        2 * scale depth ≤ target.x → target.x < 6 * scale depth →
-        2 * scale depth ≤ target.y → target.y < 6 * scale depth →
-        portPresent (actualGrid depth) target = true →
-        value states target = value (canonicalStates depth) target := by
+        2 * comparison.scale depth ≤ target.x →
+        target.x < 6 * comparison.scale depth →
+        2 * comparison.scale depth ≤ target.y →
+        target.y < 6 * comparison.scale depth →
+        portPresent (comparison.actualGrid depth) target = true →
+        value states target = value (comparison.canonicalStates depth) target := by
+  rcases comparison with ⟨scale, actualGrid, canonicalStates, localStates,
+    scaleSucc, gridSucc, rootCycle, base, localValid, canonicalBlock,
+    canonicalSparse, cycleSourceAgreement⟩
+  dsimp only at *
   intro depth states valid shaded target targetWest targetEast
     targetSouth targetNorth targetPresent
   induction depth generalizing states target with
