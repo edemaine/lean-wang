@@ -3,8 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
-import LeanWang.Kari.Hooper.CounterControlInstructionSearchSemantics
-import LeanWang.Kari.Hooper.CounterControlScheduleStages
+import LeanWang.Kari.Hooper.CounterControlIncrementSchedule
 
 /-!
 # Increment-instruction semantics
@@ -96,132 +95,6 @@ structure IncrementScheduleRunner
             (install next spec.growth spec.returnTag T)
             (boundaryOffset spec.registers i.castSucc)⟩
 
-/-- Fold the non-clock tail of an increment prefix. -/
-private theorem incrementTail_with
-    (base : Nat) (c : Nat.Partrec.Code)
-    (Short : Nat → Prop)
-    (Failure : FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop)
-    (runner : IncrementScheduleRunner base c Short Failure)
-    (source searchSlot : Nat)
-    {current next target : Register} {tail : List Register}
-    (hnext : IncrementStageNext current next)
-    (hrest : IncrementStageChain next target tail)
-    {spec : Spec numTags} {T : FullTM0.Tape (Symbol numTags)}
-    (h : Represents spec T)
-    (hroom : layoutEnd (spec.registers.increment target) <
-      spec.outerDistance)
-    (hshort : Short spec.outerDistance)
-    (hcommands : ∀ raw,
-      raw ∈ incrementShiftCommandsAux spec.growth source searchSlot false
-        ((next :: tail).map
-          (fun stage => (incrementStageIndex stage).castSucc)) →
-      raw ∈ rawCommands) :
-    FullTM0.CompletesOr (CounterControlNestingBridge.machine base c) Failure
-      ⟨searchState base c ⟨spec.growth, source, searchSlot⟩,
-        atLogical spec.growth (incrementTape spec current T)
-          (lastGapOffset (spec.registers.increment current)
-            (incrementStageIndex next))⟩
-      ⟨resolve base c (directRef spec.growth source bodyDirectBase),
-        atLogical spec.growth (incrementTape spec target T)
-          (boundaryOffset spec.registers
-            (MarkerSchedule.decrementStartBoundary target))⟩ := by
-  induction hrest generalizing current searchSlot with
-  | done stage =>
-      have hcurrentRoom : layoutEnd (spec.registers.increment current) <
-          spec.outerDistance := by
-        simpa only [layoutEnd_increment] using hroom
-      let currentSpec := incrementSpec spec current hcurrentRoom
-      let currentTape := incrementTape spec current T
-      have hcurrentRep : Represents currentSpec currentTape :=
-        incrementTape_represents h current hcurrentRoom
-      have hraw : RawCommand.markerShift
-          ⟨spec.growth, source, searchSlot⟩
-          (incrementStageIndex stage).castSucc .left .right
-          (directRef spec.growth source bodyDirectBase) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommandsAux]
-      have hrun := runner.internal spec.outerDistance hshort source searchSlot
-        (directRef spec.growth source bodyDirectBase) none hcurrentRep
-        (spec.registers.increment stage) (incrementStageIndex stage)
-        (by
-          simpa only [currentSpec, incrementSpec, updateSpec] using
-            incrementStage_positive spec.registers hnext)
-        (by
-          simpa [currentSpec, incrementSpec, updateSpec] using
-            registerValue_lt_outerDistance hcurrentRep
-              (incrementStageIndex stage))
-        (by simpa [currentSpec, incrementSpec, updateSpec,
-          layoutEnd_increment] using hroom)
-        (by simp [currentSpec, incrementSpec, updateSpec,
-          layoutEnd_increment])
-        (by
-          simpa only [currentSpec, incrementSpec, updateSpec] using
-            incrementStage_move spec.registers hnext)
-        hraw
-      have htape : install (spec.registers.increment stage) spec.growth
-          spec.returnTag currentTape = incrementTape spec stage T := by
-        simpa [currentTape] using
-          install_incrementTape_eq spec T current stage
-      simp only [currentSpec, incrementSpec, updateSpec] at hrun
-      rw [htape, incrementStage_finish spec.registers
-        (current := current) (next := stage) hnext] at hrun
-      exact hrun
-  | @cons next after target tail hafter htail ih =>
-      have hcurrentRoom : layoutEnd (spec.registers.increment current) <
-          spec.outerDistance := by
-        simpa only [layoutEnd_increment] using hroom
-      let currentSpec := incrementSpec spec current hcurrentRoom
-      let currentTape := incrementTape spec current T
-      have hcurrentRep : Represents currentSpec currentTape :=
-        incrementTape_represents h current hcurrentRoom
-      have hraw : RawCommand.markerShift
-          ⟨spec.growth, source, searchSlot⟩
-          (incrementStageIndex next).castSucc .left .right
-          (searchRef spec.growth source (searchSlot + 1))
-          (some .left) none ∈ rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommandsAux]
-      have hrun := runner.internal spec.outerDistance hshort source searchSlot
-        (searchRef spec.growth source (searchSlot + 1)) none hcurrentRep
-        (spec.registers.increment next) (incrementStageIndex next)
-        (by
-          simpa only [currentSpec, incrementSpec, updateSpec] using
-            incrementStage_positive spec.registers hnext)
-        (by
-          simpa [currentSpec, incrementSpec, updateSpec] using
-            registerValue_lt_outerDistance hcurrentRep
-              (incrementStageIndex next))
-        (by simpa [currentSpec, incrementSpec, updateSpec,
-          layoutEnd_increment] using hroom)
-        (by simp [currentSpec, incrementSpec, updateSpec,
-          layoutEnd_increment])
-        (by
-          simpa only [currentSpec, incrementSpec, updateSpec] using
-            incrementStage_move spec.registers hnext)
-        hraw
-      have htape : install (spec.registers.increment next) spec.growth
-          spec.returnTag currentTape = incrementTape spec next T := by
-        simpa [currentTape] using
-          install_incrementTape_eq spec T current next
-      simp only [currentSpec, incrementSpec, updateSpec] at hrun
-      rw [htape, incrementStage_head spec.registers
-        (current := current) (next := next) (after := after)
-        hnext hafter] at hrun
-      simp only [searchRef, CounterControlPlan.resolve] at hrun
-      have hnextCommands : ∀ raw,
-          raw ∈ incrementShiftCommandsAux spec.growth source
-            (searchSlot + 1) false
-            ((after :: tail).map
-              (fun stage => (incrementStageIndex stage).castSucc)) →
-          raw ∈ rawCommands := by
-        intro raw hraw'
-        apply hcommands raw
-        simpa [incrementShiftCommandsAux] using List.mem_cons_of_mem _ hraw'
-      have htailRun := ih (current := next) (searchSlot := searchSlot + 1)
-        hafter hroom hnextCommands
-      exact FullTM0.CompletesOr.trans runner.pullback hrun htailRun
-
 /-- Register-independent increment scheduling, parameterized by the outcome
 of each constituent bounded search. -/
 theorem machine_reaches_incrementSchedule_with
@@ -247,77 +120,54 @@ theorem machine_reaches_incrementSchedule_with
             (MarkerSchedule.decrementStartBoundary register))⟩ := by
   have hlimit : 0 < spec.outerDistance := by
     omega
-  have hclockRoom : layoutEnd (spec.registers.increment .clock) <
-      spec.outerDistance := by
-    simpa only [layoutEnd_increment] using hroom
-  generalize hstages : incrementStages register = stages
-  have hlabels :
-      4 :: stages.map
-          (fun stage => (incrementStageIndex stage).castSucc) =
-        MarkerShift.incrementOrder register :=
-    by rw [← hstages]; exact incrementStages_labels register
-  have hchain : IncrementStageChain .clock register stages := by
-    rw [← hstages]
-    exact incrementStages_chain register
-  clear hstages
-  revert hlabels
-  cases hchain with
-  | done =>
-      intro hlabels
-      have hraw : RawCommand.markerShift
-          ⟨spec.growth, source, bodySearchBase⟩ 4 .left .right
-          (directRef spec.growth source bodyDirectBase) (some .left)
-          (some (directRef spec.growth source testDirectSlot)) ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      simpa [MarkerSchedule.decrementStartBoundary] using
-        runner.clock spec.outerDistance hshort source bodySearchBase
-          (directRef spec.growth source bodyDirectBase)
-          (some (directRef spec.growth source testDirectSlot)) h hclockRoom
-          hlimit hraw
-  | @cons _ next _ tail hnext hrest =>
-      intro hlabels
-      have hraw : RawCommand.markerShift
-          ⟨spec.growth, source, bodySearchBase⟩ 4 .left .right
-          (searchRef spec.growth source (bodySearchBase + 1)) (some .left)
-          (some (directRef spec.growth source testDirectSlot)) ∈
-            rawCommands := by
-        apply hcommands
-        simp only [incrementShiftCommands]
-        rw [← hlabels]
-        simp [incrementShiftCommandsAux]
-      have hclock := runner.clock spec.outerDistance hshort source
-        bodySearchBase (searchRef spec.growth source (bodySearchBase + 1))
-        (some (directRef spec.growth source testDirectSlot)) h hclockRoom
-        hlimit hraw
-      have hclock' : FullTM0.CompletesOr
-          (CounterControlNestingBridge.machine base c) Failure
-          ⟨searchState base c ⟨spec.growth, source, bodySearchBase⟩,
-            atLogical spec.growth T (layoutEnd spec.registers)⟩
-          ⟨searchState base c
-              ⟨spec.growth, source, bodySearchBase + 1⟩,
-            atLogical spec.growth (incrementTape spec .clock T)
-              (lastGapOffset (spec.registers.increment .clock)
-                (incrementStageIndex next))⟩ := by
-        cases hnext
-        simpa [searchRef, CounterControlPlan.resolve, incrementStageIndex,
-          incrementSchedule_clock_start spec.registers] using hclock
-      have htailCommands : ∀ raw,
-          raw ∈ incrementShiftCommandsAux spec.growth source
-            (bodySearchBase + 1) false
-            ((next :: tail).map
-              (fun stage => (incrementStageIndex stage).castSucc)) →
-          raw ∈ rawCommands := by
-        intro raw hraw'
-        apply hcommands raw
-        simp only [incrementShiftCommands]
-        rw [← hlabels]
-        exact List.mem_cons_of_mem _ hraw'
-      have htailRun := incrementTail_with base c Short Failure runner source
-        (bodySearchBase + 1) hnext hrest h hroom hshort htailCommands
-      exact FullTM0.CompletesOr.trans runner.pullback hclock' htailRun
+  let prefixRunner : IncrementPrefixRunner base c Failure spec.growth
+      spec.registers T := {
+    stageTape := fun stage => incrementTape spec stage T
+    pullback := runner.pullback
+    clock := by
+      intro counterState searchSlot success collision hraw
+      have hclockRoom : layoutEnd (spec.registers.increment .clock) <
+          spec.outerDistance := by
+        simpa only [layoutEnd_increment] using hroom
+      exact runner.clock spec.outerDistance hshort counterState searchSlot
+        success collision h hclockRoom hlimit hraw
+    internal := by
+      intro counterState searchSlot success current next hnext hraw
+      have hcurrentRoom : layoutEnd (spec.registers.increment current) <
+          spec.outerDistance := by
+        simpa only [layoutEnd_increment] using hroom
+      let currentSpec := incrementSpec spec current hcurrentRoom
+      let currentTape := incrementTape spec current T
+      have hcurrentRep : Represents currentSpec currentTape :=
+        incrementTape_represents h current hcurrentRoom
+      have hrun := runner.internal spec.outerDistance hshort counterState
+        searchSlot success none hcurrentRep
+        (spec.registers.increment next) (incrementStageIndex next)
+        (by
+          simpa only [currentSpec, incrementSpec, updateSpec] using
+            incrementStage_positive spec.registers hnext)
+        (by
+          simpa [currentSpec, incrementSpec, updateSpec] using
+            registerValue_lt_outerDistance hcurrentRep
+              (incrementStageIndex next))
+        (by simpa [currentSpec, incrementSpec, updateSpec,
+          layoutEnd_increment] using hroom)
+        (by simp [currentSpec, incrementSpec, updateSpec,
+          layoutEnd_increment])
+        (by
+          simpa only [currentSpec, incrementSpec, updateSpec] using
+            incrementStage_move spec.registers hnext)
+        hraw
+      have htape : install (spec.registers.increment next) spec.growth
+          spec.returnTag currentTape = incrementTape spec next T := by
+        simpa [currentTape] using
+          install_incrementTape_eq spec T current next
+      simp only [currentSpec, incrementSpec, updateSpec] at hrun
+      rw [htape] at hrun
+      exact hrun }
+  exact machine_reaches_incrementPrefix_with base c Failure prefixRunner
+    source register hcommands
+
 /-- All collision-free shifts of one generated increment execute exactly.
 The endpoint is the blank old source cell of the last shifted boundary; the
 following direct rule moves right onto the new boundary. -/

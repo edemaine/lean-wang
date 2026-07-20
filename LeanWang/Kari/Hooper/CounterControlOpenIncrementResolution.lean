@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.6
 -/
 import LeanWang.Kari.Hooper.CounterControlCanonicalOpenMortality
+import LeanWang.Kari.Hooper.CounterControlIncrementSchedule
 import LeanWang.Kari.Hooper.CounterControlInstructionResolution
 
 /-!
@@ -629,129 +630,6 @@ structure IncrementEnvelope (growth : Turing.Dir) (limit : Nat) where
           ⟨searchState base c ⟨growth, counterState, searchSlot⟩,
             atLogical growth T (lastGapOffset current i)⟩
 
-/-- Fold the non-clock tail of an increment prefix under an arbitrary open
-increment envelope. -/
-private theorem incrementEnvelopeTail
-    (base : Nat) (c : Nat.Partrec.Code) (source searchSlot : Nat)
-    {growth : Turing.Dir} {limit : Nat}
-    (E : IncrementEnvelope growth limit)
-    {current next target : Register} {tail : List Register}
-    (hnext : IncrementStageNext current next)
-    (hrest : IncrementStageChain next target tail)
-    {registers : Registers} {T : FullTM0.Tape (Symbol numTags)}
-    (h : E.Represents registers T)
-    (hroom : layoutEnd (registers.increment target) < limit)
-    (hcommands : ∀ raw,
-      raw ∈ incrementShiftCommandsAux growth source searchSlot false
-        ((next :: tail).map
-          (fun stage => (incrementStageIndex stage).castSucc)) →
-      raw ∈ rawCommands) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, source, searchSlot⟩,
-          atLogical growth (incrementCoreTape registers growth current T)
-            (lastGapOffset (registers.increment current)
-              (incrementStageIndex next))⟩
-        ⟨resolve base c (directRef growth source bodyDirectBase),
-          atLogical growth (incrementCoreTape registers growth target T)
-            (boundaryOffset registers
-              (MarkerSchedule.decrementStartBoundary target))⟩ ∨
-      FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-        ⟨searchState base c ⟨growth, source, searchSlot⟩,
-          atLogical growth (incrementCoreTape registers growth current T)
-            (lastGapOffset (registers.increment current)
-              (incrementStageIndex next))⟩ := by
-  induction hrest generalizing current searchSlot with
-  | done stage =>
-      have hcurrentRoom : layoutEnd (registers.increment current) < limit := by
-        simpa only [layoutEnd_increment] using hroom
-      let currentRegisters := registers.increment current
-      let currentTape := incrementCoreTape registers growth current T
-      have hcurrent : E.Represents currentRegisters currentTape := by
-        simpa [currentRegisters, currentTape] using
-          E.increment current h hcurrentRoom
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, searchSlot⟩
-          (incrementStageIndex stage).castSucc .left .right
-          (directRef growth source bodyDirectBase) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommandsAux]
-      have hrun := E.internal (next := registers.increment stage) base c
-        source searchSlot (directRef growth source bodyDirectBase) none
-        hcurrent (incrementStageIndex stage)
-        (by
-          simpa [currentRegisters] using
-            incrementStage_positive registers hnext)
-        (AnchoredCounterGeometry.registerValue_lt_of_layoutEnd_lt
-          currentRegisters (incrementStageIndex stage)
-          (E.core_before_limit hcurrent))
-        (by simp [currentRegisters, layoutEnd_increment])
-        (by simp [currentRegisters, layoutEnd_increment])
-        (by simp [currentRegisters, layoutEnd_increment])
-        (by
-          simpa [currentRegisters] using
-            incrementStage_move registers hnext)
-        hraw
-      have htape : installCore (registers.increment stage) growth currentTape =
-          incrementCoreTape registers growth stage T := by
-        simpa [currentRegisters, currentTape] using
-          installCore_incrementCoreTape_eq registers growth current stage T
-      rw [htape, incrementStage_finish registers
-        (current := current) (next := stage) hnext] at hrun
-      exact hrun.imp (fun hsuccess => hsuccess.1) id
-  | @cons next after target tail hafter htail ih =>
-      have hcurrentRoom : layoutEnd (registers.increment current) < limit := by
-        simpa only [layoutEnd_increment] using hroom
-      let currentRegisters := registers.increment current
-      let currentTape := incrementCoreTape registers growth current T
-      have hcurrent : E.Represents currentRegisters currentTape := by
-        simpa [currentRegisters, currentTape] using
-          E.increment current h hcurrentRoom
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, searchSlot⟩
-          (incrementStageIndex next).castSucc .left .right
-          (searchRef growth source (searchSlot + 1)) (some .left) none ∈
-            rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommandsAux]
-      have hrun := E.internal (next := registers.increment next) base c
-        source searchSlot (searchRef growth source (searchSlot + 1)) none
-        hcurrent (incrementStageIndex next)
-        (by
-          simpa [currentRegisters] using
-            incrementStage_positive registers hnext)
-        (AnchoredCounterGeometry.registerValue_lt_of_layoutEnd_lt
-          currentRegisters (incrementStageIndex next)
-          (E.core_before_limit hcurrent))
-        (by simp [currentRegisters, layoutEnd_increment])
-        (by simp [currentRegisters, layoutEnd_increment])
-        (by simp [currentRegisters, layoutEnd_increment])
-        (by
-          simpa [currentRegisters] using
-            incrementStage_move registers hnext)
-        hraw
-      have htape : installCore (registers.increment next) growth currentTape =
-          incrementCoreTape registers growth next T := by
-        simpa [currentRegisters, currentTape] using
-          installCore_incrementCoreTape_eq registers growth current next T
-      rw [htape, incrementStage_head registers
-        (current := current) (next := next) (after := after)
-        hnext hafter] at hrun
-      simp only [searchRef, CounterControlPlan.resolve] at hrun
-      have hnextCommands : ∀ raw,
-          raw ∈ incrementShiftCommandsAux growth source
-            (searchSlot + 1) false
-            ((after :: tail).map
-              (fun stage => (incrementStageIndex stage).castSucc)) →
-          raw ∈ rawCommands := by
-        intro raw hraw'
-        apply hcommands raw
-        simpa [incrementShiftCommandsAux] using List.mem_cons_of_mem _ hraw'
-      have htailRun := ih (current := next) (searchSlot := searchSlot + 1)
-        hafter hroom hnextCommands
-      exact FullTM0.ResolvesTo.trans
-        (hrun.imp (fun hsuccess => hsuccess.1) id) htailRun
-
 /-- Every collision-free increment schedule has the same controller trace
 under any increment envelope. -/
 theorem machine_reaches_incrementSchedule_or_halts_of_envelope
@@ -780,80 +658,53 @@ theorem machine_reaches_incrementSchedule_or_halts_of_envelope
       E.Represents (registers.increment stage)
         (incrementCoreTape registers growth stage T) :=
     E.increment stage h (by simpa only [layoutEnd_increment] using hroom)
-  generalize hstages : incrementStages register = stages
-  have hlabels :
-      4 :: stages.map
-          (fun stage => (incrementStageIndex stage).castSucc) =
-        MarkerShift.incrementOrder register := by
-    rw [← hstages]
-    exact incrementStages_labels register
-  have hchain : IncrementStageChain .clock register stages := by
-    rw [← hstages]
-    exact incrementStages_chain register
-  clear hstages
-  revert hlabels
-  cases hchain with
-  | done =>
-      intro hlabels
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase⟩ 4 .left .right
-          (directRef growth source bodyDirectBase) (some .left)
-          (some (directRef growth source testDirectSlot)) ∈ rawCommands := by
-        apply hcommands
-        simp [incrementShiftCommands, incrementShiftCommandsAux,
-          MarkerShift.incrementOrder]
-      simpa [MarkerSchedule.decrementStartBoundary] using
-        E.clock base c source bodySearchBase
-          (directRef growth source bodyDirectBase)
-          (some (directRef growth source testDirectSlot)) h
-          (by simpa only [layoutEnd_increment] using hroom) hraw
-  | @cons _ next _ tail hnext hrest =>
-      intro hlabels
-      have hraw : RawCommand.markerShift
-          ⟨growth, source, bodySearchBase⟩ 4 .left .right
-          (searchRef growth source (bodySearchBase + 1)) (some .left)
-          (some (directRef growth source testDirectSlot)) ∈ rawCommands := by
-        apply hcommands
-        simp only [incrementShiftCommands]
-        rw [← hlabels]
-        simp [incrementShiftCommandsAux]
-      have hclock := E.clock base c source bodySearchBase
-        (searchRef growth source (bodySearchBase + 1))
-        (some (directRef growth source testDirectSlot)) h
-        (by simpa only [layoutEnd_increment] using hroom) hraw
-      have hclock' :
-          FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-              ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
-                atLogical growth T (layoutEnd registers)⟩
-              ⟨searchState base c
-                  ⟨growth, source, bodySearchBase + 1⟩,
-                atLogical growth
-                  (incrementCoreTape registers growth .clock T)
-                  (lastGapOffset (registers.increment .clock)
-                    (incrementStageIndex next))⟩ ∨
-            FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
-              ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
-                atLogical growth T (layoutEnd registers)⟩ := by
-        cases hnext
-        simpa [searchRef, CounterControlPlan.resolve, incrementStageIndex,
-          incrementSchedule_clock_start registers] using
-          hclock.imp (fun hsuccess => hsuccess.1) id
-      have htailCommands : ∀ raw,
-          raw ∈ incrementShiftCommandsAux growth source
-            (bodySearchBase + 1) false
-            ((next :: tail).map
-              (fun stage => (incrementStageIndex stage).castSucc)) →
-          raw ∈ rawCommands := by
-        intro raw hraw'
-        apply hcommands raw
-        simp only [incrementShiftCommands]
-        rw [← hlabels]
-        exact List.mem_cons_of_mem _ hraw'
-      have htailRun := incrementEnvelopeTail base c source
-        (bodySearchBase + 1) E hnext hrest h hroom htailCommands
-      rcases FullTM0.ResolvesTo.trans hclock' htailRun with hrun | hhalts
-      · exact Or.inl ⟨hrun, hfinal register⟩
-      · exact Or.inr hhalts
+  let prefixRunner : IncrementPrefixRunner base c
+      (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+      growth registers T := {
+    stageTape := fun stage => incrementCoreTape registers growth stage T
+    pullback := FullTM0.HaltsFrom.of_reaches
+    clock := by
+      intro counterState searchSlot success collision hraw
+      exact (E.clock base c counterState searchSlot success collision h
+        (by simpa only [layoutEnd_increment] using hroom) hraw).imp
+          (fun result => result.1) id
+    internal := by
+      intro counterState searchSlot success current next hnext hraw
+      have hcurrentRoom : layoutEnd (registers.increment current) < limit := by
+        simpa only [layoutEnd_increment] using hroom
+      let currentRegisters := registers.increment current
+      let currentTape := incrementCoreTape registers growth current T
+      have hcurrent : E.Represents currentRegisters currentTape := by
+        simpa [currentRegisters, currentTape] using
+          E.increment current h hcurrentRoom
+      have hrun := E.internal (next := registers.increment next) base c
+        counterState searchSlot success none hcurrent
+        (incrementStageIndex next)
+        (by
+          simpa [currentRegisters] using
+            incrementStage_positive registers hnext)
+        (AnchoredCounterGeometry.registerValue_lt_of_layoutEnd_lt
+          currentRegisters (incrementStageIndex next)
+          (E.core_before_limit hcurrent))
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by simp [currentRegisters, layoutEnd_increment])
+        (by
+          simpa [currentRegisters] using
+            incrementStage_move registers hnext)
+        hraw
+      have htape : installCore (registers.increment next) growth currentTape =
+          incrementCoreTape registers growth next T := by
+        simpa [currentRegisters, currentTape] using
+          installCore_incrementCoreTape_eq registers growth current next T
+      rw [htape] at hrun
+      exact hrun.imp (fun result => result.1) id }
+  rcases machine_reaches_incrementPrefix_with base c
+      (FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c))
+      prefixRunner source register hcommands with hrun | hhalts
+  · exact Or.inl ⟨hrun, hfinal register⟩
+  · exact Or.inr hhalts
+
 /-- Every shift in a collision-free increment schedule resolves on an open
 core.  The arbitrary finite `limit` used by the converse Basic Lemma is chosen
 past the updated core; it is not asserted to contain a target. -/
