@@ -43,6 +43,12 @@ def lastRouteTarget (current : MarkerValidation.Leg)
     lastRouteTarget current [] = current.target := by
   rfl
 
+@[simp] theorem lastRouteTarget_cons (current next : MarkerValidation.Leg)
+    (rest : List MarkerValidation.Leg) :
+    lastRouteTarget current (next :: rest) =
+      lastRouteTarget next rest := by
+  simp [lastRouteTarget]
+
 /-- A complete nonempty route trace finishes on its final labelled target. -/
 theorem routeGaps_finish_read
     {growth : Turing.Dir} {route : List MarkerValidation.Leg}

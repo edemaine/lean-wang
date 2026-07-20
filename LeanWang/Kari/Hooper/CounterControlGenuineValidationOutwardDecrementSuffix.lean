@@ -167,6 +167,16 @@ private theorem roundtripToFourToBoundary
   rw [toBoundary_four_eq_returnRoute hsource inwardShape] at inward
   exact roundtripToFour outwardShape start_read outward inward
 
+private theorem toBoundary_lastRouteTarget
+    {source target : Fin 5} {route : List MarkerValidation.Leg}
+    (shape : ToBoundary source target route)
+    (current : MarkerValidation.Leg) (hcurrent : current.target = source) :
+    CounterControlDecrementEntry.lastRouteTarget current route = target := by
+  induction shape generalizing current with
+  | here => simpa using hcurrent
+  | step i tail ih =>
+      simpa using ih ⟨i.castSucc, .left⟩ rfl
+
 /-- Exact preserving route from the boundary-`4` body entry to the boundary
 immediately after the selected register.  For the clock this route is empty.
 -/
@@ -239,6 +249,53 @@ private theorem routeContinuation_mem
     growth hrule
   simp [directRulesForRule, decrementRules, hmem]
 
+/-- Every non-clock decrement enters the first inward body search one cell
+inside boundary `4`. -/
+private theorem reaches_bodyFirstSearch
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    (suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive))
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (hregister : register ≠ .clock) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
+        suffix.progress.suffix.finish.move (orient growth .left)⟩ := by
+  let rule : RawDirectRule :=
+    ⟨growth, directRef growth source bodyDirectBase, .boundary 4,
+      searchRef growth source bodySearchBase, .left⟩
+  have hruleMem : rule ∈ rawDirectRules := by
+    simpa [rule] using
+      routeEntryRule_mem growth source register ifZero ifPositive hrule
+        hregister
+  have hmatch : rule.read.Matches suffix.progress.suffix.finish.read := by
+    simpa [rule, RawRead.Matches] using suffix.finish_read
+  have hlocal := CounterControlDirectSemantics.reaches_directRule
+    base c rule hruleMem suffix.progress.suffix.finish hmatch
+  have hlocal' : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      ⟨resolve base c (directRef growth source bodyDirectBase),
+        suffix.progress.suffix.finish⟩
+      ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
+        suffix.progress.suffix.finish.move (orient growth .left)⟩ := by
+    change FullTM0.Reaches
+      (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
+    simpa [rule, searchRef, resolve] using hlocal
+  have hbody : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨resolve base c (directRef growth source bodyDirectBase),
+        suffix.progress.suffix.finish⟩ := by
+    cases register with
+    | left | right | temp =>
+        simpa [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
+          using suffix.reaches_bodyEntry
+    | clock => exact False.elim (hregister rfl)
+  exact hbody.trans hlocal'
+
 /-- Execute the whole route from an arbitrary outward validation suffix.
 The proof separates the empty clock route from the three routes whose first
 leg searches inward for boundary `3`. -/
@@ -256,134 +313,50 @@ theorem bodyRouteEnd_of_immortal
       (CounterControlNestingBridge.machine base c) (foundCfg current)) :
     Nonempty (BodyRouteEnd current growth source register ifZero ifPositive
       suffix) := by
-  cases register with
-  | clock =>
-      refine ⟨⟨suffix.progress.suffix.finish, ?_, ?_, ?_⟩⟩
-      · exact .nil _
-      · simpa [MarkerSchedule.decrementStartBoundary] using
-          suffix.finish_read
-      · simpa [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
-          using suffix.reaches_bodyEntry
-  | left =>
-      let entryRule : RawDirectRule :=
-        ⟨growth, directRef growth source bodyDirectBase, .boundary 4,
-          searchRef growth source bodySearchBase, .left⟩
-      have hentryRule : entryRule ∈ rawDirectRules := by
-        exact routeEntryRule_mem growth source .left ifZero ifPositive hrule
-          (by decide)
-      have hmatch : entryRule.read.Matches
-          suffix.progress.suffix.finish.read := by
-        simpa [entryRule, RawRead.Matches] using suffix.finish_read
-      have hentryLocal := CounterControlDirectSemantics.reaches_directRule
-        base c entryRule hentryRule suffix.progress.suffix.finish hmatch
-      have hentryDirect : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c (directRef growth source bodyDirectBase),
-            suffix.progress.suffix.finish⟩
-          ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
-            suffix.progress.suffix.finish.move (orient growth .left)⟩ := by
-        change FullTM0.Reaches
-          (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-        simpa [entryRule, searchRef, resolve] using hentryLocal
-      have hbody : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c) (foundCfg current)
-          ⟨resolve base c (directRef growth source bodyDirectBase),
-            suffix.progress.suffix.finish⟩ := by
-        simpa [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
-          using suffix.reaches_bodyEntry
-      have hentry := hbody.trans hentryDirect
-      rcases CounterControlValidationMortality.reaches_routeGaps_of_immortal
-          base c hmortal himmortal growth source bodySearchBase
-          (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-          ⟨3, .left⟩ [⟨2, .left⟩, ⟨1, .left⟩]
-          (suffix.progress.suffix.finish.move (orient growth .left)) hentry
-          (routeCommand_mem growth source .left ifZero ifPositive hrule)
-          (routeContinuation_mem growth source .left ifZero ifPositive hrule)
-        with ⟨finish, trace, reaches⟩
-      refine ⟨⟨finish, .cons ⟨3, .left⟩ [⟨2, .left⟩, ⟨1, .left⟩]
-        suffix.progress.suffix.finish finish trace, ?_, reaches⟩⟩
-      exact CounterControlDecrementEntry.routeGaps_finish_read trace
-        (by simp)
-  | right =>
-      let entryRule : RawDirectRule :=
-        ⟨growth, directRef growth source bodyDirectBase, .boundary 4,
-          searchRef growth source bodySearchBase, .left⟩
-      have hentryRule : entryRule ∈ rawDirectRules := by
-        exact routeEntryRule_mem growth source .right ifZero ifPositive hrule
-          (by decide)
-      have hmatch : entryRule.read.Matches
-          suffix.progress.suffix.finish.read := by
-        simpa [entryRule, RawRead.Matches] using suffix.finish_read
-      have hentryLocal := CounterControlDirectSemantics.reaches_directRule
-        base c entryRule hentryRule suffix.progress.suffix.finish hmatch
-      have hentryDirect : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c (directRef growth source bodyDirectBase),
-            suffix.progress.suffix.finish⟩
-          ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
-            suffix.progress.suffix.finish.move (orient growth .left)⟩ := by
-        change FullTM0.Reaches
-          (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-        simpa [entryRule, searchRef, resolve] using hentryLocal
-      have hbody : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c) (foundCfg current)
-          ⟨resolve base c (directRef growth source bodyDirectBase),
-            suffix.progress.suffix.finish⟩ := by
-        simpa [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
-          using suffix.reaches_bodyEntry
-      have hentry := hbody.trans hentryDirect
-      rcases CounterControlValidationMortality.reaches_routeGaps_of_immortal
-          base c hmortal himmortal growth source bodySearchBase
-          (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-          ⟨3, .left⟩ [⟨2, .left⟩]
-          (suffix.progress.suffix.finish.move (orient growth .left)) hentry
-          (routeCommand_mem growth source .right ifZero ifPositive hrule)
-          (routeContinuation_mem growth source .right ifZero ifPositive hrule)
-        with ⟨finish, trace, reaches⟩
-      refine ⟨⟨finish, .cons ⟨3, .left⟩ [⟨2, .left⟩]
-        suffix.progress.suffix.finish finish trace, ?_, reaches⟩⟩
-      exact CounterControlDecrementEntry.routeGaps_finish_read trace
-        (by simp)
-  | temp =>
-      let entryRule : RawDirectRule :=
-        ⟨growth, directRef growth source bodyDirectBase, .boundary 4,
-          searchRef growth source bodySearchBase, .left⟩
-      have hentryRule : entryRule ∈ rawDirectRules := by
-        exact routeEntryRule_mem growth source .temp ifZero ifPositive hrule
-          (by decide)
-      have hmatch : entryRule.read.Matches
-          suffix.progress.suffix.finish.read := by
-        simpa [entryRule, RawRead.Matches] using suffix.finish_read
-      have hentryLocal := CounterControlDirectSemantics.reaches_directRule
-        base c entryRule hentryRule suffix.progress.suffix.finish hmatch
-      have hentryDirect : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c)
-          ⟨resolve base c (directRef growth source bodyDirectBase),
-            suffix.progress.suffix.finish⟩
-          ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
-            suffix.progress.suffix.finish.move (orient growth .left)⟩ := by
-        change FullTM0.Reaches
-          (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-        simpa [entryRule, searchRef, resolve] using hentryLocal
-      have hbody : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c) (foundCfg current)
-          ⟨resolve base c (directRef growth source bodyDirectBase),
-            suffix.progress.suffix.finish⟩ := by
-        simpa [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
-          using suffix.reaches_bodyEntry
-      have hentry := hbody.trans hentryDirect
-      rcases CounterControlValidationMortality.reaches_routeGaps_of_immortal
-          base c hmortal himmortal growth source bodySearchBase
-          (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-          ⟨3, .left⟩ []
-          (suffix.progress.suffix.finish.move (orient growth .left)) hentry
-          (routeCommand_mem growth source .temp ifZero ifPositive hrule)
-          (routeContinuation_mem growth source .temp ifZero ifPositive hrule)
-        with ⟨finish, trace, reaches⟩
-      refine ⟨⟨finish, .cons ⟨3, .left⟩ []
-        suffix.progress.suffix.finish finish trace, ?_, reaches⟩⟩
-      exact CounterControlDecrementEntry.routeGaps_finish_read trace
-        (by simp)
+  by_cases hclock : register = .clock
+  · subst register
+    refine ⟨⟨suffix.progress.suffix.finish, .nil _, ?_, ?_⟩⟩
+    · simpa [MarkerSchedule.decrementStartBoundary] using suffix.finish_read
+    · simpa [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
+        using suffix.reaches_bodyEntry
+  · have hshape :=
+      CounterControlGuardedInwardRouteMargin.routeToDecrementStart_toBoundary
+        register
+    have htarget : (4 : Fin 5) ≠
+        MarkerSchedule.decrementStartBoundary register := by
+      cases register <;>
+        simp_all [MarkerSchedule.decrementStartBoundary]
+    rcases hshape.uncons htarget with ⟨i, rest, hi, hroute, _tail⟩
+    have hi' : i = (3 : Fin 4) := by
+      apply Fin.ext
+      have hval := congrArg Fin.val hi
+      simp at hval ⊢
+      omega
+    subst i
+    have hentry := reaches_bodyFirstSearch suffix hrule hclock
+    rcases CounterControlValidationMortality.reaches_routeGaps_of_immortal
+        base c hmortal himmortal growth source bodySearchBase
+        (bodyDirectBase + 1) (directRef growth source testDirectSlot)
+        ⟨3, .left⟩ rest
+        (suffix.progress.suffix.finish.move (orient growth .left)) hentry
+        (fun raw hraw => routeCommand_mem growth source register ifZero
+          ifPositive hrule raw (by rw [hroute]; exact hraw))
+        (fun rule hmem => routeContinuation_mem growth source register ifZero
+          ifPositive hrule rule (by rw [hroute]; exact hmem)) with
+      ⟨finish, trace, reaches⟩
+    have tailGaps : RouteTailGaps growth
+        (AnchoredCounterGeometry.routeToDecrementStart register)
+        suffix.progress.suffix.finish finish := by
+      rw [hroute]
+      exact .cons ⟨3, .left⟩ rest _ _ trace
+    have hfinish := CounterControlDecrementEntry.routeTailGaps_finish_read
+      tailGaps ⟨4, .left⟩ suffix.finish_read
+    have hlast : CounterControlDecrementEntry.lastRouteTarget ⟨4, .left⟩
+        (AnchoredCounterGeometry.routeToDecrementStart register) =
+          MarkerSchedule.decrementStartBoundary register :=
+      toBoundary_lastRouteTarget hshape ⟨4, .left⟩ rfl
+    rw [hlast] at hfinish
+    exact ⟨⟨finish, tailGaps, hfinish, reaches⟩⟩
 
 /-- If the original outward caller found the boundary where the decrement
 body route ends, the outward and inward preserving routes cancel exactly.
@@ -1277,53 +1250,6 @@ theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
   exact ⟨outwardHandoff_of_monotone hreachesNext (by simp [next]) outcome⟩
 
 /-! ## Re-entering a later inward body search -/
-
-/-- Every non-clock decrement enters the first inward body search one cell
-inside boundary `4`. -/
-private theorem reaches_bodyFirstSearch
-    {base : Nat} {c : Nat.Partrec.Code}
-    {current : GenuineSearch base c}
-    {growth : Turing.Dir} {source : Nat} {register : Register}
-    {ifZero ifPositive : Nat}
-    (suffix : Suffix current growth source
-      (.decrement register ifZero ifPositive))
-    (hrule : (source, .decrement register ifZero ifPositive) ∈
-      GlobalSourceProgram.program)
-    (hregister : register ≠ .clock) :
-    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
-      (foundCfg current)
-      ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
-        suffix.progress.suffix.finish.move (orient growth .left)⟩ := by
-  let rule : RawDirectRule :=
-    ⟨growth, directRef growth source bodyDirectBase, .boundary 4,
-      searchRef growth source bodySearchBase, .left⟩
-  have hruleMem : rule ∈ rawDirectRules := by
-    simpa [rule] using
-      routeEntryRule_mem growth source register ifZero ifPositive hrule
-        hregister
-  have hmatch : rule.read.Matches suffix.progress.suffix.finish.read := by
-    simpa [rule, RawRead.Matches] using suffix.finish_read
-  have hlocal := CounterControlDirectSemantics.reaches_directRule
-    base c rule hruleMem suffix.progress.suffix.finish hmatch
-  have hlocal' : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      ⟨resolve base c (directRef growth source bodyDirectBase),
-        suffix.progress.suffix.finish⟩
-      ⟨searchState base c ⟨growth, source, bodySearchBase⟩,
-        suffix.progress.suffix.finish.move (orient growth .left)⟩ := by
-    change FullTM0.Reaches
-      (FiniteTM0.machine (CounterControlPlan.table base c)) _ _
-    simpa [rule, searchRef, resolve] using hlocal
-  have hbody : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) (foundCfg current)
-      ⟨resolve base c (directRef growth source bodyDirectBase),
-        suffix.progress.suffix.finish⟩ := by
-    cases register with
-    | left | right | temp =>
-        simpa [bodyEntry, AnchoredCounterGeometry.routeToDecrementStart]
-          using suffix.reaches_bodyEntry
-    | clock => exact False.elim (hregister rfl)
-  exact hbody.trans hlocal'
 
 /-- Once a later genuine body-route search has been reached with at least
 the original caller's distance, the existing total decrement-entry
