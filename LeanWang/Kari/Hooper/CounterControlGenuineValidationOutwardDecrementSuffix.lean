@@ -1285,6 +1285,151 @@ private theorem outwardHandoff_of_decrementEntrySearch
   exact ⟨outwardHandoff_of_monotone (hreaches.trans hfound) hdistance
     outcome⟩
 
+/-- Execute one inward preserving search and cancel it against the matching
+retained outward leg.  The following inward search then starts one cell
+beyond the original source boundary. -/
+private theorem reaches_nextBodySearch_after_reverseLeg
+    (base : Nat) (c : Nat.Partrec.Code)
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source searchSlot directSlot nextSearchSlot : Nat}
+    {sourceBoundary targetBoundary : Fin 5}
+    {start top : FullTM0.Tape (Symbol numTags)} {distance : Nat}
+    (start_read : start.read = boundarySymbol sourceBoundary)
+    (outwardGap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary targetBoundary).Matches
+      (start.move (orient growth .right)) (orient growth .right) distance)
+    (top_eq : top =
+      (start.move (orient growth .right)).moveN
+        (orient growth .right) distance)
+    (hraw : RawCommand.boundaryNavigation
+      ⟨growth, source, searchSlot⟩ sourceBoundary .left
+      (directRef growth source directSlot) .preserve ∈ rawCommands)
+    (hcontinuation : RawDirectRule.mk growth
+      (directRef growth source directSlot) (.boundary sourceBoundary)
+      (searchRef growth source nextSearchSlot) .left ∈ rawDirectRules)
+    (hreach : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨searchState base c ⟨growth, source, searchSlot⟩,
+        top.move (orient growth .left)⟩)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    FullTM0.Reaches (CounterControlNestingBridge.machine base c)
+      (foundCfg current)
+      ⟨searchState base c ⟨growth, source, nextSearchSlot⟩,
+        start.move (orient growth .left)⟩ := by
+  rcases
+      CounterControlArbitraryMortality.reaches_nextSearch_of_immortal_boundary_preserve
+        base c hmortal himmortal ⟨growth, source, searchSlot⟩ sourceBoundary
+        .left (directRef growth source directSlot)
+        ⟨growth, source, nextSearchSlot⟩ .left hraw hcontinuation
+        (top.move (orient growth .left)) hreach with
+    ⟨reverseDistance, reverseGap, hnext⟩
+  have hreturned :
+      ((top.move (orient growth .left)).moveN
+        (orient growth .left) reverseDistance) = start := by
+    have hopposite : NestingMachine.opposite (orient growth .right) =
+        orient growth .left := by
+      cases growth <;> rfl
+    apply CounterControlRouteRoundtrip.reverseRouteLeg_found_eq start_read
+      outwardGap
+    · rw [hopposite, ← top_eq]
+      exact reverseGap
+    · rw [hopposite, ← top_eq]
+  rw [hreturned] at hnext
+  exact hnext
+
+/-- Turn a body-route search re-entered immediately behind the original
+outward boundary into the instruction-wide monotone handoff. -/
+private theorem outwardHandoff_of_reenteredBodySearch
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current : GenuineSearch base c}
+    {growth : Turing.Dir} {source searchSlot : Nat} {register : Register}
+    {ifZero ifPositive : Nat}
+    {suffix : Suffix current growth source
+      (.decrement register ifZero ifPositive)}
+    {obligation : OutwardObligation current growth source
+      (.decrement register ifZero ifPositive)}
+    (hmortal : ¬ DominoProblem.FixedNonhalting c)
+    (hrule : (source, .decrement register ifZero ifPositive) ∈
+      GlobalSourceProgram.program)
+    (target : Fin 5) (success : ControlRef)
+    (hrawRoute : RawCommand.boundaryNavigation
+      ⟨growth, source, searchSlot⟩ target .left success .preserve ∈
+      routeCommandsAux growth source bodySearchBase (bodyDirectBase + 1)
+        (directRef growth source testDirectSlot)
+        (AnchoredCounterGeometry.routeToDecrementStart register))
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨searchState base c ⟨growth, source, searchSlot⟩,
+        current.foundTape.move (orient growth .left)⟩)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current)) :
+    Nonempty (OutwardInstructionHandoff current obligation) := by
+  let raw : RawCommand := .boundaryNavigation
+    ⟨growth, source, searchSlot⟩ target .left success .preserve
+  have hraw : raw ∈ rawCommands := by
+    apply routeCommand_mem growth source register ifZero ifPositive hrule
+    simpa [raw] using hrawRoute
+  have himmortalSearch := FullTM0.ImmortalFrom.of_reaches himmortal hreaches
+  rcases CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
+      base c hmortal ⟨growth, source, searchSlot⟩ target .left success
+      .preserve hraw (current.foundTape.move (orient growth .left))
+      himmortalSearch with
+    ⟨distance, gap⟩
+  let next : GenuineSearch base c := {
+    search := CounterControlCommandAt.rawTag raw hraw
+    outer := current.foundTape.move (orient growth .left)
+    distance := distance
+    gap := by
+      rw [show command base c (CounterControlCommandAt.rawTag raw hraw) =
+          CounterControlCommandAt.compileRawCommand base c raw hraw by rfl,
+        CounterControlCommandAt.compileRawCommand_spec]
+      simpa [raw, CounterControlCommandAt.compileRawAtTag,
+        Command.target, Command.searchDirection,
+        compileNavigationAction] using gap }
+  have hnextCfg : next.cfg =
+      ⟨searchState base c ⟨growth, source, searchSlot⟩,
+        current.foundTape.move (orient growth .left)⟩ := by
+    change (searchSystem base c).startCfg
+      (CounterControlCommandAt.rawTag raw hraw)
+      (current.foundTape.move (orient growth .left)) = _
+    change (⟨CounterControlSearchSystem.commandOffset base c
+        (CounterControlCommandAt.rawTag raw hraw),
+      current.foundTape.move (orient growth .left)⟩ :
+        FullTM0.Cfg (Symbol numTags) FiniteTM0.State) = _
+    unfold CounterControlSearchSystem.commandOffset
+    rw [CounterControlCommandAt.rawCommands_get_rawTag raw hraw]
+    rfl
+  have hnextRaw : next.selectedRaw = raw :=
+    CounterControlCommandAt.rawCommands_get_rawTag raw hraw
+  have hcommand : next.selectedRaw ∈
+      routeCommandsAux growth source bodySearchBase (bodyDirectBase + 1)
+        (directRef growth source testDirectSlot)
+        (AnchoredCounterGeometry.routeToDecrementStart register) := by
+    rw [hnextRaw]
+    exact hrawRoute
+  have hopposite : NestingMachine.opposite (orient growth .right) =
+      orient growth .left := by
+    cases growth <;> rfl
+  have hreverse : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches
+      ((current.outer.moveN (orient growth .right) current.distance).move
+        (NestingMachine.opposite (orient growth .right)))
+      (NestingMachine.opposite (orient growth .right)) distance := by
+    rw [hopposite, suffix.current_foundTape]
+    exact gap
+  have hdistance : current.distance ≤ distance :=
+    CounterControlInwardValidationReplay.reverseBoundaryGap_distance_ge
+      suffix.current_gap hreverse
+  have hreachesNext : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      next.cfg := by
+    rw [hnextCfg]
+    exact hreaches
+  apply outwardHandoff_of_decrementEntrySearch hmortal hrule hcommand
+    hreachesNext (by simpa [next] using hdistance) himmortal
+
 /-- If the original caller found boundary `3` and the decrement continues
 inward, the first body search returns exactly to that boundary.  Its direct
 continuation therefore exposes a reverse search starting one cell behind
@@ -1320,14 +1465,6 @@ private theorem outwardHandoff_of_boundaryThree_core
       (CounterControlNestingBridge.machine base c) (foundCfg current)) :
     Nonempty (OutwardInstructionHandoff current obligation) := by
   have hfirst := reaches_bodyFirstSearch suffix hrule hregister
-  rcases
-      CounterControlArbitraryMortality.reaches_nextSearch_of_immortal_boundary_preserve
-        base c hmortal himmortal ⟨growth, source, bodySearchBase⟩ 3 .left
-        (directRef growth source (bodyDirectBase + 1))
-        ⟨growth, source, bodySearchBase + 1⟩ .left hrawFirst
-        hcontinuation (suffix.progress.suffix.finish.move
-          (orient growth .left)) hfirst with
-    ⟨reverseDistance, reverseGap, hsecond⟩
   have htoFour : ToFour 3 suffix.progress.suffix.remaining := by
     simpa [hindex] using suffix.remaining_toFour
   have hremaining := toFour_three htoFour
@@ -1337,88 +1474,10 @@ private theorem outwardHandoff_of_boundaryThree_core
   have htop := routeTail_nil_finish outwardTail
   have hread : current.foundTape.read = boundarySymbol 3 := by
     simpa [hindex] using suffix.current_read
-  have hreturned :
-      ((suffix.progress.suffix.finish.move (orient growth .left)).moveN
-        (orient growth .left) reverseDistance) = current.foundTape := by
-    have hopposite : NestingMachine.opposite (orient growth .right) =
-        orient growth .left := by
-      cases growth <;> rfl
-    apply CounterControlRouteRoundtrip.reverseRouteLeg_found_eq hread
-      outwardGap
-    · rw [hopposite, ← htop]
-      exact reverseGap
-    · rw [hopposite, ← htop]
-  let raw : RawCommand := .boundaryNavigation
-    ⟨growth, source, bodySearchBase + 1⟩ 2 .left
-    secondSuccess .preserve
-  have hraw : raw ∈ rawCommands := by
-    apply routeCommand_mem growth source register ifZero ifPositive hrule
-    simpa [raw] using hrawSecondRoute
-  have hsecond' : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) (foundCfg current)
-      ⟨searchState base c ⟨growth, source, bodySearchBase + 1⟩,
-        current.foundTape.move (orient growth .left)⟩ := by
-    rw [hreturned] at hsecond
-    exact hsecond
-  have himmortalSecond := FullTM0.ImmortalFrom.of_reaches himmortal hsecond'
-  rcases CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
-      base c hmortal ⟨growth, source, bodySearchBase + 1⟩ 2 .left
-      secondSuccess .preserve hraw
-      (current.foundTape.move (orient growth .left))
-      himmortalSecond with
-    ⟨distance, gap⟩
-  let next : GenuineSearch base c := {
-    search := CounterControlCommandAt.rawTag raw hraw
-    outer := current.foundTape.move (orient growth .left)
-    distance := distance
-    gap := by
-      rw [show command base c (CounterControlCommandAt.rawTag raw hraw) =
-          CounterControlCommandAt.compileRawCommand base c raw hraw by rfl,
-        CounterControlCommandAt.compileRawCommand_spec]
-      simpa [raw, CounterControlCommandAt.compileRawAtTag,
-        Command.target, Command.searchDirection,
-        compileNavigationAction] using gap }
-  have hnextCfg : next.cfg =
-      ⟨searchState base c ⟨growth, source, bodySearchBase + 1⟩,
-        current.foundTape.move (orient growth .left)⟩ := by
-    change (searchSystem base c).startCfg
-      (CounterControlCommandAt.rawTag raw hraw)
-      (current.foundTape.move (orient growth .left)) = _
-    change (⟨CounterControlSearchSystem.commandOffset base c
-        (CounterControlCommandAt.rawTag raw hraw),
-      current.foundTape.move (orient growth .left)⟩ :
-        FullTM0.Cfg (Symbol numTags) FiniteTM0.State) = _
-    unfold CounterControlSearchSystem.commandOffset
-    rw [CounterControlCommandAt.rawCommands_get_rawTag raw hraw]
-    rfl
-  have hnextRaw : next.selectedRaw = raw := by
-    exact CounterControlCommandAt.rawCommands_get_rawTag raw hraw
-  have hcommand : next.selectedRaw ∈
-      routeCommandsAux growth source bodySearchBase (bodyDirectBase + 1)
-        (directRef growth source testDirectSlot)
-        (AnchoredCounterGeometry.routeToDecrementStart register) := by
-    rw [hnextRaw]
-    exact hrawSecondRoute
-  have hopposite : NestingMachine.opposite (orient growth .right) =
-      orient growth .left := by
-    cases growth <;> rfl
-  have hreverse : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary (2 : Fin 5)).Matches
-      ((current.outer.moveN (orient growth .right) current.distance).move
-        (NestingMachine.opposite (orient growth .right)))
-      (NestingMachine.opposite (orient growth .right)) distance := by
-    rw [hopposite, suffix.current_foundTape]
-    exact gap
-  have hdistance : current.distance ≤ distance :=
-    CounterControlInwardValidationReplay.reverseBoundaryGap_distance_ge
-      suffix.current_gap hreverse
-  have hreachesNext : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c) (foundCfg current)
-      next.cfg := by
-    rw [hnextCfg]
-    exact hsecond'
-  apply outwardHandoff_of_decrementEntrySearch hmortal hrule hcommand
-    hreachesNext (by simpa [next] using hdistance) himmortal
+  have hsecond := reaches_nextBodySearch_after_reverseLeg base c hmortal
+    hread outwardGap htop hrawFirst hcontinuation hfirst himmortal
+  exact outwardHandoff_of_reenteredBodySearch (suffix := suffix) hmortal hrule
+    2 secondSuccess hrawSecondRoute hsecond himmortal
 
 /-- Boundary-`3` callers are strictly beyond the decrement start only for
 the left and right registers; instantiate the common reverse-search proof
@@ -1527,14 +1586,6 @@ private theorem outwardHandoff_of_boundaryTwo_beforeStart
           hrule
         rw [hrouteEq]
         simp [routeContinuationRules, routeContinuationRulesFrom]
-      rcases
-          CounterControlArbitraryMortality.reaches_nextSearch_of_immortal_boundary_preserve
-            base c hmortal himmortal ⟨growth, source, bodySearchBase⟩ 3
-            .left (directRef growth source (bodyDirectBase + 1))
-            ⟨growth, source, bodySearchBase + 1⟩ .left hrawFirst
-            hcontinuationFirst (suffix.progress.suffix.finish.move
-              (orient growth .left)) hfirst with
-        ⟨reverseThreeDistance, reverseThreeGap, hsecond⟩
       have htoFour : ToFour 2 suffix.progress.suffix.remaining := by
         simpa [hindex] using suffix.remaining_toFour
       have hremaining := toFour_two htoFour
@@ -1551,25 +1602,10 @@ private theorem outwardHandoff_of_boundaryTwo_beforeStart
       have hreadThree : foundThree.read = boundarySymbol 3 := by
         simpa [foundThree, Target.Matches, FullTM0.Tape.read_moveN] using
           outwardThreeGap.marked
-      have hreturnedThree :
-          ((suffix.progress.suffix.finish.move (orient growth .left)).moveN
-            (orient growth .left) reverseThreeDistance) = foundThree := by
-        have hopposite : NestingMachine.opposite (orient growth .right) =
-            orient growth .left := by
-          cases growth <;> rfl
-        apply CounterControlRouteRoundtrip.reverseRouteLeg_found_eq
-          hreadThree outwardFourGap
-        · rw [hopposite, ← htop]
-          simpa [foundThree] using reverseThreeGap
-        · rw [hopposite, ← htop]
-      have hsecond' : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c) (foundCfg current)
-          ⟨searchState base c ⟨growth, source, bodySearchBase + 1⟩,
-            foundThree.move (orient growth .left)⟩ := by
-        rw [hreturnedThree] at hsecond
-        exact hsecond
-      have himmortalSecond := FullTM0.ImmortalFrom.of_reaches himmortal
-        hsecond'
+      have hsecond := reaches_nextBodySearch_after_reverseLeg base c hmortal
+        hreadThree (by simpa [foundThree] using outwardFourGap)
+        (by simpa [foundThree] using htop) hrawFirst hcontinuationFirst
+        hfirst himmortal
       have hrawSecond : RawCommand.boundaryNavigation
           ⟨growth, source, bodySearchBase + 1⟩ 2 .left
           (directRef growth source (bodyDirectBase + 2)) .preserve ∈
@@ -1585,113 +1621,22 @@ private theorem outwardHandoff_of_boundaryTwo_beforeStart
           hrule
         rw [hrouteEq]
         simp [routeContinuationRules, routeContinuationRulesFrom]
-      rcases
-          CounterControlArbitraryMortality.reaches_nextSearch_of_immortal_boundary_preserve
-            base c hmortal himmortalSecond
-            ⟨growth, source, bodySearchBase + 1⟩ 2 .left
-            (directRef growth source (bodyDirectBase + 2))
-            ⟨growth, source, bodySearchBase + 2⟩ .left hrawSecond
-            hcontinuationSecond (foundThree.move (orient growth .left))
-            (Relation.ReflTransGen.refl) with
-        ⟨reverseTwoDistance, reverseTwoGap, hthirdLocal⟩
-      have hthird : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c) (foundCfg current)
-          ⟨searchState base c ⟨growth, source, bodySearchBase + 2⟩,
-            ((foundThree.move (orient growth .left)).moveN
-              (orient growth .left) reverseTwoDistance).move
-                (orient growth .left)⟩ :=
-        hsecond'.trans hthirdLocal
       have hreadTwo : current.foundTape.read = boundarySymbol 2 := by
         simpa [hindex] using suffix.current_read
-      have hreturnedTwo :
-          ((foundThree.move (orient growth .left)).moveN
-            (orient growth .left) reverseTwoDistance) = current.foundTape := by
-        have hopposite : NestingMachine.opposite (orient growth .right) =
-            orient growth .left := by
-          cases growth <;> rfl
-        apply CounterControlRouteRoundtrip.reverseRouteLeg_found_eq hreadTwo
-          outwardThreeGap
-        · rw [hopposite]
-          simpa [foundThree] using reverseTwoGap
-        · rw [hopposite]
-      have hthird' : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c) (foundCfg current)
-          ⟨searchState base c ⟨growth, source, bodySearchBase + 2⟩,
-            current.foundTape.move (orient growth .left)⟩ := by
-        rw [hreturnedTwo] at hthird
-        exact hthird
-      have himmortalThird := FullTM0.ImmortalFrom.of_reaches himmortal
-        hthird'
-      let raw : RawCommand := .boundaryNavigation
-        ⟨growth, source, bodySearchBase + 2⟩ 1 .left
-        (directRef growth source testDirectSlot) .preserve
-      have hrawRoute : raw ∈ routeCommandsAux growth source bodySearchBase
-          (bodyDirectBase + 1) (directRef growth source testDirectSlot)
-          (AnchoredCounterGeometry.routeToDecrementStart .left) := by
+      have hthird := reaches_nextBodySearch_after_reverseLeg base c hmortal
+        hreadTwo outwardThreeGap (by rfl) hrawSecond hcontinuationSecond
+        hsecond himmortal
+      have hrawThirdRoute : RawCommand.boundaryNavigation
+          ⟨growth, source, bodySearchBase + 2⟩ 1 .left
+          (directRef growth source testDirectSlot) .preserve ∈
+            routeCommandsAux growth source bodySearchBase
+              (bodyDirectBase + 1) (directRef growth source testDirectSlot)
+              (AnchoredCounterGeometry.routeToDecrementStart .left) := by
         rw [hrouteEq]
-        simp [raw, routeCommandsAux]
-      have hraw : raw ∈ rawCommands := by
-        apply routeCommand_mem growth source .left ifZero ifPositive hrule
-        exact hrawRoute
-      rcases
-          CounterControlGeneratedSearchGap.boundaryNavigation_gap_of_immortal
-            base c hmortal ⟨growth, source, bodySearchBase + 2⟩ 1 .left
-            (directRef growth source testDirectSlot) .preserve hraw
-            (current.foundTape.move (orient growth .left)) himmortalThird with
-        ⟨distance, gap⟩
-      let next : GenuineSearch base c := {
-        search := CounterControlCommandAt.rawTag raw hraw
-        outer := current.foundTape.move (orient growth .left)
-        distance := distance
-        gap := by
-          rw [show command base c (CounterControlCommandAt.rawTag raw hraw) =
-              CounterControlCommandAt.compileRawCommand base c raw hraw by
-                rfl,
-            CounterControlCommandAt.compileRawCommand_spec]
-          simpa [raw, CounterControlCommandAt.compileRawAtTag,
-            Command.target, Command.searchDirection,
-            compileNavigationAction] using gap }
-      have hnextCfg : next.cfg =
-          ⟨searchState base c ⟨growth, source, bodySearchBase + 2⟩,
-            current.foundTape.move (orient growth .left)⟩ := by
-        change (searchSystem base c).startCfg
-          (CounterControlCommandAt.rawTag raw hraw)
-          (current.foundTape.move (orient growth .left)) = _
-        change (⟨CounterControlSearchSystem.commandOffset base c
-            (CounterControlCommandAt.rawTag raw hraw),
-          current.foundTape.move (orient growth .left)⟩ :
-            FullTM0.Cfg (Symbol numTags) FiniteTM0.State) = _
-        unfold CounterControlSearchSystem.commandOffset
-        rw [CounterControlCommandAt.rawCommands_get_rawTag raw hraw]
-        rfl
-      have hnextRaw : next.selectedRaw = raw :=
-        CounterControlCommandAt.rawCommands_get_rawTag raw hraw
-      have hcommand : next.selectedRaw ∈
-          routeCommandsAux growth source bodySearchBase (bodyDirectBase + 1)
-            (directRef growth source testDirectSlot)
-            (AnchoredCounterGeometry.routeToDecrementStart .left) := by
-        rw [hnextRaw]
-        exact hrawRoute
-      have hopposite : NestingMachine.opposite (orient growth .right) =
-          orient growth .left := by
-        cases growth <;> rfl
-      have hreverse : SearchGap (fun symbol => symbol = blankSymbol)
-          (Target.boundary (1 : Fin 5)).Matches
-          ((current.outer.moveN (orient growth .right) current.distance).move
-            (NestingMachine.opposite (orient growth .right)))
-          (NestingMachine.opposite (orient growth .right)) distance := by
-        rw [hopposite, suffix.current_foundTape]
-        exact gap
-      have hdistance : current.distance ≤ distance :=
-        CounterControlInwardValidationReplay.reverseBoundaryGap_distance_ge
-          suffix.current_gap hreverse
-      have hreachesNext : FullTM0.Reaches
-          (CounterControlNestingBridge.machine base c) (foundCfg current)
-          next.cfg := by
-        rw [hnextCfg]
-        exact hthird'
-      apply outwardHandoff_of_decrementEntrySearch hmortal hrule hcommand
-        hreachesNext (by simpa [next] using hdistance) himmortal
+        simp [routeCommandsAux]
+      exact outwardHandoff_of_reenteredBodySearch (suffix := suffix) hmortal
+        hrule 1 (directRef growth source testDirectSlot) hrawThirdRoute
+        hthird himmortal
 
 /-! ## Final-boundary dispatch -/
 
