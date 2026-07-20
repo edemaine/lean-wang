@@ -25,7 +25,7 @@ namespace Closed104
 namespace CanonicalOddFreeLines
 
 open RedShadeCycles Signals.FreeCellLocal ShadedSubstitution
-open CanonicalFreeLine CanonicalOddFreeLineData
+open CanonicalFreeLine CanonicalFreeLineBranching CanonicalOddFreeLineData
   CanonicalOddFreeLineCertificate CanonicalOddFreeLineCoordinates
 
 set_option maxRecDepth 20000
@@ -339,7 +339,7 @@ private theorem base_classified : RowClassified 0 2 ∧ ColumnClassified 0 2 := 
       (And.intro columnInterior columnBoundary)
 
 private theorem transition_of_child {old child : Nat}
-    (hchild : child ∈ CanonicalOddFreeLineCoordinates.children old) :
+    (hchild : child ∈ CanonicalFreeLineBranching.children old) :
     ∃ transition, transition ∈ stripTransitions ∧
       offsetParity old = transition.source ∧
       offsetParity child = transition.target ∧
@@ -365,7 +365,7 @@ private theorem transition_of_child {old child : Nat}
 
 private theorem stripClassified_child (axis : StripAxis) {depth old child : Nat}
     (classified : StripClassified axis depth old)
-    (hchild : child ∈ CanonicalOddFreeLineCoordinates.children old) :
+    (hchild : child ∈ CanonicalFreeLineBranching.children old) :
     StripClassified axis (depth + 1) child := by
   rcases transition_of_child hchild with
     ⟨transition, transitionMem, sourceEq, targetEq, childEq⟩
@@ -376,7 +376,7 @@ private theorem stripClassified_child (axis : StripAxis) {depth old child : Nat}
 
 private theorem classified_child {depth old child : Nat}
     (classified : RowClassified depth old ∧ ColumnClassified depth old)
-    (hchild : child ∈ CanonicalOddFreeLineCoordinates.children old) :
+    (hchild : child ∈ CanonicalFreeLineBranching.children old) :
     RowClassified (depth + 1) child ∧ ColumnClassified (depth + 1) child :=
   ⟨stripClassified_child .row classified.1 hchild,
     stripClassified_child .column classified.2 hchild⟩

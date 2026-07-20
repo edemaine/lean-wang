@@ -24,7 +24,8 @@ namespace Closed104
 namespace CanonicalEvenFreeLines
 
 open RedShadeCycles Signals.FreeCellLocal ShadedSubstitution
-open CanonicalFreeLine CanonicalFreeLineCoordinates CanonicalFreeLineLocal
+open CanonicalFreeLine CanonicalFreeLineBranching
+  CanonicalFreeLineCoordinates CanonicalFreeLineLocal
 
 set_option maxRecDepth 20000
 
@@ -308,9 +309,9 @@ private theorem freeLine_refine {axis : LineAxis} {root : Node}
     exact (refines _ parentClear) localAlong localAlongBound
 
 private theorem freeLine_child {axis : LineAxis} {root : Node}
-    {depth old child : Nat}
-    (oldFree : LineFree axis root depth old)
-    (hchild : child ∈ CanonicalFreeLineCoordinates.children old)
+    {depth oldOffset childOffset : Nat}
+    (oldFree : LineFree axis root depth (coordinate depth oldOffset))
+    (hchild : childOffset ∈ CanonicalFreeLineBranching.children oldOffset)
     (oddRefines : ∀ node : Node,
       CoarseLineClear axis node 1 →
         FineLineClear axis node 1 ∧ FineLineClear axis node 2)
@@ -320,38 +321,47 @@ private theorem freeLine_child {axis : LineAxis} {root : Node}
       BoundaryStripClear axis node 0 ∧
         BoundaryStripClear axis node 1 ∧
           BoundaryStripClear axis node 2) :
-    LineFree axis root (depth + 1) child := by
+    LineFree axis root (depth + 1) (coordinate (depth + 1) childOffset) := by
   rcases mem_children_cases hchild with
-    ⟨odd, rfl | rfl⟩ | ⟨even, rfl⟩
+    ⟨even, rfl | rfl⟩ | ⟨odd, rfl⟩
   · apply freeLine_refine oldFree (localFixed := 1)
-    · omega
+    · simp only [coordinate, pow_succ]
+      omega
     · decide
     · intro node clear
-      rw [odd] at clear
+      rw [show coordinate depth oldOffset % 2 = 1 by
+        simp only [coordinate]
+        omega] at clear
       exact (oddRefines node clear).1
     · exact fun node => (boundaryClears node).2.1
   · apply freeLine_refine oldFree (localFixed := 2)
-    · omega
+    · simp only [coordinate, pow_succ]
+      omega
     · decide
     · intro node clear
-      rw [odd] at clear
+      rw [show coordinate depth oldOffset % 2 = 1 by
+        simp only [coordinate]
+        omega] at clear
       exact (oddRefines node clear).2
     · exact fun node => (boundaryClears node).2.2
   · apply freeLine_refine oldFree (localFixed := 0)
-    · omega
+    · simp only [coordinate, pow_succ]
+      omega
     · decide
     · intro node clear
-      rw [even] at clear
+      rw [show coordinate depth oldOffset % 2 = 0 by
+        simp only [coordinate]
+        omega] at clear
       exact evenRefines node clear
     · exact fun node => (boundaryClears node).1
 
-theorem freeRow_child {root : Node} {depth old child : Nat}
-    (oldFree : FreeRowAt root depth old)
-    (hchild : child ∈ CanonicalFreeLineCoordinates.children old) :
-    FreeRowAt root (depth + 1) child := by
+private theorem freeRow_child {root : Node} {depth oldOffset childOffset : Nat}
+    (oldFree : FreeRowAt root depth (coordinate depth oldOffset))
+    (hchild : childOffset ∈ CanonicalFreeLineBranching.children oldOffset) :
+    FreeRowAt root (depth + 1) (coordinate (depth + 1) childOffset) := by
   unfold FreeRowAt at oldFree ⊢
-  change LineFree .row root depth old at oldFree
-  change LineFree .row root (depth + 1) child
+  change LineFree .row root depth (coordinate depth oldOffset) at oldFree
+  change LineFree .row root (depth + 1) (coordinate (depth + 1) childOffset)
   apply freeLine_child oldFree hchild
   · intro node clear
     exact row_one_refines node clear
@@ -360,13 +370,13 @@ theorem freeRow_child {root : Node} {depth old child : Nat}
   · intro node
     exact west_strips_clear node
 
-theorem freeColumn_child {root : Node} {depth old child : Nat}
-    (oldFree : FreeColumnAt root depth old)
-    (hchild : child ∈ CanonicalFreeLineCoordinates.children old) :
-    FreeColumnAt root (depth + 1) child := by
+private theorem freeColumn_child {root : Node} {depth oldOffset childOffset : Nat}
+    (oldFree : FreeColumnAt root depth (coordinate depth oldOffset))
+    (hchild : childOffset ∈ CanonicalFreeLineBranching.children oldOffset) :
+    FreeColumnAt root (depth + 1) (coordinate (depth + 1) childOffset) := by
   unfold FreeColumnAt at oldFree ⊢
-  change LineFree .column root depth old at oldFree
-  change LineFree .column root (depth + 1) child
+  change LineFree .column root depth (coordinate depth oldOffset) at oldFree
+  change LineFree .column root (depth + 1) (coordinate (depth + 1) childOffset)
   apply freeLine_child oldFree hchild
   · intro node clear
     exact column_one_refines node clear
@@ -378,16 +388,19 @@ theorem freeColumn_child {root : Node} {depth old child : Nat}
 theorem coordinate_free_lines (root : Node) (depth : Nat) {coordinate : Nat}
     (hcoordinate : coordinate ∈ coordinates depth) :
     FreeRowAt root depth coordinate ∧ FreeColumnAt root depth coordinate := by
-  induction depth generalizing coordinate with
+  rw [mem_coordinates_iff] at hcoordinate
+  rcases hcoordinate with ⟨offset, hoffset, rfl⟩
+  induction depth generalizing offset with
   | zero =>
-      simp only [coordinates_zero, List.mem_singleton] at hcoordinate
-      subst coordinate
-      exact ⟨base_free_row root, base_free_column root⟩
+      simp only [offsets_zero, List.mem_singleton] at hoffset
+      subst offset
+      simpa [coordinate] using
+        And.intro (base_free_row root) (base_free_column root)
   | succ depth ih =>
-      rw [coordinates_succ, List.mem_flatMap] at hcoordinate
-      rcases hcoordinate with ⟨old, hold, hchild⟩
-      exact ⟨freeRow_child (ih hold).1 hchild,
-        freeColumn_child (ih hold).2 hchild⟩
+      rw [offsets_succ, List.mem_flatMap] at hoffset
+      rcases hoffset with ⟨old, hold, hchild⟩
+      exact ⟨freeRow_child (ih old hold).1 hchild,
+        freeColumn_child (ih old hold).2 hchild⟩
 
 theorem freeRowAt_iff_isFreeRow (root : Node) (depth row : Nat) :
     FreeRowAt root depth row ↔
