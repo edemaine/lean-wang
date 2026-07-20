@@ -5,7 +5,19 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.CanonicalOddFreeLineChecks
 
-/-! Proof-facing projections of the odd canonical free-line certificate. -/
+/-!
+# Projections of the odd free-line certificate
+
+The odd certificate classifies reachable nodes by axis, offset parity, and
+whether they lie at the strip boundary or in its interior.  Its checked
+transition table says that interior children remain in the target interior
+class, boundary child zero remains a boundary, and the other boundary children
+enter the interior.  Separate checks give local clearance for each class and
+the initial strip below the seed.
+
+This module extracts those implications from the aggregate Boolean check;
+`CanonicalOddFreeLines` supplies the geometric strip induction around them.
+-/
 
 namespace LeanWang
 namespace OllingerRobinson

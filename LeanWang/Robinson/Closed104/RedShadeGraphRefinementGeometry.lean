@@ -6,7 +6,19 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.PlaneRedBoards
 import LeanWang.Robinson.Closed104.RedShadeGraph
 
-/-! Geometry of the two-substitution local red-graph block. -/
+/-!
+# Coordinates for red-graph refinement
+
+Two substitutions replace each coarse quarter cell by an `8 x 8` local block.
+`sparseCoordinate` embeds the old quarter grid into the southwest `2 x 2`
+corner of each block, preserving the old component exactly.  `internalPort`
+and `externalPort` name the endpoints of the certified connector that carries
+an east or north port from that sparse copy to the block boundary.
+
+Keeping these formulas separate lets the search and certificate files operate
+on small concrete coordinates while the semantic refinement proof translates
+them into arbitrary grids.
+-/
 
 namespace LeanWang
 namespace OllingerRobinson

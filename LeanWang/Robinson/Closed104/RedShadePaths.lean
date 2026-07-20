@@ -8,7 +8,18 @@ import LeanWang.Robinson.Closed104.SignalFreeCellLocal
 import LeanWang.Robinson.Closed104.SignalCorridors
 
 /-!
-Path-level propagation for the light/dark red-wire layer.
+# Propagating red-wire shades
+
+`ValidShadeGrid` is the semantic form of the red shade layer: each quarter
+state is locally allowed for its thick Robinson component, and neighboring
+states agree on shared edges.  A present straight line therefore transmits one
+shade unchanged, a corner identifies its two incident shades, and a crossing
+forces the horizontal and vertical shades to be opposite.
+
+This file exposes those local consequences and lifts straight-line
+transmission to arbitrary finite intervals.  Later graph modules package the
+same equal/opposite relation as a parity-labelled path, while `RedShadeCycles`
+uses the interval form around rectangular board boundaries.
 -/
 
 namespace LeanWang

@@ -7,7 +7,17 @@ import LeanWang.Robinson.Closed104.RedShadeGraphRefinement
 import LeanWang.Robinson.Closed104.RedShadeGraphBoards
 
 /-!
-Lift parity-labelled red paths through two substitutions.
+# Refining red-graph paths
+
+The sparse embedding preserves every coarse red port after two substitutions.
+A checked even connector carries that sparse port to the corresponding refined
+macrocell boundary.  Thus each coarse link, whether internal to a quarter or
+crossing a tile edge, becomes a fine path with the same parity.
+
+The file first proves the local sparse/component facts and refined versions of
+the primitive link constructors.  It then maps each link of a `Path` and joins
+the resulting pieces, yielding the path-level refinement theorem used by cycle
+connectivity and canonical shade comparison.
 -/
 
 namespace LeanWang

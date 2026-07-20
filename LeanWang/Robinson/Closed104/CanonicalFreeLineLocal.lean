@@ -6,7 +6,20 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.CanonicalFreeLineCertificate
 import LeanWang.Robinson.Closed104.ShadedSubstitutionSupertiles
 
-/-! Semantic wrappers for the canonical local free-line audit. -/
+/-!
+# Semantic interface to the even free-line certificate
+
+The executable audit works with numeric finite-state nodes and Boolean tests.
+This module rephrases those tests for proof-bearing reachable `Node`s and
+ordinary propositions about selected signals.  A coarse node covers `2 x 2`
+quarter cells; one refinement covers `8 x 8` cells.
+
+The exported facts say which clear coarse rows and columns remain clear after
+refinement, which west/south boundary strips are always clear, and where the
+base free lines occur.  `CanonicalEvenFreeLines` combines exactly these local
+facts with coordinate induction; no certificate representation escapes into
+its public free-line statements.
+-/
 
 noncomputable section
 

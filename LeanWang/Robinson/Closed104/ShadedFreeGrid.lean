@@ -6,7 +6,18 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.ShadedFreeLineTranslation
 
 /-!
-Ordered finite grids of free rows and columns inside shaded Robinson boards.
+# Finite grids of free lines
+
+A `FreeGrid` chooses equally many strictly ordered rows and columns inside one
+light Robinson board.  “Free” means that the shade layer selects no
+perpendicular obstruction border anywhere along the strict board interior.
+Consequently every chosen row/column crossing has the all-clear signal state
+and is available for an active payload tile.
+
+The singleton constructor packages one crossing, while `translate` transports
+an entire grid from a local refined block to its absolute coordinates.  Later
+modules enlarge these sparse grids, enumerate all intervening free lines, and
+select consecutive lines for payload routing.
 -/
 
 namespace LeanWang

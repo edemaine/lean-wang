@@ -6,7 +6,20 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.CanonicalShadeMarkedFreeGrid
 import LeanWang.Robinson.Closed104.CanonicalOddShadeMarkedFreeGrid
 
-/-! Marked free grids in actual decoded routed-product planes. -/
+/-!
+# Marked free grids in decoded planes
+
+At a sufficiently deep hierarchy level, the shade argument supplies a light
+board in one of two adjacent parity phases.  The even and odd canonical
+comparison theorems each provide a marked free grid for their respective
+phase.  This module chooses between those cases and rewrites both witnesses
+onto the same actual refined grid of the decoded plane.
+
+The requested grid is deliberately larger than the eventual payload square:
+later enumeration discards lines below the marker and still needs enough rows
+and columns to select a consecutive prefix.  The marker at the lower-left
+crossing is what forces the payload seed.
+-/
 
 namespace LeanWang
 namespace OllingerRobinson

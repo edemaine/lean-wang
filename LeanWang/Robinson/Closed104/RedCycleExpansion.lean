@@ -6,7 +6,17 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.RedCycles
 
 /-!
-Finite local expansion rules for corrected-Ollinger red cycles.
+# Local expansion of red cycles
+
+The thick component of each corrected tile describes the red Robinson lines.
+After one substitution, the southwest child preserves a parent corner or line,
+while the southeast and northwest children supply the next horizontal and
+vertical pieces.  These are precisely the local facts needed to double a
+rectangular red cycle.
+
+Because there are only 104 parents, the conjunction is checked once by
+`native_decide`; the named theorems below are proof-facing projections used by
+the coordinate-level expansion in `RedCycleScaling`.
 -/
 
 namespace LeanWang

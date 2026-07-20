@@ -6,7 +6,17 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.IteratedEmbedding
 
 /-!
-Unbounded red boards at concrete coordinates in every valid corrected-Ollinger plane.
+# Red boards in arbitrary corrected planes
+
+The substitution theorem initially constructs boards below a constant coarse
+tile.  Locality shows that the same depth-two block occurs below the tile at
+any chosen position of an arbitrary grid.  Translation and repeated refinement
+then place the resulting cycle at explicit coordinates.
+
+Combined with a desubstitution tower, these lemmas pull large boards from a
+coarse hierarchy level back into the original valid plane.  This is where the
+abstract “boards at every scale” statement acquires the concrete coordinate
+form needed by the shade and payload layers.
 -/
 
 namespace LeanWang

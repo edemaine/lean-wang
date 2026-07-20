@@ -7,6 +7,17 @@ import LeanWang.Robinson.Closed104.ShadedSubstitutionChecks
 
 /-!
 # Certificate for the finite-state red-shade substitution
+
+The data module enumerates decorated nodes reachable from the chosen seed,
+together with their sixteen children.  Native checks establish that every
+listed node is locally valid, the list is closed under children, neighboring
+listed nodes have compatible decorated boundaries, and each child realizes
+the recorded expansion block.
+
+This file is the proof-facing interface to those aggregate checks.  It provides
+ordinary membership, existence, and structure lemmas; recursive supertile
+proofs should use these projections rather than unfolding the native Boolean
+certificate.
 -/
 
 namespace LeanWang

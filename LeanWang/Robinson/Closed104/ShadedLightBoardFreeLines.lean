@@ -8,6 +8,17 @@ import LeanWang.Robinson.Closed104.ShadedLightBoardSignals
 /-!
 Signal characterization of free rows and columns inside uniformly light
 Robinson boards.
+
+A free row has no selected vertical obstruction border between the west and
+east board sides.  Every interior signal tile on that row must therefore
+transmit horizontally.  The light-board endpoint rules face outward at both
+ends; since the transmitted inner edge is the same at both ends, it can only
+be `none`.  The column proof is the rotated argument.
+
+At the crossing of a free row and free column all four flows are absent.  In
+the routed scaffold this means the site is active, except for the distinguished
+marker quarter where it is the fixed-seed corner.  The payload consequences at
+the end of the file are what the free-grid construction ultimately uses.
 -/
 
 namespace LeanWang

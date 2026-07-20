@@ -9,6 +9,16 @@ import LeanWang.Robinson.Closed104.SignalCorridors
 /-!
 Obstruction-signal endpoint rules along every strict side quarter of a
 uniformly light Robinson board.
+
+On a light red boundary, the shade and thick-line orientation determine which
+horizontal or vertical obstruction interior is selected.  Local signal-tile
+rules then force a nonempty outward-facing flow and forbid the inward-facing
+direction.  The first four theorems identify the selected interiors; the last
+four translate them into these endpoint flow constraints.
+
+These are boundary conditions only.  `ShadedLightBoardFreeLines` combines them
+with transmission through an unselected interior line to prove that genuinely
+free rows and columns carry no obstruction signal at all.
 -/
 
 namespace LeanWang

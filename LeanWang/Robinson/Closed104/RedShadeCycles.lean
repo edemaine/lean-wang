@@ -7,7 +7,18 @@ import LeanWang.Robinson.Closed104.OrientedRedCycles
 import LeanWang.Robinson.Closed104.RedShadePaths
 
 /-!
-Uniform red-wire shade on the canonical depth-two board.
+# Uniform shade around red cycles
+
+An oriented Robinson cycle is expressed in parent-tile coordinates, whereas
+shade states live on the four times finer quarter grid.  The coordinate lemmas
+below identify the four inward corners and strict sides of the cycle in that
+quarter grid.  Local red-line transmission then proves that one corner shade
+propagates around the complete rectangle.
+
+`CycleShade` records the resulting common light/dark shade at the four inward
+corners.  The final side lemmas strengthen this to every quarter along each
+edge.  These statements are the bridge between geometric red boards and the
+shade-dependent obstruction and canonical-comparison arguments.
 -/
 
 namespace LeanWang
@@ -81,6 +92,10 @@ theorem fixedGeometry (parent : Index) : FixedGeometry parent := by
     east5 := ?_
   }
   all_goals revert parent; native_decide
+
+/- Parent coordinates refer to tile centers and lanes.  The `quarter*`
+coordinates select the inward side of each boundary tile, where the shade
+layer actually carries the cycle. -/
 
 def quarterWest (west : Nat) : Nat := 2 * west + 1
 def quarterEast (east : Nat) : Nat := 2 * east
@@ -287,6 +302,10 @@ theorem CycleOn.east_path
     omega
   rw [hdivX]
   exact hline
+
+/- The four path lemmas turn geometric cycle lanes into transmissive
+quarter-level red lines.  Starting from one present corner shade, edge matching
+and corner equalities carry it counterclockwise to all four corners. -/
 
 /-- Uniform shade at the four inward quarter corners of an arbitrary board. -/
 structure CycleShade (stateGrid : Nat → Nat → RedShades.State)

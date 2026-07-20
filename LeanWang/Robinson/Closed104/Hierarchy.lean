@@ -6,7 +6,17 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.ParentPlane
 
 /-!
-An infinite desubstitution hierarchy for every valid corrected-Ollinger plane.
+# Infinite desubstitution hierarchy
+
+Recognizability gives at least one valid parent plane for every valid corrected
+plane, together with the parity origin locating its child blocks.  Classical
+choice selects one such parent repeatedly, producing an infinite tower indexed
+by substitution depth.
+
+No computability claim depends on this choice: the tower is used only in the
+mathematical implication from a hypothetical plane tiling to arbitrarily large
+Robinson boards.  `Tower` is the proof-facing interface, retaining just each
+valid plane, its origin, and the exact child relation to the next level.
 -/
 
 namespace LeanWang

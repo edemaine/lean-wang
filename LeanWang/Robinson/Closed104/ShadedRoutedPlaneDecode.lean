@@ -7,7 +7,18 @@ import LeanWang.Robinson.Closed104.ShadedSignalRoutingScaffold
 import LeanWang.Robinson.Scaffold.Routed.PlaneDecode
 
 /-!
-Decode routed product planes over the final shaded Robinson scaffold.
+# Decoding the final shaded routed product
+
+The generic routed-product decoder separates any product tiling into a valid
+scaffold plane and a globally edge-matching payload plane.  This specialization
+then peels the corrected shaded scaffold through its own representations:
+shaded tile, red-shade quarter tile, regrouped corrected parent tile, and the
+infinite desubstitution tower.
+
+The resulting `Decoded` object is the common context for the geometric half of
+the reduction.  It retains the generic payload-role consequences while also
+exposing the corrected parent hierarchy in which arbitrarily large Robinson
+boards and free grids are found.
 -/
 
 noncomputable section
@@ -28,6 +39,9 @@ structure Decoded
     (x : Int × Int → TileIn
       (combineWithRoutedScaffold ShadedSignals.routedScaffold T seed)) where
   routed : RoutedPlaneDecode.Decoded x
+
+/- The definitions below successively forget layers of the same base tiling.
+Each validity theorem is the bridge required by the next decoding stage. -/
 
 noncomputable def decode
     {x : Int × Int → TileIn

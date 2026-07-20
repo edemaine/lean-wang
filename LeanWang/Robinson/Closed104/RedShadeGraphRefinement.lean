@@ -7,7 +7,17 @@ import LeanWang.Robinson.Closed104.RedShadeGraphRefinementCheck
 import LeanWang.Robinson.Closed104.RedShadeGraphTranslation
 
 /-!
-Proof-facing two-substitution red-path refinement lemmas.
+# Certified connectors through a refined block
+
+The untrusted search records, for each corrected parent and each live east or
+north local port, a route through the parent's two-substitution `8 x 8` block.
+`RedShadeGraphRefinementCheck` validates those routes with the executable path
+checker.  This module converts the Boolean certificate into `BoundedPath` and
+`Path` theorems and proves the sparse embedding identities needed to place the
+local connector in an arbitrary refined grid.
+
+No theorem trusts the search procedure itself: only the stored route and the
+sound checker are used in proofs.
 -/
 
 namespace LeanWang

@@ -11,6 +11,17 @@ import LeanWang.Robinson.Closed104.IteratedEmbedding
 /-!
 Embed the shade layer of a final routed product plane as valid natural quarter
 grids below arbitrary hierarchy coordinates.
+
+The decoded plane is indexed by integers and quarter tiles, while the finite
+red-board arguments use natural coordinates rooted at a chosen parent tile.
+`point` performs this coordinate embedding.  `quarter_at_point` proves that its
+tile component and quadrant are exactly those of the natural parent grid, so
+the decoded shade states form a `ValidShadeGrid` there.
+
+For a coarser level of the desubstitution tower, `fineParentOrigin` descends its
+origin back to level zero.  The resulting natural parent grid equals the
+appropriate iterated refinement of the coarse grid.  This transports the
+canonical unbounded light-board theorem into every decoded product plane.
 -/
 
 noncomputable section

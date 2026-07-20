@@ -6,7 +6,17 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.ShadedFreeGrid
 
 /-!
-Finite enumeration of all free rows and columns inside a shaded board.
+# Enumerating all free lines in a board
+
+The free-line predicates quantify only over a finite strict board interval, so
+they have executable Boolean counterparts.  Filtering the finite coordinate
+intervals yields `freeRows` and `freeColumns`, with membership theorems that
+recover the semantic predicates.
+
+An ordered `FreeGrid` embeds injectively into these complete finite sets.
+The resulting cardinality bounds justify taking a long sorted prefix later;
+adjacent members of that prefix are genuinely consecutive free lines, not just
+consecutive members of the original sparse witness.
 -/
 
 namespace LeanWang

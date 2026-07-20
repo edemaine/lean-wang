@@ -6,7 +6,15 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.RedShadeGraphRefinementGeometry
 import LeanWang.Robinson.Closed104.RedShadeCycles
 
-/-! Sources and targets for local red-graph coverage. -/
+/-!
+# Sources for local red-graph coverage
+
+Inside one two-substitution block, every live target port must be connected to
+either the newly created southwest cell cycle or a sparse port inherited from
+the parent.  `sources` is exactly that finite source set.  The search module
+finds connector paths from these sources, and the proof-facing coverage module
+uses the checked paths to classify arbitrary live targets.
+-/
 
 namespace LeanWang
 namespace OllingerRobinson

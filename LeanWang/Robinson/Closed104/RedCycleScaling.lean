@@ -6,7 +6,17 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.RedCycleExpansion
 
 /-!
-Coordinate-level doubling of corrected-Ollinger red cycles.
+# Coordinate-level expansion of red cycles
+
+`RedCycleOn` is the semantic statement that four corrected tile corners and
+the intervening thick red lines form an axis-aligned rectangle.  Substitution
+maps every old coordinate to the even-even child position and fills each old
+edge with the adjacent southeast or northwest child.
+
+The finite component facts from `RedCycleExpansion` therefore imply that one
+refinement doubles all four cycle coordinates.  This module packages that
+argument for arbitrary grids; `RedBoards` iterates it to obtain unbounded
+cycles.
 -/
 
 namespace LeanWang

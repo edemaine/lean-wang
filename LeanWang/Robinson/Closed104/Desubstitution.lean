@@ -7,7 +7,18 @@ import LeanWang.Robinson.Closed104.LocalRecognizability
 import Mathlib.Algebra.Ring.Periodic
 
 /-!
-Desubstitution of valid plane tilings by the corrected Ollinger tiles.
+# Desubstitution of corrected Ollinger tilings
+
+Matching thin-layer edges force the phases `a,b,c,d` into a checkerboard with
+period two in both coordinates.  Choosing any phase-`a` site therefore chooses
+a global alignment of `2 x 2` child blocks.  Local recognizability supplies a
+unique parent for each aligned block.
+
+This module establishes the phase geometry and the unique-parent operation.
+`ParentPlane` subsequently proves that neighboring recovered parents match, so
+the operation really maps a valid plane tiling to another valid plane tiling.
+The distinction keeps the finite `4 x 4` recognizability argument separate
+from the global coordinate bookkeeping.
 -/
 
 namespace LeanWang
@@ -61,6 +72,9 @@ def rowAt (z : IndexPlane) (center : Int × Int) (dy : Int) : IndexRow4 where
   x1 := z (shift center 0 dy)
   x2 := z (shift center 1 dy)
   x3 := z (shift center 2 dy)
+
+/- Four consecutive valid rows around a phase-`a` site form exactly the local
+neighborhood consumed by the recognizability theorem. -/
 
 theorem rowAt_hValid {z : IndexPlane} (hz : ValidIndexPlane z)
     (center : Int × Int) (dy : Int) :
@@ -175,6 +189,10 @@ theorem thin_even {z : IndexPlane} (hz : ValidIndexPlane z)
       exact congrArg (thinAt z) (shift_even_xy p kx ky)
     _ = thinAt z (shift p (2 * kx) 0) := thin_north_even hz _ ky
     _ = thinAt z p := thin_east_even hz p kx
+
+/- Period two makes every translate by an even vector another aligned child
+block.  At each such origin, finite recognizability identifies one and only one
+parent index. -/
 
 end Desubstitution
 end Closed104

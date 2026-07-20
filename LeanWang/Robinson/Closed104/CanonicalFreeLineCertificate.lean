@@ -5,7 +5,16 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 -/
 import LeanWang.Robinson.Closed104.CanonicalFreeLineChecks
 
-/-! Proof-facing projections of the canonical free-line local audit. -/
+/-!
+# Projections of the even free-line certificate
+
+`CanonicalFreeLineChecks` proves one conjunction of Boolean facts for every
+reachable substitution node.  This file names the individual consequences:
+clear coarse rows and columns refine to the required clear fine coordinates,
+the strict west/south boundary strips are clear, and the designated base node
+and root-cycle shade have their expected values.  The following semantic layer
+converts these Boolean statements into propositions about proof-bearing nodes.
+-/
 
 namespace LeanWang
 namespace OllingerRobinson

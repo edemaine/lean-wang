@@ -8,7 +8,22 @@ import LeanWang.Robinson.Closed104.CanonicalOddShadeGeometry
 import LeanWang.Robinson.Closed104.CanonicalShadeComparisonCore
 import LeanWang.Robinson.Closed104.RedShadeCycleOddDescendants
 
-/-! Comparing arbitrary and raw canonical shades at odd root scale. -/
+/-!
+# Comparing arbitrary and canonical odd-phase shades
+
+This is the odd-scale counterpart of `CanonicalShadeComparison`.  A valid
+shade assignment on a light Robinson board is compared with the raw canonical
+substitution rooted at `seedNode`.  The odd root cycle crosses each finest cell
+cycle with odd parity, so the local comparison source is dark rather than
+light; after that sign change, both phases use the common
+`RefinementComparison` induction.
+
+The proof establishes a finite base agreement, agreement at the distinguished
+cycle source in every refined block, and compatibility with canonical block
+refinement.  The shared core then concludes equality at every present central
+port.  This is enough to transfer the canonical odd free lines to an arbitrary
+valid shade assignment without claiming equality at absent ports.
+-/
 
 namespace LeanWang
 namespace OllingerRobinson
@@ -250,6 +265,7 @@ private theorem cycleSourceAgreement (depth : Nat)
 private noncomputable def refinementComparison
     (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0) :
     RefinementComparison where
+
   scale := scale
   actualGrid := fun depth => actualGrid depth coarse
   canonicalGrid := fun depth => indexGrid (depth + 2)

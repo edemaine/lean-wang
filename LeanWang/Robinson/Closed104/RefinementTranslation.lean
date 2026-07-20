@@ -6,7 +6,18 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.SignalFreeCellLocal
 
 /-!
-Translation equivariance of iterated Robinson refinement.
+# Translation and local refinement
+
+Substitution is local and scales coordinates by two at each level.  Refining a
+grid shifted by `(blockX, blockY)` is therefore the same as refining the
+original grid and translating by `2^depth` times that block offset.  Within the
+single refined block below a coarse tile, the result is also independent of
+the rest of the coarse grid.
+
+The lemmas here state those two facts for tile grids, quarter components, and
+the path coordinates used later.  They are the standard transport layer that
+turns finite certificates over a constant parent into facts about any block of
+an arbitrary plane.
 -/
 
 namespace LeanWang

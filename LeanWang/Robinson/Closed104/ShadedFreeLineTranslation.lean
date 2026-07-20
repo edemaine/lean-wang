@@ -7,7 +7,16 @@ import LeanWang.Robinson.Closed104.RefinementTranslation
 import LeanWang.Robinson.Closed104.ShadedLightBoardFreeLines
 
 /-!
-Translation equivariance of shaded free rows and columns.
+# Translating shaded free lines
+
+The index grid is measured in parent-tile coordinates, while shade states and
+free-line coordinates live on the twice-finer quarter grid.  Translating a
+coarse block by `(blockX, blockY)` after `depth` refinements therefore shifts
+the index bounds by `2^depth` and the quarter coordinates by `2^(depth+1)`.
+
+The two equivalences in this file perform that bookkeeping for rows and
+columns.  They let a free-line witness proved in a canonical local supertile be
+reused in any translated block of an arbitrary refined grid.
 -/
 
 namespace LeanWang

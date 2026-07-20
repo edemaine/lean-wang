@@ -25,6 +25,13 @@ open OrientedRedCycles RedCycles RedShadeCycles RedShadePaths
 
 set_option maxRecDepth 20000
 
+/- `Geometry` is the purely geometric hypothesis supplied by the Robinson
+boundary analysis.  At a crossing of one free and one non-free line, it finds
+either a selected obstruction at the crossing itself or the nearest selected
+boundary above/below (respectively right/left), with no selected boundary in
+between.  The rest of this module propagates the forced nonempty signal from
+that endpoint back to the crossing. -/
+
 structure Geometry
     (indexGrid : Nat -> Nat -> Index)
     (shadeGrid : Nat -> Nat -> RedShades.State)

@@ -11,6 +11,19 @@ Executable `4 x 4` recognizability audit from Proposition 8.
 The search works directly with the finite corrected-tile type `Index`.
 Horizontal and vertical follower tables are computed once, after which the
 row dynamic program uses only finite list lookup and membership.
+
+The audited statement is local recognizability: in every valid `4 x 4`
+neighborhood whose central `2 x 2` thin phases are `a,c/d,b`, that central
+block is the child block of exactly one corrected tile.  The outer row and
+column provide one-cell context, so this finite condition applies to a window
+cut from any full-plane tiling.
+
+The executable part proceeds in three stages.  It enumerates all legal rows of
+length four, combines four vertically compatible rows while fixing the central
+phase pattern, and compares the middle block against the 104 possible parent
+child blocks.  `auditCorrect` checks both the search diagnostics and absence of
+any extendable middle pair with a non-unique parent.  The final theorems turn
+membership in these lists back into ordinary Wang matching hypotheses.
 -/
 
 namespace LeanWang
@@ -87,6 +100,10 @@ private theorem cons_mem_compatibleRows
   simp [compatibleRows, hfirst, htail]
 
 def fourRows : List (List Index) := compatibleRows hFollowerTable 4
+
+/- The dynamic program above produces every horizontally valid length-four
+row.  The next stage filters possible middle rows by thin-layer phase and asks
+whether they admit one compatible row both below and above. -/
 
 theorem indexRow_mem_fourRows (a b c d : Index)
     (hab : WangTile.HMatches (tile (components a)) (tile (components b)))
@@ -195,6 +212,11 @@ theorem middle_mem_extendableCentralRowPairs
     ⟨⟨south, hsouth, hsm⟩, ⟨north, hnorth, hmn⟩⟩⟩
 
 abbrev IndexBlock := Index × Index × Index × Index
+
+/- A central `2 x 2` block is recognizable exactly when it occurs as the
+ordered child block of one parent.  The native audit checks uniqueness for all
+extendable central row pairs; the proof-facing tail of the file extracts that
+fact for an arbitrary valid neighborhood. -/
 
 def childIndexBlock (parent : Index) : IndexBlock :=
   (childBlock parent ⟨0, by decide⟩ ⟨0, by decide⟩,

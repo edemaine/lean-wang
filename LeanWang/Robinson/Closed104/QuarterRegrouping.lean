@@ -6,7 +6,18 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5
 import LeanWang.Robinson.Closed104.Quarters
 
 /-!
-Regroup valid corrected quarter-tile planes into their original `2 x 2` macrotiles.
+# Regrouping corrected quarter tiles
+
+The generic tile subdivision marks each quarter with its quadrant.  Matching
+edges force those quadrant labels into a period-two checkerboard, so every
+valid quarter plane has a southwest origin and a unique global `2 x 2`
+alignment.  Internal subdivision colors then force all four quarters in an
+aligned block to come from the same corrected Ollinger tile.
+
+`macroPlane` reads that common parent.  `block_spec` is the main result of this
+module: it reconstructs the four quarter tiles at every macro coordinate.
+`QuarterPlaneDecode` uses the remaining, external edges of these blocks to
+prove that the reconstructed parent plane is Wang-valid.
 -/
 
 namespace LeanWang
@@ -111,6 +122,10 @@ theorem exists_southwest_origin {z : QuarterPlane} (hz : ValidQuarterPlane z) :
         _ = Quarters.phaseNorth (Quarters.phaseEast (phaseAt z p)) := by
           rw [phase_east hz p]
         _ = .southwest := by rw [hphase]; rfl
+
+/- The phase checkerboard fixes where blocks lie.  The next two lemmas use the
+private internal subdivision colors to show that adjacent quarters inside one
+such block also share the same parent index. -/
 
 theorem parentTile_injective :
     Function.Injective (fun index : Index => tile (components index)) := by
