@@ -13,6 +13,21 @@ import LeanWang.Robinson.Closed104.ShadedLightBoardFreeLines
 The finite local audit propagates a line directly through the selected shade
 substitution.  This is the semantic replacement for transporting explicit odd
 graph paths through arbitrary border windows.
+
+The proof has five layers:
+
+1. `selectedVerticalAt` and `selectedHorizontalAt` expose the selected signals
+   of a finite supertile as a coordinate grid.
+2. `FreeRowAt` and `FreeColumnAt` say that one such signal line is absent across
+   the open middle half of the supertile.
+3. The private `LineAxis` vocabulary proves rows and columns together.  Its
+   local predicates translate a global line into the `2 x 2` node containing
+   each point and then into that node's `8 x 8` refinement.
+4. `freeLine_refine` handles one substitution step.  The first parent block is
+   cleared by a certified boundary-strip fact; every later block inherits
+   clearance from the old line through a local refinement certificate.
+5. The coordinate branching rule chooses the appropriate clear child line,
+   and induction over `coordinates` produces all advertised free lines.
 -/
 
 noncomputable section
@@ -28,6 +43,10 @@ open CanonicalFreeLine CanonicalFreeLineBranching
   CanonicalFreeLineCoordinates CanonicalFreeLineLocal
 
 set_option maxRecDepth 20000
+
+/- The first group of definitions and lemmas is only a change of coordinates:
+the canonical supertile is viewed first as a global tile grid, then as a grid
+of `2 x 2` nodes, and finally as an `8 x 8` refined node. -/
 
 def indexGrid (root : Node) (level : Nat) : Nat → Nat → Index :=
   supertileIndexGrid level root
@@ -174,6 +193,11 @@ theorem base_free_column (root : Node) : FreeColumnAt root 0 5 := by
   rw [nodeEq]
   exact clear (y % 2) (Nat.mod_lt _ (by decide))
 
+/- Rows and columns obey the same refinement argument.  `along` is the varying
+coordinate and `fixed` selects the candidate free line.  The three clearance
+predicates distinguish a coarse node, its complete refinement, and the part of
+the refinement that lies just inside the board's strict lower boundary. -/
+
 private inductive LineAxis where
   | row
   | column
@@ -308,6 +332,11 @@ private theorem freeLine_refine {axis : LineAxis} {root : Node}
       exact clear
     exact (refines _ parentClear) localAlong localAlongBound
 
+/- The branching certificate records which child line remains clear.  An odd
+parent offset has two clear children (local coordinates 1 and 2); an even
+parent has one (local coordinate 0).  The local audit supplies exactly these
+three refinement implications and the corresponding boundary strips. -/
+
 private theorem freeLine_child {axis : LineAxis} {root : Node}
     {depth oldOffset childOffset : Nat}
     (oldFree : LineFree axis root depth (coordinate depth oldOffset))
@@ -401,6 +430,10 @@ theorem coordinate_free_lines (root : Node) (depth : Nat) {coordinate : Nat}
       rcases hoffset with ⟨old, hold, hchild⟩
       exact ⟨freeRow_child (ih old hold).1 hchild,
         freeColumn_child (ih old hold).2 hchild⟩
+
+/- The public statements below only translate the internal coordinate form of
+clearance into the `IsFreeRow` and `IsFreeColumn` interface used by the board
+and scaffold theorems. -/
 
 theorem freeRowAt_iff_isFreeRow (root : Node) (depth row : Nat) :
     FreeRowAt root depth row ↔

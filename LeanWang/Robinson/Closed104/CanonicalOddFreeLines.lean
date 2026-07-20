@@ -14,6 +14,24 @@ import LeanWang.Robinson.Closed104.ShadedSubstitutionSupertiles
 The deterministic raw shade substitution has a finite two-parity invariant.
 Clear interior nodes propagate through child rows or columns `0`, `1`, and
 `3`; a separate boundary class accounts for the strict lower board boundary.
+
+Unlike the even-depth proof, this argument does not propagate absence of a
+signal directly.  It classifies every node met by a candidate row or column:
+the classification records the parity of the line offset and distinguishes the
+left/bottom boundary node from the open interior.  The finite certificate
+proves that each allowed offset child transforms those two classes correctly.
+After induction over the offset tree, the class-specific clearance checks turn
+node membership back into absence of the selected signal.
+
+The proof is organized as follows:
+
+1. normalize coordinates and identify the concrete nodes checked by the
+   certificate;
+2. define the axis-independent interior/boundary strip invariant;
+3. prove its geometric one-level step and discharge that step with the finite
+   transition certificate;
+4. induct over generated offsets; and
+5. read the certified local clearance at tile coordinate `1` of each node.
 -/
 
 noncomputable section
@@ -29,6 +47,11 @@ open CanonicalFreeLine CanonicalFreeLineBranching CanonicalOddFreeLineData
   CanonicalOddFreeLineCertificate CanonicalOddFreeLineCoordinates
 
 set_option maxRecDepth 20000
+
+/- These definitions connect the semantic selected-signal grid to the raw node
+indices used by the finite certificate.  `nodeAt` starts two substitution
+levels below the seed because that is the scale at which the base strips were
+enumerated. -/
 
 def indexGrid (level : Nat) : Nat → Nat → Index :=
   supertileIndexGrid level seedNode
@@ -183,6 +206,12 @@ abbrev RowBoundary := StripBoundary .row
 abbrev ColumnInterior := StripInterior .column
 abbrev ColumnBoundary := StripBoundary .column
 
+/- A strip contains an open run of interior nodes and one distinguished node
+on its lower endpoint.  Keeping the endpoint in a separate class is essential:
+under refinement, child zero remains the boundary while children one through
+three enter the interior.  Row and column strips share this geometry after
+swapping coordinates with `orientedPoint`. -/
+
 private def offsetParity (offset : Nat) : StripParity :=
   if offset % 2 = 0 then .even else .odd
 
@@ -282,6 +311,10 @@ private theorem strip_step {axis : StripAxis}
     rw [alongDiv, alongMod]
     exact boundaryChild _ oldClassified.2
 
+/- `strip_step` is purely geometric.  The next theorem plugs in one row of the
+finite transition table: `interior_child`, `boundary_child`, and
+`boundary_enters` are exhaustive checks over the certified node classes. -/
+
 private theorem strip_transition {axis : StripAxis}
     {depth old child : Nat} (transition : StripTransition)
     (transitionMem : transition ∈ stripTransitions)
@@ -338,6 +371,10 @@ private theorem base_classified : RowClassified 0 2 ∧ ColumnClassified 0 2 := 
     And.intro (And.intro rowInterior rowBoundary)
       (And.intro columnInterior columnBoundary)
 
+/- The arithmetic branching rule and the finite state machine coincide:
+even offsets choose child 0 or 1, while odd offsets choose child 3.  These are
+the three transitions certified in `CanonicalOddFreeLineCertificate`. -/
+
 private theorem transition_of_child {old child : Nat}
     (hchild : child ∈ CanonicalFreeLineBranching.children old) :
     ∃ transition, transition ∈ stripTransitions ∧
@@ -393,6 +430,11 @@ theorem offset_classified (depth : Nat) {offset : Nat}
       rw [offsets_succ, List.mem_flatMap] at hoffset
       rcases hoffset with ⟨old, hold, hchild⟩
       exact classified_child (ih hold) hchild
+
+/- Classification is stronger than the desired free-line statement.  For an
+interior tile coordinate, divide by two to find its node, use the strip
+invariant to select the even or odd certified class, and read the class's local
+clearance check at the coordinate modulo two. -/
 
 @[irreducible] def FreeRowAt (depth row : Nat) : Prop :=
   ∀ x, quarterWest (2 * 4 ^ depth) < x →
