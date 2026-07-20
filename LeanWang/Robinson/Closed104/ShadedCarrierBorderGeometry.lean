@@ -12,6 +12,18 @@ import Mathlib.Data.Nat.Periodic
 This module characterizes the canonical nearest-border paths of the corrected
 union-of-frames border formula.  The first step is the exact scaling relation
 between consecutive frame depths.
+
+A depth-`d` frame repeats with period `4^(d+1)`.  Its opening and closing
+coordinates are distinct residues in that period.  One substitution divides
+coordinates by four, rounded upward; an opening survives only at fine residue
+`1`, and a closing only at fine residue `0`.  This is precisely the behavior
+implemented by `liftBorder`.
+
+After proving that scaling law, the module shows that boundaries from different
+depths cannot overlap.  Therefore the bounded search in `selectedBorder` is a
+mathematical union of the outer opening and all frame boundaries, independent
+of search priority.  Those facts are the arithmetic input to the finite-state
+hierarchy proof.
 -/
 
 namespace LeanWang
@@ -21,6 +33,11 @@ namespace Closed104
 namespace ShadedCarrierBorderGeometry
 
 open ShadedCarrierHierarchy ShadedCarrierBorderHierarchy
+
+/- `ceilDivFour` is the coarse coordinate map for one substitution.  The next
+lemmas establish how periods, frame interiors, and boundary residues transform
+under it.  `FrameSide` packages the opening and closing calculations, whose
+only asymmetry is fine residue 1 versus 0. -/
 
 theorem ceilDivFour_add_four_mul (coordinate multiple : Nat) :
     ceilDivFour (coordinate + 4 * multiple) =
@@ -256,6 +273,11 @@ theorem frameBorder_succ (depth coordinate transverse : Nat) :
       · simp [liftBorder, opening, closing]
   · rfl
 
+/- A deeper frame boundary projects to residue zero or one at every shallower
+scale.  Shallower frame boundaries lie strictly beyond those residues, so no
+point can belong to frame boundaries of two different depths.  The persistent
+outer opening at coordinate one is disjoint for the same reason. -/
+
 theorem period_dvd_scale_of_lt {small large : Nat} (h : small < large) :
     period small ∣ scale large := by
   rw [period, scale]
@@ -431,6 +453,11 @@ theorem firstBorder_eq_some_iff
     firstBorder first second = some orientation ↔
       first = some orientation ∨ (first = none ∧ second = some orientation) := by
   cases first <;> cases second <;> simp [firstBorder]
+
+/- Because all candidate borders are pairwise disjoint, the executable
+`Fin.findSome?` selector has the simple extensional description below.  Its
+lifted form then separates the inherited depths `2 .. level + 1` from the new
+depth-one frame used by the substitution recurrence. -/
 
 /-- The finite selector contains exactly the outer opening and the frame
 boundaries at depths `1` through `level`. -/

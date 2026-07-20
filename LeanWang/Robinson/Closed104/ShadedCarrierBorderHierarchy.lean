@@ -13,6 +13,20 @@ import Mathlib.Tactic.IntervalCases
 
 The finite extended-patch certificate is promoted here to the general direct
 border formula and then projected back to concrete substitution supertiles.
+
+There are three representations in play:
+
+* the actual decorated substitution node and its selected signal outputs;
+* the direct arithmetic formula `selectedBorder`; and
+* a finite certificate state containing a node, coordinate parities, and a
+  `3 x 3` border patch.
+
+The proof first normalizes the node outputs and derives the recursive equation
+for `selectedBorder`.  It then proves that refining an arithmetic patch agrees
+with refining a certificate state.  Closure of the finite state list promotes
+the checked equality between visible patches and node outputs to every
+supertile block.  The final theorems discard the certificate state and identify
+the semantic row and column signals with the arithmetic border formula.
 -/
 
 namespace LeanWang
@@ -24,6 +38,11 @@ namespace ShadedCarrierBorderHierarchy
 open Signals.FreeCellLocal ShadedCarrierHierarchy
 open ShadedCarrierBorderGeometry
 open ShadedSubstitution ShadedSubstitutionPlane
+
+/- These lemmas are representation bridges.  They identify the executable
+node indices in the certificate with canonical supertile nodes, and unpack the
+eight entries of `nodePatch` as the four horizontal and four vertical selected
+signal observations of a `2 x 2` node. -/
 
 theorem generatedNode_eq_supertileNodeGrid
     (level : Nat) (root : Node) (x y : Nat) :
@@ -108,6 +127,11 @@ theorem columnInterior_eq_verticalOutput
   simpa [columnInterior, ShadedSignalRectangle.verticalInterior,
     componentAt, supertileIndexGrid, supertileShadeGrid,
     supertileBlockGrid, quadrantAt, Nat.mod_mod] using output.symm
+
+/- The direct border formula satisfies the same local recurrence as the
+substitution: lift all old borders through the coordinate map, then add the new
+depth-one frame.  The block and child versions merely expose the bounded local
+coordinates required by the finite patch computation. -/
 
 /-- Splitting the direct finite formula at depth one recovers the local
 substitution recurrence used by the finite-state factor. -/
@@ -277,6 +301,10 @@ theorem selectedBorder_eq_refinedColumnBorder_y_zero
   simpa using selectedBorder_eq_refinedColumnBorder level blockX blockY
     childX childY x 0 hchildX hchildY hx (by omega)
 
+/- The preceding bounded computations cover every entry of the `3 x 3` halo,
+so an arithmetic extended patch refines exactly as the certificate says.  This
+is the key connection between the closed formula and the finite state graph. -/
+
 theorem extendedPatch_succ (level blockX blockY childX childY : Nat)
     (hchildX : childX < 4) (hchildY : childY < 4) :
     extendedPatch (level + 1)
@@ -319,6 +347,12 @@ theorem state_succ (level blockX blockY childX childY : Nat)
   · simp [state, refineState, Nat.add_mod, Nat.mul_mod]
   · exact extendedPatch_succ level blockX blockY childX childY
       hchildX hchildY
+
+/- The native-decided certificate has three logical fields: every listed state
+has the correct visible node patch, the list is closed under all sixteen child
+positions, and the initial state is listed.  The special corner-transition
+field is read separately to characterize where corrected tile index zero can
+appear. -/
 
 theorem visiblePatch_eq_nodePatch_of_mem {candidate : State}
     (member : candidate ∈ states) :
@@ -394,6 +428,10 @@ theorem state_mem (level blockX blockY : Nat)
         omega
       simpa [decomposeX, decomposeY] using childMember
 
+/- Induction on base-four block coordinates now places every bounded canonical
+block in the certified state list.  From this point onward, finite-state facts
+apply uniformly at arbitrary substitution depth. -/
+
 /-- The three certified ways index zero occurs in a canonical child block.
 This packages the corrected-tile and thin-layer finite analysis together. -/
 theorem supertileIndexGrid_zero_cases
@@ -452,6 +490,11 @@ theorem visiblePatch_state_eq_nodePatch
   have patch := visiblePatch_eq_nodePatch_of_mem
     (state_mem level blockX blockY hblockX hblockY)
   simpa [state, generatedNode_seed_eq_supertileNodeGrid] using patch
+
+/- Finally, read the visible entries of the certified patch and recombine the
+block coordinate and its modulo-two local coordinate.  This removes all
+certificate machinery from the public conclusion: actual selected signals on
+the seed supertile equal `selectedBorder` pointwise. -/
 
 theorem horizontalOutput_node_eq_selectedBorder
     (level blockX blockY x y : Nat)
