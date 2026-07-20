@@ -12,6 +12,18 @@ A two-sided TM0 tape is represented on a one-sided tape by pairing source
 positions `-(i + 1)` and `i` at target position `i`.  This module contains only
 the coordinate bookkeeping and source semantics used by the fixed-machine
 simulation.
+
+The target head stores both a natural-number position and a `Side`, indicating
+which member of the pair is the active source cell.  Moving away from the
+source origin increments the natural coordinate; moving inward decrements it,
+except that crossing between source positions `-1` and `0` changes `Side` at
+target position zero.  `activeAbs_moveHead` is the central coordinate invariant.
+
+The paired symbols at every target position are read through offsets relative
+to the source head.  A source move shifts those offsets without changing the
+stored pairs, while a source write changes exactly the active component of the
+pair under the target head.  The later fixed-machine construction implements
+these two cases as finite transition phases.
 -/
 
 noncomputable section
@@ -30,6 +42,9 @@ def symbols : List Symbol := Finset.univ.toList
 
 theorem mem_symbols (symbol : Symbol) : symbol ∈ symbols := by
   simp [symbols]
+
+/- Which half of the folded tape is active.  At target position `i`, `.left`
+denotes source position `-(i + 1)` and `.right` denotes source position `i`. -/
 
 inductive Side where
   | left
@@ -72,6 +87,10 @@ def moveHead (side : Side) (atOrigin : Bool) (head : Nat)
   else if side.isOutward dir then head + 1
   else head.pred
 
+/- `Config` deliberately retains the complete source TM0 configuration beside
+the finite folded control data.  It is a semantic relation used to prove the
+simulation, not the eventual executable machine state. -/
+
 structure Config where
   source : Turing.TM0.Cfg Symbol Label
   side : Side
@@ -102,6 +121,10 @@ def symbolsAt (tape : Turing.Tape Symbol) (side : Side)
     (head position : Nat) : Symbol × Symbol :=
   (tape.nth (sourceOffset side head (leftAbs position)),
     tape.nth (sourceOffset side head (rightAbs position)))
+
+/- Moving the source head changes the origin from which tape offsets are
+measured.  The absolute source position represented at each target cell stays
+fixed, so every stored symbol pair remains unchanged. -/
 
 @[simp] theorem sourceOffset_right_head (head : Nat) :
     sourceOffset .right head (rightAbs head) = 0 := by
@@ -151,6 +174,10 @@ theorem sourceOffset_right_ne_zero_of_ne_head
     (side : Side) {head position : Nat} (h : position ≠ head) :
     sourceOffset side head (rightAbs position) ≠ 0 := by
   cases side <;> simp [sourceOffset, activeAbs, leftAbs, rightAbs] <;> omega
+
+/- A write leaves every inactive target cell unchanged and replaces exactly
+one component of the pair at the active cell.  These lemmas are the tape part
+of the folded simulation invariant. -/
 
 theorem symbolsAt_write_inactive (tape : Turing.Tape Symbol) (side : Side)
     {head position : Nat} (symbol : Symbol) (h : position ≠ head) :

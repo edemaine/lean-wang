@@ -12,12 +12,32 @@ Horizontal position tags force the finite input history from the distinguished
 corner.  Beyond a computable bound, the bottom history is constant and uses
 one self-looping tail tile.  Normal rows use the same finite local-history
 language as the empty-input construction.
+
+The theorem `tilesQuarterWithSeed_iff_not_halts` has two directions.  For a
+nonhalting run, `runTile` places its actual two-row local histories in the
+quarter plane.  Conversely, the seed and horizontal position tags force the
+entire bottom row; row tags make every higher tile a normal history tile.
+Vertical colors expose the lower triples of the next row, and horizontal
+overlaps make those triples one coherent machine configuration.  Inductively,
+every positive tiling row therefore decodes to the corresponding run row.  A
+first halting configuration is impossible because the normal history palette
+contains no tile whose relevant transition enters the halt state.
+
+The position tags are needed only on the input-dependent bottom row.  Once the
+finite input and one-step lookahead have become blank, a self-looping tag and a
+single tail tile represent the infinite remainder, keeping the generated tile
+set finite.
 -/
 
 namespace LeanWang
 namespace MachineInputTiles
 
 open MachineInput
+
+/- A Wang color stores both the ordinary local-history overlap and a tag.  On
+horizontal edges the tag is a bottom-row position; on vertical edges it says
+whether the lower row is the distinguished input row or a normal row.  The two
+matching lemmas below are the decoding interface for these packed colors. -/
 
 def horizontalColor (positionTag rowTag : Nat)
     (prevLeft prevRight nextLeft nextRight : MachineCell) : Nat :=
@@ -90,6 +110,10 @@ theorem vMatches_toWangTile_iff
         lower.nextCenter = upper.prevCenter ∧
         lower.nextRight = upper.prevRight := by
   simp [WangTile.VMatches, toWangTile, taggedTripleCellColor_eq_iff]
+
+/- The input-specific palette consists of a finite prefix followed by one
+constant blank tile.  The `+ 3` margin covers both the width-three local window
+and the possible one-cell head move in the first transition. -/
 
 /-- Past this position, the time-zero local history is a constant blank tail. -/
 def tailPosition (input : List Nat) : Nat :=
@@ -251,6 +275,10 @@ theorem initialTile_hMatches (M : Machine) (input : List Nat) (position : Nat) :
       rw [historyTile_zero_eq_blank_of_tailPosition_le M input (le_refl _)]
       simp [blankHistoryTile]
 
+/- Soundness: place the actual history tile at `(position, time)`.  Time zero
+uses the tagged finite-input row, while all later rows use the fixed normal
+palette.  Horizontal and vertical validity are then direct overlap facts. -/
+
 def runTile (M : Machine) (input : List Nat) (time position : Nat) : WangTile :=
   if time = 0 then initialTile M input position
   else toWangTile 0 0 normalRowTag normalRowTag
@@ -307,6 +335,12 @@ theorem tilesQuarterWithSeed_of_not_halts
     · intro point
       exact runTile_vMatches M input point.2 point.1
   · rfl
+
+/- Completeness starts by classifying every palette member.  The seed fixes
+position zero, horizontal tags force its unique successor repeatedly, and the
+self-looping tail handles all remaining positions.  Since every legal north
+edge is tagged `normal`, vertical matching excludes another initial tile above
+the bottom row. -/
 
 theorem mem_tiles_iff (M : Machine) (input : List Nat) (tile : WangTile) :
     tile ∈ tiles M input ↔
@@ -427,6 +461,12 @@ structure IsDecodedHistoryRow (M : Machine) (input : List Nat)
 def DecodedHistoryRow (M : Machine) (input : List Nat)
     (plane : Nat × Nat → TileIn (tiles M input)) (time : Nat) : Prop :=
   ∃ row, IsDecodedHistoryRow M input plane time row
+
+/- A decoded row remembers more than tile membership: its lower triples equal
+the true machine configuration at that time.  Local transition validity fixes
+each upper center; overlap with neighboring tiles fixes the upper left and
+right cells.  Vertical matching then transfers all three cells to the lower
+triple of the next row. -/
 
 theorem row_one_decoded
     {M : Machine} {input : List Nat}
@@ -585,6 +625,11 @@ theorem decoded_row_of_nonhalting_prefix
         (ih fun step hstep hbound => hprefix step hstep (by omega))
         (hprefix (time + 1) (by omega) (by omega))
         (hprefix (time + 1 + 1) (by omega) (by omega))
+
+/- At the first halting time, all preceding positive rows can be decoded.  If
+halting occurs immediately, row one already contains a forbidden halt head.
+Otherwise the tile at the next head position would have to realize a local
+transition into `halt`, which the normal palette explicitly omits. -/
 
 theorem false_of_run_one_halt
     {M : Machine} {input : List Nat}
