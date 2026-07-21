@@ -943,6 +943,8 @@ private theorem boundaryMiddle_primrec {numTags : Nat} :
       continuationMiddle input.1 input.2.1
         (.boundaryNavigation input.2.2.1 input.2.2.2.1
           input.2.2.2.2.1 input.2.2.2.2.2.1 input.2.2.2.2.2.2) := by
+  -- Name the primitive-recursive projections shared by every navigation
+  -- action before constructing the action-specific rule lists.
   have hradiusOffset : Primrec fun input : BoundaryMiddleInput numTags =>
       (input.1, input.2.1) :=
     Primrec.pair Primrec.fst (Primrec.fst.comp Primrec.snd)
@@ -965,6 +967,8 @@ private theorem boundaryMiddle_primrec {numTags : Nat} :
       (Primrec.snd.comp
         (Primrec.snd.comp (Primrec.snd.comp
           (Primrec.snd.comp (Primrec.snd.comp Primrec.snd)))))
+  -- Preservation delegates to generic target rules; erasure has separate
+  -- one-rule and two-rule forms according to its optional departure move.
   have hpreserve : Primrec fun input : BoundaryMiddleInput numTags =>
       targetRules (numTags := numTags) (foundState input.1 input.2.1)
         input.2.2.2.2.1
@@ -1050,6 +1054,7 @@ private theorem boundaryMiddle_primrec {numTags : Nat} :
       (heraseSome.comp₂ (Primrec.fst.comp₂ Primrec₂.left)
         Primrec₂.right)).of_eq fun pair => by
           cases pair.2 <;> rfl
+  -- Decode the navigation action and select the corresponding construction.
   exact (Primrec.option_casesOn hactionCode hpreserve herase).of_eq
     fun input => by
       cases input.2.2.2.2.2.2 with

@@ -404,6 +404,9 @@ theorem gap_of_reachable_search_on_immortal_orbit
         False :=
     (FullTM0.HaltsFrom.immortalFrom_iff_not
       (CounterControlNestingBridge.machine base c) start).mp himmortal
+  -- Every ray either has the desired gap, has a first wrong nonblank, or is
+  -- blank forever.  The first alternative contradicts `hnoGap`; the other
+  -- two are shown mortal.
   rcases searchGap_or_wrongGap_or_blankRay
       (fun symbol : Symbol numTags => symbol = blankSymbol)
       (command base c search).target.Matches outer
@@ -411,6 +414,9 @@ theorem gap_of_reachable_search_on_immortal_orbit
     hmatching | ⟨distance, hwrong⟩ | hallBlank
   · exact False.elim (hnoGap hmatching)
   · let bound := NestingMachine.bound (CanonicalInitializer.radius c)
+    -- A nearby obstruction halts inside the bounded scanner.  A farther
+    -- obstruction exhausts the scanner and transfers the no-gap property to
+    -- the remaining launch ray.
     by_cases hnear : distance ≤ bound
     · have hhalts := haltsFrom_of_reaches_scan_wrongGap base c
           (CounterControlWellFormed.compileCommand_commandAt base c search)
@@ -450,7 +456,9 @@ theorem gap_of_reachable_search_on_immortal_orbit
         apply contradicts_immortality
         apply FullTM0.HaltsFrom.of_reaches (hreach.trans htoLaunch)
         simpa [exhaustedLaunchCfg, bound] using hlaunchHalts
-  · let bound := NestingMachine.bound (CanonicalInitializer.radius c)
+  · -- An entirely blank scan likewise reaches an exhausted launch whose
+    -- remaining ray still has no matching target.
+    let bound := NestingMachine.bound (CanonicalInitializer.radius c)
     have hblankThrough : ∀ i ≤ bound,
         outer (FullTM0.Tape.offset
           (command base c search).searchDirection i) = blankSymbol := by

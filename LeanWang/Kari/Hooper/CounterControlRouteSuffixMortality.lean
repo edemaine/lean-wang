@@ -35,6 +35,8 @@ open CounterControlExactCommandContinuation
 
 noncomputable section
 
+/-! ## Constructor facts for preserving route commands -/
+
 /-- Every command emitted by a marker route is preserving boundary
 navigation. -/
 theorem boundaryPreserve_of_mem_routeCommandsAux
@@ -115,6 +117,8 @@ theorem rawTargetMatches_of_compiled
     simpa [CounterControlCommandAt.compileRawAtTag,
       compileNavigationAction, Command.target,
       RawTargetMatches, Target.Matches] using hmatch
+
+/-! ## Algebra of retained route tails -/
 
 /-- Gap trace after a selected preserving route command has already found
 its target and entered its success reference.  A nonempty tail begins with
@@ -241,6 +245,8 @@ theorem RouteTailGaps.split
             ⟨middle, earlyTrace, lateTrace⟩
           exact ⟨middle, .cons leg rest start middle earlyTrace, lateTrace⟩
 
+/-! ## Executing a selected route suffix -/
+
 /-- Success reference selected by one route position. -/
 def routeSuffixSuccess (growth : Turing.Dir) (source directSlot : Nat)
     (after : ControlRef) : List MarkerValidation.Leg → ControlRef
@@ -299,11 +305,14 @@ theorem reaches_routeSuffix_of_immortal
       ⟨resolve base c (rawSuccessRef raw), T⟩) :
     Nonempty (RouteSuffixReached base c growth source searchSlot directSlot
       after route raw T) := by
+  -- Strip route legs from the front while shifting the generated slot
+  -- numbers.  The result remembers the stripped prefix in `before`.
   induction route generalizing searchSlot directSlot raw with
   | nil => simp [routeCommandsAux] at hraw
   | cons leg route ih =>
       cases route with
       | nil =>
+          -- The singleton command hands off directly to `after`.
           simp only [routeCommandsAux, List.mem_cons, List.not_mem_nil,
             or_false] at hraw
           subst raw
@@ -317,6 +326,8 @@ theorem reaches_routeSuffix_of_immortal
           simp only [routeCommandsAux, List.mem_cons] at hraw
           rcases hraw with hhead | htail
           · subst raw
+            -- If the selected command is the head, execute its direct
+            -- continuation and then the entire remaining gap trace.
             let handoff := directRef growth source directSlot
             let continuation : RawDirectRule :=
               ⟨growth, handoff, .boundary leg.target,
@@ -369,7 +380,9 @@ theorem reaches_routeSuffix_of_immortal
               .cons next rest T finish htrace, ?_⟩⟩
             · simp [routeSuffixSuccess]
             · simpa [rawSuccessRef, handoff] using hfinish
-          · have hcommandsTail : ∀ command,
+          · -- Otherwise recurse at the shifted slots and restore the
+            -- skipped head leg to the recorded route prefix.
+            have hcommandsTail : ∀ command,
                 command ∈ routeCommandsAux growth source (searchSlot + 1)
                     (directSlot + 1) after (next :: rest) →
                   command ∈ rawCommands := by

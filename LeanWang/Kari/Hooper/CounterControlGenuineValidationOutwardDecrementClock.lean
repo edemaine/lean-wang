@@ -37,64 +37,7 @@ set_option maxRecDepth 10000
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
-/-- Retag a retained boundary-`4` gap with another generated command having
-the same target and physical search direction. -/
-private def retagFour
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c)
-    (growth : Turing.Dir)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands)
-    (htarget : (CounterControlCommandAt.compileRawCommand base c raw hraw).target =
-      Target.boundary (4 : Fin 5))
-    (hdirection :
-      (CounterControlCommandAt.compileRawCommand base c raw hraw).searchDirection =
-        orient growth .right)
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary (4 : Fin 5)).Matches current.outer
-      (orient growth .right) current.distance) : GenuineSearch base c := by
-  let search : Search := CounterControlCommandAt.rawTag raw hraw
-  exact {
-    search := search
-    outer := current.outer
-    distance := current.distance
-    gap := by
-      have hcommand : command base c search =
-          CounterControlCommandAt.compileRawCommand base c raw hraw := by
-        rfl
-      rw [hcommand, htarget, hdirection]
-      exact hgap }
-
-@[simp] private theorem retagFour_distance
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c) (growth : Turing.Dir)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
-    (retagFour base c current growth raw hraw htarget hdirection hgap).distance =
-      current.distance :=
-  rfl
-
-@[simp] private theorem retagFour_selectedRaw
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c) (growth : Turing.Dir)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
-    (retagFour base c current growth raw hraw htarget hdirection hgap).selectedRaw =
-      raw := by
-  exact CounterControlCommandAt.rawCommands_get_rawTag raw hraw
-
-private theorem retagFour_foundTape
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c) (growth : Turing.Dir)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap
-    (hcurrentDirection : current.direction = orient growth .right) :
-    (retagFour base c current growth raw hraw htarget hdirection hgap).foundTape =
-      current.foundTape := by
-  change current.outer.moveN
-      (command base c (CounterControlCommandAt.rawTag raw hraw)).searchDirection
-      current.distance =
-    current.outer.moveN current.direction current.distance
-  have hcommand : command base c (CounterControlCommandAt.rawTag raw hraw) =
-      CounterControlCommandAt.compileRawCommand base c raw hraw := by
-    rfl
-  rw [hcommand, hdirection, hcurrentDirection]
+/-! ## Retagging the forced clock branch -/
 
 /-- At the branch direct state, immortality forces one of the two rules
 owned by the clock-decrement instruction to match. -/
@@ -115,26 +58,91 @@ private theorem clockBranchRead_of_immortal
     (CounterControlDecrementEntry.branchRead_of_reaches base c hprogram
       (foundCfg current) T hreaches himmortal)
 
-private def outwardHandoff_of_monotone
-    {base : Nat} {c : Nat.Partrec.Code}
-    {current next : GenuineSearch base c}
-    {growth : Turing.Dir} {source : Nat}
-    {instruction : CounterMachine.Instruction}
-    {progress : ValidationEnd current growth source instruction}
-    {hraw : current.selectedRaw = .boundaryNavigation
-      ⟨growth, source, 7⟩ 4 .right
-        (bodyEntry growth source instruction) .preserve}
-    (hreaches : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      (foundCfg current) (foundCfg next))
-    (hdistance : current.distance ≤ next.distance)
-    (outcome : FoundMonotoneGuardedEntryOutcome next) :
-    OutwardInstructionHandoff current (OutwardObligation.four progress hraw) := by
-  cases outcome with
-  | logical core htail hinside =>
-      exact .logical core (hreaches.trans htail) (hdistance.trans hinside)
-  | nextSearch guarded htail hle =>
-      exact .nextSearch guarded (hreaches.trans htail) (hdistance.trans hle)
+/-- A generated clock-decrement branch retagged onto the original outward
+gap, together with the operational facts needed by either branch
+continuation. -/
+private structure RetaggedBranch
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (raw : RawCommand) where
+  next : GenuineSearch base c
+  selectedRaw : next.selectedRaw = raw
+  reaches : FullTM0.Reaches
+    (CounterControlNestingBridge.machine base c)
+    (foundCfg current) (foundCfg next)
+  immortal : FullTM0.ImmortalFrom
+    (CounterControlNestingBridge.machine base c) (foundCfg next)
+  distance_eq : next.distance = current.distance
+
+/-- Turn an exact generated branch entry into a genuine search carrying the
+original outward gap.  Immortality supplies the generated search's found
+state; retagging identifies it with the requested branch command. -/
+private def retaggedBranch
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands)
+    (htarget :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).target =
+        Target.boundary target)
+    (hdirection :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).searchDirection =
+        orient growth .right)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches current.outer
+      (orient growth .right) current.distance)
+    (hcurrentDirection : current.direction = orient growth .right)
+    (hread : current.foundTape.read = boundarySymbol target)
+    (himmortal : FullTM0.ImmortalFrom
+      (CounterControlNestingBridge.machine base c) (foundCfg current))
+    (hsearchEntry : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      ⟨searchState base c raw.address, current.foundTape⟩) :
+    RetaggedBranch base c current raw := by
+  have htargetMatch :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).target.Matches
+        current.foundTape.read := by
+    rw [htarget]
+    simpa [Target.Matches] using hread
+  let immediate := CounterControlGenuineDecrementEntry.immediateSearch
+    base c raw hraw current.foundTape htargetMatch
+  let next := GenuineSearch.retagBoundary base c current growth target raw
+    hraw htarget hdirection hgap
+  have hentry : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      immediate.cfg := by
+    rw [CounterControlGenuineDecrementEntry.immediateSearch_cfg]
+    exact hsearchEntry
+  have himmortalImmediate := FullTM0.ImmortalFrom.of_reaches himmortal hentry
+  have hfoundImmediate := reaches_foundCfg_of_immortal immediate
+    himmortalImmediate
+  have hfoundTapeNext : next.foundTape = current.foundTape :=
+    GenuineSearch.retagBoundary_foundTape base c current growth target raw
+      hraw htarget hdirection hgap hcurrentDirection
+  have himmediateSelected : immediate.selectedRaw = raw :=
+    CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw
+      base c raw hraw current.foundTape htargetMatch
+  have hnextSelected : next.selectedRaw = raw :=
+    GenuineSearch.retagBoundary_selectedRaw base c current growth target raw
+      hraw htarget hdirection hgap
+  have himmediateFoundTape : immediate.foundTape = current.foundTape := by
+    change current.foundTape.moveN immediate.direction 0 = current.foundTape
+    simp
+  have hfoundEq : foundCfg immediate = foundCfg next := by
+    rw [immediate.foundCfg_eq, next.foundCfg_eq]
+    rw [himmediateSelected, hnextSelected, himmediateFoundTape,
+      hfoundTapeNext]
+  have hreachesNext : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c) (foundCfg current)
+      (foundCfg next) := by
+    rw [← hfoundEq]
+    exact hentry.trans hfoundImmediate
+  exact {
+    next := next
+    selectedRaw := hnextSelected
+    reaches := hreachesNext
+    immortal := FullTM0.ImmortalFrom.of_reaches himmortal hreachesNext
+    distance_eq := rfl }
+
+/-! ## Final-boundary clock handoff -/
 
 /-- The final outward validation command followed by a clock decrement has
 a monotone handoff through either the positive shift or zero recovery. -/
@@ -155,6 +163,8 @@ theorem outwardFour_clockDecrement_handoff
       (CounterControlNestingBridge.machine base c) (foundCfg current)) :
     Nonempty (OutwardInstructionHandoff current
       (OutwardObligation.four progress hraw)) := by
+  -- The clock has no body route: validation reaches the test directly, and
+  -- immortality then selects exactly one of its positive and zero branches.
   have hread : current.foundTape.read = boundarySymbol 4 :=
     outwardFour_foundTape_read current growth source
       (.decrement .clock ifZero ifPositive) hraw
@@ -208,7 +218,7 @@ theorem outwardFour_clockDecrement_handoff
       (current.foundTape.move (orient growth .left)) hbranchRead with ⟨step⟩
   rcases step with ⟨hblank, hpositiveStepRaw⟩ |
     ⟨hboundary, hzeroStepRaw⟩
-  ·
+  · -- The blank branch enters the first positive shift at boundary `4`.
     have hpositiveStep : FullTM0.Reaches
         (CounterControlNestingBridge.machine base c)
         ⟨resolve base c (directRef growth source branchDirectSlot),
@@ -217,7 +227,11 @@ theorem outwardFour_clockDecrement_handoff
           current.foundTape⟩ := by
       rw [hback] at hpositiveStepRaw
       exact hpositiveStepRaw
-    have hpositiveEntry := hbranch.trans hpositiveStep
+    have hpositiveEntry : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c) (foundCfg current)
+        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
+          current.foundTape⟩ :=
+      hbranch.trans hpositiveStep
     let raw := CounterControlGenuineDecrementEntry.firstDecrementShiftRaw
       growth source .clock
     have hrawMem : raw ∈ rawCommands :=
@@ -234,62 +248,23 @@ theorem outwardFour_clockDecrement_handoff
           hrawMem).searchDirection = orient growth .right :=
       CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_direction
         base c growth source .clock hrawMem
-    let next := retagFour base c current growth raw hrawMem htarget
-      hdirection hgap
-    have htargetMatch :
-        (CounterControlCommandAt.compileRawCommand base c raw hrawMem).target.Matches
-          current.foundTape.read := by
-      rw [htarget]
-      simpa [Target.Matches] using hread
-    let immediate := CounterControlGenuineDecrementEntry.immediateSearch
-      base c raw hrawMem current.foundTape htargetMatch
-    have hentry : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c) (foundCfg current)
-        immediate.cfg := by
-      rw [CounterControlGenuineDecrementEntry.immediateSearch_cfg]
-      change FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c) (foundCfg current)
-        ⟨searchState base c ⟨growth, source, secondarySearchBase⟩,
-          current.foundTape⟩
-      exact hpositiveEntry
-    have himmortalImmediate := FullTM0.ImmortalFrom.of_reaches himmortal hentry
-    have hfoundImmediate := reaches_foundCfg_of_immortal immediate
-      himmortalImmediate
-    have hfoundTapeNext : next.foundTape = current.foundTape :=
-      retagFour_foundTape base c current growth raw hrawMem htarget
-        hdirection hgap hcurrentDirection
-    have himmediateSelected : immediate.selectedRaw = raw := by
-      exact CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw
-        base c raw hrawMem current.foundTape htargetMatch
-    have hnextSelected : next.selectedRaw = raw := by
-      exact retagFour_selectedRaw base c current growth raw hrawMem htarget
-        hdirection hgap
-    have himmediateFoundTape : immediate.foundTape = current.foundTape := by
-      change current.foundTape.moveN immediate.direction 0 = current.foundTape
-      simp
-    have hfoundEq : foundCfg immediate = foundCfg next := by
-      rw [immediate.foundCfg_eq, next.foundCfg_eq]
-      rw [himmediateSelected, hnextSelected, himmediateFoundTape,
-        hfoundTapeNext]
-    have hreachesNext : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c) (foundCfg current)
-        (foundCfg next) := by
-      rw [← hfoundEq]
-      exact hentry.trans hfoundImmediate
-    have himmortalNext := FullTM0.ImmortalFrom.of_reaches himmortal
-      hreachesNext
-    have hcommand : next.selectedRaw ∈
+    have entered := retaggedBranch base c current growth 4 raw hrawMem
+      htarget hdirection hgap hcurrentDirection hread himmortal (by
+        simpa only [raw,
+          CounterControlGenuineDecrementEntry.firstDecrementShiftRaw,
+          RawCommand.address] using hpositiveEntry)
+    have hcommand : entered.next.selectedRaw ∈
         decrementShiftCommands growth source .clock := by
-      rw [retagFour_selectedRaw]
+      rw [entered.selectedRaw]
       exact CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_mem
         growth source .clock
     rcases
         CounterControlDecrementShiftContinuation.foundMonotoneGuardedEntryOutcome_of_decrementShift
-          base c hmortal next growth source .clock ifZero ifPositive hrule
-          hcommand himmortalNext with ⟨outcome⟩
-    exact ⟨outwardHandoff_of_monotone hreachesNext (by simp [next])
-      outcome⟩
-  ·
+          base c hmortal entered.next growth source .clock ifZero ifPositive
+          hrule hcommand entered.immortal with ⟨outcome⟩
+    exact ⟨OutwardInstructionHandoff.ofMonotone entered.reaches
+      (by rw [entered.distance_eq]) outcome⟩
+  · -- The boundary-`3` branch enters the marker-preserving zero recovery.
     have hzeroStep : FullTM0.Reaches
         (CounterControlNestingBridge.machine base c)
         ⟨resolve base c (directRef growth source branchDirectSlot),
@@ -298,7 +273,11 @@ theorem outwardFour_clockDecrement_handoff
           current.foundTape⟩ := by
       rw [hback] at hzeroStepRaw
       exact hzeroStepRaw
-    have hzeroEntry := hbranch.trans hzeroStep
+    have hzeroEntry : FullTM0.Reaches
+        (CounterControlNestingBridge.machine base c) (foundCfg current)
+        ⟨searchState base c ⟨growth, source, zeroSearchBase⟩,
+          current.foundTape⟩ :=
+      hbranch.trans hzeroStep
     let raw := CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw
       growth source .clock ifZero
     have hrawMem : raw ∈ rawCommands :=
@@ -315,62 +294,23 @@ theorem outwardFour_clockDecrement_handoff
           hrawMem).searchDirection = orient growth .right :=
       CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw_direction
         base c growth source .clock ifZero hrawMem
-    let next := retagFour base c current growth raw hrawMem htarget
-      hdirection hgap
-    have htargetMatch :
-        (CounterControlCommandAt.compileRawCommand base c raw hrawMem).target.Matches
-          current.foundTape.read := by
-      rw [htarget]
-      simpa [Target.Matches] using hread
-    let immediate := CounterControlGenuineDecrementEntry.immediateSearch
-      base c raw hrawMem current.foundTape htargetMatch
-    have hentry : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c) (foundCfg current)
-        immediate.cfg := by
-      rw [CounterControlGenuineDecrementEntry.immediateSearch_cfg]
-      change FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c) (foundCfg current)
-        ⟨searchState base c ⟨growth, source, zeroSearchBase⟩,
-          current.foundTape⟩
-      exact hzeroEntry
-    have himmortalImmediate := FullTM0.ImmortalFrom.of_reaches himmortal hentry
-    have hfoundImmediate := reaches_foundCfg_of_immortal immediate
-      himmortalImmediate
-    have hfoundTapeNext : next.foundTape = current.foundTape :=
-      retagFour_foundTape base c current growth raw hrawMem htarget
-        hdirection hgap hcurrentDirection
-    have himmediateSelected : immediate.selectedRaw = raw := by
-      exact CounterControlGenuineDecrementEntry.immediateSearch_selectedRaw
-        base c raw hrawMem current.foundTape htargetMatch
-    have hnextSelected : next.selectedRaw = raw := by
-      exact retagFour_selectedRaw base c current growth raw hrawMem htarget
-        hdirection hgap
-    have himmediateFoundTape : immediate.foundTape = current.foundTape := by
-      change current.foundTape.moveN immediate.direction 0 = current.foundTape
-      simp
-    have hfoundEq : foundCfg immediate = foundCfg next := by
-      rw [immediate.foundCfg_eq, next.foundCfg_eq]
-      rw [himmediateSelected, hnextSelected, himmediateFoundTape,
-        hfoundTapeNext]
-    have hreachesNext : FullTM0.Reaches
-        (CounterControlNestingBridge.machine base c) (foundCfg current)
-        (foundCfg next) := by
-      rw [← hfoundEq]
-      exact hentry.trans hfoundImmediate
-    have himmortalNext := FullTM0.ImmortalFrom.of_reaches himmortal
-      hreachesNext
-    have hcommand : next.selectedRaw ∈
+    have entered := retaggedBranch base c current growth 4 raw hrawMem
+      htarget hdirection hgap hcurrentDirection hread himmortal (by
+        simpa only [raw,
+          CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw,
+          RawCommand.address] using hzeroEntry)
+    have hcommand : entered.next.selectedRaw ∈
         routeCommandsAux growth source zeroSearchBase zeroDirectBase
           (.logical growth ifZero)
           (AnchoredCounterGeometry.routeFromZero .clock) := by
-      rw [retagFour_selectedRaw]
+      rw [entered.selectedRaw]
       exact CounterControlGenuineDecrementEntry.firstZeroRecoveryRaw_mem
         growth source .clock ifZero
     rcases CounterControlGenuineRouteEmbedding.zeroRecovery_logical_of_rule
-        base c hmortal next himmortalNext growth source .clock ifZero
+        base c hmortal entered.next entered.immortal growth source .clock ifZero
         ifPositive hrule hcommand with ⟨outcome⟩
-    exact ⟨outwardHandoff_of_monotone hreachesNext (by simp [next])
-      outcome⟩
+    exact ⟨OutwardInstructionHandoff.ofMonotone entered.reaches
+      (by rw [entered.distance_eq]) outcome⟩
 
 end
 

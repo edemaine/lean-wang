@@ -24,6 +24,8 @@ namespace CounterProgram
 
 open CounterMachine
 
+/-! ## Deterministic association-list programs -/
+
 /-- A counter program is deterministic when every control state occurs as a
 source at most once. -/
 def Deterministic (program : Program) : Prop :=
@@ -75,6 +77,8 @@ theorem lookupInstruction_eq_some_iff_of_deterministic
             exact List.mem_map.mpr ⟨(state, instruction), htail, rfl⟩
           rw [lookupInstruction_cons_ne hstate]
           exact ih htailDet htail
+
+/-! ## Relocation and fresh-state blocks -/
 
 /-- Relocate the target-state part of the primitive-recursive instruction
 code. -/
@@ -291,6 +295,8 @@ theorem codeAppend_computable :
   Computable.list_append
 
 end Block
+
+/-! ## Verified register transfer -/
 
 /-- The two-instruction loop that transfers `source` into `target`.
 

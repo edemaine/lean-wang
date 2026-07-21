@@ -79,6 +79,7 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
     exact (FullTM0.HaltsFrom.immortalFrom_iff_not
       (CounterControlNestingBridge.machine base c) start).mp
         (by simpa [start, returnTape] using himmortal)
+  -- Immortality forces the shared return dispatcher to select a command.
   rcases return_step_or_haltsFrom base c spec.growth returnTape with
     hhalts | ⟨before, selected, after, hlist, hdirection, hread, hstep⟩
   · exact False.elim (hnotHalts hhalts)
@@ -124,6 +125,8 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
       have hchain := hone.trans hresume
       rw [houter] at hchain
       exact hchain
+    -- Invert the selected compiled command to recover its generated raw
+    -- command, hence the genuine search restarted by the resume state.
     rcases CounterControlCommandAtConverse.exists_raw_of_commandAt
         base c (by simpa [radius, selectedOffset] using hat) with
       ⟨raw, hraw, hselected, hoffset⟩
@@ -138,6 +141,8 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
         (command base c search).searchDirection = spec.growth := by
       rw [← hselectedSearch]
       exact hdirection
+    -- Cleanup erased only the five positive-coordinate boundaries, so the
+    -- return tag at logical coordinate zero is still the generated tag.
     have hreturnTag :
         logicalTape spec.growth T 0 = tagSymbol search := by
       have hread' : returnTape.read =
@@ -193,6 +198,8 @@ theorem reaches_resumed_search_at_first_obstruction_sub_one
       simpa [searchSystem, SearchSystem.startCfg,
         BoundedMarkerProgram.entryState, hcommandOffset, radius]
         using hentry
+    -- The arbitrary-search converse supplies some matching gap.  The known
+    -- first obstruction of the cleaned tape then makes its distance unique.
     rcases CounterControlArbitrarySearchMortality.gap_of_reachable_search_on_immortal_orbit
         base c hmortal
         (CounterControlOpenStepLaw.openStepContinuesOrHalts base c)

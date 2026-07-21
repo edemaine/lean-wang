@@ -26,6 +26,8 @@ namespace Kari
 namespace Hooper
 namespace CounterMachine
 
+/-! ## Registers and their encodings -/
+
 /-- The four registers used by the sparse simulator. -/
 inductive Register where
   | left
@@ -175,6 +177,8 @@ theorem decrement_eq_self_of_get_eq_zero (v : Registers) (r : Register)
 
 end Registers
 
+/-! ## Instructions and finite programs -/
+
 /-- Control states are natural numbers.  Only the finitely many states that
 occur as sources in a program can take a step. -/
 abbrev State := Nat
@@ -301,6 +305,8 @@ theorem lookupInstruction_computable :
     Computable fun input : Program × State =>
       lookupInstruction input.1 input.2 :=
   lookupInstruction_primrec.to_comp
+
+/-! ## Configuration semantics -/
 
 /-- Counter-machine configurations. -/
 structure Cfg where

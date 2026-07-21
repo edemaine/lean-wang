@@ -40,6 +40,8 @@ private def leftLeg (target : Fin 5) : MarkerValidation.Leg :=
 private def rightLeg (target : Fin 5) : MarkerValidation.Leg :=
   ⟨target, .right⟩
 
+/-! ## Boundary arithmetic -/
+
 /-- Finite gap index corresponding to a named register. -/
 def registerGap : Register → Fin 4
   | .left => 0
@@ -125,6 +127,8 @@ theorem positiveTest_predecessor (registers : Registers)
       firstGapOffset, boundaryOffset, CounterLayout.boundaryPos,
       RegisterLayout.values] at hpositive ⊢ <;> omega
 
+/-! ## Instruction navigation routes -/
+
 /-- Route from boundary `4` to the boundary immediately after the selected
 register. -/
 def routeToDecrementStart : Register → List MarkerValidation.Leg
@@ -153,6 +157,10 @@ theorem routeFromZero_ne_nil (register : Register) :
     routeFromZero register ≠ [] := by
   cases register <;> simp [routeFromZero]
 
+/-! ## Route execution on canonical layouts -/
+
+/-- The decrement-entry route reaches the selected boundary on a canonical
+layout. -/
 theorem routeToDecrementStart_executes (registers : Registers)
     (register : Register) :
     MarkerValidation.Executes (routeToDecrementStart register)

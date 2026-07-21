@@ -45,8 +45,11 @@ theorem haltsFrom_body_of_coreOpen
     (hopen : CoreOpenRepresents registers growth T) :
     FullTM0.HaltsFrom (CounterControlNestingBridge.machine base c)
       (bodyCfg base c growth ⟨source, registers⟩ instruction T) := by
+  -- Resolve each instruction body to either an earlier halt or the next open
+  -- logical configuration, whose mortality follows from the source code.
   cases instruction with
   | increment register next =>
+      -- Execute the shift schedule and recovery, preserving the open runway.
       have hcommands : ∀ raw,
           raw ∈ incrementShiftCommands growth source register →
             raw ∈ rawCommands := by
@@ -78,6 +81,8 @@ theorem haltsFrom_body_of_coreOpen
       · simpa [bodyCfg, bodyEntry, searchRef,
           CounterControlPlan.resolve] using hhalts
   | decrement register ifZero ifPositive =>
+      -- Reach the common test first, then separate the marker-preserving zero
+      -- route from the positive shift schedule.
       have hroute := machine_reaches_decrementToTest_or_halts_of_core base c
         growth source ifZero ifPositive register hrule
         hopen.toCoreRepresents
@@ -117,7 +122,9 @@ theorem haltsFrom_body_of_coreOpen
               (CounterControlAbstractTrace.target_mem_programStates hrule
                 (by simp [instructionTargets]))) hopen
         · simpa [bodyCfg] using hhalts
-      · have hpositive : 0 < registers.get register :=
+      · -- A positive register has room for its inward shift; the resulting
+        -- decremented core still carries the same open runway.
+        have hpositive : 0 < registers.get register :=
           Nat.pos_of_ne_zero hzero
         have hhandoff := machine_reaches_decrementPositiveHandoff_of_core
           base c source ifZero ifPositive register hrule

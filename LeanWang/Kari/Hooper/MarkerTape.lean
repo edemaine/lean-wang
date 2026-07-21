@@ -30,6 +30,8 @@ namespace MarkerTape
 open Turing
 open CounterMachine
 
+/-! ## Marker alphabet -/
+
 /-- The core alphabet of the four-register marker representation.  Boundary
 labels run from the initial boundary through the four right boundaries. -/
 inductive Symbol where
@@ -105,6 +107,8 @@ theorem isBlank_iff_eq_blank (symbol : Symbol) :
 theorem isBoundary_of_isBoundaryLabel {i : Fin 5} {symbol : Symbol}
     (h : IsBoundaryLabel i symbol) : IsBoundary symbol := by
   cases symbol <;> simp_all [IsBoundaryLabel, IsBoundary]
+
+/-! ## Canonical boundary tape -/
 
 /-- Absolute integer coordinate of labelled boundary `j`. -/
 def boundaryPosition (v : Registers) (j : Fin 5) : Int :=
@@ -225,6 +229,8 @@ theorem canonicalTape_gapInterior (v : Registers) (i : Fin 4) (k : Nat)
   have hblank := hgap.blank hk
   simpa [CounterLayout.firstGapCellTape] using
     canonicalTape_blank_of_coordinateBlank v _ hblank
+
+/-! ## Boundary-centered search gaps -/
 
 /-- Actual symbol tape with the head at the first cell of gap `i`. -/
 def firstGapCellTape (v : Registers) (i : Nat) : FullTM0.Tape Symbol :=

@@ -1387,6 +1387,8 @@ theorem outwardSuffix_incrementSuccess_logical
       FullTM0.Reaches (CounterControlNestingBridge.machine base c)
           (foundCfg current) core.cfg ∧
         current.distance < layoutEnd core.registers := by
+  -- Enter the first increment shift at the completed validation tape, then
+  -- expose its exact found generated search under immortality.
   let T := suffix.progress.suffix.finish
   let shift := bodyIncrementShift base c growth source next register hrule T
     suffix.finish_read
@@ -1424,6 +1426,9 @@ theorem outwardSuffix_incrementSuccess_logical
     ⟨shiftSuffix⟩
   rcases incrementDirectCompletion base c guarded growth source register next
       hrule shiftSuffix with ⟨completion⟩
+  -- Clock increments hand off directly to the next logical state; the other
+  -- registers traverse a preserving recovery route.  Both endpoints provide
+  -- the centered core needed by the common retained-gap comparison.
   cases completion with
   | logical direct hroute =>
       have hregister : register = .clock := by

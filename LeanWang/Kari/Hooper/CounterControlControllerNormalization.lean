@@ -844,6 +844,8 @@ theorem controller_normalizes_arbitrary_entry
         FullTM0.Reaches (CounterControlNestingBridge.machine base c)
             ⟨state, T⟩ finish ∧
           ControllerExit base c finish.q := by
+  -- A controller source is owned either by one compiled command block or by
+  -- one of the two shared return dispatchers.
   rcases controller_source_command_or_return base c hsource with
     ⟨before, command, after, hlist, hcommandSource⟩ |
       ⟨direction, hreturn⟩
@@ -860,6 +862,7 @@ theorem controller_normalizes_arbitrary_entry
         (fun rule => rule.1.1) at hcommandSource
     rw [List.map_append, List.mem_append] at hcommandSource
     rcases hcommandSource with hcontinuation | hprivate
+    -- Public continuation states normalize directly to a command exit.
     · rcases continuation_normalizes_arbitrary_entry base c hat T
           hcontinuation with
         hhalts | ⟨finish, hreach, hexit⟩
@@ -869,7 +872,9 @@ theorem controller_normalizes_arbitrary_entry
         apply controllerExit_of_continuation base c before after command
         · exact hlist
         · simpa [radius, commandOffset] using hexit
-    · rcases private_source_scan_or_unwind hprivate with
+    · -- Private states are either bounded-scan progress or unwind
+      -- progress; normalize each back into the public continuation graph.
+      rcases private_source_scan_or_unwind hprivate with
         ⟨progress, hprogress, hstate⟩ |
           ⟨progress, hprogress, hstate⟩
       · subst state
@@ -924,7 +929,9 @@ theorem controller_normalizes_arbitrary_entry
                   (offset := commandOffset)
                   (sharedCore := controllerCoreEntry base c)
                   (command := command))
-  · subst state
+  · -- A shared return state either halts or dispatches to a generated
+    -- command entry, which is already a controller exit.
+    subst state
     rcases return_normalizes_arbitrary_entry base c direction T with
       hhalts | ⟨before, command, after, U, hlist, _hdirection, hreach⟩
     · exact Or.inl hhalts

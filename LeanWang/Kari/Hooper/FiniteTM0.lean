@@ -34,6 +34,8 @@ namespace FiniteTM0
 
 open Turing
 
+/-! ## Finite syntax and encodings -/
+
 /-- A tape symbol is a natural number below the declared alphabet size. -/
 abbrev Symbol (numSymbols : Nat) := Fin numSymbols
 
@@ -173,6 +175,8 @@ theorem lookupAction_eq_listLookup
           change decide ((q, a) = key) = false
           simp [h]
         simp only [lookupAction, if_neg h, List.lookup, hb, ih]
+
+/-! ## Determinism and machine semantics -/
 
 /-- A table is deterministic when no two rules have the same source state and
 scanned symbol. -/
@@ -336,6 +340,8 @@ theorem machine_eq_some_iff_of_deterministic
     have hlookup :=
       (lookupAction_eq_some_iff_of_deterministic hdet).2 h
     simp [hlookup]
+
+/-! ## Computability of table lookup -/
 
 /-- Explicit table lookup is primitive recursive in the table, state, and
 scanned symbol. -/

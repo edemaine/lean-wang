@@ -1069,26 +1069,6 @@ theorem PositiveCenteredEnd.distance_lt_layoutEnd_of_boundary_lt_start
 
 /-! ## Branch handoffs which do not require new shifted geometry -/
 
-/-- Lift a monotone continuation of a retagged search back through an
-arbitrary outward-validation obligation. -/
-private def outwardHandoff_of_monotone
-    {base : Nat} {c : Nat.Partrec.Code}
-    {current next : GenuineSearch base c}
-    {growth : Turing.Dir} {source : Nat}
-    {instruction : CounterMachine.Instruction}
-    {obligation : OutwardObligation current growth source instruction}
-    (hreaches : FullTM0.Reaches
-      (CounterControlNestingBridge.machine base c)
-      (foundCfg current) (foundCfg next))
-    (hdistance : current.distance ≤ next.distance)
-    (outcome : FoundMonotoneGuardedEntryOutcome next) :
-    OutwardInstructionHandoff current obligation := by
-  cases outcome with
-  | logical core htail hinside =>
-      exact .logical core (hreaches.trans htail) (hdistance.trans hinside)
-  | nextSearch guarded htail hle =>
-      exact .nextSearch guarded (hreaches.trans htail) (hdistance.trans hle)
-
 /-- The zero branch preserves every marker, so its centered endpoint and
 the retained suffix margin immediately give the instruction handoff. -/
 theorem ZeroSearchEntry.outwardHandoff_of_immortal
@@ -1112,66 +1092,6 @@ theorem ZeroSearchEntry.outwardHandoff_of_immortal
     ⟨endpoint⟩
   exact ⟨.logical endpoint.core endpoint.reaches
     endpoint.distance_lt_layoutEnd.le⟩
-
-/-- Retag the original outward gap with the first positive-decrement shift
-when both searches target the same boundary. -/
-private def retagCurrent
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c)
-    (growth : Turing.Dir) (target : Fin 5)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands)
-    (htarget :
-      (CounterControlCommandAt.compileRawCommand base c raw hraw).target =
-        Target.boundary target)
-    (hdirection :
-      (CounterControlCommandAt.compileRawCommand base c raw hraw).searchDirection =
-        orient growth .right)
-    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
-      (Target.boundary target).Matches current.outer
-      (orient growth .right) current.distance) : GenuineSearch base c := by
-  let search : Search := CounterControlCommandAt.rawTag raw hraw
-  exact {
-    search := search
-    outer := current.outer
-    distance := current.distance
-    gap := by
-      have hcommand : command base c search =
-          CounterControlCommandAt.compileRawCommand base c raw hraw := by
-        rfl
-      rw [hcommand, htarget, hdirection]
-      exact hgap }
-
-@[simp] private theorem retagCurrent_distance
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
-    (retagCurrent base c current growth target raw hraw htarget hdirection
-      hgap).distance = current.distance :=
-  rfl
-
-@[simp] private theorem retagCurrent_selectedRaw
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
-    (retagCurrent base c current growth target raw hraw htarget hdirection
-      hgap).selectedRaw = raw := by
-  exact CounterControlCommandAt.rawCommands_get_rawTag raw hraw
-
-private theorem retagCurrent_foundTape
-    (base : Nat) (c : Nat.Partrec.Code)
-    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
-    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap
-    (hcurrentDirection : current.direction = orient growth .right) :
-    (retagCurrent base c current growth target raw hraw htarget hdirection
-      hgap).foundTape = current.foundTape := by
-  change current.outer.moveN
-      (command base c (CounterControlCommandAt.rawTag raw hraw)).searchDirection
-      current.distance =
-    current.outer.moveN current.direction current.distance
-  have hcommand : command base c (CounterControlCommandAt.rawTag raw hraw) =
-      CounterControlCommandAt.compileRawCommand base c raw hraw := by
-    rfl
-  rw [hcommand, hdirection, hcurrentDirection]
 
 /-- If the original validation caller found exactly the selected decrement
 boundary, its whole gap can be retagged as the first shift.  This retains
@@ -1211,10 +1131,12 @@ theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
         orient growth .right :=
     CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_direction
       base c growth source register hraw
-  let next := retagCurrent base c current growth suffix.index.succ raw hraw
+  let next := GenuineSearch.retagBoundary base c current growth
+    suffix.index.succ raw hraw
     htarget hdirection suffix.current_gap
   have hnextFound : next.foundTape = current.foundTape :=
-    retagCurrent_foundTape base c current growth suffix.index.succ raw hraw
+    GenuineSearch.retagBoundary_foundTape base c current growth
+      suffix.index.succ raw hraw
       htarget hdirection suffix.current_gap suffix.current_direction
   have hentryFound : entry.next.current.foundTape = entry.route.finish := by
     rw [GenuineSearch.foundTape, entry.distance_eq,
@@ -1223,7 +1145,7 @@ theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
     entry.route.finish_eq_current_of_boundary_eq hboundary
   have hfoundEq : foundCfg entry.next.current = foundCfg next := by
     rw [entry.next.current.foundCfg_eq, next.foundCfg_eq]
-    rw [entry.selectedRaw_eq, retagCurrent_selectedRaw,
+    rw [entry.selectedRaw_eq, GenuineSearch.retagBoundary_selectedRaw,
       hentryFound, hrouteFinish, hnextFound]
   have himmortalEntry : FullTM0.ImmortalFrom
       (CounterControlNestingBridge.machine base c) entry.next.current.cfg :=
@@ -1239,7 +1161,7 @@ theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
     hreachesNext
   have hcommand : next.selectedRaw ∈
       decrementShiftCommands growth source register := by
-    rw [retagCurrent_selectedRaw]
+    rw [GenuineSearch.retagBoundary_selectedRaw]
     exact CounterControlGenuineDecrementEntry.firstDecrementShiftRaw_mem
       growth source register
   rcases
@@ -1247,7 +1169,8 @@ theorem PositiveSearchEntry.outwardHandoff_of_boundary_eq
         base c hmortal next growth source register ifZero ifPositive hrule
         hcommand himmortalNext with
     ⟨outcome⟩
-  exact ⟨outwardHandoff_of_monotone hreachesNext (by simp [next]) outcome⟩
+  exact ⟨OutwardInstructionHandoff.ofMonotone hreachesNext
+    (by simp [next]) outcome⟩
 
 /-! ## Re-entering a later inward body search -/
 
@@ -1282,8 +1205,8 @@ private theorem outwardHandoff_of_decrementEntrySearch
         base c hmortal next growth source register ifZero ifPositive hrule
         hcommand himmortalFound with
     ⟨outcome⟩
-  exact ⟨outwardHandoff_of_monotone (hreaches.trans hfound) hdistance
-    outcome⟩
+  exact ⟨OutwardInstructionHandoff.ofMonotone (hreaches.trans hfound)
+    hdistance outcome⟩
 
 /-- Execute one inward preserving search and cancel it against the matching
 retained outward leg.  The following inward search then starts one cell

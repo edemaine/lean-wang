@@ -31,6 +31,8 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
+/-! ## Operational route traces -/
+
 /-- Tape-level trace of a nonempty preserving boundary route.  Each search
 starts one cell beyond the preceding boundary; the final tape is centered on
 the last boundary found. -/
@@ -147,6 +149,8 @@ theorem reaches_routeGaps_of_immortal
       exact ⟨finish, .cons first next tail outer distance hgap finish htail,
         hfinish⟩
 
+/-! ## Reconstructing geometry from route traces -/
+
 /-- Convert any nonempty all-right tape trace into its coordinate-level route
 on a single logical tape. -/
 theorem routeExecutesAt_of_routeGaps_allRight
@@ -248,6 +252,8 @@ theorem outwardRouteGaps_reconstructs
   refine ⟨registers, hboundary, hcore, ?_⟩
   rw [hfinish, hposition]
   simp
+
+/-! ## Validation endpoints on immortal orbits -/
 
 /-- Starting at the first outward validation search on an immortal orbit,
 the four generated searches reconstruct a finite counter core and reach the

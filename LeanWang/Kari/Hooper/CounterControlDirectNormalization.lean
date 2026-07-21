@@ -29,6 +29,8 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
+/-! ## Classifying direct-rule targets -/
+
 /-- The only generated direct-rule targets which remain in internal direct
 control are the increment-recovery and decrement-branch bridges. -/
 theorem target_logical_search_or_bridge
@@ -144,6 +146,8 @@ theorem bridge_source_targets_search
         norm_num [bodyDirectBase, testDirectSlot, branchDirectSlot,
           finishDirectSlot] at *
 
+/-! ## Internal bridge states -/
+
 private theorem localRule_mem_rawDirectRules
     (growth : Turing.Dir) (programRule : CounterMachine.Rule)
     (hprogram : programRule ∈ GlobalSourceProgram.program)
@@ -251,6 +255,8 @@ theorem bridge_target_wellFormed
   rw [← hsource]
   exact rawDirectRule_source_wellFormed next hnext
 
+/-! ## Two-step normalization -/
+
 /-- Honest macro endpoints after leaving the finite direct-glue graph. -/
 inductive Exit (base : Nat) (c : Nat.Partrec.Code) :
     FullTM0.Cfg (Symbol numTags) FiniteTM0.State → Prop
@@ -272,6 +278,8 @@ theorem normalizes_arbitrary_entry
       ∃ finish,
         FullTM0.Reaches (CounterControlNestingBridge.machine base c)
           cfg finish ∧ Exit base c finish := by
+  -- Execute the unique enabled direct rule, then classify its target as a
+  -- final logical/search exit or one of the two internal bridge states.
   rcases direct_step_or_haltsFrom base c cfg.q cfg.tape hsource with
     hhalts | ⟨rule, hrule, hstate, hmatch, hstep⟩
   · exact Or.inl hhalts
@@ -295,7 +303,9 @@ theorem normalizes_arbitrary_entry
       simpa [htarget, resolve] using
         (Exit.search (base := base) (c := c) address
           (cfg.tape.move (orient rule.growth rule.direction)))
-    · have hnextSource : resolve base c rule.target ∈
+    · -- The increment-recovery bridge has one further enabled rule, and
+      -- every such rule exits to a generated search.
+      have hnextSource : resolve base c rule.target ∈
           FiniteTM0.sourceStates (directTable base c) := by
         rw [htarget]
         simp only [directRef, resolve]
@@ -359,7 +369,9 @@ theorem normalizes_arbitrary_entry
           (Exit.search (base := base) (c := c) address
             ((cfg.tape.move (orient rule.growth rule.direction)).move
               (orient next.growth next.direction)))
-    · have hnextSource : resolve base c rule.target ∈
+    · -- The decrement-test branch is the other two-step bridge and is
+      -- handled by the same source-identity argument.
+      have hnextSource : resolve base c rule.target ∈
           FiniteTM0.sourceStates (directTable base c) := by
         rcases bridge_target_is_source rule hrule growth state
             branchDirectSlot (Or.inr rfl) htarget with

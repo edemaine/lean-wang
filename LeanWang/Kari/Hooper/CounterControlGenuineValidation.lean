@@ -30,6 +30,7 @@ namespace CounterControlGenuineValidation
 
 open Turing CounterMachine
 open BoundedMarkerProgram FramedMarkerTape CounterControlPlan
+open CounterControlSearchSystem
 open CounterControlCoreFrame
 open CounterControlGlobalUnnesting
 open CounterControlGenuineRouteEmbedding
@@ -43,6 +44,8 @@ noncomputable section
 
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
+
+/-! ## Completing and classifying validation -/
 
 /-- The exact completed suffix of an arbitrary genuine validation caller. -/
 abbrev ValidationEnd
@@ -170,6 +173,8 @@ theorem classify
   · exact ⟨.outwardTwo progress hraw⟩
   · exact ⟨.outwardThree progress hraw⟩
   · exact ⟨.outwardFour progress hraw⟩
+
+/-! ## Reconstructing inward callers -/
 
 private theorem inwardZero_remaining
     {base : Nat} {c : Nat.Partrec.Code}
@@ -727,6 +732,8 @@ theorem ReconstructedBody.monotone
       body.tape hrule body.represented body.reaches body.strictly_inside
       himmortal
 
+/-! ## Classifying post-validation endpoints -/
+
 /-- Result of compiling arbitrary validation membership as far as the
 available geometry allows.  Every inward position reaches an exact body core
 which strictly contains the original gap.  The four outward positions retain
@@ -794,6 +801,8 @@ theorem classify_compiled
       exact ⟨.outwardThree progress hraw⟩
   | outwardFour progress hraw =>
       exact ⟨.outwardFour progress hraw⟩
+
+/-! ## Outward obligations and instruction handoffs -/
 
 /-- The exact four outward-prefix cases left after all inward validation
 callers have been converted to monotone guarded-entry outcomes. -/
@@ -1045,6 +1054,100 @@ inductive OutwardInstructionHandoff
         (CounterControlNestingBridge.machine base c)
         (foundCfg current) next.current.cfg)
       (distance_le : current.distance ≤ next.current.distance)
+
+/-! ## Shared outward transport -/
+
+namespace GenuineSearch
+
+/-- Retag a genuine boundary search without changing its outer tape or
+distance.  A target and direction equality transfer the existing search gap
+to the newly selected generated command. -/
+def retagBoundary
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c)
+    (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands)
+    (htarget :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).target =
+        Target.boundary target)
+    (hdirection :
+      (CounterControlCommandAt.compileRawCommand base c raw hraw).searchDirection =
+        orient growth .right)
+    (hgap : SearchGap (fun symbol => symbol = blankSymbol)
+      (Target.boundary target).Matches current.outer
+      (orient growth .right) current.distance) : GenuineSearch base c := by
+  let search : Search := CounterControlCommandAt.rawTag raw hraw
+  exact {
+    search := search
+    outer := current.outer
+    distance := current.distance
+    gap := by
+      have hcommand : command base c search =
+          CounterControlCommandAt.compileRawCommand base c raw hraw := by
+        rfl
+      rw [hcommand, htarget, hdirection]
+      exact hgap }
+
+@[simp] theorem retagBoundary_distance
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
+    (retagBoundary base c current growth target raw hraw htarget hdirection
+      hgap).distance = current.distance :=
+  rfl
+
+@[simp] theorem retagBoundary_selectedRaw
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap :
+    (retagBoundary base c current growth target raw hraw htarget hdirection
+      hgap).selectedRaw = raw := by
+  exact CounterControlCommandAt.rawCommands_get_rawTag raw hraw
+
+/-- Retagging preserves the found tape when the original and replacement
+searches have the same physical direction. -/
+theorem retagBoundary_foundTape
+    (base : Nat) (c : Nat.Partrec.Code)
+    (current : GenuineSearch base c) (growth : Turing.Dir) (target : Fin 5)
+    (raw : RawCommand) (hraw : raw ∈ rawCommands) htarget hdirection hgap
+    (hcurrentDirection : current.direction = orient growth .right) :
+    (retagBoundary base c current growth target raw hraw htarget hdirection
+      hgap).foundTape = current.foundTape := by
+  change current.outer.moveN
+      (command base c (CounterControlCommandAt.rawTag raw hraw)).searchDirection
+      current.distance =
+    current.outer.moveN current.direction current.distance
+  have hcommand : command base c (CounterControlCommandAt.rawTag raw hraw) =
+      CounterControlCommandAt.compileRawCommand base c raw hraw := by
+    rfl
+  rw [hcommand, hdirection, hcurrentDirection]
+
+end GenuineSearch
+
+namespace OutwardInstructionHandoff
+
+/-- Transport a monotone guarded-entry outcome back across an earlier
+genuine search.  Reachability composes, while the two distance comparisons
+compose in the logical and next-search cases. -/
+def ofMonotone
+    {base : Nat} {c : Nat.Partrec.Code}
+    {current next : GenuineSearch base c}
+    {growth : Turing.Dir} {source : Nat}
+    {instruction : CounterMachine.Instruction}
+    {obligation : OutwardObligation current growth source instruction}
+    (hreaches : FullTM0.Reaches
+      (CounterControlNestingBridge.machine base c)
+      (foundCfg current) (foundCfg next))
+    (hdistance : current.distance ≤ next.distance)
+    (outcome : FoundMonotoneGuardedEntryOutcome next) :
+    OutwardInstructionHandoff current obligation := by
+  cases outcome with
+  | logical core htail hinside =>
+      exact .logical core (hreaches.trans htail) (hdistance.trans hinside)
+  | nextSearch guarded htail hle =>
+      exact .nextSearch guarded (hreaches.trans htail) (hdistance.trans hle)
+
+end OutwardInstructionHandoff
 
 /-- A concrete statement of the remaining instruction-wide theorem.  In
 contrast with `OutwardContinuationLaw`, its validation branch delegates all

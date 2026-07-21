@@ -205,6 +205,8 @@ theorem outwardSweep_reconstructs
     ∃ registers : Registers,
       BoundaryZeroRepresents registers growth (atLogical growth T source) ∧
       finish = source + RegisterLayout.clockBoundary registers := by
+  -- Unpack the fixed four-leg sweep to expose its four gap lengths and the
+  -- successive absolute boundary positions.
   unfold outwardSweep at hexec
   cases hexec with
   | cons _ _ _ p1 _ hleg0 hrest0 =>
@@ -243,9 +245,13 @@ theorem outwardSweep_reconstructs
           rcases hleg1 with ⟨d1, hgap1, hp2⟩
           rcases hleg2 with ⟨d2, hgap2, hp3⟩
           rcases hleg3 with ⟨d3, hgap3, hp4⟩
+          -- The four observed gap lengths are exactly the reconstructed
+          -- register values.
           let registers : Registers := ⟨d0, d1, d2, d3⟩
           refine ⟨registers, ?_, ?_⟩
           · constructor
+            -- Boundary labels come from the marked endpoints; blank gap
+            -- interiors come from the corresponding `SearchGap.blank` field.
             · intro label
               rcases label with ⟨label, hlabel⟩
               have hcases : label = 0 ∨ label = 1 ∨ label = 2 ∨
@@ -299,7 +305,9 @@ theorem outwardSweep_reconstructs
                   Nat.cast_add, hp1, hp2, hp3, add_assoc, add_comm,
                   add_left_comm]
                   using hblank
-          · dsimp [registers]
+          · -- Summing the four gaps and four separating boundary cells
+            -- identifies the final absolute position.
+            dsimp [registers]
             rw [RegisterLayout.clockBoundary_eq]
             change finish = source + (d0 + d1 + d2 + d3 + 4)
             omega

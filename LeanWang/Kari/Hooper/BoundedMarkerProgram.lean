@@ -2084,6 +2084,8 @@ private theorem markerShift_collision_deterministic {numTags : Nat}
     FiniteTM0.Deterministic
       (continuationTable radius offset sharedCore
         (.markerShift move success returnTag departure (some collision))) := by
+  -- Partition the table by control-state family.  Determinism within each
+  -- family is local; the rest of the proof establishes source disjointness.
   let prefixRules : FiniteTM0.Table (AlphabetSize numTags) :=
     [ FiniteTM0.Rule.mk (launchState radius offset) blankSymbol sharedCore
         (.write (tagSymbol returnTag))
@@ -2114,6 +2116,8 @@ private theorem markerShift_collision_deterministic {numTags : Nat}
     simpa [verifyGroup] using
       (verify_collision_deterministic (numTags := numTags) radius offset
         verifyTarget collision move.expected)
+  -- Classify the possible sources of the fixed prefix and verification
+  -- groups so state-separation lemmas can prove the append disjointness.
   have hprefixSource : ∀ source,
       source ∈ FiniteTM0.sourceStates prefixRules →
       source = launchState radius offset ∨
@@ -2174,6 +2178,8 @@ private theorem markerShift_collision_deterministic {numTags : Nat}
     · exact Or.inr (Or.inr (Or.inr (hverifySource source hsource)))
   have hresume : FiniteTM0.Deterministic resumeGroup := by
     simp [resumeGroup, FiniteTM0.Deterministic, FiniteTM0.Rule.mk]
+  -- With no departure move, only the resume group remains to be appended.
+  -- A departure adds one more singleton group before that same resume rule.
   cases departure with
   | none =>
       have hdisjoint : List.Disjoint

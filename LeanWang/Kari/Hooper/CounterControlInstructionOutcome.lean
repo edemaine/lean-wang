@@ -436,6 +436,9 @@ theorem machine_reaches_abstractStep_solved
       ⟨source, spec.registers⟩ = some next)
     (hshort : ShortSearches base c spec.outerDistance) :
     AbstractStepReached base c source next spec T outer := by
+  -- Split the abstract step into increment, zero-decrement, and
+  -- positive-decrement geometry.  Each case first exposes the same concrete
+  -- validation transition before following its instruction-specific body.
   have hcase := CounterControlStepGeometry.stepCase_of_step_eq_some hstep
   cases hcase with
   | increment register target hlookup hnext =>
@@ -463,6 +466,8 @@ theorem machine_reaches_abstractStep_solved
           hshort
       rcases CounterControlStepGeometry.increment_room_or_collision spec
           register with hroom | hcollision
+      -- A free destination executes the full increment schedule and recovery;
+      -- an occupied destination takes deterministic collision cleanup.
       · have hcommands : ∀ raw,
             raw ∈ incrementShiftCommands spec.growth source register →
               raw ∈ rawCommands := by
@@ -516,6 +521,8 @@ theorem machine_reaches_abstractStep_solved
         exact .boundary ⟨by simpa using hcollision⟩ first hfirst
           (hvalidation.trans (hcollisionRun.trans hcleanup))
   | decrementZero register ifZero ifPositive hlookup hzero hnext =>
+      -- The zero branch preserves the core while routing from the decrement
+      -- test to the zero target.
       subst next
       have hrule := CounterProgram.rule_mem_of_lookupInstruction_eq_some
         hlookup
@@ -550,6 +557,8 @@ theorem machine_reaches_abstractStep_solved
         (hvalidation.trans (hroute.trans (htest.trans hzeroRoute))) ?_
       simpa [updateSpec] using hback
   | decrementPositive register ifZero ifPositive hlookup hpositive hnext =>
+      -- The positive branch shifts the selected boundary inward, completes
+      -- the decrement schedule, and reaches the backed successor core.
       subst next
       have hrule := CounterProgram.rule_mem_of_lookupInstruction_eq_some
         hlookup

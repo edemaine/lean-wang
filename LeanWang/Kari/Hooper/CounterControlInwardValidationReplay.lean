@@ -39,6 +39,8 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
+/-! ## Executing and reversing individual validation gaps -/
+
 private abbrev validationCommand_mem :=
   CounterControlPlan.validationCommand_mem_rawCommands
 
@@ -264,6 +266,8 @@ private theorem selectedRaw_inward_cases
   · exact (selectedRaw_right_false current growth source 7 4
       (bodyEntry growth source instruction) hdirection h7).elim
 
+/-! ## Packaging a replayed outward search -/
+
 /-- Package a reached generated boundary-navigation entry together with the
 finite gap forced by immortality. -/
 private theorem reachedBoundarySearch_of_immortal
@@ -429,6 +433,10 @@ private theorem packageReplay
   · simpa [hcurrentRaw, replayRaw, RawCommand.address] using hslots
   · simpa [replayRaw] using hreplaySearch
 
+/-! ## The four inward starting positions -/
+
+/-- Replay an inward caller already at boundary `0`; only the first outward
+continuation remains. -/
 private theorem replay_of_zeroInward
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -469,6 +477,8 @@ private theorem replay_of_zeroInward
   · omega
   · exact hreplay
 
+/-- Replay a boundary-`1` inward caller by reaching boundary `0`, then
+cancelling the single outward gap against the retained inward gap. -/
 private theorem replay_of_oneInward
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -550,6 +560,8 @@ private theorem replay_of_oneInward
   · omega
   · exact hreplay'
 
+/-- Replay a boundary-`2` inward caller through two inward gaps and then
+cancel those gaps in reverse order during the outward sweep. -/
 private theorem replay_of_twoInward
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -564,6 +576,7 @@ private theorem replay_of_twoInward
       ⟨growth, source, 1⟩ 2 .left (directRef growth source 1)
         .preserve) :
     Nonempty (InwardReplay current growth source instruction) := by
+  -- Descend through boundaries `1` and `0`, retaining both inward gaps.
   have htwo := foundTape_read_of_selectedRaw_boundary current
     ⟨growth, source, 1⟩ 2 .left (directRef growth source 1) hraw
   have hsuccess := current.reaches_selectedRaw_success
@@ -614,6 +627,7 @@ private theorem replay_of_twoInward
   have hzero : zeroTape.read = boundarySymbol 0 := by
     simpa [zeroTape, FullTM0.Tape.read_moveN, Target.Matches] using
       gap0.marked
+  -- The outward sweep first cancels the `1`–`0` pair.
   rcases reaches_validationNext_of_immortal base c hmortal growth source
       instruction hrule himmortal 4 1 .right .right
       (zeroTape.move (orient growth .right))
@@ -640,6 +654,8 @@ private theorem replay_of_twoInward
         oneTape.move (orient growth .right)⟩ := by
     rw [← htape1]
     exact hentry5
+  -- Its next leg cancels the original `2`–`1` pair and returns to the
+  -- caller's tape, one cell into the replay search.
   rcases reaches_validationNext_of_immortal base c hmortal growth source
       instruction hrule himmortal 5 2 .right .right
       (oneTape.move (orient growth .right))
@@ -674,6 +690,8 @@ private theorem replay_of_twoInward
   · omega
   · exact hreplay'
 
+/-- Replay the first inward validation caller by retaining all three inward
+gaps and cancelling them from the inside out during the outward sweep. -/
 private theorem replay_of_threeInward
     (base : Nat) (c : Nat.Partrec.Code)
     (hmortal : ¬ DominoProblem.FixedNonhalting c)
@@ -688,6 +706,8 @@ private theorem replay_of_threeInward
       ⟨growth, source, 0⟩ 3 .left (directRef growth source 0)
         .preserve) :
     Nonempty (InwardReplay current growth source instruction) := by
+  -- Descend from boundary `3` to boundary `0`, naming each intermediate
+  -- tape and retaining the three inward gaps.
   have hthree := foundTape_read_of_selectedRaw_boundary current
     ⟨growth, source, 0⟩ 3 .left (directRef growth source 0) hraw
   have hsuccess := current.reaches_selectedRaw_success
@@ -755,6 +775,8 @@ private theorem replay_of_threeInward
   have hzero : zeroTape.read = boundarySymbol 0 := by
     simpa [zeroTape, FullTM0.Tape.read_moveN, Target.Matches] using
       gap0.marked
+  -- Replay outward, cancelling the retained gaps in reverse order:
+  -- first `1`–`0`, then `2`–`1`, and finally `3`–`2`.
   rcases reaches_validationNext_of_immortal base c hmortal growth source
       instruction hrule himmortal 4 1 .right .right
       (zeroTape.move (orient growth .right))
@@ -839,6 +861,8 @@ private theorem replay_of_threeInward
       validationSearchBase, validationDirectBase]
   · omega
   · exact hreplay'
+
+/-! ## Public replay interface -/
 
 /-- Starting from the exact found state of any guarded inward validation
 command, execute the smaller symmetric cycle and stop at the matching

@@ -35,6 +35,8 @@ noncomputable section
 private instance : Inhabited (Symbol numTags) :=
   ⟨blankSymbol⟩
 
+/-! ## Cancelling the inward and outward gap traces -/
+
 /-- Moving the boundary-zero view one logical cell inward and compensating
 in the logical coordinate leaves every recentered tape unchanged. -/
 private theorem atLogical_boundaryZero_to_core
@@ -200,6 +202,8 @@ theorem sweep_routeGaps_roundtrip
                   rw [hT7]
                   simpa only [hcancel, opposite_orient_left] using hpair0.2
 
+/-! ## Reconstructing the completed validation tape -/
+
 /-- A full successful validation trace simultaneously reconstructs the
 finite core and identifies its boundary-`4` view with the tape from which
 validation originally departed. -/
@@ -251,6 +255,8 @@ theorem sweep_routeGaps_reconstructs
             ⟨registers, hboundary, hcore, hfinish⟩
           refine ⟨registers, T, hboundary, hcore, ?_⟩
           exact hfinish.symm.trans hroundtrip
+
+/-! ## Operational validation reconstruction -/
 
 /-- Starting from the first inward validation search on an immortal orbit,
 the complete generated sweep reconstructs a core and reaches the instruction
@@ -318,6 +324,8 @@ theorem validation_reconstructs_roundtrip_of_immortal
     ⟨registers, T, hboundary, hcore, htape⟩
   rw [hroundtrip] at hfinish
   exact ⟨registers, T, hboundary, hcore, htape, hfinish⟩
+
+/-! ## Logical successor reconstruction -/
 
 /-- An immortal bounded logical entry is already centered on the boundary
 `4` of a reconstructed tag-free core.  The mandatory validation prefix

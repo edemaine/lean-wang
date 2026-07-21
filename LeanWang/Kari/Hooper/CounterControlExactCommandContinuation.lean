@@ -139,8 +139,12 @@ def exact_found_continuation
     (T : FullTM0.Tape (Symbol numTags))
     (hmatch : (compileRawCommand base c raw hraw).target.Matches T.read) :
     FoundContinuationOutcome base c raw hraw T := by
+  -- Follow the raw-command constructors.  Navigation commands always
+  -- succeed at a matching target; only marker shifts inspect another cell.
   cases raw with
   | boundaryNavigation address expected direction success action =>
+      -- Preserving and erasing navigation use the corresponding native
+      -- continuation theorem after exposing the compiled `CommandAt` fact.
       cases action with
       | preserve =>
           have hatRaw := CommandAt.compileRawCommand base c
@@ -205,6 +209,7 @@ def exact_found_continuation
             simpa [rawSuccessRef, exactSuccessTape, RawCommand.address] using
               hrun
   | tagNavigation address direction success =>
+      -- A tag target is ordinary preserving navigation with `anyTag`.
       have hatRaw := CommandAt.compileRawCommand base c
         (.tagNavigation address direction success) hraw
       rw [compileRawCommand_spec] at hatRaw
@@ -227,6 +232,9 @@ def exact_found_continuation
           hat T htarget
       simpa [rawSuccessRef, exactSuccessTape, RawCommand.address] using hrun
   | markerShift address expected search shift success departure collision =>
+      -- A blank destination takes the success continuation.  An occupied
+      -- destination either reports its collision reference or is blocked
+      -- when the command deliberately has no such reference.
       let move : MarkerProgram.Move :=
         ⟨expected, orient address.growth search,
           orient address.growth shift⟩

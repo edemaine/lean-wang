@@ -30,6 +30,8 @@ namespace RegisterLayout
 open Turing
 open CounterMachine
 
+/-! ## Register values as a sparse sequence -/
+
 /-- Index of a named register in the sparse marker layout. -/
 def registerIndex : Register → Nat
   | .left => 0
@@ -124,6 +126,8 @@ theorem values_decrement (v : Registers) (r : Register) :
   funext i
   simp [CounterLayout.decrement]
 
+/-! ## Named boundary coordinates -/
+
 /-- The common left boundary of all four register gaps. -/
 def startBoundary (v : Registers) : Nat :=
   CounterLayout.boundaryPos (values v) 0
@@ -193,6 +197,8 @@ theorem clock_gap (v : Registers) :
   simp
   omega
 
+/-! ## Boundary movement under register updates -/
+
 /-- Incrementing a named register moves precisely the suffix of boundaries
 strictly after its gap. -/
 theorem boundaryPos_increment (v : Registers) (r : Register) (j : Nat) :
@@ -258,6 +264,8 @@ theorem boundaryPos_decrement_clock (v : Registers) (j : Nat) (hr : 0 < v.clock)
       CounterLayout.boundaryPos (values (v.decrement .clock)) j +
         if 3 < j then 1 else 0 := by
   exact boundaryPos_decrement v Register.clock j hr
+
+/-! ## Search gaps between named boundaries -/
 
 /-- A rightward search across the `left` register gap. -/
 theorem searchGap_left_right (v : Registers) :
