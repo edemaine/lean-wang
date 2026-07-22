@@ -17,8 +17,12 @@ is in [`plan.md`](plan.md).
 ## Where to start
 
 - [`LeanWang/Final.lean`](LeanWang/Final.lean) contains the main public theorem
-  statements. It imports and checks both completed constructions while keeping
-  the statements independent of either proof technique.
+  statements. It uses the Robinson certificate while keeping the statements
+  independent of the proof technique, so downstream projects can import the
+  theorem surface without also building the Kari--Hooper proof.
+- [`LeanWang.lean`](LeanWang.lean) is the complete aggregate entry point. It
+  imports the public theorem surface and independently checks the Kari--Hooper
+  certificate, and is the default `lake build` target.
 - [`LeanWang/DominoProblem.lean`](LeanWang/DominoProblem.lean) defines the
   proof-neutral domino predicates, the shared reduction certificate, and the
   generic co-r.e.-completeness and undecidability consequences.
@@ -125,8 +129,9 @@ The top-level modules are shared by all proof techniques:
 - `UniversalCode` and `UniversalTM0/` select a universal Mathlib evaluator and
   transport its finite machine support through Mathlib's TM2, TM1, and TM0
   models.
-- `Final` is the public theorem module. The default `lake build` target imports
-  this file, so it checks both completed proof certificates.
+- `Final` is the public theorem module backed by the Robinson certificate.
+  The root `LeanWang` module additionally imports `Kari.Final`, so the default
+  `lake build` checks both completed proof certificates.
 
 The completed Robinson proof is split by responsibility:
 
@@ -155,7 +160,8 @@ The independent second proof is isolated under `Kari/`:
   and the arbitrary-configuration mortality converse.
 - `Kari/Final.lean` exports the second reduction certificate and its generic
   complexity consequences. `Kari.lean` imports the full development for
-  separate checking, and `LeanWang.Final` imports the completed endpoint.
+  separate checking, and the root `LeanWang` aggregate imports the completed
+  endpoint.
 
 The superseded exhaustive PairCover seam proof remains available as provenance
 in the [last pre-cleanup commit](https://github.com/edemaine/lean-wang/tree/a8bcfd206a9816868d0a77bda96c46227313dad3).
@@ -169,9 +175,14 @@ and committed component roots in
 ## Build
 
 ```bash
-lake build                 # public theorem surface and both proofs
-lake build LeanWang.Kari   # complete Kari--Hooper aggregate
+lake build LeanWang.Final  # public theorems and the selected Robinson proof
+lake build                 # root aggregate: check both completed proofs
+lake build LeanWang.Kari   # complete Kari--Hooper aggregate only
 ```
+
+Downstream projects should normally `import LeanWang.Final`. Use
+`import LeanWang` only when the goal is to check both independent reduction
+certificates.
 
 All Lean source files are nonexecutable (`100644`). The source contains no
 `sorry`, `admit`, or explicit `axiom` declarations. The large finite

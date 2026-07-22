@@ -61,6 +61,7 @@ import LeanWang.Kari.Hooper.CounterControlOpenFrame
 import LeanWang.Kari.Hooper.CounterControlSearchSystem
 import LeanWang.Kari.Hooper.CounterControlSearchExecution
 import LeanWang.Kari.Hooper.CounterControlInstructionSemantics
+import LeanWang.Kari.Hooper.CounterControlSearchResolution
 
 /-!
 # Hooper's immortality construction
@@ -112,6 +113,8 @@ and unwind laws are discharged by the compiled controller,
 with raw-command bridges for applying its forward and converse search
 hypotheses inside instruction-sized executions,
 and exact backed semantics for a complete compiled increment instruction,
+and a resolving semantics in which every compiled marker route either reaches
+its intended continuation or makes the complete controller halt,
 and both directions of the abstract strong-induction core of Hooper's nested
 construction.  The remaining files prove the compiled plan's operational
 semantics and use its shared canonical core to discharge the nesting laws.
