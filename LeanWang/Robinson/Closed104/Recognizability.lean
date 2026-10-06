@@ -46,25 +46,23 @@ theorem phaseEast_phaseNorth_comm (thin : Figure16.Thin) :
     phaseEast (phaseNorth thin) = phaseNorth (phaseEast thin) := by
   cases thin <;> rfl
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem equalTilesHaveEqualThin :
     ∀ i j : Index, tile (components i) = tile (components j) →
       (components i).1 = (components j).1 := by
-  native_decide
+  decide +kernel
 
 theorem thin_eq_of_tile_eq {i j : Index}
     (h : tile (components i) = tile (components j)) :
     (components i).1 = (components j).1 :=
   equalTilesHaveEqualThin i j h
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem horizontalMatchesHaveExpectedThin :
     ∀ left right : Index,
       WangTile.HMatches (tile (components left)) (tile (components right)) →
         (components right).1 = phaseEast (components left).1 := by
-  native_decide
+  decide +kernel
 
 theorem thin_eq_thinEast_of_hMatches {left right : Index}
     (h : WangTile.HMatches
@@ -72,13 +70,12 @@ theorem thin_eq_thinEast_of_hMatches {left right : Index}
     (components right).1 = phaseEast (components left).1 :=
   horizontalMatchesHaveExpectedThin left right h
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem verticalMatchesHaveExpectedThin :
     ∀ lower upper : Index,
       WangTile.VMatches (tile (components lower)) (tile (components upper)) →
         (components upper).1 = phaseNorth (components lower).1 := by
-  native_decide
+  decide +kernel
 
 theorem thin_eq_thinNorth_of_vMatches {lower upper : Index}
     (h : WangTile.VMatches
@@ -104,17 +101,15 @@ def verticalBoundaryReflectionFailures : List (Nat × Nat) :=
           (tile (components lower)) (tile (components upper)))).map fun upper =>
             (lower.val, upper.val)
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem horizontalBoundaryReflectionFailures_eq_nil :
     horizontalBoundaryReflectionFailures = [] := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem verticalBoundaryReflectionFailures_eq_nil :
     verticalBoundaryReflectionFailures = [] := by
-  native_decide
+  decide +kernel
 
 end Closed104
 end Figure13Layers

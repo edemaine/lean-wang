@@ -71,7 +71,6 @@ structure FixedGeometry (parent : Index) : Prop where
   east5 : RedShades.hasVertical
     (componentAt (fixedGrid parent) 6 5) (quadrantAt 6 5) = true
 
-set_option linter.style.nativeDecide false in
 theorem fixedGeometry (parent : Index) : FixedGeometry parent := by
   refine {
     southwestEast := ?_
@@ -91,7 +90,7 @@ theorem fixedGeometry (parent : Index) : FixedGeometry parent := by
     east4 := ?_
     east5 := ?_
   }
-  all_goals revert parent; native_decide
+  all_goals revert parent; decide +kernel
 
 /- Parent coordinates refer to tile centers and lanes.  The `quarter*`
 coordinates select the inward side of each boundary tile, where the shade

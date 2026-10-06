@@ -417,13 +417,12 @@ theorem decode_allowed (wang : TileIn tileSet) :
     locallyAllowed (decode wang).1 (decode wang).2 = true :=
   (mem_allSites_iff (decode wang)).1 (decode_mem wang)
 
-set_option linter.style.nativeDecide false in
 /-- Finite audit that every corrected quarter site admits a local shade state. -/
 theorem allowedStateAudit (site : QuarterIndex) :
     State.all.any (fun state => locallyAllowed site state) = true := by
   rcases site with ⟨index, quadrant⟩
   revert index
-  cases quadrant <;> native_decide
+  cases quadrant <;> decide +kernel
 
 /-- Every corrected quarter site admits at least one local shade state. -/
 theorem exists_allowed_state (site : QuarterIndex) :

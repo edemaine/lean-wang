@@ -5,7 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5/5.6
 -/
 import LeanWang.Robinson.Closed104.CanonicalOddFreeLineData
 
-/-! Cached native certificate for the odd canonical free-line state classes. -/
+/-! Kernel certificate for the odd canonical free-line state classes. -/
 
 namespace LeanWang
 namespace OllingerRobinson
@@ -15,9 +15,8 @@ namespace CanonicalOddFreeLineData
 
 set_option maxRecDepth 20000
 
-set_option linter.style.nativeDecide false in
 theorem complete_eq_true : complete = true := by
-  native_decide
+  decide +kernel
 
 end CanonicalOddFreeLineData
 end Closed104

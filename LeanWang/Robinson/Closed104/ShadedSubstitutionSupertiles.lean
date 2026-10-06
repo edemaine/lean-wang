@@ -97,10 +97,9 @@ theorem expansion_internally_valid (node : Node) :
 
 end Node
 
-set_option linter.style.nativeDecide false in
 private theorem modelData_seed_parent :
     (modelData (encodeNode false 0)).map DecoratedData.parent = some 0 := by
-  native_decide
+  decide +kernel
 
 /-- The concrete selected seed decorates corrected index zero. -/
 theorem seedNode_parent : seedNode.data.parent = 0 := by

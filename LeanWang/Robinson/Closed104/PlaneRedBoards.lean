@@ -72,13 +72,12 @@ theorem RedCycleOn.congr_of_eq_on
   }
 
 /- The list and function presentations of a depth-two supertile agree. -/
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem depthTwo_supertile_eq_iterateRefine :
     ∀ (parent : Index) (x y : Fin 4),
       gridAt (supertile 2 parent) x.val y.val =
         iterateRefine 2 (fun _ _ => parent) x.val y.val := by
-  native_decide
+  decide +kernel
 
 
 theorem constantGrid_depthTwo_has_fixed_redCycleOn (parent : Index) :

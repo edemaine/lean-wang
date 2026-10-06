@@ -4,15 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5/5.6
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraphLocalCoverageGeometry
-import LeanWang.Robinson.Closed104.RedShadeGraphSearch
+import LeanWang.Robinson.Closed104.RedShadeGraphPathWitnesses
 
 /-!
 # Checked local red-graph coverage under two substitutions
 
 Inside the `8 x 8` quarter-cell block replacing one corrected tile, every
 present red port is connected either to the new central cell cycle or to the
-sparse copy of a present old port. The graph flood is untrusted: every selected
-node is accepted only after its retained move list passes the bounded checker.
+sparse copy of a present old port. The stored paths are untrusted witnesses: every selected
+node is accepted only after its move list passes the bounded checker.
 -/
 
 namespace LeanWang
@@ -27,7 +27,8 @@ open RedShadeCycles RedShadeGraph RedShadeGraphRefinement
 set_option maxRecDepth 20000
 
 def routes (parent : Index) : List Node :=
-  exploreFast (fineGrid parent) 8 8 1000 (sources parent)
+  RedShadeGraphPathWitnesses.decodeNodes 8
+    (RedShadeGraphPathWitnesses.parentNodes.getD parent.val [])
 
 def routeNode? (parent : Index) (found : List Node) (target : Port) :
     Option Node :=
@@ -49,7 +50,7 @@ def allParentsCovered : Bool :=
   (List.finRange 104).all parentCovered
 
 def baseRoutes : List Node :=
-  exploreFast (fineGrid 0) 8 8 1000 [cycleSource]
+  RedShadeGraphPathWitnesses.decodeNodes 8 RedShadeGraphPathWitnesses.baseNodes
 
 def baseRoute? (target : Port) : Option Node :=
   baseRoutes.find? fun node =>

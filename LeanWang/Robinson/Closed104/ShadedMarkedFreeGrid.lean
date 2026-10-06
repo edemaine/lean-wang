@@ -32,14 +32,13 @@ structure MarkedFreeGrid
         (grid.rowAt ⟨0, positive⟩)) ∈
       ShadedSignals.markerQuarters
 
-set_option linter.style.nativeDecide false in
 theorem marker_refines (index : Index)
     (marker : (index, Quadrant.northeast) ∈
       ShadedSignals.markerQuarters) :
     (southwestChild (southwestChild index), Quadrant.northeast) ∈
       ShadedSignals.markerQuarters := by
   revert index
-  native_decide
+  decide +kernel
 
 /-- Localize a constant-grid marker certificate at the root of an arbitrary
 coarse grid. -/

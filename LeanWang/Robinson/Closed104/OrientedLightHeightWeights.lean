@@ -118,7 +118,6 @@ local instance : Fintype RedShades.State :=
   Fintype.ofList RedShades.State.all RedShades.State.mem_all
 local instance : Fintype Segment := Fintype.ofList segmentAll segment_mem_all
 
-set_option linter.style.nativeDecide false in
 /-- The signed light flow has zero divergence at every allowed quarter tile. -/
 theorem balance_of_allowed (component : Thick) (quadrant : Quadrant)
     (state : RedShades.State)
@@ -126,9 +125,8 @@ theorem balance_of_allowed (component : Thick) (quadrant : Quadrant)
     rightWeight quadrant state - leftWeight quadrant state =
       upWeight quadrant state - downWeight quadrant state := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 /-- The four geometric weights agree with the segment read from an allowed
 quarter tile. -/
 theorem weights_eq_of_segment (component : Thick) (quadrant : Quadrant)
@@ -140,9 +138,8 @@ theorem weights_eq_of_segment (component : Thick) (quadrant : Quadrant)
       upWeight quadrant state = segmentUpWeight segment /\
       downWeight quadrant state = segmentDownWeight segment := by
   revert component quadrant state segment
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 /-- A west-pointing bottom edge and a north-pointing left edge would be a
 right turn, so they cannot meet at an allowed quarter tile. -/
 theorem not_right_negative_and_up_negative_of_allowed
@@ -150,61 +147,55 @@ theorem not_right_negative_and_up_negative_of_allowed
     (allowed : RedShades.allowedFor component quadrant state = true) :
     Not (rightWeight quadrant state = -1 /\ upWeight quadrant state = -1) := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem horizontal_none_weights_zero
     (component : Thick) (quadrant : Quadrant) (state : RedShades.State)
     (allowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state = none) :
     And (rightWeight quadrant state = 0) (leftWeight quadrant state = 0) := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem vertical_none_weights_zero
     (component : Thick) (quadrant : Quadrant) (state : RedShades.State)
     (allowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state = none) :
     And (upWeight quadrant state = 0) (downWeight quadrant state = 0) := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem horizontal_south_has_negative_weight
     (component : Thick) (quadrant : Quadrant) (state : RedShades.State)
     (allowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state = some .south) :
     Or (rightWeight quadrant state = -1) (leftWeight quadrant state = -1) := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem horizontal_north_has_positive_weight
     (component : Thick) (quadrant : Quadrant) (state : RedShades.State)
     (allowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedHorizontalFor component quadrant state = some .north) :
     Or (rightWeight quadrant state = 1) (leftWeight quadrant state = 1) := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem vertical_west_has_negative_weight
     (component : Thick) (quadrant : Quadrant) (state : RedShades.State)
     (allowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state = some .west) :
     Or (upWeight quadrant state = -1) (downWeight quadrant state = -1) := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem vertical_east_has_positive_weight
     (component : Thick) (quadrant : Quadrant) (state : RedShades.State)
     (allowed : RedShades.allowedFor component quadrant state = true)
     (hselected : ShadedSignals.selectedVerticalFor component quadrant state = some .east) :
     Or (upWeight quadrant state = 1) (downWeight quadrant state = 1) := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
 theorem ValidShadeGrid.rightWeight_eq_leftWeight_succ
     {indexGrid : Nat -> Nat -> Index}

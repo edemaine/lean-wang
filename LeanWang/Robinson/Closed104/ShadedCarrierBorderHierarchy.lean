@@ -348,7 +348,7 @@ theorem state_succ (level blockX blockY childX childY : Nat)
   · exact extendedPatch_succ level blockX blockY childX childY
       hchildX hchildY
 
-/- The native-decided certificate has three logical fields: every listed state
+/- The kernel-checked certificate has three logical fields: every listed state
 has the correct visible node patch, the list is closed under all sixteen child
 positions, and the initial state is listed.  The special corner-transition
 field is read separately to characterize where corrected tile index zero can

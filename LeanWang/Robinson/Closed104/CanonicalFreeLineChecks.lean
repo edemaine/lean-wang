@@ -5,7 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5/5.6
 -/
 import LeanWang.Robinson.Closed104.CanonicalFreeLineData
 
-/-! Cached native certificate for the canonical free-line local audit. -/
+/-! Kernel certificate for the canonical free-line local audit. -/
 
 namespace LeanWang
 namespace OllingerRobinson
@@ -15,13 +15,11 @@ namespace CanonicalFreeLine
 
 set_option maxRecDepth 20000
 
-set_option linter.style.nativeDecide false in
 theorem evenLocalComplete_eq_true : evenLocalComplete = true := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem evenBaseComplete_eq_true : evenBaseComplete = true := by
-  native_decide
+  decide +kernel
 
 end CanonicalFreeLine
 end Closed104

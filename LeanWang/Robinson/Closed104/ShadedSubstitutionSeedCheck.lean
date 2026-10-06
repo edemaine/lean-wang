@@ -15,9 +15,8 @@ namespace ShadedSubstitution
 
 set_option maxRecDepth 20000
 
-set_option linter.style.nativeDecide false in
 theorem seed_mem_reachable : encodeNode false 0 ∈ reachable := by
-  native_decide
+  decide +kernel
 
 end ShadedSubstitution
 end Closed104

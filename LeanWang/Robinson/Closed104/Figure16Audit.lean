@@ -119,24 +119,20 @@ instance (block : Block) : Decidable block.Compatible := by
 
 end Block
 
-set_option linter.style.nativeDecide false in
 theorem phiL1Star_compatible : phiL1Star.Compatible := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem phiL2Component1_compatible (component : Thin) :
     (phiL2Component1 component).Compatible := by
-  cases component <;> native_decide
+  cases component <;> decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem phiL2Component2_compatible (component : Thick) :
     (phiL2Component2 component).Compatible := by
-  cases component <;> native_decide
+  cases component <;> decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem phiL3_compatible (component : Black) :
     (phiL3 component).Compatible := by
-  cases component <;> native_decide
+  cases component <;> decide +kernel
 
 /-- One proposition-level certificate covering every block in the human
 Figure 16 transcription. -/

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5/5.6
 -/
 import LeanWang.Robinson.Closed104.RedShadeGraphRefinementGeometry
-import LeanWang.Robinson.Closed104.RedShadeGraphSearch
+import LeanWang.Robinson.Closed104.RedShadeGraphConnectorWitnesses
 
 /-!
 Checked audit for lifting red paths through two substitutions.
@@ -27,7 +27,8 @@ set_option maxRecDepth 20000
 def connectorRoute? (parent : Index) (side : ExitSide) (offset : Nat) :
     Option Node :=
   let source := internalPort side offset
-  (exploreFast (fineGrid parent) 8 8 1000 [source]).find? fun node =>
+  (RedShadeGraphPathWitnesses.decodeNodes 8
+    (RedShadeGraphPathWitnesses.connectorNodes.getD parent.val [])).find? fun node =>
     decide (node.origin = source) &&
       decide (node.current = externalPort side offset) &&
         decide (node.parity = false) && node.valid (fineGrid parent) 8 8

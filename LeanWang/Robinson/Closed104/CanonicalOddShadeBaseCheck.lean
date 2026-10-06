@@ -5,7 +5,7 @@ Authors: Erik Demaine, Stefan Langerman, GPT 5.5/5.6
 -/
 import LeanWang.Robinson.Closed104.CanonicalOddShadeBaseData
 
-/-! Cached native certificate for odd base connectivity. -/
+/-! Kernel certificate for odd base connectivity. -/
 
 namespace LeanWang
 namespace OllingerRobinson
@@ -15,11 +15,10 @@ namespace CanonicalOddShadeBase
 
 set_option maxRecDepth 20000
 
-set_option linter.style.nativeDecide false in
 set_option maxHeartbeats 2000000 in
--- The bounded flood checks all parity-labelled graph states in one base box.
+-- Each selected witness is validated by the bounded path checker.
 theorem complete_eq_true : complete = true := by
-  native_decide
+  decide +kernel
 
 end CanonicalOddShadeBase
 end Closed104

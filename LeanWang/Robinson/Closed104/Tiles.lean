@@ -177,16 +177,14 @@ def tile (components : Components) : WangTile where
 def tileSet : TileSet :=
   (alphabet.map tile).eraseDups
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 @[simp]
 theorem tileSet_length : tileSet.length = 104 := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem tileSet_nodup : tileSet.Nodup := by
-  native_decide
+  decide +kernel
 
 theorem tile_components_mem (index : Index) :
     tile (components index) ∈ tileSet := by
@@ -198,11 +196,10 @@ theorem tile_components_mem (index : Index) :
 def childRectangle (parent : Index) : Rectangle 2 2 :=
   fun i j => tile (components (childBlock parent i j))
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allChildRectanglesValid :
     ∀ parent : Index, ValidRectangle tileSet (childRectangle parent) := by
-  native_decide
+  decide +kernel
 
 theorem childRectangle_valid (parent : Index) :
     ValidRectangle tileSet (childRectangle parent) :=
@@ -234,21 +231,19 @@ instance (lower upper : Index) : Decidable (ChildVMatches lower upper) := by
   unfold ChildVMatches
   infer_instance
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allHorizontalBoundariesPreserved :
     ∀ left right : Index,
       WangTile.HMatches (tile (components left)) (tile (components right)) →
         ChildHMatches left right := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allVerticalBoundariesPreserved :
     ∀ lower upper : Index,
       WangTile.VMatches (tile (components lower)) (tile (components upper)) →
         ChildVMatches lower upper := by
-  native_decide
+  decide +kernel
 
 theorem childHMatches_of_hMatches (left right : Index)
     (hmatch : WangTile.HMatches
@@ -262,19 +257,17 @@ theorem childVMatches_of_vMatches (lower upper : Index)
     ChildVMatches lower upper :=
   allVerticalBoundariesPreserved lower upper hmatch
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allHorizontalBoundariesReflected :
     ∀ left right : Index, ChildHMatches left right →
       WangTile.HMatches (tile (components left)) (tile (components right)) := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allVerticalBoundariesReflected :
     ∀ lower upper : Index, ChildVMatches lower upper →
       WangTile.VMatches (tile (components lower)) (tile (components upper)) := by
-  native_decide
+  decide +kernel
 
 theorem hMatches_of_childHMatches (left right : Index)
     (hmatch : ChildHMatches left right) :

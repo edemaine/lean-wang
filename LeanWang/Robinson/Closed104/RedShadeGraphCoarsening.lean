@@ -40,14 +40,13 @@ theorem value_isSome_eq_portPresent
     RedShades.optionPresent] at allowed
   cases side <;> simp only [value, portPresent] <;> aesop
 
-set_option linter.style.nativeDecide false in
 private theorem local_refinedPort_present (parent : Index) (x y : Fin 2)
     (side : Side) :
     portPresent (fineGrid parent) (refinedPort ⟨x, y, side⟩) =
       portPresent (coarseGrid parent) ⟨x, y, side⟩ := by
   revert parent x y side
   intro parent x y side
-  cases side <;> revert parent x y <;> native_decide
+  cases side <;> revert parent x y <;> decide +kernel
 
 private theorem sparseCoordinate_two_block (block offset : Nat)
     (hoffset : offset < 2) :

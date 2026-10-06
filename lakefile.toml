@@ -6,6 +6,9 @@ defaultTargets = ["LeanWang"]
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 relaxedAutoImplicit = false
+# Kernel reduction of the finite certificates needs larger elaboration limits.
+maxHeartbeats = 2000000
+maxRecDepth = 10000
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
 

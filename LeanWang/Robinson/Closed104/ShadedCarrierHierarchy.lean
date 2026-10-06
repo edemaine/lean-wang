@@ -400,16 +400,14 @@ def componentCoordinates (depth : Nat) : List Nat :=
       some coordinate
     else none
 
-set_option linter.style.nativeDecide false in
 theorem componentCoordinates_one :
     componentCoordinates 1 = [6, 7, 8, 9, 10, 11] := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem componentCoordinates_two :
     componentCoordinates 2 =
       [18, 19, 20, 29, 30, 31, 32, 33, 34, 35, 36, 45, 46, 47] := by
-  native_decide
+  decide +kernel
 
 end ShadedCarrierHierarchy
 end Closed104

@@ -28,11 +28,10 @@ open RedCycles RedShadePaths RedShadeCycles Signals.FreeCellLocal
 
 set_option maxRecDepth 20000
 
-set_option linter.style.nativeDecide false in
 private theorem baseMarker_constant :
     (iterateRefine 4 (fun _ _ => (0 : Index)) 8 8,
       Quadrant.northeast) ∈ ShadedSignals.markerQuarters := by
-  native_decide
+  decide +kernel
 
 private theorem markerIndex (extra : Nat)
     (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0) :

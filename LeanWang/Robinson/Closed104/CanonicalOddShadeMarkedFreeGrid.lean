@@ -19,11 +19,10 @@ open RedCycles RedShadePaths RedShadeCycles Signals.FreeCellLocal
   CanonicalOddShadeFreeGrid CanonicalShadeComparisonCore.PhaseComparison
   SparseFreeLinePlaneMarkedGrid
 
-set_option linter.style.nativeDecide false in
 private theorem baseMarker_constant :
     (iterateRefine 4 (fun _ _ => (0 : Index)) 4 4,
       Quadrant.northeast) ∈ ShadedSignals.markerQuarters := by
-  native_decide
+  decide +kernel
 
 private theorem markerIndex (depth : Nat)
     (coarse : Nat → Nat → Index) (coarseRoot : coarse 0 0 = 0) :

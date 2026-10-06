@@ -18,16 +18,14 @@ namespace OllingerRobinson
 namespace Figure13Layers
 namespace Closed104
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 @[simp]
 theorem alphabet_length : alphabet.length = 104 := by
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem alphabet_nodup : alphabet.Nodup := by
-  native_decide
+  decide +kernel
 
 /-- Index type for the corrected component alphabet. -/
 abbrev Index := Fin 104
@@ -48,12 +46,11 @@ theorem mem_childCandidates_iff
         (components parent) quadrant (components child) = true := by
   simp [childCandidates]
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allChildrenUnique :
     ∀ (parent : Index) (quadrant : Quadrant),
       (childCandidates parent quadrant).length = 1 := by
-  native_decide
+  decide +kernel
 
 theorem childCandidates_length_eq_one
     (parent : Index) (quadrant : Quadrant) :

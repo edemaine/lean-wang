@@ -74,7 +74,6 @@ def redAt (component : Thick) (quadrant : Quadrant) : Bool :=
   cases quadrant <;> decide
 
 /- Exact quarter-level orientation of the uniform depth-two red board. -/
-set_option linter.style.nativeDecide false in
 theorem fixedBoard_oriented (parent : Index) :
     let grid := supertile 2 parent
     thickAt grid 1 1 = .b ∧
@@ -86,7 +85,7 @@ theorem fixedBoard_oriented (parent : Index) :
     containsLine (thickAt grid 1 2) .r0 = true ∧
     containsLine (thickAt grid 3 2) .r2 = true := by
   revert parent
-  native_decide
+  decide +kernel
 
 end QuarterGeometry
 end Closed104

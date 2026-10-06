@@ -52,13 +52,12 @@ theorem isMarkerQuarterTile_primrec : Primrec isMarkerQuarterTile := by
   exact Primrec.beq.comp Primrec.id
     (Primrec.const (Quarters.quarterTile (0, .northeast)))
 
-set_option linter.style.nativeDecide false in
 theorem isMarkerQuarterTile_quarterTile_eq_true_iff
     (quarter : Quarters.QuarterIndex) :
     isMarkerQuarterTile (Quarters.quarterTile quarter) = true ↔
       quarter ∈ markerQuarters := by
   rcases quarter with ⟨index, quadrant⟩
-  cases quadrant <;> revert index <;> native_decide
+  cases quadrant <;> revert index <;> decide +kernel
 
 /-- The finite marker selecting the lower-left payload seed crossing. -/
 def isCornerMarker (wang : WangTile) : Bool :=

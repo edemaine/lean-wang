@@ -61,7 +61,6 @@ local instance : Fintype Thick := Fintype.ofList Thick.all thick_mem_all
 local instance : Fintype RedShades.State :=
   Fintype.ofList RedShades.State.all RedShades.State.mem_all
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_east_of_horizontal_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -69,9 +68,8 @@ theorem segment_eq_east_of_horizontal_edges
     (hbit : quadrant.yBit = true) :
     segment? component quadrant state = some .east := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_west_of_horizontal_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -79,9 +77,8 @@ theorem segment_eq_west_of_horizontal_edges
     (hbit : quadrant.yBit = false) :
     segment? component quadrant state = some .west := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_north_of_vertical_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -89,9 +86,8 @@ theorem segment_eq_north_of_vertical_edges
     (hbit : quadrant.xBit = false) :
     segment? component quadrant state = some .north := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_south_of_vertical_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -99,9 +95,8 @@ theorem segment_eq_south_of_vertical_edges
     (hbit : quadrant.xBit = true) :
     segment? component quadrant state = some .south := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_southEast_of_turn_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -109,9 +104,8 @@ theorem segment_eq_southEast_of_turn_edges
     (hx : quadrant.xBit = true) (hy : quadrant.yBit = true) :
     segment? component quadrant state = some .southEast := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_eastNorth_of_turn_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -119,9 +113,8 @@ theorem segment_eq_eastNorth_of_turn_edges
     (hx : quadrant.xBit = false) (hy : quadrant.yBit = true) :
     segment? component quadrant state = some .eastNorth := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_northWest_of_turn_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -129,9 +122,8 @@ theorem segment_eq_northWest_of_turn_edges
     (hx : quadrant.xBit = false) (hy : quadrant.yBit = false) :
     segment? component quadrant state = some .northWest := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
-set_option linter.style.nativeDecide false in
 theorem segment_eq_westSouth_of_turn_edges
     {component : Thick} {quadrant : Quadrant} {state : RedShades.State}
     (allowed : RedShades.allowedFor component quadrant state = true)
@@ -139,7 +131,7 @@ theorem segment_eq_westSouth_of_turn_edges
     (hx : quadrant.xBit = true) (hy : quadrant.yBit = false) :
     segment? component quadrant state = some .westSouth := by
   revert component quadrant state
-  native_decide
+  decide +kernel
 
 @[simp] theorem quadrantAt_xBit (x y : Nat) :
     (quadrantAt x y).xBit = (x % 2 == 1) := by

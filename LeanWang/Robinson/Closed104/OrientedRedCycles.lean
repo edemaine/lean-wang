@@ -24,7 +24,6 @@ open RedCycles QuarterGeometry
 set_option maxRecDepth 20000
 
 /- Finite audit of exact red-lane preservation under substitution. -/
-set_option linter.style.nativeDecide false in
 theorem expansionRules (parent : Index) :
     (containsLine (indexThick parent) .r1 = true →
       containsLine (indexThick (southwestChild parent)) .r1 = true ∧
@@ -47,7 +46,7 @@ theorem expansionRules (parent : Index) :
     (indexThick parent = .c →
       containsLine (indexThick (northwestChild parent)) .r2 = true) := by
   revert parent
-  native_decide
+  decide +kernel
 
 theorem r1_children {parent : Index}
     (h : containsLine (indexThick parent) .r1 = true) :

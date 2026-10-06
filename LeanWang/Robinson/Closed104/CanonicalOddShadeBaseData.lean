@@ -25,7 +25,7 @@ def cyclePorts : List Port :=
     ⟨12, 12, .west⟩, ⟨5, 12, .east⟩]
 
 def routes : List Node :=
-  exploreFast indexGrid 16 16 4000 cyclePorts
+  RedShadeGraphPathWitnesses.decodeNodes 16 RedShadeGraphPathWitnesses.oddNodes
 
 def baseRoute? (found : List Node) (target : Port) : Option Node :=
   found.find? fun node =>

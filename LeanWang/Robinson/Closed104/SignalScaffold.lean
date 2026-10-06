@@ -67,10 +67,9 @@ def cornerQuarter : Quarters.QuarterIndex :=
 
 def cornerSite : Site := (cornerQuarter, clearState)
 
-set_option linter.style.nativeDecide false in
 theorem cornerSite_allowed :
     locallyAllowed cornerSite.1 cornerSite.2 = true := by
-  native_decide
+  decide +kernel
 
 def cornerTile : WangTile := tile cornerSite
 

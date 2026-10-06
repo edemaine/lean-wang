@@ -185,8 +185,8 @@ Downstream projects should normally `import LeanWang.Final`. Use
 certificates.
 
 All Lean source files are nonexecutable (`100644`). The source contains no
-`sorry`, `admit`, or explicit `axiom` declarations. The large finite
-certificates intentionally use `native_decide`, so Lean's axiom report includes
-the corresponding generated code-evaluation axioms in addition to `propext`,
-`Classical.choice`, and `Quot.sound`; it contains no `sorryAx` or other custom
-project axiom.
+`sorry`, `admit`, or explicit `axiom` declarations. The final completeness and
+undecidability theorems use only `propext`, `Classical.choice`, and `Quot.sound`.
+Finite certificates use kernel reduction; stored search witnesses are checked
+against their mathematical conditions. The [axiom regression checks](LeanWang/AxiomAudit.lean)
+reject additional assumptions, including native-execution axioms and unfinished proofs.

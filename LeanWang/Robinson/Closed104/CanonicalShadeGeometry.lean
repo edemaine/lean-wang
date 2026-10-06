@@ -185,9 +185,8 @@ private def sparseBlockPreserved (node : Nat) : Bool :=
 private def sparseBlocksComplete : Bool :=
   reachable.all sparseBlockPreserved
 
-set_option linter.style.nativeDecide false in
 private theorem sparseBlocksComplete_eq_true : sparseBlocksComplete = true := by
-  native_decide
+  decide +kernel
 
 theorem child_zero_block (node : Node) :
     (node.child ⟨0, by decide⟩).data.block = node.data.block := by

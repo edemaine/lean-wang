@@ -15,7 +15,7 @@ vertical pieces.  These are precisely the local facts needed to double a
 rectangular red cycle.
 
 Because there are only 104 parents, the conjunction is checked once by
-`native_decide`; the named theorems below are proof-facing projections used by
+`decide +kernel`; the named theorems below are proof-facing projections used by
 the coordinate-level expansion in `RedCycleScaling`.
 -/
 
@@ -43,7 +43,6 @@ theorem indexThick_eq (index : Index) :
   rfl
 
 /- Finite audit of the local facts that double a red rectangular cycle. -/
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allRedCycleExpansionRules :
     ∀ parent : Index,
@@ -64,7 +63,7 @@ private theorem allRedCycleExpansionRules :
       (hasRedVertical (indexThick parent) = true →
         hasRedVertical (indexThick (southwestChild parent)) = true ∧
         hasRedVertical (indexThick (northwestChild parent)) = true) := by
-  native_decide
+  decide +kernel
 
 theorem redCycleExpansionRules (parent : Index) :
     (indexThick parent = .a → indexThick (southwestChild parent) = .a) ∧

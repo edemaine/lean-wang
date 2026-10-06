@@ -38,7 +38,6 @@ variable {T : TileSet} {seed : WangTile}
   {x : Int × Int → TileIn
     (combineWithRoutedScaffold ShadedSignals.routedScaffold T seed)}
 
-set_option linter.style.nativeDecide false in
 set_option maxHeartbeats 2000000 in
 -- The two light-cycle cases use different phase representations of one grid.
 theorem unboundedMarkedFreeGrid_with_light

@@ -33,7 +33,7 @@ open RedCycles RedShadeGraph RedShadeGraphBoundedPath
 set_option maxRecDepth 20000
 
 set_option maxHeartbeats 1000000 in
--- Projecting one parent from the native all-parent connector table.
+-- Projecting one parent from the kernel-checked all-parent connector table.
 theorem completeFor_eq_true (parent : Index) : completeFor parent = true := by
   have hall : ∀ candidate ∈ List.finRange 104,
       completeFor candidate = true := by
@@ -41,12 +41,11 @@ theorem completeFor_eq_true (parent : Index) : completeFor parent = true := by
   exact hall parent (List.mem_finRange parent)
 
 set_option maxHeartbeats 1000000 in
--- Projecting one parent from the native bounded-connector table.
+-- Projecting one parent from the kernel-checked bounded-connector table.
 theorem boundedCompleteFor_eq_true (parent : Index) :
     boundedCompleteFor parent = true := by
   exact completeFor_eq_true parent
 
-set_option linter.style.nativeDecide false in
 /-- Two substitutions retain the old quarter component at local coordinates. -/
 theorem componentAt_fineGrid_southwest (parent : Index)
     {x y : Nat} (hx : x < 2) (hy : y < 2) :
@@ -54,7 +53,7 @@ theorem componentAt_fineGrid_southwest (parent : Index)
   have hxCases : x = 0 ∨ x = 1 := by omega
   have hyCases : y = 0 ∨ y = 1 := by omega
   rcases hxCases with rfl | rfl <;> rcases hyCases with rfl | rfl <;>
-    revert parent <;> native_decide
+    revert parent <;> decide +kernel
 
 /-- The same connector with every intermediate port retained inside its macrocell. -/
 theorem boundedConnectorPath (parent : Index) (side : ExitSide)

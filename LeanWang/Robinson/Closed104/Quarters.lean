@@ -25,10 +25,9 @@ def all : List QuarterIndex :=
   (List.finRange 104).flatMap fun index =>
     Quadrant.all.map fun quadrant => (index, quadrant)
 
-set_option linter.style.nativeDecide false in
 @[simp]
 theorem all_length : all.length = 416 := by
-  native_decide
+  decide +kernel
 
 theorem mem_all (site : QuarterIndex) : site ∈ all := by
   rcases site with ⟨index, quadrant⟩
@@ -39,10 +38,9 @@ def quarterTile (site : QuarterIndex) : WangTile :=
 
 def tileSet : TileSet := all.map quarterTile
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 theorem tileSet_nodup : tileSet.Nodup := by
-  native_decide
+  decide +kernel
 
 @[simp]
 theorem tileSet_length : tileSet.length = 416 := by
@@ -52,12 +50,11 @@ theorem quarterTile_mem (site : QuarterIndex) : quarterTile site ∈ tileSet := 
   exact List.mem_map.2 ⟨site, mem_all site, rfl⟩
 
 /- Both the corrected parent encoding and its four subdivisions are injective. -/
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allQuarterTilesDistinct :
     ∀ left right : QuarterIndex,
       quarterTile left = quarterTile right → left = right := by
-  native_decide
+  decide +kernel
 
 theorem quarterTile_injective : Function.Injective quarterTile := by
   exact allQuarterTilesDistinct
@@ -68,11 +65,10 @@ def candidates (wang : WangTile) : List QuarterIndex :=
 @[irreducible] def decode (wang : WangTile) : QuarterIndex :=
   (candidates wang).headD (⟨0, by decide⟩, .southwest)
 
-set_option linter.style.nativeDecide false in
 set_option maxRecDepth 20000 in
 private theorem allDecodeCorrect :
     ∀ site : QuarterIndex, decode (quarterTile site) = site := by
-  native_decide
+  decide +kernel
 
 @[simp]
 theorem decode_quarterTile (site : QuarterIndex) :

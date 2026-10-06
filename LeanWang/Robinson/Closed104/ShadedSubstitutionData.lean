@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 5.5/5.6
 -/
+import LeanWang.Robinson.Closed104.ShadedSubstitutionStateWitnesses
 import LeanWang.Robinson.Closed104.RedShadeGraphRefinement
 import LeanWang.Robinson.Closed104.Tiles
 
@@ -18,7 +19,7 @@ bit.  `modelChoiceTrue` and `modelTransitionTrue` are a finite strategy found
 by an exhaustive SAT check.  The executable definitions below reconstruct the
 chosen decorated substitution and its closed reachable state set; the separate
 certificate module audits all local and boundary conditions with
-`native_decide`.
+`decide +kernel`.
 -/
 
 namespace LeanWang
@@ -114,11 +115,25 @@ structure StateInfo where
   choices : List (List ShadeBlock)
 deriving Repr
 
-/-- The 176 corrected-tile/shade-block states. -/
+private def shadeOfCode (code : Nat) : Option RedShades.Shade :=
+  match code with
+  | 0 => none | 1 => some .dark | _ => some .light
+
+private def stateOfCode (code : Nat) : RedShades.State :=
+  ⟨shadeOfCode (code % 3), shadeOfCode ((code / 3) % 3),
+    shadeOfCode ((code / 9) % 3), shadeOfCode ((code / 27) % 3)⟩
+
+private def blockOfCode (code : Nat) : ShadeBlock :=
+  ⟨stateOfCode (code % 81), stateOfCode ((code / 81) % 81),
+    stateOfCode ((code / 6561) % 81), stateOfCode ((code / 531441) % 81)⟩
+
+/-- Candidate states and expansion witnesses. The selected subsystem is
+validated by the structural and compatibility certificates. -/
 def stateInfos : List StateInfo :=
-  (List.finRange 104).flatMap fun parent =>
-    (validShadeBlocks parent).map fun block =>
-      { parent, block, choices := expansions parent block }
+  ShadedSubstitutionStateWitnesses.stateRows.map fun row =>
+    { parent := ⟨row.1 % 104, Nat.mod_lt _ (by decide)⟩
+      block := blockOfCode row.2.1
+      choices := row.2.2.map (List.map blockOfCode) }
 
 def stateIndex (parent : Index) (block : ShadeBlock) : Option Nat :=
   stateInfos.findIdx? fun info => info.parent == parent && info.block == block
@@ -214,18 +229,10 @@ def modelData (node : Nat) : Option DecoratedData :=
   | none => none
   | some info => choiceData info (modelChoice (nodeContext node) (nodeState node))
 
+/-- Stored child indices, checked against the selected expansion blocks. -/
 def childNode (node position : Nat) : Option Nat :=
-  match modelData node with
-  | none => none
-  | some data =>
-      match data.expansion[position]? with
-      | none => none
-      | some block =>
-          match stateIndex
-              (fineGrid data.parent (position % 4) (position / 4)) block with
-          | none => none
-          | some state => some (encodeNode
-              (Bool.xor (nodeContext node) (modelTransition position)) state)
+  ((ShadedSubstitutionStateWitnesses.childRows.getD
+    (strategyVariable (nodeContext node) (nodeState node)) [])[position]?).join
 
 def children (node : Nat) : List Nat :=
   (List.range 16).filterMap (childNode node)
@@ -237,9 +244,9 @@ def closureAux : Nat → List Nat → List Nat → List Nat
       if node ∈ visited then closureAux fuel queue visited
       else closureAux fuel (queue ++ children node) (node :: visited)
 
-/-- Closed decorated subsystem reachable from one concrete seed state. -/
+/-- Stored decorated subsystem, checked to contain the seed and be closed under children. -/
 def reachable : List Nat :=
-  closureAux 10000 [encodeNode false 0] []
+  ShadedSubstitutionStateWitnesses.reachableNodes
 
 def modelBoundariesValid (node : Nat) : Bool :=
   let childAt (position : Nat) : Option DecoratedData :=
