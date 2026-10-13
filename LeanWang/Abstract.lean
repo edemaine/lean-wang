@@ -14,8 +14,11 @@ This file is a short, independently readable formal abstract.
 It introduces just the few needed definitions beyond Mathlib (Wang tiles,
 Wang tilings, and co-RE-completeness) and proves the main theorem
 (Wang tiling is co-RE-complete) and corollary (Wang tiling is undecidable).
-Their proofs invoke LeanWang/AbstractBridge.lean,
-which supplies computable translations to and from the main proof.
+
+To check that we prove the intended main results, the reader only needs to
+check the definitions and theorem statements in this file. Lean verifies the
+proofs via LeanWang/AbstractBridge.lean, which supplies computable translations
+to and from the main proof.
 -/
 
 namespace LeanWang.Abstract

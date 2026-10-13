@@ -21,7 +21,9 @@ is in [`plan.md`](plan.md).
   beyond Mathlib (Wang tiles, Wang tilings, and co-RE-completeness) and
   proves the main theorem (Wang tiling is co-RE-complete) and corollary
   (Wang tiling is undecidable).
-  Their proofs invoke [`LeanWang/AbstractBridge.lean`](LeanWang/AbstractBridge.lean),
+  To check that we prove the intended main results, the reader only needs to
+  check the definitions and theorem statements in this file. Lean verifies the
+  proofs via [`LeanWang/AbstractBridge.lean`](LeanWang/AbstractBridge.lean),
   which supplies computable translations to and from the main proof.
   Import `LeanWang.Abstract` to use these results.
 - [`LeanWang/Final.lean`](LeanWang/Final.lean) contains the main public theorem
