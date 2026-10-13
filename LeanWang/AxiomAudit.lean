@@ -3,6 +3,7 @@ Copyright (c) 2026 lean-wang contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Erik Demaine, Stefan Langerman, GPT 6.1
 -/
+import LeanWang.Abstract
 import LeanWang.Final
 import LeanWang.Kari.Final
 import Lean.Util.CollectAxioms
@@ -16,7 +17,9 @@ three standard axioms, including native evaluation and unfinished proofs.
 
 open Lean Elab Command in
 run_cmd do
-  for name in [``LeanWang.domino_problem_coRE_complete,
+  for name in [``LeanWang.Abstract.coRE_complete,
+      ``LeanWang.Abstract.undecidable,
+      ``LeanWang.domino_problem_coRE_complete,
       ``LeanWang.encoded_domino_problem_coRE_complete,
       ``LeanWang.domino_problem_undecidable,
       ``LeanWang.encoded_domino_problem_undecidable,

@@ -16,6 +16,14 @@ is in [`plan.md`](plan.md).
 
 ## Where to start
 
+- [`LeanWang/Abstract.lean`](LeanWang/Abstract.lean) is a short, independently
+  readable formal abstract. It introduces just the few needed definitions
+  beyond Mathlib (Wang tiles, Wang tilings, and co-RE-completeness) and
+  proves the main theorem (Wang tiling is co-RE-complete) and corollary
+  (Wang tiling is undecidable).
+  Their proofs invoke [`LeanWang/AbstractBridge.lean`](LeanWang/AbstractBridge.lean),
+  which supplies computable translations to and from the main proof.
+  Import `LeanWang.Abstract` to use these results.
 - [`LeanWang/Final.lean`](LeanWang/Final.lean) contains the main public theorem
   statements. It uses the Robinson certificate while keeping the statements
   independent of the proof technique, so downstream projects can import the
@@ -105,6 +113,7 @@ is a generic corollary of any such reduction from fixed nonhalting.
 ```text
 LeanWang/
   Basic.lean, Compactness.lean, FiniteSearch.lean
+  Abstract.lean, AbstractBridge.lean
   CoRE.lean, DominoProblem.lean, Final.lean
   UniversalCode.lean
   UniversalTM0/
@@ -176,8 +185,9 @@ and committed component roots in
 
 ```bash
 lake build LeanWang.Final  # public theorems and the selected Robinson proof
-lake build                 # root aggregate: check both completed proofs
+lake build LeanWang.Abstract  # formal abstract and its bridge proofs
 lake build LeanWang.Kari   # complete Kari--Hooper aggregate only
+lake build                 # root aggregate: check both completed proofs
 ```
 
 Downstream projects should normally `import LeanWang.Final`. Use
