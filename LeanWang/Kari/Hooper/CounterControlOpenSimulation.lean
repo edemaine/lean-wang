@@ -185,7 +185,7 @@ theorem iterate_add {alpha : Type*} (step : alpha → Option alpha)
       (Dynamics.iterate step first start).bind
         (Dynamics.iterate step second) := by
   induction second with
-  | zero => simp
+  | zero => cases Dynamics.iterate step first start <;> rfl
   | succ second ih =>
       rw [Nat.add_succ, Dynamics.iterate_succ, ih]
       cases Dynamics.iterate step first start <;>

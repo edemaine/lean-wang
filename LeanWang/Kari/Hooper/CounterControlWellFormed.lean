@@ -349,7 +349,8 @@ theorem commands_get_eq_compileCommand (base : Nat) (c : Nat.Partrec.Code)
     (commands base c).get
         ⟨tag.val, by simpa only [commands_length, numTags] using tag.isLt⟩ =
       compileCommand base c tag := by
-  change (List.ofFn (compileCommand base c)).get _ = _
+  change (List.ofFn (compileCommand base c)).get
+    ⟨tag.val, by simpa only [List.length_ofFn] using tag.isLt⟩ = _
   rw [List.get_ofFn]
   apply congrArg (compileCommand base c)
   apply Fin.ext

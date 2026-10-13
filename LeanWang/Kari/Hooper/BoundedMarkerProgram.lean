@@ -578,11 +578,8 @@ theorem lookup_nativeScanTableAux_target_at {numTags : Nat}
             FiniteTM0Program.lookupAction_append,
             lookupAction_targetRules_state_ne target hstate symbol,
             FiniteTM0.lookupAction]
-          have hkey :
-              (state + (i + 1), symbol) ≠
-                (state, (blankSymbol : Symbol numTags)) := by
-            exact fun h => hstate (congrArg Prod.fst h)
-          simp only [FiniteTM0.Rule.mk, if_neg hkey]
+          simp only [FiniteTM0.Rule.mk, Prod.mk.injEq, hstate, false_and,
+            ite_eq_right]
           have htail := ih (state := state + 1) (remaining := remaining)
             (by omega)
           simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using htail
@@ -611,11 +608,8 @@ theorem lookup_nativeScanTableAux_blank_at {numTags : Nat}
             FiniteTM0Program.lookupAction_append,
             lookupAction_targetRules_state_ne target hstate
               (blankSymbol : Symbol numTags), FiniteTM0.lookupAction]
-          have hkey :
-              (state + (i + 1), (blankSymbol : Symbol numTags)) ≠
-                (state, blankSymbol) := by
-            exact fun h => hstate (congrArg Prod.fst h)
-          simp only [FiniteTM0.Rule.mk, if_neg hkey]
+          simp only [FiniteTM0.Rule.mk, Prod.mk.injEq, hstate, false_and,
+            ite_eq_right]
           have htail := ih (state := state + 1) (remaining := remaining)
             (by omega)
           simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using htail
@@ -637,11 +631,8 @@ theorem lookup_nativeScanTableAux_launch_at {numTags : Nat}
         FiniteTM0Program.lookupAction_append,
         lookupAction_targetRules_state_ne target hstate
           (blankSymbol : Symbol numTags), FiniteTM0.lookupAction]
-      have hkey :
-          (state + (remaining + 1), (blankSymbol : Symbol numTags)) ≠
-            (state, blankSymbol) := by
-        exact fun h => hstate (congrArg Prod.fst h)
-      simp only [FiniteTM0.Rule.mk, if_neg hkey]
+      simp only [FiniteTM0.Rule.mk, Prod.mk.injEq, hstate, false_and,
+        ite_eq_right]
       simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
         ih (state + 1)
 

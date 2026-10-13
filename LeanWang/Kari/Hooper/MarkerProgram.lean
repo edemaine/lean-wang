@@ -329,7 +329,7 @@ theorem reaches_append_right_of_source_disjoint
       FullTM0.Cfg MarkerMachine.Symbol FiniteTM0.State}
     (hreach : FullTM0.Reaches (FiniteTM0.machine second) start finish) :
     FullTM0.Reaches (FiniteTM0.machine (first ++ second)) start finish := by
-  apply Relation.ReflTransGen.mono ?_ hreach
+  apply Relation.ReflTransGen.mono ?_ start finish hreach
   intro current next hstep
   have hright : current.q ∈ FiniteTM0.sourceStates second := by
     by_contra hsource

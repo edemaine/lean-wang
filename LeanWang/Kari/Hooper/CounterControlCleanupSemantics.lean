@@ -1044,9 +1044,11 @@ private theorem logicalTape_writeLogical_of_neg {numTags : Nat}
     (hnegative : position < 0) :
     logicalTape growth (writeLogical growth T written symbol) position =
       logicalTape growth T position := by
+  have hne : position ≠ (written : Int) :=
+    ne_of_lt (lt_of_lt_of_le hnegative (Int.natCast_nonneg written))
   cases growth <;>
     simp [logicalTape, OrientedMarkerTape.orientTape, writeLogical,
-      physicalCoord, Function.update] <;> omega
+      physicalCoord, Function.update, hne]
 
 private theorem boundaryOffset_le_layoutEnd (registers : Registers)
     (label : Fin 5) :

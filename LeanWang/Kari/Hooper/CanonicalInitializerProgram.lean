@@ -922,7 +922,7 @@ private theorem reaches_mono_of_deterministic_superset {numSymbols : Nat}
       FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State}
     (hreach : FullTM0.Reaches (FiniteTM0.machine small) start finish) :
     FullTM0.Reaches (FiniteTM0.machine large) start finish := by
-  apply Relation.ReflTransGen.mono ?_ hreach
+  apply Relation.ReflTransGen.mono ?_ start finish hreach
   intro current next hstep
   exact step_mono_of_deterministic_superset hdet hsubset hstep
 

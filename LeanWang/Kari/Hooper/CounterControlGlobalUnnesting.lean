@@ -45,6 +45,8 @@ private instance : Inhabited (Symbol numTags) :=
 
 /-! ## The cleared-prefix tape invariant -/
 
+-- Unfold the tape's function type when simplifying dependent updates.
+set_option backward.isDefEq.respectTransparency false in
 /-- Installing an arbitrary dummy tag at logical coordinate `0` does not
 change the cleanup tape, because cleanup erases that coordinate.  This lets
 the existing framed cleanup theorem be used without asserting that the

@@ -41,6 +41,8 @@ theorem comp {α β : Type*} [Primcodable α] [Primcodable β]
   unfold _root_.REPred at hp ⊢
   exact hp.comp hf
 
+-- Allow the search proof to unfold Mathlib's partial-function type.
+set_option backward.isDefEq.respectTransparency false in
 /-- Existential quantification over naturals preserves recursive enumerability. -/
 theorem exists_nat {α : Type*} [Primcodable α]
     {p : α → Nat → Prop}

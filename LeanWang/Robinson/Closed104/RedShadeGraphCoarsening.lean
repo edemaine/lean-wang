@@ -36,9 +36,14 @@ theorem value_isSome_eq_portPresent
   unfold RedShades.locallyAllowed at allowed
   change RedShades.allowedFor (componentAt grid x y) (quadrantAt x y)
     (stateGrid x y) = true at allowed
-  simp only [RedShades.allowedFor, Bool.and_eq_true, decide_eq_true_eq,
-    RedShades.optionPresent] at allowed
-  cases side <;> simp only [value, portPresent] <;> aesop
+  simp only [RedShades.allowedFor, Bool.and_eq_true, decide_eq_true_eq] at allowed
+  simp only [RedShades.optionPresent] at allowed
+  rcases allowed.1.1.1.1.1.1.1 with ⟨⟨⟨hwest, heast⟩, hsouth⟩, hnorth⟩
+  cases side with
+  | west => exact hwest
+  | east => exact heast
+  | south => exact hsouth
+  | north => exact hnorth
 
 private theorem local_refinedPort_present (parent : Index) (x y : Fin 2)
     (side : Side) :

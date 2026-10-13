@@ -221,7 +221,7 @@ theorem reaches_append_left
       FullTM0.Cfg (FiniteTM0.Symbol numSymbols) FiniteTM0.State}
     (hreach : FullTM0.Reaches (FiniteTM0.machine first) start finish) :
     FullTM0.Reaches (FiniteTM0.machine (first ++ second)) start finish := by
-  apply Relation.ReflTransGen.mono ?_ hreach
+  apply Relation.ReflTransGen.mono ?_ start finish hreach
   intro current next hstep
   have hdefined :
       FullTM0.step (FiniteTM0.machine first) current ≠ none := by

@@ -209,7 +209,8 @@ theorem allowedFor_of {component : Thick} {quadrant : Quadrant} {state : State}
     (hcrossing : hasHorizontal component quadrant = true →
       hasVertical component quadrant = true → state.west ≠ state.south) :
     allowedFor component quadrant state = true := by
-  simp only [allowedFor, Bool.and_eq_true, decide_eq_true_eq, optionPresent]
+  simp only [allowedFor, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [optionPresent]
   refine ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨hwest, heast⟩, hsouth⟩, hnorth⟩, ?_⟩, ?_⟩,
     ?_⟩, ?_⟩, ?_⟩, ?_⟩, ?_⟩
   · split <;> simp_all
